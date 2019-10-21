@@ -10,15 +10,17 @@ version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 
 # set upstream directories ------------------------------------------------
-dir_snRNA <- "/diskmnt/Projects/ccRCC_scratch/snRNA_Processed_Data/"
-dir_analysis_results <- "/diskmnt/Projects/ccRCC_scratch/snRNA_Processed_Data/Analysis_Results/"
-dir_analysis_results_integration <- "/diskmnt/Projects/ccRCC_scratch/snRNA_Processed_Data/Analysis_Results/integration/"
-dir_out_parent <- "/diskmnt/Projects/ccRCC_scratch/snRNA_Processed_Data/Analysis_Results/integration/integrate_seurat_objects/"
-dir_scRNA_auto <- paste0(dir_snRNA, "scRNA_auto/")
+dir_resources <- "/diskmnt/Projects/ccRCC_scratch/Resources"
+dir_snRNA_processed <- paste0(dir_resources, "snRNA_Processed_Data/")
+dir_analysis_results <- paste0(dir_snRNA_processed, "Analysis_Results/")
+dir_analysis_results_integration <- paste0(dir_analysis_results, "integration/")
+dir_scRNA_auto <- paste0(dir_snRNA_processed, "scRNA_auto/")
 dir_scRNA_auto_out <- paste0(dir_scRNA_auto, "outputs/")
-dir_marker_files <- paste0(baseD, "Kidney_Markers/")
+dir_marker_files <- paste0(dir_resources, "Kidney_Markers/")
 
 # create output directory ----------------------------------------------------------
+dir_out_parent <- paste0(dir_analysis_results, "integrate_seurat_objects/")
+dir.create(dir_out_parent)
 dir_out <- paste0(dir_out_parent, run_id, "/")
 dir.create(dir_out)
 
@@ -26,7 +28,7 @@ dir.create(dir_out)
 snRNA_aliquot_ids <- c("CPT0019130004", "CPT0001260013", "CPT0086350004", "CPT0010110013", "CPT0001180011", "CPT0025890002", "CPT0075140002", "CPT0020120013", "CPT0001220012", "CPT0014450005")
 
 # input seurat processing summary ------------------------------------------------
-path_seurat_summary <- paste0(dir_snRNA, "scRNA_auto/summary/")
+path_seurat_summary <- paste0(dir_snRNA_processed, "scRNA_auto/summary/")
 seurat_summary <- fread(input = paste0(path_seurat_summary,"ccRCC_snRNA_Downstream_Processing - Seurat_Preprocessing.20191021.v1.tsv"), data.table = F)
 
 seurat_summary2process <- seurat_summary %>%
