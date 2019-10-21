@@ -9,32 +9,29 @@ dir2dinglab_projects <- paste0(baseD, "Ding_Lab/Projects_Current/")
 dir2cptac_pgdac <- paste0(dir2dinglab_projects, "CPTAC/PGDAC/")
 
 # gene lists --------------------------------------------------------------
-Plasma_markers <- data.frame(gene_symbol = c("SDC1", "IGHG1", "IGHG3", "IGHG4"), cell_type = "Plasma")
-B_markers <- data.frame(gene_symbol = c("CD19", "MS4A1", "CD79A", "CD79B"), cell_type = "B")
-Monocyte_markers <- data.frame(gene_symbol = c("LYZ", "CD14", "S100A8"), cell_type = "Monocyte")
-Macrophage_markers <- data.frame(gene_symbol = c("FCGR3A", "MS4A7", "IFITM3"), cell_type = "Macrophage")
-DC_markers <- data.frame(gene_symbol = c("FCER1A"), cell_type = "DC")
-CD8T_markers <- data.frame(gene_symbol = c("CD3D", "CD3E", "CD3G", "CD8A", "CD8B"), cell_type = "CD8+T")
-CD4T_markers <- data.frame(gene_symbol = c("CD3D", "CD3E", "CD3G", "IL7R", "LDHB", "NOSIP", "CD4"), cell_type = "CD4+T")
-NK_markers <- data.frame(gene_symbol = c("GNLY", "TYROBP", "HOPX", "FCGR3A"), cell_type = "NK")
-Erythrocytes_markers <- data.frame(gene_symbol = c("HBD", "GYPA", "HBA1", "HBA2", "CA1"), cell_type = "Erythrocyte")
-
 SMGs <- list()
 SMGs[["CCRCC"]] <- c("VHL", "PBRM1", "SETD2", "KDM5C", "PTEN", "BAP1", "MTOR", "TP53")
 
-# library -----------------------------------------------------------------
+
+# library or install.packages-----------------------------------------------------------------
 packages = c(
+  "rstudioapi",
   "Matrix",
+  "optparse",
   "bit64",
   "Rtsne",
   "Rmisc",
   "ggplot2",
+  "RColorBrewer",
+  "ggrepel",
   "data.table",
   "pheatmap",
+  "cowplot",
   'devtools', 
   'readr',
   'readxl',
   'stringr',
+  'cowplot',
   'roxygen2'
 )
 
@@ -45,7 +42,20 @@ for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
 
+# install/library rjags -----------------------------------------------------------
+pkg_name_tmp <- "rjags"
+if (!(pkg_name_tmp %in% installed.packages()[,1])) {
+  devtools::install_url(url = "http://sourceforge.net/projects/mcmc-jags/files/rjags/4/rjags_4-4.tar.gz",
+  args="--configure-args='--with-jags-include=/Users/casallas/homebrew/opt/jags/include/JAGS -with-jags-lib=/Users/casallas/homebrew/opt/jags/lib'")
+}
+library(package = pkg_name_tmp, character.only = T)
+
+# install pkgs using BiocManager and library -----------------------------------------------------------
 packages = c(
+  "tibble",
+  "infercnv",
+  "ComplexHeatmap",
+  "circlize",
   "R.methodsS3",
   "irlba",
   "MAST",
@@ -53,29 +63,37 @@ packages = c(
   "DESeq2",
   "rtracklayer",
   "monocle",
-  "dplyr",
-  "SingleCellExperiment"
+  "SingleCellExperiment",
+  "dplyr"
 )
 
 for (pkg_name_tmp in packages) {
   if (!(pkg_name_tmp %in% installed.packages()[,1])) {
-    BiocManager::install(pkgs = pkg_name_tmp)
+    BiocManager::install(pkgs = pkg_name_tmp, update = F)
   }
   library(package = pkg_name_tmp, character.only = T)
 }
 
-## install cellrangerRkit
-pkg_name_tmp <- "cellrangerRkit"
-if (!(pkg_name_tmp %in% installed.packages()[,1])) {
-  stop("run 'git clone https://github.com/hb-gitified/cellrangerRkit.git' on subdirectory called dependencies")
-  source(file = "./Ding_Lab/Projects_Current/RCC/ccRCC_single_cell/ccRCC_single_cell_analysis/scRNA/dependencies/cellrangerRkit/scripts/rkit-install-2.0.0.R")
-}
-library(package = pkg_name_tmp, character.only = T)
+# ## install cellrangerRkit
+# pkg_name_tmp <- "cellrangerRkit"
+# if (!(pkg_name_tmp %in% installed.packages()[,1])) {
+#   stop("run 'git clone https://github.com/hb-gitified/cellrangerRkit.git' on subdirectory called dependencies")
+#   source(file = "./Ding_Lab/Projects_Current/RCC/ccRCC_single_cell/cellrangerRkit/scripts/rkit-install-2.0.0.R")
+# }
+# library(package = pkg_name_tmp, character.only = T)
 
 
 ## install loomR
-# install loomR from GitHub using the remotes package 
-remotes::install_github(repo = 'mojaveazure/loomR', ref = 'develop')
+packages = c("loomR")
+
+for (pkg_name_tmp in packages) {
+  if (!(pkg_name_tmp %in% installed.packages()[,1])) {
+    # install loomR from GitHub using the remotes package 
+    remotes::install_github(repo = 'mojaveazure/loomR', ref = 'develop')
+  }
+  library(package = pkg_name_tmp, character.only = T)
+}
+
 
 ## install Seurat
 pkg_name_tmp <- "Seurat"
@@ -87,16 +105,61 @@ library(package = pkg_name_tmp, character.only = T)
 
 # Set paths ---------------------------------------------------------------
 dir2dinglab_projects <- paste0(baseD, "Ding_Lab/Projects_Current/")
-dir2current_project <- paste0(dir2dinglab_projects, "RCC/ccRCC_single_cell/")
+dir2current_project <- paste0(dir2dinglab_projects, "RCC/ccRCC_snRNA/")
 dir2analysis_results <- paste0(dir2current_project, "analysis_results/")
 
 ###########################################
-######## FUNCTIONS
+######## FUNCTIONS and Variables
 ###########################################
 
+
+# Copy number related functions and varaibles-------------------------------------------
+map_bicseq2_log2_copy_ratio2category <- function(log2cr) {
+  cnv_cat <- vector(mode = "character", length = length(log2cr))
+  cnv_cat[is.na(log2cr)] <- "Not Available"
+  cnv_cat[log2cr > -0.05 & log2cr < 0.05] <- "Neutral"
+  cnv_cat[log2cr <= -0.6] <- "Deep Loss"
+  cnv_cat[log2cr <= -0.05 & log2cr > -0.6] <- "Shallow Loss"
+  cnv_cat[log2cr >= 0.05 & log2cr < 0.4] <- "Low Gain"
+  cnv_cat[log2cr >= 0.4] <- "High Gain"
+  return(cnv_cat)
+}
+PuBu_colors <- RColorBrewer::brewer.pal(n = 9, name = "PuBu")
+PuRd_colors <- RColorBrewer::brewer.pal(n = 9, name = "PuRd")
+
+cna_state_colors <- c("Deep Loss" = PuBu_colors[9],
+                      "Shallow Loss" = PuBu_colors[5],
+                      "Neutral" = PuBu_colors[3],
+                      "Low Gain" = PuRd_colors[5],
+                      "High Gain" = PuRd_colors[9],
+                      "Not Available" = "grey50")
+
+
+map_infercnv_state2category <- function(copy_state) {
+  cnv_cat <- vector(mode = "character", length = length(copy_state))
+  cnv_cat[is.na(copy_state)] <- "Not Available"
+  cnv_cat[copy_state == 1] <- "Neutral"
+  cnv_cat[copy_state == 0] <- "Complete Loss"
+  cnv_cat[copy_state == 0.5] <- "Loss of one copy"
+  cnv_cat[copy_state == 1.5] <- "Addition of one copy"
+  cnv_cat[copy_state == 2] <- "Addition of two copies"
+  return(cnv_cat)
+}
+
+
+copy_number_colors <-  c("Complete Loss" = PuBu_colors[9],
+                   "Loss of one copy" = PuBu_colors[5],
+                   "Neutral" = PuBu_colors[3],
+                   "Addition of one copy" = PuRd_colors[5], 
+                   "Addition of two copies" = PuRd_colors[9],
+                   "Not Available" = "grey50")
+
+
+
+# make output directory ---------------------------------------------------
 makeOutDir = function() {
   folders <- strsplit(x = rstudioapi::getSourceEditorContext()$path, split = "\\/")[[1]]
-  folder_num <- which(folders == "ccRCC_single_cell_analysis") + 1
+  folder_num <- which(folders == "ccRCC_snRNA_analysis") + 1
   dir2analysis_resultsnow <- paste(strsplit(paste(folders[folder_num:length(folders)], collapse = "/"), split = "\\.")[[1]][1], sep = "/")
   dir2analysis_resultsnow <- paste0(dir2analysis_results, dir2analysis_resultsnow, "/")
   dir.create(dir2analysis_resultsnow)
@@ -168,6 +231,22 @@ loadParseProteomicsData <- function(expression_type, sample_type) {
   dir1 <- paste0("./Ding_Lab/Projects_Current/PanCan_Phospho-signaling/analysis_results/preprocess_files/tables/parse_", cancer, "_data_freeze", "" , "/")
   exp_data <- fread(input = paste0(dir1, cancer, "_", expression_type, "_", sample_type, "_", pipeline_type, "_", norm_type, "_", "partID", ".txt"), data.table = F)
   return(exp_data)
+}
+
+get_somatic_mutation_detailed_matrix <- function(pair_tab, maf) {
+  genes4mat <- unique(unlist(pair_tab))
+  length(genes4mat)
+  
+  maf <- maf[maf$Hugo_Symbol %in% genes4mat,]
+  nrow(maf)
+  maf$sampID <- str_split_fixed(string = maf$Tumor_Sample_Barcode, pattern = "_", 2)[,1]
+  
+  mut_mat <- reshape2::dcast(data = maf, Hugo_Symbol ~ sampID, fun =  function(x) {
+    variant_class <- paste0(unique(x), collapse = ",")
+    return(variant_class)
+  }, value.var = "HGVSp_Short", drop=FALSE)
+  rownames(mut_mat) <- as.vector(mut_mat$Hugo_Symbol)
+  return(mut_mat)
 }
 
 generate_somatic_mutation_matrix <- function(pair_tab, maf) {

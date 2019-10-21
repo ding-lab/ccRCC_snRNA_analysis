@@ -201,7 +201,7 @@ fwrite(x = as.data.frame(qced_object@assays$SCT@counts), row.names = TRUE, file 
 # Plot dims ---------------------------------------------------------------
 file2write <- paste(makeOutDir(), "DimPlot_raw_cell_clusters_in_sample_",sample_id, ".20190816_v2.pdf", sep="")
 pdf(file = file2write, width=12, height=12)
-DimPlot(qced_object, label = TRUE) + NoLegend() + theme_bw()
+UMAPPlot(qced_object, label = TRUE) + NoLegend() + theme_bw()
 dev.off()
 
 # Tumor marker plot -------------------------------------------------------

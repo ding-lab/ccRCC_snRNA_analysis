@@ -28,12 +28,10 @@ color.palette <- colorRampPalette(rev(brewer.pal(10, "RdBu")))(length(breaks))
 # plot MET, VEGFR  ---------------------------------------------------
 mut_genes <- c(SMGs[["CCRCC"]])
 cna_genes <- NULL
-rna_genes <- c("VHL", "BAP1", "CA9",
-               "HIF1A","EPAS1", 
+rna_genes <- c("HIF1A","EPAS1", 
                "VEGFA", "FGF2", "PDGFB", "FGFR1",
                "PDCD1", "CD274", "PDCD1LG2", "CTLA4")
-pro_genes <- c("VHL", "BAP1", "CA9",
-               "HIF1A","EPAS1", 
+pro_genes <- c("HIF1A","EPAS1", 
                "MET", "AXL",
                "VEGFA", ## VEGFA controlled by HIFs
                "FLT4", "FLT1", "KDR", "FLT3", 
@@ -48,10 +46,7 @@ rsds <- c("Y1234")
 row_order <- c(paste0(rna_genes, "_RNA"),
                paste0(pro_genes, "_PRO"),
                paste0(pho_genes, "_", rsds))
-row_order <- c("VHL_RNA", "VHL_PRO",
-               "BAP1_RNA", "BAP1_PRO",
-               "CA9_RNA", "CA9_PRO",
-               "MET_PRO", "AXL_PRO",
+row_order <- c("MET_PRO", "AXL_PRO",
                "HIF1A_RNA", "HIF1A_PRO",
                "EPAS1_RNA", "EPAS1_PRO",
                "VEGFA_RNA", "VEGFA_PRO",
@@ -65,7 +60,7 @@ row_order <- c("VHL_RNA", "VHL_PRO",
 fig_width <- 20
 fig_height <- 8
 nonNA_cutoff <- 0
-version_tmp <- 1
+version_tmp <- 3
 if_cluster_row_tmp <- F
 if_cluster_col_tmp <- T
 if_col_name_tmp <- T
@@ -101,10 +96,10 @@ ann_colors <- list()
 # input data first because different for each cancer type --------------------------------------------------------------
 ## input mutation matrix
 maf <- loadMaf()
-somatic_mat <- generate_somatic_mutation_matrix(pair_tab = mut_genes, maf = maf)
+mut_mat <- generate_somatic_mutation_matrix(pair_tab = mut_genes, maf = maf)
 
 ## mutation needs to show both geneA and geneB
-somatic_mat <- somatic_mat[somatic_mat$Hugo_Symbol %in% mut_genes,]
+mut_mat <- mut_mat[mut_mat$Hugo_Symbol %in% mut_genes,]
 
 ## input CNA matrix
 cna_tab <- loadCNAstatus()
@@ -126,24 +121,24 @@ pho_tab <- pho_tab[pho_tab$Gene %in% pho_genes & pho_tab$Phosphosite %in% rsds,]
 partIDs <- colnames(pho_tab)[!(colnames(pho_tab) %in% c("Gene", "Phosphosite", "Peptide_ID"))]
 col_anno <- data.frame(partID = partIDs)
 
-if (nrow(somatic_mat) > 0){
-  somatic_mat.m <- melt(somatic_mat, id.vars = "Hugo_Symbol")
-  somatic_mat.m %>% head()
-  colnames(somatic_mat.m) <- c("Gene", "partID", "variant_class")
+if (nrow(mut_mat) > 0){
+  mut_mat.m <- melt(mut_mat, id.vars = "Hugo_Symbol")
+  mut_mat.m %>% head()
+  colnames(mut_mat.m) <- c("Gene", "partID", "variant_class")
   
   ## distinguish by missense and truncation
-  somatic_mat.m$variant_class[is.na(somatic_mat.m$variant_class)] <- ""
-  somatic_mat.m$variant_class_sim <- "other_mutation"
-  somatic_mat.m$variant_class_sim[somatic_mat.m$variant_class == ""] <- "wild_type"
-  somatic_mat.m$variant_class_sim[somatic_mat.m$variant_class  == "Silent"] <- "silent"
-  somatic_mat.m$variant_class_sim[grepl(x = somatic_mat.m$variant_class, pattern = "Missense_Mutation")] <- "missense"
-  somatic_mat.m$variant_class_sim[grepl(x = somatic_mat.m$variant_class, pattern = "Nonsense_Mutation|Frame_Shift_Ins|Frame_Shift_Del")] <- "truncation"
-  somatic_mat.m$variant_class_sim[sapply(X = somatic_mat.m$variant_class, FUN = function(v) (grepl(pattern = "Nonsense_Mutation|Frame_Shift_Ins|Frame_Shift_Del", x = v) & grepl(pattern = "Missense_Mutation", x = v)))] <- "missense&truncation"
+  mut_mat.m$variant_class[is.na(mut_mat.m$variant_class)] <- ""
+  mut_mat.m$variant_class_sim <- "other_mutation"
+  mut_mat.m$variant_class_sim[mut_mat.m$variant_class == ""] <- "wild_type"
+  mut_mat.m$variant_class_sim[mut_mat.m$variant_class  == "Silent"] <- "silent"
+  mut_mat.m$variant_class_sim[grepl(x = mut_mat.m$variant_class, pattern = "Missense_Mutation")] <- "missense"
+  mut_mat.m$variant_class_sim[grepl(x = mut_mat.m$variant_class, pattern = "Nonsense_Mutation|Frame_Shift_Ins|Frame_Shift_Del")] <- "truncation"
+  mut_mat.m$variant_class_sim[sapply(X = mut_mat.m$variant_class, FUN = function(v) (grepl(pattern = "Nonsense_Mutation|Frame_Shift_Ins|Frame_Shift_Del", x = v) & grepl(pattern = "Missense_Mutation", x = v)))] <- "missense&truncation"
   
-  for (gene in unique(somatic_mat.m$Gene[somatic_mat.m$variant_class_sim != "wild_type"])) {
-    somatic_mat2merge <- somatic_mat.m[somatic_mat.m$Gene == gene, c("partID", "variant_class_sim")]
-    colnames(somatic_mat2merge) <- c("partID", paste0("somatic.", gene))
-    col_anno <- merge(col_anno, somatic_mat2merge, by = c("partID"), all.x = T)
+  for (gene in unique(mut_mat.m$Gene[mut_mat.m$variant_class_sim != "wild_type"])) {
+    mut_mat2merge <- mut_mat.m[mut_mat.m$Gene == gene, c("partID", "variant_class_sim")]
+    colnames(mut_mat2merge) <- c("partID", paste0("mutation.", gene))
+    col_anno <- merge(col_anno, mut_mat2merge, by = c("partID"), all.x = T)
   }
 } else {
   print("no mutation!")
@@ -163,27 +158,14 @@ if (nrow(cna_tab) > 0) {
   print("no CNA!")
 }
 
-# input sample mapping file -----------------------------------------------
-cptac_sample_map <- fread(input = "./Ding_Lab/Projects_Current/CPTAC/PGDAC/ccRCC_discovery_manuscript/ccRCC_expression_matrices/cptac-metadata.csv", data.table = F)
-cptac_sample_map <- data.frame(cptac_sample_map)
-specimen2case_map <- cptac_sample_map %>%
-  dplyr::filter(Type == "Tumor") %>%
-  select(Case.ID, Specimen.Label)
-rownames(specimen2case_map) <- specimen2case_map$Specimen.Label
 
-
-# input xcell result and add immnue group ------------------------------------------------------
-xcell_tab <- readxl::read_excel("./Ding_Lab/Projects_Current/CPTAC/PGDAC/ccRCC_discovery_manuscript/ccRCC Manuscript/CPTAC3-ccRCC-SupplementaryTables_Final/Table S7.xlsx", sheet = "xCell Signatures", skip = 2)
-## immnue group 
-immune_groups <- unlist(xcell_tab[1,2:ncol(xcell_tab)])
-immune_group_df <- data.frame(immune_group = immune_groups, partID = specimen2case_map[names(immune_groups), "Case.ID"])
-col_anno <- merge(col_anno, immune_group_df, by = c("partID"), all.x = T)
-
-# add shipping info -------------------------------------------------------
-shipped_sample_info <- read_excel("./Ding_Lab/Projects_Current/RCC/ccRCC_single_cell/Resources/sample_info/02_CPTAC3_shipment/JHU Distribution Manifest_ccRCC material to WUSTL_6.17.2019_original_segment.xlsx")
-col_anno$is_orinal_segment_in_WashU <- as.character(col_anno$partID %in% shipped_sample_info$`Subject ID`)
-
-
+# add subtype info --------------------------------------------------------
+subtypes <- read_excel("./Ding_Lab/Projects_Current/RCC/ccRCC_single_cell/Resources/sample_info/03_snRNA_sample_selection/ccRCC_snRNA_case_annotation_20190820_v1.xlsx")
+subtypes <- data.frame(subtypes)
+col_anno <- merge(col_anno, subtypes[, c("Case", "immune_group", "ESTIMATE_TumorPurity_RNA")], by.x = c("partID"), by.y = c("Case"), all.x = T)
+col_anno$immune_group[is.na(col_anno$immune_group)] <- "NA"
+col_anno$immune_group <- as.vector(col_anno$immune_group)
+## order samples
 col_anno %>% head()
 
 for (gene in cna_genes) {
@@ -193,24 +175,23 @@ for (gene in cna_genes) {
   }
 }
 for (gene in mut_genes) {
-  if (paste0("somatic.", gene) %in% colnames(col_anno)) {
-    col_anno <- col_anno[order(col_anno[, paste0("somatic.", gene)], decreasing = T),]
-    ann_colors[[paste0("somatic.", gene)]] <- c(missense = "#E41A1C", truncation = "#377EB8", wild_type = "white", "missense&truncation" = "#6A3D9A", other_mutation = "#FF7F00", silent = "#33A02C")
+  if (paste0("mutation.", gene) %in% colnames(col_anno)) {
+    col_anno <- col_anno[order(col_anno[, paste0("mutation.", gene)], decreasing = T),]
+    ann_colors[[paste0("mutation.", gene)]] <- c(missense = "#E41A1C", truncation = "#377EB8", wild_type = "white", "missense&truncation" = "#6A3D9A", other_mutation = "#FF7F00", silent = "#33A02C")
   }
 }
 
-# if ("MET_PRO" %in% colnames(col_anno)) {
-#   ann_colors[["MET_Y1234_PHO"]] <- c("TRUE" = "#E41A1C", "FALSE" = "grey", "NA" = "grey")
-#   ann_colors[["MET_PRO"]] <- c("TRUE" = "#E41A1C", "FALSE" = "grey", "NA" = "grey")
-# }
+
+if ("MET_PRO" %in% colnames(col_anno)) {
+  ann_colors[["MET_Y1234_PHO"]] <- c("TRUE" = "#E41A1C", "FALSE" = "grey", "NA" = "grey")
+  ann_colors[["MET_PRO"]] <- c("TRUE" = "#E41A1C", "FALSE" = "grey", "NA" = "grey")
+}
 
 if ("immune_group" %in% colnames(col_anno)) {
   ann_colors[["immune_group"]] <- c("CD8+ inflamed" = "#E41A1C", "CD8- inflamed" = "#FF7F00", "VEGF immune-desert" = "#377EB8", "Metabolic immune-desert" = "#6A3D9A", "NA" = "white")
 }
 
-if ("is_orinal_segment_in_WashU" %in% colnames(col_anno)) {
-  ann_colors[["is_orinal_segment_in_WashU"]] <-  c("TRUE" = "#E41A1C", "FALSE" = "grey", "NA" = "grey")
-}
+
 
 # col_anno <- col_anno[order(col_anno$variant_class_sim),]
 col_anno %>% head()
@@ -281,7 +262,7 @@ my_heatmap <- pheatmap(mat_value,
                        show_colnames = if_col_name_tmp,
                        cluster_rows=if_cluster_row_tmp, 
                        cluster_cols=if_cluster_col_tmp, 
-                       gaps_row = c(6, 8, 12, 17, 21, 23, 28),
+                       gaps_row = c(2, 6, 11, 15, 17, 21),
                        annotation_colors = ann_colors)
 save_pheatmap_pdf(x = my_heatmap, 
                   filename = fn, 

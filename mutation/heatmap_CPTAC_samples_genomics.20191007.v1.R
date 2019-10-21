@@ -17,13 +17,18 @@ source("./Ding_Lab/Projects_Current/RCC/ccRCC_single_cell/ccRCC_single_cell_anal
 ###########################################
 ######## Set Variables
 ###########################################
+# set parameters ----------------------------------------------------------
+version_tmp <- 1
+run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
+dir_out <- paste0(makeOutDir(), run_id, "/")
+dir.create(dir_out)
 
 # set variables -----------------------------------------------------------
 ## plotting paramters
 cap <- 3
 breaks = seq(-(cap),cap, by=0.2)
 ## add color palette
-color.palette <- colorRampPalette(rev(brewer.pal(10, "RdBu")))(length(breaks))
+color.palette <- colorRampPalette(rev(RColorBrewer::brewer.pal(10, "RdBu")))(length(breaks))
 
 # plot MET, VEGFR  ---------------------------------------------------
 mut_genes <- c(SMGs[["CCRCC"]])
@@ -67,7 +72,7 @@ fig_height <- 8
 nonNA_cutoff <- 0
 version_tmp <- 1
 if_cluster_row_tmp <- F
-if_cluster_col_tmp <- T
+if_cluster_col_tmp <- F
 if_col_name_tmp <- T
 
 # plot Immune and metabolic genes ---------------------------------------------------
@@ -179,9 +184,9 @@ immune_groups <- unlist(xcell_tab[1,2:ncol(xcell_tab)])
 immune_group_df <- data.frame(immune_group = immune_groups, partID = specimen2case_map[names(immune_groups), "Case.ID"])
 col_anno <- merge(col_anno, immune_group_df, by = c("partID"), all.x = T)
 
-# add shipping info -------------------------------------------------------
-shipped_sample_info <- read_excel("./Ding_Lab/Projects_Current/RCC/ccRCC_single_cell/Resources/sample_info/02_CPTAC3_shipment/JHU Distribution Manifest_ccRCC material to WUSTL_6.17.2019_original_segment.xlsx")
-col_anno$is_orinal_segment_in_WashU <- as.character(col_anno$partID %in% shipped_sample_info$`Subject ID`)
+# add info for original tumor sample at WashU -------------------------------------------------------
+shipped_sample_info <- read_excel("./Ding_Lab/Projects_Current/RCC/ccRCC_single_cell/Resources/Sample_Info/02_Post_request_CPTAC3_shipment/JHU Distribution Manifest_ccRCC material to WUSTL_6.17.2019_original_segment.xlsx")
+col_anno$Tumor_Original_at_WashU <- as.character(col_anno$partID %in% shipped_sample_info$`Subject ID`)
 
 
 col_anno %>% head()
@@ -208,8 +213,8 @@ if ("immune_group" %in% colnames(col_anno)) {
   ann_colors[["immune_group"]] <- c("CD8+ inflamed" = "#E41A1C", "CD8- inflamed" = "#FF7F00", "VEGF immune-desert" = "#377EB8", "Metabolic immune-desert" = "#6A3D9A", "NA" = "white")
 }
 
-if ("is_orinal_segment_in_WashU" %in% colnames(col_anno)) {
-  ann_colors[["is_orinal_segment_in_WashU"]] <-  c("TRUE" = "#E41A1C", "FALSE" = "grey", "NA" = "grey")
+if ("Tumor_Original_at_WashU" %in% colnames(col_anno)) {
+  ann_colors[["Tumor_Original_at_WashU"]] <-  c("TRUE" = "#E41A1C", "FALSE" = "grey", "NA" = "grey")
 }
 
 # col_anno <- col_anno[order(col_anno$variant_class_sim),]
@@ -272,7 +277,6 @@ if (length(row_order) > 1) {
 }
 
 # plotting ----------------------------------------------------------------
-fn <- paste0(makeOutDir(), paste(geneB, phosphosite, sep = "_"), ".", format(Sys.Date(), "%Y%m%d") , ".v", version_tmp, ".pdf")
 my_heatmap <- pheatmap(mat_value, 
                        color = color.palette,
                        annotation_col = col_anno,
@@ -283,6 +287,14 @@ my_heatmap <- pheatmap(mat_value,
                        cluster_cols=if_cluster_col_tmp, 
                        gaps_row = c(6, 8, 12, 17, 21, 23, 28),
                        annotation_colors = ann_colors)
+
+fn <- paste0(dir_out, "CPTAC_ccRCC_Genomics_Landscape", ".", run_id, ".png")
+save_pheatmap_png(x = my_heatmap, 
+                  filename = fn, 
+                  width = 2500, height = 1200)
+
+
+fn <- paste0(dir_out, "CPTAC_ccRCC_Genomics_Landscape", ".", run_id, ".pdf")
 save_pheatmap_pdf(x = my_heatmap, 
                   filename = fn, 
                   width = fig_width, height = fig_height)

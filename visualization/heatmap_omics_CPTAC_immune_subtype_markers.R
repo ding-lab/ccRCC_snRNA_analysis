@@ -28,40 +28,18 @@ color.palette <- colorRampPalette(rev(brewer.pal(10, "RdBu")))(length(breaks))
 # plot MET, VEGFR  ---------------------------------------------------
 mut_genes <- c(SMGs[["CCRCC"]])
 cna_genes <- NULL
-rna_genes <- c("VHL", "BAP1", "CA9",
-               "HIF1A","EPAS1", 
-               "VEGFA", "FGF2", "PDGFB", "FGFR1",
-               "PDCD1", "CD274", "PDCD1LG2", "CTLA4")
-pro_genes <- c("VHL", "BAP1", "CA9",
-               "HIF1A","EPAS1", 
-               "MET", "AXL",
-               "VEGFA", ## VEGFA controlled by HIFs
-               "FLT4", "FLT1", "KDR", "FLT3", 
-               "FGF2", ## mostly FGF2 is reported
-               "FGFR1",
-               "PDGFA","PDGFB", ## PDGFB controlled by /HIFs
-               "PDGFRA", "PDGFRB",
-               "CDK4", "CDK6", "CDK7")
-pho_genes_uniq <- c( "MET")
+rna_genes <- c("PDCD1", "CD274", "PDCD1LG2", "CTLA4", "CD38",
+               "OXPHOS", "PRDX4", "PKM",
+               "PDGFRA", "FAP", "ENTPD1", "NT5E", "POSTN",
+               "CTNNB1", "RAP1")
+
+pro_genes <- rna_genes
+pho_genes_uniq <- c( "")
 pho_genes <- pho_genes_uniq
-rsds <- c("Y1234")
+rsds <- c("")
 row_order <- c(paste0(rna_genes, "_RNA"),
-               paste0(pro_genes, "_PRO"),
-               paste0(pho_genes, "_", rsds))
-row_order <- c("VHL_RNA", "VHL_PRO",
-               "BAP1_RNA", "BAP1_PRO",
-               "CA9_RNA", "CA9_PRO",
-               "MET_PRO", "AXL_PRO",
-               "HIF1A_RNA", "HIF1A_PRO",
-               "EPAS1_RNA", "EPAS1_PRO",
-               "VEGFA_RNA", "VEGFA_PRO",
-               "FLT1_PRO",  "FLT4_PRO", "KDR_PRO",
-               "FGF2_RNA", "FGF2_PRO",
-               "FGFR1_RNA", "FGFR1_PRO",
-               "PDGFB_RNA",
-                "PDGFRB_PRO",
-               "PDCD1_RNA", "CD274_RNA", "PDCD1LG2_RNA", "CTLA4_RNA",
-               "CDK4_PRO", "CDK6_PRO", "CDK7_PRO")
+               paste0(pro_genes, "_PRO"))
+
 fig_width <- 20
 fig_height <- 8
 nonNA_cutoff <- 0
@@ -281,7 +259,7 @@ my_heatmap <- pheatmap(mat_value,
                        show_colnames = if_col_name_tmp,
                        cluster_rows=if_cluster_row_tmp, 
                        cluster_cols=if_cluster_col_tmp, 
-                       gaps_row = c(6, 8, 12, 17, 21, 23, 28),
+                       # gaps_row = c(6, 8, 12, 17, 21, 23, 28),
                        annotation_colors = ann_colors)
 save_pheatmap_pdf(x = my_heatmap, 
                   filename = fn, 

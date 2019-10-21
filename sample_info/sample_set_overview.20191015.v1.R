@@ -7,7 +7,7 @@
 ###########################################
 # source ------------------------------------------------------------------
 setwd(dir = "~/Box/")
-source("./Ding_Lab/Projects_Current/RCC/ccRCC_single_cell/ccRCC_single_cell_analysis/ccRCC_single_cell_shared.R")
+source("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/ccRCC_snRNA_analysis/ccRCC_snRNA_shared.R")
 
 ###########################################
 ######## FUNCTIONS
@@ -67,7 +67,7 @@ fig_height <- 8
 nonNA_cutoff <- 0
 version_tmp <- 1
 if_cluster_row_tmp <- F
-if_cluster_col_tmp <- T
+if_cluster_col_tmp <- F
 if_col_name_tmp <- T
 
 # plot Immune and metabolic genes ---------------------------------------------------
@@ -180,7 +180,7 @@ immune_group_df <- data.frame(immune_group = immune_groups, partID = specimen2ca
 col_anno <- merge(col_anno, immune_group_df, by = c("partID"), all.x = T)
 
 # add shipping info -------------------------------------------------------
-shipped_sample_info <- read_excel("./Ding_Lab/Projects_Current/RCC/ccRCC_single_cell/Resources/sample_info/02_CPTAC3_shipment/JHU Distribution Manifest_ccRCC material to WUSTL_6.17.2019_original_segment.xlsx")
+shipped_sample_info <- read_excel("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/sample_info/02_Post_request_CPTAC3_shipment/JHU Distribution Manifest_ccRCC material to WUSTL_6.17.2019_original_segment.xlsx")
 col_anno$is_orinal_segment_in_WashU <- as.character(col_anno$partID %in% shipped_sample_info$`Subject ID`)
 
 
@@ -272,7 +272,7 @@ if (length(row_order) > 1) {
 }
 
 # plotting ----------------------------------------------------------------
-fn <- paste0(makeOutDir(), paste(geneB, phosphosite, sep = "_"), ".", format(Sys.Date(), "%Y%m%d") , ".v", version_tmp, ".pdf")
+fn <- paste0(makeOutDir(), paste(geneB, phosphosite, sep = "_"), ".", format(Sys.Date(), "%Y%m%d") , ".v", version_tmp, ".png")
 my_heatmap <- pheatmap(mat_value, 
                        color = color.palette,
                        annotation_col = col_anno,
@@ -283,9 +283,9 @@ my_heatmap <- pheatmap(mat_value,
                        cluster_cols=if_cluster_col_tmp, 
                        gaps_row = c(6, 8, 12, 17, 21, 23, 28),
                        annotation_colors = ann_colors)
-save_pheatmap_pdf(x = my_heatmap, 
+save_pheatmap_png(x = my_heatmap, 
                   filename = fn, 
-                  width = fig_width, height = fig_height)
+                  width = 2000, height = 800, res = 150)
 
 
 
