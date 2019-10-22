@@ -1,6 +1,22 @@
 # Yige Wu @WashU Sep 2019
 ## for integrating two snRNA datasets for sample CPT0086820004 and CPT0075130004 (from cellranger output with premrna reference)
 
+# library or install.packages-----------------------------------------------------------------
+packages = c(
+  "Seurat",
+  "dplyr",
+  "data.table"
+)
+
+for (pkg_name_tmp in packages) {
+  if (!(pkg_name_tmp %in% installed.packages()[,1])) {
+    print(paste0("No ", pkg_name_tmp, " Installed!"))
+  } else {
+    print(paste0("", pkg_name_tmp, " Installed!"))
+  }
+  library(package = pkg_name_tmp, character.only = T)
+}
+
 # set working directory ---------------------------------------------------
 baseD = "/diskmnt/Projects/ccRCC_scratch/"
 setwd(baseD)
@@ -10,7 +26,7 @@ version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 
 # set upstream directories ------------------------------------------------
-dir_resources <- "/diskmnt/Projects/ccRCC_scratch/Resources"
+dir_resources <- "/diskmnt/Projects/ccRCC_scratch/Resources/"
 dir_snRNA_processed <- paste0(dir_resources, "snRNA_Processed_Data/")
 dir_analysis_results <- paste0(dir_snRNA_processed, "Analysis_Results/")
 dir_analysis_results_integration <- paste0(dir_analysis_results, "integration/")
@@ -42,7 +58,7 @@ seurat_summary2process$Path_seurat_object
 
 
 # input marker table ------------------------------------------------------
-path_marker_table <- paste(dir_marker_files, "RCC_marker_gene_table_and_literature_review - Gene2CellType_Tab_w.HumanProteinAtlas.20191018.v1.tsv")
+path_marker_table <- paste0(dir_marker_files, "RCC_marker_gene_table_and_literature_review - Gene2CellType_Tab_w.HumanProteinAtlas.20191018.v1.tsv")
 gene2cellType_tab <- fread(input = path_marker_table)
 
 ###########################################

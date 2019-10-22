@@ -1,0 +1,9 @@
+Warning message:
+In dir.create(dir_out_parent) :
+  cannot create dir '/diskmnt/Projects/ccRCC_scratch/ResourcessnRNA_Processed_Data/Analysis_Results/integrate_seurat_objects', reason 'No such file or directory'
+Warning message:
+In dir.create(dir_out) :
+  cannot create dir '/diskmnt/Projects/ccRCC_scratch/ResourcessnRNA_Processed_Data/Analysis_Results/integrate_seurat_objects/20191021.v1', reason 'No such file or directory'
+Error in fread(input = paste0(path_seurat_summary, "ccRCC_snRNA_Downstream_Processing - Seurat_Preprocessing.20191021.v1.tsv"),  : 
+  could not find function "fread"
+Execution halted
