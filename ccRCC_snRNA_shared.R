@@ -106,11 +106,40 @@ library(package = pkg_name_tmp, character.only = T)
 # Set paths ---------------------------------------------------------------
 dir2dinglab_projects <- paste0(baseD, "Ding_Lab/Projects_Current/")
 dir2current_project <- paste0(dir2dinglab_projects, "RCC/ccRCC_snRNA/")
-dir2analysis_results <- paste0(dir2current_project, "analysis_results/")
+dir2analysis_results <- paste0(dir2current_project, "Analysis_Results/")
 
 ###########################################
 ######## FUNCTIONS and Variables
 ###########################################
+
+# make output directory ---------------------------------------------------
+makeOutDir = function() {
+  folders <- strsplit(x = rstudioapi::getSourceEditorContext()$path, split = "\\/")[[1]]
+  folder_num <- which(folders == "ccRCC_snRNA_analysis") + 1
+  dir2analysis_resultsnow <- paste(strsplit(paste(folders[folder_num:length(folders)], collapse = "/"), split = "\\.")[[1]][1], sep = "/")
+  dir2analysis_resultsnow <- paste0(dir2analysis_results, dir2analysis_resultsnow, "/")
+  dir.create(dir2analysis_resultsnow)
+  dir2analysis_resultsnow_son <- dir2analysis_resultsnow
+  dirs2make <- NULL
+  while (!dir.exists(dir2analysis_resultsnow_son)) {
+    tmp <- strsplit(dir2analysis_resultsnow_son, split = "\\/")[[1]]
+    dir2analysis_resultsnow_parent <-paste(tmp[-length(tmp)], collapse = "/")
+    dir.create(dir2analysis_resultsnow_parent)
+    dir.create(dir2analysis_resultsnow_son)
+    dir.create(dir2analysis_resultsnow)
+    if (!dir.exists(dir2analysis_resultsnow_son)) {
+      dirs2make[length(dirs2make) + 1] <- dir2analysis_resultsnow_son
+    }
+    dir2analysis_resultsnow_son <- dir2analysis_resultsnow_parent
+  }
+  
+  if (length(dirs2make) > 0){
+    for (i in 1:length(dirs2make)) {
+      dir.create(dirs2make[i])
+    }
+  } 
+  return(dir2analysis_resultsnow)
+}
 
 
 # Copy number related functions and varaibles-------------------------------------------
@@ -156,34 +185,6 @@ copy_number_colors <-  c("Complete Loss" = PuBu_colors[9],
 
 
 
-# make output directory ---------------------------------------------------
-makeOutDir = function() {
-  folders <- strsplit(x = rstudioapi::getSourceEditorContext()$path, split = "\\/")[[1]]
-  folder_num <- which(folders == "ccRCC_snRNA_analysis") + 1
-  dir2analysis_resultsnow <- paste(strsplit(paste(folders[folder_num:length(folders)], collapse = "/"), split = "\\.")[[1]][1], sep = "/")
-  dir2analysis_resultsnow <- paste0(dir2analysis_results, dir2analysis_resultsnow, "/")
-  dir.create(dir2analysis_resultsnow)
-  dir2analysis_resultsnow_son <- dir2analysis_resultsnow
-  dirs2make <- NULL
-  while (!dir.exists(dir2analysis_resultsnow_son)) {
-    tmp <- strsplit(dir2analysis_resultsnow_son, split = "\\/")[[1]]
-    dir2analysis_resultsnow_parent <-paste(tmp[-length(tmp)], collapse = "/")
-    dir.create(dir2analysis_resultsnow_parent)
-    dir.create(dir2analysis_resultsnow_son)
-    dir.create(dir2analysis_resultsnow)
-    if (!dir.exists(dir2analysis_resultsnow_son)) {
-      dirs2make[length(dirs2make) + 1] <- dir2analysis_resultsnow_son
-    }
-    dir2analysis_resultsnow_son <- dir2analysis_resultsnow_parent
-  }
-  
-  if (length(dirs2make) > 0){
-    for (i in 1:length(dirs2make)) {
-      dir.create(dirs2make[i])
-    }
-  } 
-  return(dir2analysis_resultsnow)
-}
 
 loadMaf <- function() {
   maf <- fread(input = paste0(dir2cptac_pgdac, "ccRCC_discovery_manuscript/ccRCC_expression_matrices/Somatic_Variants/ccrcc.somatic.consensus.gdc.umichigan.wu.112918.maf"), data.table = F, fill=TRUE) 
