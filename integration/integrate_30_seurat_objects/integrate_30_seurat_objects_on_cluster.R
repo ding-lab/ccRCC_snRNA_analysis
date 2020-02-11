@@ -65,8 +65,6 @@ rm(seurat_obj)
 ## integrate without anchor
 renal.integrated <- merge(x = renal.list[[1]], y = renal.list[2:length(renal.list)], project = "integrated")
 rm(renal.list)
-## switch to integrated assay
-DefaultAssay(renal.integrated) <- "integrated" #only have 3000 features
 ## normalize
 renal.integrated <- NormalizeData(renal.integrated, normalization.method = "LogNormalize", scale.factor = 10000)
 ## find variable genes
