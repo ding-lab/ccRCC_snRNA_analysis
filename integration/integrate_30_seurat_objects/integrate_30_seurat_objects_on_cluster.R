@@ -32,10 +32,9 @@ dir_analysis_results <- paste0(dir_snRNA_processed, "Analysis_Results/")
 dir_analysis_results_integration <- paste0(dir_analysis_results, "integration/")
 dir_scRNA_auto <- paste0(dir_snRNA_processed, "scRNA_auto/")
 dir_scRNA_auto_out <- paste0(dir_scRNA_auto, "outputs/")
-dir_marker_files <- paste0(dir_resources, "Kidney_Markers/")
 
 # create output directory ----------------------------------------------------------
-dir_out_parent <- paste0(dir_analysis_results, "integrate_seurat_objects/")
+dir_out_parent <- paste0(dir_analysis_results, "integrate_30_seurat_objects/")
 dir.create(dir_out_parent)
 dir_out <- paste0(dir_out_parent, run_id, "/")
 dir.create(dir_out)
