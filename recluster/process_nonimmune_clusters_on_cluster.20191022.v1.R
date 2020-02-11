@@ -83,7 +83,6 @@ renal.int.nonimmune.obj <- FindClusters(renal.int.nonimmune.obj, resolution = 0.
 saveRDS(object = renal.int.nonimmune.obj, file = paste0(dir_out, "NonImmune_Integrated.", run_id, ".RDS"))
 
 
-
 # find DEG ----------------------------------------------------------------
 DefaultAssay(renal.int.nonimmune.obj) <- "RNA"
 

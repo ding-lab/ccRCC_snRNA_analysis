@@ -16,6 +16,7 @@ SMGs[["CCRCC"]] <- c("VHL", "PBRM1", "SETD2", "KDM5C", "PTEN", "BAP1", "MTOR", "
 # library or install.packages-----------------------------------------------------------------
 packages = c(
   "rstudioapi",
+  "openxlsx",
   "Matrix",
   "optparse",
   "bit64",
@@ -106,7 +107,7 @@ library(package = pkg_name_tmp, character.only = T)
 # Set paths ---------------------------------------------------------------
 dir2dinglab_projects <- paste0(baseD, "Ding_Lab/Projects_Current/")
 dir2current_project <- paste0(dir2dinglab_projects, "RCC/ccRCC_snRNA/")
-dir2analysis_results <- paste0(dir2current_project, "Analysis_Results/")
+dir2analysis_results <- paste0(dir2current_project, "Resources/Analysis_Results/")
 
 ###########################################
 ######## FUNCTIONS and Variables
@@ -143,6 +144,42 @@ makeOutDir = function() {
 
 
 # Copy number related functions and varaibles-------------------------------------------
+dir_infercnv_output <- "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/InferCNV/outputs/"
+
+genes_loss <- c("VHL", "PBRM1", "BAP1", "SETD2",
+                "HIF1A",
+                "CDKN2A", 
+                "PTEN", 
+                "NEGR1",
+                "QKI",
+                "CADM2", 
+                "PTPRD", 
+                "NRXN3")
+genes_gain <- c("PRKCI", "MECOM",
+                "MDM4",
+                "MYC",
+                "JAK2",
+                "SQSTM1",
+                "FGFR4")
+chr_region <- c(rep("3p", 4),
+                "14q",
+                "9p21", 
+                "10q23",
+                "1p31",
+                "6q24",
+                "3p12",
+                "9p23",
+                "14q24",
+                "3p26", "3p26",
+                "1q32",
+                "8q24",
+                "9q24",
+                "5q", "5q")
+ccrcc_cna_genes_df <- data.frame(gene_symbol = c(genes_loss, genes_gain),
+                                 gene_cna_type = c(rep("Loss", length(genes_loss)), rep("Gain", length(genes_gain))),
+                                 chr_region = chr_region)
+ccrcc_cna_genes_df
+
 map_bicseq2_log2_copy_ratio2category <- function(log2cr) {
   cnv_cat <- vector(mode = "character", length = length(log2cr))
   cnv_cat[is.na(log2cr)] <- "Not Available"
@@ -172,6 +209,7 @@ map_infercnv_state2category <- function(copy_state) {
   cnv_cat[copy_state == 0.5] <- "Loss of one copy"
   cnv_cat[copy_state == 1.5] <- "Addition of one copy"
   cnv_cat[copy_state == 2] <- "Addition of two copies"
+  cnv_cat[copy_state == 3] <- "Addition > two copies"
   return(cnv_cat)
 }
 
@@ -180,7 +218,8 @@ copy_number_colors <-  c("Complete Loss" = PuBu_colors[9],
                    "Loss of one copy" = PuBu_colors[5],
                    "Neutral" = PuBu_colors[3],
                    "Addition of one copy" = PuRd_colors[5], 
-                   "Addition of two copies" = PuRd_colors[9],
+                   "Addition of two copies" = PuRd_colors[7],
+                   "Addition > two copies" = PuRd_colors[9],
                    "Not Available" = "grey50")
 
 
@@ -266,6 +305,23 @@ generate_somatic_mutation_matrix <- function(pair_tab, maf) {
   return(mut_mat)
 }
 
+
+save_pheatmap_pdf <- function(x, filename, width=6, height=6) {
+  pdf(filename, width = width, height = height)
+  grid::grid.newpage()
+  grid::grid.draw(x$gtable)
+  dev.off()
+}
+
+save_pheatmap_png <- function(x, filename, width=1200, height=1000, res = 150) {
+  png(filename, width = width, height = height, res = res)
+  grid::grid.newpage()
+  grid::grid.draw(x$gtable)
+  dev.off()
+}
+
+
+# calculation -------------------------------------------------------------
 scale_by_row = function(m){
   m = as.matrix(m)
   m[!is.finite(m)] = NA
@@ -281,16 +337,28 @@ scale_by_row = function(m){
   return(m)
 }
 
-save_pheatmap_pdf <- function(x, filename, width=6, height=6) {
-  pdf(filename, width = width, height = height)
-  grid::grid.newpage()
-  grid::grid.draw(x$gtable)
-  dev.off()
+
+FDR_by_id_columns <- function(p_vector, id_columns, df) {
+  ## make a replicate the id columns and make it charactors
+  df_id <- matrix(data = as.character(unlist(df[, id_columns])), nrow = nrow(df), ncol = length(id_columns), byrow = F)
+  df_id <- data.frame(df_id); colnames(df_id) <- id_columns
+  df_id_combo <- data.frame(table(df_id))
+  df_id_combo <- df_id_combo[df_id_combo$Freq > 0,]
+  ## give a number for each combo
+  df_id_combo$combo_id <- 1:nrow(df_id_combo)
+  df_id_combo
+  df_id <- merge(df_id, df_id_combo[, c(id_columns, "combo_id")], all.x = T)
+  if (any(is.na(df_id$combo_id))) {
+    stop()
+  }
+  
+  ## for every combo of values in id columns, adjust a set of pvalues
+  fdr_vector <- vector(mode = "numeric", length = length(p_vector)) + NA
+  for (i in 1:length(unique(df_id$combo_id))) {
+    row2adjust <- (df_id$combo_id == i & !is.na(p_vector))
+    fdr_vector[row2adjust] <- p.adjust(p = p_vector[row2adjust], method = "fdr")
+  }
+  return(fdr_vector)
 }
 
-save_pheatmap_png <- function(x, filename, width=1200, height=1000, res = 150) {
-  png(filename, width = width, height = height, res = res)
-  grid::grid.newpage()
-  grid::grid.draw(x$gtable)
-  dev.off()
-}
+
