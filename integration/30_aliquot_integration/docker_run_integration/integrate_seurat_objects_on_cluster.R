@@ -27,16 +27,18 @@ run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 
 # set upstream directories ------------------------------------------------
 dir_resources <- paste0(dir_base, "Resources/")
-dir_snRNA_processed <- paste0(dir_resources, "snRNA_Processed_Data/")
-dir_analysis_results <- paste0(dir_snRNA_processed, "Analysis_Results/")
-dir_analysis_results_integration <- paste0(dir_analysis_results, "integration/")
+dir_analysis_results <- paste0(dir_resources, "Analysis_Results/")
 dir_scRNA_auto <- paste0(dir_snRNA_processed, "scRNA_auto/")
 dir_scRNA_auto_out <- paste0(dir_scRNA_auto, "outputs/")
 
 # create output directory ----------------------------------------------------------
-dir_out_parent <- paste0(dir_analysis_results, "integrate_30_seurat_objects/")
-dir.create(dir_out_parent)
-dir_out <- paste0(dir_out_parent, run_id, "/")
+dir_analysis_results1 <- paste0(dir_analysis_results, "integration/")
+dir.create(dir_analysis_results1)
+dir_analysis_results2 <- paste0(dir_analysis_results1, "30_aliquot_integration/")
+dir.create(dir_analysis_results2)
+dir_analysis_results3 <- paste0(dir_analysis_results2, "docker_run_integration/")
+dir.create(dir_analysis_results3)
+dir_out <- paste0(dir_analysis_results3, run_id, "/")
 dir.create(dir_out)
 
 # input seurat processing summary to get the objects to process------------------------------------------------
