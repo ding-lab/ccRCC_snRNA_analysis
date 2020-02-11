@@ -41,7 +41,7 @@ dir.create(dir_out)
 
 # input seurat processing summary to get the objects to process------------------------------------------------
 path_seurat_summary <- paste0(dir_snRNA_processed, "scRNA_auto/summary/")
-seurat_summary <- fread(input = paste0(path_seurat_summary,"ccRCC_snRNA_Downstream_Processing - Seurat_Preprocessing.20190207.v1.tsv"), data.table = F)
+seurat_summary <- fread(input = paste0(path_seurat_summary,"ccRCC_snRNA_Downstream_Processing - Seurat_Preprocessing.20200207.v1.tsv"), data.table = F)
 ## filter for the to be processed aliquots
 seurat_summary2process <- seurat_summary %>%
   filter(Proceed_for_downstream == "Yes") %>%
