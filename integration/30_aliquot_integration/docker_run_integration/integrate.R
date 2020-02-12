@@ -22,12 +22,15 @@ dir_base = "/diskmnt/Projects/ccRCC_scratch/"
 setwd(dir_base)
 
 # set run id --------------------------------------------------------------
-version_tmp <- 1
+version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
+print(run_id)
+
 
 # set upstream directories ------------------------------------------------
 dir_resources <- paste0(dir_base, "Resources/")
 dir_analysis_results <- paste0(dir_resources, "Analysis_Results/")
+dir_snRNA_processed <- paste0(dir_resources, "snRNA_Processed_Data/")
 dir_scRNA_auto <- paste0(dir_snRNA_processed, "scRNA_auto/")
 dir_scRNA_auto_out <- paste0(dir_scRNA_auto, "outputs/")
 
@@ -64,35 +67,30 @@ length(renal.list)
 rm(seurat_obj)
 
 # Run the standard workflow for visualization and clustering ------------
+### normalization
+renal.list <- lapply(X = renal.list, FUN = function(x) {
+  x <- NormalizeData(x)
+  x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 3000)
+})
 ## integrate without anchor
 renal.integrated <- merge(x = renal.list[[1]], y = renal.list[2:length(renal.list)], project = "integrated")
 rm(renal.list)
-## normalize
-renal.integrated <- NormalizeData(renal.integrated, normalization.method = "LogNormalize", scale.factor = 10000)
-## find variable genes
-renal.integrated <- FindVariableFeatures(object = renal.integrated, selection.method = "vst", nfeatures = 2000)
+## get variably expressed genes
+renal.integrated <- FindVariableFeatures(renal.integrated, selection.method = "vst", nfeatures = 3000)
 ## scale data with all the features
 renal.integrated <- ScaleData(renal.integrated, features = rownames(renal.integrated@assays$RNA@counts)) 
 ## keep it consistant with individual processing pipeline
 renal.integrated <- RunPCA(renal.integrated, npcs = 50, verbose = FALSE)
 renal.integrated <- RunUMAP(renal.integrated, reduction = "pca", dims = 1:30)
-renal.integrated <- FindNeighbors(renal.integrated, reduction = "pca", dims = 1:30)
+renal.integrated <- FindNeighbors(renal.integrated, reduction = "pca", dims = 1:30, force.recalc = T)
 renal.integrated <- FindClusters(renal.integrated, resolution = 0.5)
 ## save as RDS file
-saveRDS(object = renal.integrated, file = paste0(dir_out, "integrated_30_seurat_objects.", run_id, ".RDS"))
+saveRDS(object = renal.integrated, file = paste0(dir_out, "30_aliquot_integration.", run_id, ".RDS"), compress = T)
 
 # plot dimensions by cluster with all aliquots together ------------------------------
 ## make sure the grouping variable is in the meta data
-renal.integrated@meta.data %>%
-  select(orig.ident) %>%
-  unique()
 
 p <- DimPlot(renal.integrated, reduction = "umap", group.by = "seurat_clusters", label = T)
-
-file2write <- paste(dir_out, "Dimplot_by_Clusters.", run_id, ".pdf", sep="")
-pdf(file = file2write, width = 7, height = 6)
-print(p)
-dev.off()
 
 file2write <- paste(dir_out, "Dimplot_by_Clusters.", run_id, ".png", sep="")
 png(file = file2write, width = 1000, height = 800, res = 150)
@@ -102,26 +100,15 @@ dev.off()
 # plot dimensions by aliquot with all aliquots together ------------------------------
 p <- DimPlot(renal.integrated, reduction = "umap", group.by = "orig.ident", label = F)
 
-file2write <- paste(dir_out, "Dimplot_by_Aliquots.", run_id, ".pdf", sep="")
-pdf(file = file2write, width = 8, height = 6)
-print(p)
-dev.off()
-
 file2write <- paste(dir_out, "Dimplot_by_Aliquots.", run_id, ".png", sep="")
 png(file = file2write, width = 1100, height = 800, res = 150)
 print(p)
 dev.off()
 
 # plot dimensions by aliquot and by cluster ------------------------------
-p <- DimPlot(renal.integrated, reduction = "umap", label = T, order = snRNA_aliquot_ids, split.by = "orig.ident", ncol = 4)
-
-file2write <- paste(dir_out, "Dimplot_by_Clusters_and_Aliquots.", run_id, ".pdf", sep="")
-pdf(file = file2write, width = 20, height = 10)
-print(p)
-dev.off()
+p <- DimPlot(renal.integrated, reduction = "umap", label = T, split.by = "orig.ident", ncol = 8)
 
 file2write <- paste(dir_out, "Dimplot_by_Clusters_and_Aliquots.", run_id, ".png", sep="")
-png(file = file2write, width = 3000, height = 1600, res = 150)
+png(file = file2write, width = 5000, height = 2000, res = 150)
 print(p)
 dev.off()
-
