@@ -22,10 +22,6 @@ cat("###########################################\n")
 ## get the path to the seurat object
 args = commandArgs(trailingOnly=TRUE)
 
-# test if there is at least one argument: if not, return an error
-if (length(args)<5) {
-  stop("At least 5 arguments must be supplied\n1.path to the output directory\n2.filename for the output\n3.path to the seurat object\n4.path to the cell type marker table\n5.minimal percentage of cells in any cluster expressing the genes to show", call.=FALSE)
-}
 ## argument 1: path to the output directory
 path_output_dir <- args[1]
 cat(paste0("Path to the output directory: ", path_output_dir, "\n"))

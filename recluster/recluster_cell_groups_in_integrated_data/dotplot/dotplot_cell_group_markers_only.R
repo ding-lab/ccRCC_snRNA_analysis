@@ -22,10 +22,6 @@ cat("###########################################\n")
 ## get the path to the seurat object
 args = commandArgs(trailingOnly=TRUE)
 
-# test if there is at least one argument: if not, return an error
-if (length(args)<5) {
-  stop("At least 5 arguments must be supplied\n1.path to the output directory\n2.filename for the output\n3.path to the seurat object\n4.path to the cell type marker table\n5.minimal percentage of cells in any cluster expressing the genes to show", call.=FALSE)
-}
 ## argument 1: path to the output directory
 path_output_dir <- args[1]
 cat(paste0("Path to the output directory: ", path_output_dir, "\n"))
@@ -52,6 +48,11 @@ min.exp.pct <- args[5]
 cat(paste0("Minimal percentage of cell in any clustering expressing the genes to show: ", min.exp.pct, "%\n"))
 cat("###########################################\n")
 
+## argument 6: the cell group to select cell type markers to show
+cellgroup2show <- args[6]
+cat(paste0("Only show markers for cell group: ", cellgroup2show, "\n"))
+cat("###########################################\n")
+
 ## input cell type marker table
 gene2celltype_df <- fread(input = path_gene2celltype_df, data.table = F)
 cat("Finish reading the cell type marker table!\n")
@@ -76,10 +77,8 @@ plot_matrix <- dcast(data = plot_data, formula = features.plot ~ id, value.var =
 plot_matrix %>% head()
 ## filter for genes that are expressed in >25% of one cluster at least
 ## replot with the filtered genes plus malignant cell marker genes
-malignant_markers <- as.vector(gene2celltype_df$Gene[gene2celltype_df$Cell_Type_Group == "Malignant_Nephron_Epithelium"])
 genes2plot_filtered <- as.vector(plot_matrix[rowSums(plot_matrix[,unique(as.vector(plot_data$id))] > min.exp.pct) >= 1, "features.plot"])
-genes2plot_filtered <- c(genes2plot_filtered, 
-                         as.vector(plot_matrix[(plot_matrix$features.plot %in% malignant_markers) & (rowSums(plot_matrix[,unique(as.vector(plot_data$id))] > 5) >= 1), "features.plot"]))
+genes2plot_filtered <- genes2plot_filtered[genes2plot_filtered %in% gene2celltype_df$Gene[gene2celltype_df$Cell_Type_Group == cellgroup2show]]
 genes2plot_filtered <- unique(genes2plot_filtered)
 
 ## make the dotplot
