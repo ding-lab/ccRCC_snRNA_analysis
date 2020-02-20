@@ -7,9 +7,8 @@ setwd(baseD)
 source("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/ccRCC_snRNA_analysis/ccRCC_snRNA_shared.R")
 
 # set run id --------------------------------------------------------------
-# version_tmp <- 1
-# run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
-run_id <- "20200210.v1"
+version_tmp <- 1
+run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 
 # set output directory ----------------------------------------------------------
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -21,7 +20,7 @@ seurat_summary <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Res
 seurat_summary2process <- seurat_summary %>%
   filter(Cellranger_reference_type == "pre-mRNA") %>%
   filter(Proceed_for_downstream == "Yes") %>%
-  filter(!(Aliquot %in% c("CPT0001540013", "CPT0002270013", "CPT0015810004", "CPT0023690004", "CPT0078510004", "CPT0086820004"))) %>%
+  filter(!(Aliquot %in% c("CPT0001540013", "CPT0002270013", "CPT0015810004", "CPT0023690004", "CPT0025110004", "CPT0063630004", "CPT0065690004", "CPT0000870003", "CPT0075720013"))) %>%
   mutate(Path_seurat_object = paste0("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/scRNA_auto/outputs/", Aliquot, FACS, 
                                      "/pf", `pre-filter.low.nCount`, "_fmin", low.nFeautre, "_fmax", high.nFeautre, "_cmin", low.nCount, "_cmax", high.nCount, "_mito_max", high.percent.mito, 
                                      "/", Aliquot, FACS, "_processed.rds"))
@@ -32,7 +31,7 @@ seurat_summary2process$Path_seurat_object
 infercnv_run_id <- "20200207.v1"
 dir_infercnv_all_runs <- "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/InferCNV/outputs/"
 dir_infercnv_output <- paste0(dir_infercnv_all_runs, "Individual.", infercnv_run_id, "/")
-snRNA_aliquot_id_tmp <- "CPT0086820004"
+
 for (snRNA_aliquot_id_tmp in seurat_summary2process$Aliquot) {
   ## create output directory by aliquot
   dir_out1 <- paste0(dir_out, snRNA_aliquot_id_tmp, "/")
