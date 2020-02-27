@@ -1,7 +1,7 @@
 #!/bin/bash
 
 docker_image_name=sridnona/seurat_docker
-dir_base=/diskmnt/Projects/ccRCC_scratch/
+dir_base=/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/
 #dir_log=${dir_base}"Logs/"
 #mkdir -p ${dir_log}
 #path_log_file=${dir_log}$0.$(date +%Y%m%d%H%M%S).log
