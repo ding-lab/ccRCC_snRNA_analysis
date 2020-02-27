@@ -9,9 +9,18 @@ dir2dinglab_projects <- paste0(baseD, "Ding_Lab/Projects_Current/")
 dir2cptac_pgdac <- paste0(dir2dinglab_projects, "CPTAC/PGDAC/")
 
 # gene lists --------------------------------------------------------------
+## significantly mutated genes
 SMGs <- list()
-SMGs[["CCRCC"]] <- c("VHL", "PBRM1", "SETD2", "KDM5C", "PTEN", "BAP1", "MTOR", "TP53")
-
+SMGs[["CCRCC"]] <- c("VHL", 
+                     "PBRM1", 
+                     "SETD2", "KDM5C",  "BAP1", 
+                     "PTEN", 
+                     "MTOR", "TSC1",
+                     "TP53")
+## PBAF gens
+### reference: https://www.nature.com/articles/onc20094/figures/1
+### reference: https://www.nature.com/articles/onc20094/tables/1
+pbaf_genes <- c("PBRM1", "ARID2", "SMARCE1", "SMARCC2", "ACTL6A", "ACTL6B", "SMARCC1", "SMARCD1", "SMARCB1")
 
 # library or install.packages-----------------------------------------------------------------
 packages = c(
@@ -200,27 +209,47 @@ cna_state_colors <- c("Deep Loss" = PuBu_colors[9],
                       "High Gain" = PuRd_colors[9],
                       "Not Available" = "grey50")
 
-
 map_infercnv_state2category <- function(copy_state) {
   cnv_cat <- vector(mode = "character", length = length(copy_state))
   cnv_cat[is.na(copy_state)] <- "Not Available"
-  cnv_cat[copy_state == 1] <- "Neutral"
-  cnv_cat[copy_state == 0] <- "Complete Loss"
-  cnv_cat[copy_state == 0.5] <- "Loss of one copy"
-  cnv_cat[copy_state == 1.5] <- "Addition of one copy"
-  cnv_cat[copy_state == 2] <- "Addition of two copies"
-  cnv_cat[copy_state == 3] <- "Addition > two copies"
+  cnv_cat[copy_state == 1] <- "2 Copies"
+  cnv_cat[copy_state == 0] <- "0 Copies"
+  cnv_cat[copy_state == 0.5] <- "1 Copy"
+  cnv_cat[copy_state == 1.5] <- "3 Copies"
+  cnv_cat[copy_state == 2] <- "4 Copies"
+  cnv_cat[copy_state == 3] <- ">4 Copies"
   return(cnv_cat)
 }
 
 
-copy_number_colors <-  c("Complete Loss" = PuBu_colors[9],
-                   "Loss of one copy" = PuBu_colors[5],
-                   "Neutral" = PuBu_colors[3],
-                   "Addition of one copy" = PuRd_colors[5], 
-                   "Addition of two copies" = PuRd_colors[7],
-                   "Addition > two copies" = PuRd_colors[9],
-                   "Not Available" = "grey50")
+copy_number_colors <-  c("0 Copies" = PuBu_colors[9],
+                         "1 Copy" = PuBu_colors[5],
+                         "2 Copies" = PuBu_colors[3],
+                         "3 Copies" = PuRd_colors[5], 
+                         "4 Copies" = PuRd_colors[7],
+                         ">4 Copies" = PuRd_colors[9],
+                         "Not Available" = "grey50")
+
+# map_infercnv_state2category <- function(copy_state) {
+#   cnv_cat <- vector(mode = "character", length = length(copy_state))
+#   cnv_cat[is.na(copy_state)] <- "Not Available"
+#   cnv_cat[copy_state == 1] <- "Neutral"
+#   cnv_cat[copy_state == 0] <- "Complete Loss"
+#   cnv_cat[copy_state == 0.5] <- "Loss of one copy"
+#   cnv_cat[copy_state == 1.5] <- "Addition of one copy"
+#   cnv_cat[copy_state == 2] <- "Addition of two copies"
+#   cnv_cat[copy_state == 3] <- "Addition > two copies"
+#   return(cnv_cat)
+# }
+# 
+# 
+# copy_number_colors <-  c("Complete Loss" = PuBu_colors[9],
+#                    "Loss of one copy" = PuBu_colors[5],
+#                    "Neutral" = PuBu_colors[3],
+#                    "Addition of one copy" = PuRd_colors[5], 
+#                    "Addition of two copies" = PuRd_colors[7],
+#                    "Addition > two copies" = PuRd_colors[9],
+#                    "Not Available" = "grey50")
 
 
 
