@@ -1,5 +1,5 @@
 # Yige Wu @WashU Feb 2020
-## for writing a table for HIF targets
+## for writing a table for NRF2 targets
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -18,11 +18,11 @@ dir.create(dir_out)
 tf_tab <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/PPI/TF_interactions.txt", data.table = F)
 
 # filter ------------------------------------
-myc_tf_tab <- tf_tab %>%
-  filter(source_genesymbol %in% c("MYC")) %>%
+srebp_tf_tab <- tf_tab %>%
+  filter(source_genesymbol %in% c("SREBF1", "SREBF2")) %>%
   select(source_genesymbol, target_genesymbol)
 
 # add some canonical targets from literature ------------------------------
 
 # write table -------------------------------------------------------------
-write.table(x = myc_tf_tab, file = paste0(dir_out, "MYC_Target_Genes.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)
+write.table(x = srebp_tf_tab, file = paste0(dir_out, "SREBP_Target_Genes.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)

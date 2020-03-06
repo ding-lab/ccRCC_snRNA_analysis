@@ -37,6 +37,7 @@ hif_targets_manual12merge <- hif_targets_manual12merge %>%
 ## merge
 hif_targets <- rbind(hif_tf_tab, hif_targets_manual12merge)
 hif_targets <- unique(hif_targets)
+## 
 # write table -------------------------------------------------------------
 write.table(x = hif_targets, file = paste0(dir_out, "HIF_Target_Genes.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)
 

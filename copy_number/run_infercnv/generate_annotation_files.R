@@ -5,50 +5,32 @@
 baseD = "~/Box/"
 setwd(baseD)
 source("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/ccRCC_snRNA_analysis/ccRCC_snRNA_shared.R")
-
-# set input & output directory ----------------------------------------------------
+## set run id
+run_id <- "20200305.v1"
+## set output directory
 dir_infercnv <- "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/InferCNV/"
 dir_infercnv_inputs <- paste0(dir_infercnv, "inputs/")
 dir.create(dir_infercnv_inputs)
-dir_infercnv_counts <- paste0(dir_infercnv_inputs, "raw_counts_matrix/")
-dir.create(dir_infercnv_counts)
 dir_infercnv_annotation <- paste0(dir_infercnv_inputs, "annotations_file/")
 dir.create(dir_infercnv_annotation)
-
-# set run id ----------------------------------------------------------
-version_tmp <- 1
-# run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
-run_id <- "20200207.v1"
-
-# set output directory------------------------------------------------------
 dir_infercnv_annotation_out <- paste0(dir_infercnv_annotation, "Individual.", run_id, "/")
 dir.create(dir_infercnv_annotation_out)
 
-# input seurat processing summary ------------------------------------------------
-seurat_summary <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/scRNA_auto/summary/ccRCC_snRNA_Downstream_Processing - Seurat_Preprocessing.20200207.v1.tsv", data.table = F)
-seurat_summary2process <- seurat_summary %>%
-  filter(Cellranger_reference_type == "pre-mRNA") %>%
-  filter(Proceed_for_downstream == "Yes") %>%
-  filter(FACS == "") %>%
-  mutate(Path_seurat_object = paste0("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/scRNA_auto/outputs/", Aliquot, FACS, 
-                                     "/pf", `pre-filter.low.nCount`, "_fmin", low.nFeautre, "_fmax", high.nFeautre, "_cmin", low.nCount, "_cmax", high.nCount, "_mito_max", high.percent.mito, 
-                                     "/", Aliquot, FACS, "_processed.rds"))
-seurat_summary2process$Path_seurat_object
+# input barcode 2 cell type table -----------------------------------------
+## input barcode to cell type info
+barcode2celltype_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/30_aliquot_integration/map_celltype_to_barcode/20200224.v1/30_aliquot_integration.barcode2celltype.20200224.v1.tsv", data.table = F)
 
 # write annotation files -------------------------------------------------
-for (snRNA_aliquot_id_tmp in unique(seurat_summary2process$Aliquot)) {
+for (snRNA_aliquot_id_tmp in unique(barcode2celltype_df$orig.ident)) {
   path_annotations_file_out <- paste0(dir_infercnv_annotation_out, snRNA_aliquot_id_tmp, ".Barcode_Annotation.txt")
   
   if (!file.exists(path_annotations_file_out)) {
-    ## input the seurat object
-    seurat_obj_path <- seurat_summary2process$Path_seurat_object[seurat_summary2process$Aliquot == snRNA_aliquot_id_tmp]
-    seurat_object <- readRDS(file = seurat_obj_path)
-    
     ## get barcode to cluster annotation from the meta data
-    anno_tab <- seurat_object@meta.data
-    anno_tab$barcode <- rownames(anno_tab)
-    anno_tab <- anno_tab %>%
-      select(barcode, seurat_clusters)
+    anno_tab <- barcode2celltype_df %>%
+      filter(orig.ident == snRNA_aliquot_id_tmp) %>%
+      mutate(infercnv_group = ifelse((Most_Enriched_Cell_Group %in% c("Immune", "Stroma")) | (Is_Normal_Nephron_Epithelium), "Ref", "Obs")) %>%
+      select(individual_barcode, infercnv_group)
+    
     nrow(anno_tab)
     write.table(x = anno_tab, file = path_annotations_file_out, quote = F, sep = "\t", row.names = F, col.names = F)
   }
