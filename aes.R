@@ -1,8 +1,13 @@
 # especially for plotting #
+packages = c(
+  "ggplot2",
+  "RColorBrewer",
+  "Polychrome"
+)
 
-library(ggplot2)
-library(RColorBrewer)
-library("gplots")
+for (pkg_name_tmp in packages) {
+  library(package = pkg_name_tmp, character.only = T)
+}
 
 set1 = brewer.pal(9,"Set1")
 set2 = brewer.pal(9,"Set2")

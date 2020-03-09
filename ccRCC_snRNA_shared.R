@@ -16,6 +16,7 @@ dir2cptac_pgdac <- paste0(dir2dinglab_projects, "CPTAC/PGDAC/")
 packages = c(
   "rstudioapi",
   "optparse",
+  "plyr",
   "dplyr",
   "stringr",
   "reshape2",

@@ -25,7 +25,18 @@ for (pkg_name_tmp in packages) {
   if (!(pkg_name_tmp %in% installed.packages()[,1])) {
     install.packages(pkg_name_tmp, dependencies = T)
   }
-  library(package = pkg_name_tmp, character.only = T)
+}
+
+# install packages for plotting -------------------------------------------
+packages = c(
+  "Polychrome",
+  "pals"
+)
+
+for (pkg_name_tmp in packages) {
+  if (!(pkg_name_tmp %in% installed.packages()[,1])) {
+    install.packages(pkg_name_tmp, dependencies = T)
+  }
 }
 
 # install/library rjags -----------------------------------------------------------
