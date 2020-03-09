@@ -55,27 +55,14 @@ srat <- readRDS(path_srat)
 print("Finish reading the seurat object!\n")
 cat("###########################################\n")
 
-## add cell type info into meta data
-metadata_tmp <- srat@meta.data
-metadata_tmp$individual_barcode <- rownames(srat@meta.data)
-metadata_tmp <- merge(metadata_tmp, barcode2celltype_df, by = c("orig.ident", "individual_barcode"), all.x = T)
-rownames(metadata_tmp) <- metadata_tmp$individual_barcode
-srat@meta.data <- metadata_tmp
+## get the tumor cell barcodes
+barcodes2process <- barcode2celltype_df$individual_barcode[barcode2celltype_df$Most_Enriched_Cell_Group == "Nephron_Epithelium" & barcode2celltype_df$Is_Normal_Nephron_Epithelium == F]
+
+## subset data
+srat.new <- subset(srat, cells = barcodes2process)
+rm(srat)
 
 ## write output
-write.table(metadata_tmp, file = path_output, quote = F, sep = "\t", row.names = F)
+saveRDS(object = srat.new, file = path_output, compress = T)
 cat("Finished saving the output\n")
 cat("###########################################\n")
-
-## change identification for the cells to be cell type group
-#Idents(srat) <- "Most_Enriched_Cell_Type1"
-
-## run findallmarkers
-#markers_df <- FindMarkers(object = srat, ident.1 = "Proximal tubule", logfc.threshold = 0.25, test.use = "wilcox", only.pos = T)
-#print("Finish running FindMarkers!\n")
-#cat("###########################################\n")
-
-## write output
-#write.table(markers_df, file = path_output, quote = F, sep = "\t", row.names = F)
-#cat("Finished saving the output\n")
-#cat("###########################################\n")
