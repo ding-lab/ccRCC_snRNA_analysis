@@ -16,7 +16,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input seurat object paths
-srat_paths <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/individual_cluster/write_path_to_seurat_objects_on_box/20200219.v1/Seurat_Object_Paths.20200219.v1.tsv", data.table = F)
+srat_paths <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/individual_cluster/write_path_to_srats_on_box/20200219.v1/srat_Paths.20200219.v1.tsv", data.table = F)
 ### filter out normal sample
 srat_paths <- srat_paths %>%
   filter(Sample_Type == "Tumor")
@@ -29,32 +29,32 @@ for (aliquot_tmp in unique(srat_paths$Aliquot)) {
   file2write <- paste0(dir_out, aliquot_tmp, ".malignant_nephron_epithelium.", run_id, ".RDS")
   if (!file.exists(file2write)) {
     ## input individually processed seurat object
-    seurat_obj_path <- srat_paths$Path_seurat_object[srat_paths$Aliquot == aliquot_tmp]
+    seurat_obj_path <- srat_paths$Path_srat[srat_paths$Aliquot == aliquot_tmp]
     seurat_obj_path
-    seurat_object <- readRDS(file = seurat_obj_path)
+    srat <- readRDS(file = seurat_obj_path)
     
     ## get the tumor cell barcodes for this aliquot
     barcodes2process <- barcode2celltype_df$individual_barcode[barcode2celltype_df$orig.ident == aliquot_tmp & barcode2celltype_df$Most_Enriched_Cell_Group == "Nephron_Epithelium" & barcode2celltype_df$Is_Normal_Nephron_Epithelium == F]
     
     ## subset data
-    new.object <- subset(seurat_object, cells = barcodes2process)
-    rm(seurat_object)
+    srat.new <- subset(srat, cells = barcodes2process)
+    rm(srat)
     
     ## Run the standard workflow for clustering and visualization
-    new.object <- FindVariableFeatures(object = new.object, selection.method = "vst", nfeatures = 2000)
-    new.object <- ScaleData(new.object, features = rownames(new.object@assays$RNA@counts)) 
-    new.object <- RunPCA(new.object, npcs = 30, verbose = FALSE)
-    new.object <- RunUMAP(new.object, reduction = "pca", dims = 1:30)
-    new.object <- FindNeighbors(new.object, reduction = "pca", dims = 1:30, force.recalc = T)
-    new.object <- FindClusters(new.object, resolution = 0.5)
-    saveRDS(object = new.object, file = file2write)
+    srat.new <- FindVariableFeatures(object = srat.new, selection.method = "vst", nfeatures = 2000)
+    srat.new <- ScaleData(srat.new, features = rownames(srat.new@assays$RNA@counts)) 
+    srat.new <- RunPCA(srat.new, npcs = 30, verbose = FALSE)
+    srat.new <- RunUMAP(srat.new, reduction = "pca", dims = 1:30)
+    srat.new <- FindNeighbors(srat.new, reduction = "pca", dims = 1:30, force.recalc = T)
+    srat.new <- FindClusters(srat.new, resolution = 0.5)
+    saveRDS(object = srat.new, file = file2write, compress = T)
   }
 }
 
 # make table for paths to these objects -----------------------------------
 new_srat_paths <- data.frame(Aliquot = unique(srat_paths$Aliquot),
-                             Path_seurat_object = paste0(dir_out, unique(srat_paths$Aliquot), ".malignant_nephron_epithelium.", run_id, ".RDS"))
-write.table(x = new_srat_paths, file = paste0(dir_out, "Seurat_Object_Paths", ".", "Malignant_Nephron_Epithelium", run_id, ".", "tsv"), 
+                             Path_srat = paste0(dir_out, unique(srat_paths$Aliquot), ".malignant_nephron_epithelium.", run_id, ".RDS"))
+write.table(x = new_srat_paths, file = paste0(dir_out, "srat_Paths", ".", "Malignant_Nephron_Epithelium", run_id, ".", "tsv"), 
             quote = F, sep = "\t", row.names = F)
 
 

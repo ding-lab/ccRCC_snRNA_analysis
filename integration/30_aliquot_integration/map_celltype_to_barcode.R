@@ -31,7 +31,8 @@ immune_integrated_barcode2celltype_df <- merge(immune_integrated_barcode2cluster
 immune_integrated_barcode2celltype_df <- immune_integrated_barcode2celltype_df %>%
   mutate(individual_barcode = str_split_fixed(string = barcode, pattern = "_", n = 2)[,1]) %>%
   mutate(Is_Normal_Nephron_Epithelium = F) %>%
-  select(orig.ident, individual_barcode, Most_Enriched_Cell_Group, Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type2, Most_Enriched_Cell_Type3, Most_Enriched_Cell_Type4, Is_Normal_Nephron_Epithelium)
+  mutate(integrated_barcode = barcode) %>%
+  select(orig.ident, individual_barcode, integrated_barcode, Most_Enriched_Cell_Group, Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type2, Most_Enriched_Cell_Type3, Most_Enriched_Cell_Type4, Is_Normal_Nephron_Epithelium)
 
 # map cell types for cell groups other than immune----------------------------------------------------------
 ## merge barcode to cluster info with cluster to cell type info
@@ -41,7 +42,8 @@ all_integrated_barcode2celltype_df <- merge(all_integrated_barcode2cluster_df, a
 all_integrated_barcode2celltype_df <- all_integrated_barcode2celltype_df %>%
   mutate(individual_barcode = str_split_fixed(string = barcode, pattern = "_", n = 2)[,1]) %>%
   mutate(Is_Normal_Nephron_Epithelium = ((ident == 17) & (Most_Enriched_Cell_Group == "Nephron_Epithelium"))) %>%
-  select(orig.ident, individual_barcode, Most_Enriched_Cell_Group, Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type2, Most_Enriched_Cell_Type3, Most_Enriched_Cell_Type4, Is_Normal_Nephron_Epithelium)
+  mutate(integrated_barcode = barcode) %>%
+  select(orig.ident, individual_barcode, integrated_barcode, Most_Enriched_Cell_Group, Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type2, Most_Enriched_Cell_Type3, Most_Enriched_Cell_Type4, Is_Normal_Nephron_Epithelium)
 
 # merge the immune and non-immune info ------------------------------------
 barcode2celltype_df <- rbind(immune_integrated_barcode2celltype_df,
