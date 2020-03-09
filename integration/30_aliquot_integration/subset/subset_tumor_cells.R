@@ -56,7 +56,7 @@ print("Finish reading the seurat object!\n")
 cat("###########################################\n")
 
 ## get the tumor cell barcodes
-barcodes2process <- barcode2celltype_df$individual_barcode[barcode2celltype_df$Most_Enriched_Cell_Group == "Nephron_Epithelium" & barcode2celltype_df$Is_Normal_Nephron_Epithelium == F]
+barcodes2process <- barcode2celltype_df$integrated_barcode[barcode2celltype_df$Most_Enriched_Cell_Group == "Nephron_Epithelium" & barcode2celltype_df$Is_Normal_Nephron_Epithelium == F]
 
 ## subset data
 srat.new <- subset(srat, cells = barcodes2process)
