@@ -16,6 +16,8 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input the paths for reclustered seurat objects
 srat_paths <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/recluster/recluster_cell_groups_in_individual_samples/recluster_nephron_epithelium/recluster_nephron_epithelium_cells_in_individual_samples/20200225.v1/Seurat_Object_Paths.Malignant_Nephron_Epithelium20200225.v1.tsv", data.table = F)
+## inpu the integrated barocde name
+barcode2celltype_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/30_aliquot_integration/map_celltype_to_barcode/20200309.v1/30_aliquot_integration.barcode2celltype.20200309.v1.tsv", data.table = F)
 
 # for each aliquot, input seurat object and fetch data and write data --------------------
 aliquots_data <- NULL
@@ -27,11 +29,19 @@ for (aliquot_tmp in unique(srat_paths$Aliquot)) {
   ## fetch data
   aliquot_data <- FetchData(object = seurat_object, vars = c("orig.ident", "ident", "UMAP_1", "UMAP_2"))
   ## add barcode column
-  aliquot_data$barcode <- rownames(aliquot_data)
+  aliquot_data$individual_barcode <- rownames(aliquot_data)
   ## merge data across aliquots
   aliquots_data <- rbind(aliquots_data, aliquot_data)
 }
 
+# rename and add integrated barcode ---------------------------------------
+aliquots_data <- merge(aliquots_data, barcode2celltype_df %>%
+                         select(orig.ident, individual_barcode, integrated_barcode),
+                       by = c("orig.ident", "individual_barcode"), all.x = T)
+aliquots_data <- aliquots_data %>%
+  rename(tumor_exp_subcluster.ident = ident)
+
+
 # write table -------------------------------------------------------------
-write.table(x = aliquots_data, file = paste0(dir_out, "Cluster_UMAP_Data.Malignant_Nephron_Epithelium", ".", run_id, ".tsv"), row.names = F, quote = F, sep = "\t")
+write.table(x = aliquots_data, file = paste0(dir_out, "Tumor_Subcluster_UMAP_Data", ".", run_id, ".tsv"), row.names = F, quote = F, sep = "\t")
 
