@@ -29,6 +29,7 @@ for (pkg_name_tmp in packages) {
 
 # install packages for plotting -------------------------------------------
 packages = c(
+  "rcartocolor",
   "Polychrome",
   "pals"
 )
