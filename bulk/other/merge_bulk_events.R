@@ -38,6 +38,7 @@ maf_df <- maf_df %>%
 var_class_df <- generate_somatic_mutation_matrix(pair_tab = ccRCC_SMGs, maf = maf_df)
 var_class_by_case_mat <- t(var_class_df[,-1])
 var_class_by_case_mat[var_class_by_case_mat == "Silent"] <- ""
+var_class_by_case_mat[var_class_by_case_mat == ""] <- "None"
 var_class_by_case_df <- as.data.frame(var_class_by_case_mat)
 ### change column names
 colnames(var_class_by_case_df) <- paste0("Mut.", colnames(var_class_by_case_df))
@@ -46,7 +47,11 @@ var_class_by_case_df$Case <- rownames(var_class_by_case_df)
 ## format arm level cnv
 arm_cnv_by_case_df <- arm_cnv_df %>%
   dplyr::select("Case", 'CN.3p', 'CN.5q', "CN.14q") %>%
+  rename(CN.bulk.3p = CN.3p) %>%
+  rename(CN.bulk.5q = CN.5q) %>%
+  rename(CN.bulk.14q = CN.14q) %>%
   dplyr::filter(Case %in% case_ids)
+arm_cnv_by_case_df[arm_cnv_by_case_df == ""] <- "Neutral"
 
 ## format translocation data
 ### get the unique chr3 translocation for each case
@@ -55,16 +60,16 @@ uniq_chr3_translocation_long_df <- chr3_translocation_df %>%
   unique() %>%
   as.data.frame() %>%
   rename(Case = CASE_ID) %>%
-  rename(Chr3_Translocation_Type = TYPE) %>%
+  mutate(Chr3_Translocation_Chr = str_split_fixed(string = TYPE, pattern = "-", n = 2)[,2]) %>%
+  select(Case, Chr3_Translocation_Chr) %>%
   filter(Case %in% case_ids) %>%
-  arrange(Chr3_Translocation_Type)
+  arrange(Chr3_Translocation_Chr)
 uniq_chr3_translocation_long_df1 <- uniq_chr3_translocation_long_df %>%
   filter(!duplicated(Case))
 uniq_chr3_translocation_long_df2 <- uniq_chr3_translocation_long_df %>%
   filter(duplicated(Case))
 ### merge the first translocation with the second
 chr3_translocation_wide_df <- merge(uniq_chr3_translocation_long_df1, uniq_chr3_translocation_long_df2, by = c("Case"), suffixes = c("1", "2"), all = T)
-
 ## format methylation data
 ### filter down to VHL only
 methylation_vhl_wide_df <- methylation_by_gene_df %>%
@@ -79,6 +84,9 @@ merged_bulk_events_df <- data.frame(Case = case_ids)
 merged_bulk_events_df <- merge(merged_bulk_events_df, var_class_by_case_df, by = c("Case"), all.x = T)
 merged_bulk_events_df <- merge(merged_bulk_events_df, arm_cnv_by_case_df, by = c("Case"), all.x = T)
 merged_bulk_events_df <- merge(merged_bulk_events_df, chr3_translocation_wide_df, by = c("Case"), all.x = T)
+## fill in empty cells without events
+merged_bulk_events_df[is.na(merged_bulk_events_df)] <- "None"
+## fill in the methylation data
 merged_bulk_events_df <- merge(merged_bulk_events_df, methylation_vhl_long_df, by = c("Case"), all.x = T)
 
 # write table -------------------------------------------------------------

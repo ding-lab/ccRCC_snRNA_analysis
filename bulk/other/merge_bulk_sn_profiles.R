@@ -1,0 +1,50 @@
+# Yige Wu @WashU March 2020
+## running on local
+## for merging the bulk omics profile and snRNA-based CNV
+## bulk omics profile include all the  mutation (SMG), CNV (reported by TCGA, bulk), VHL methylation and 3p translocation
+
+# set up libraries and output directory -----------------------------------
+## set working directory
+baseD = "~/Box/"
+setwd(baseD)
+source("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/ccRCC_snRNA_analysis/ccRCC_snRNA_shared.R")
+## set run id
+version_tmp <- 1
+run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
+## set output directory
+dir_out <- paste0(makeOutDir(), run_id, "/")
+dir.create(dir_out)
+
+# input dependencies ------------------------------------------------------
+## input bulk omics profile
+## input te bulk genomics/methylation events
+merged_bulk_events_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/bulk/other/merge_bulk_events/20200317.v1/merged_bulk_events.20200317.v1.tsv", data.table = F)
+## input snRNA copy number profile for tumor cells
+merged_sn_events_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/copy_number/summarize_cnv_fraction/cnv_fraction_in_malignant_nephron_epithelium_per_sample_per_chr_region/20200317.v1/fraction_of_tumorcells.expectedCNA.by_chr_region.20200317.v1.tsv", data.table = F)
+## input id meta data
+id_metadata_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/sample_info/make_meta_data/20191105.v1/meta_data.20191105.v1.tsv", data.table = F)
+
+# filter snRNA copy number to 3p, 5q, 14q ---------------------------------
+merged_sn_events_df <- merged_sn_events_df %>%
+  rename(CN.sn.3p_loss.fraction = `3p`) %>%
+  rename(CN.sn.5q_gain.fraction = `5q`) %>%
+  rename(CN.sn.14q_gain.fraction = `14q`) %>%
+  select(aliquot, CN.sn.3p_loss.fraction, CN.sn.5q_gain.fraction, CN.sn.14q_gain.fraction)
+## add case ids for the aliquot ids
+merged_sn_events_df$Case <- mapvalues(x = merged_sn_events_df$aliquot, from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Case))
+# merge sn cnv with bulk omics profile ------------------------------------
+## filter meta data by just the original tumor segment (discovery cohort)
+id_metadata_original_df <- id_metadata_df %>%
+  filter(Is_discovery_set == T) %>%
+  filter(Sample_Type == "Tumor")
+## add aliquot ids for snRNA-Seq to the bulk omics profile
+merged_bulk_events_df$Aliquot.snRNA <- mapvalues(x = merged_bulk_events_df$Case, from = id_metadata_original_df$Case, to = as.vector(id_metadata_original_df$Aliquot.snRNA))
+## merge by snRNA aliquot ids
+bulk_sn_omicsprofile_df <- merge(merged_bulk_events_df, merged_sn_events_df, 
+                                 by.x = c("Case", "Aliquot.snRNA"), by.y = c("Case", "aliquot"), all = T)
+
+# write table -------------------------------------------------------------
+file2write <- paste0(dir_out, "bulk_sn_omics_profile.", run_id, ".tsv")
+write.table(x = bulk_sn_omicsprofile_df, file = file2write, quote = F, sep = "\t", row.names = F)
+
+

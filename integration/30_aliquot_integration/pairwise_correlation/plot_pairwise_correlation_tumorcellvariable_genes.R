@@ -20,12 +20,10 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input id meta data
 id_metadata_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/sample_info/make_meta_data/20191105.v1/meta_data.20191105.v1.tsv", data.table = F)
-## input cnv profile
-arm_cnv_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/bulk/copy_number/write_sample_bicseq_cnv_profile/20200227.v1/Bulk_WGS_Chr_CNV_Profile.20200227.v1.tsv", data.table = F)
+## input te bulk genomics/methylation events
+merged_bulk_events_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/bulk/other/merge_bulk_events/20200317.v1/merged_bulk_events.20200317.v1.tsv", data.table = F)
 ## input the spearman pairwise correlation result
 pearson_coef.tumorcellvariable_genes.df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/30_aliquot_integration/pairwise_correlation/calculate_pairwise_correlation_tumorcellvariable_genes/20200310.v1/avg_exp.tumorcellvaraible_genes.pearson_coef.20200310.v1.tsv", data.table = F)
-## input mutation
-maf_df <- loadMaf()
 
 # make data matrix for heatmap body ---------------------------------------
 ## reformat data frame to matrix
@@ -37,35 +35,45 @@ rownames(plot_data_mat) <- plot_data_df$V1
 case_ids <- mapvalues(x = rownames(plot_data_mat), from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Case))
 
 # make top column annotation --------------------------------------------------
-## make annotation data frame with copy number profile first
-top_col_anno_df <- arm_cnv_df %>%
-  select('3p', '5q', "14q")
-rownames(top_col_anno_df) <- arm_cnv_df$Case
+## transform the translocation data
+top_col_anno_df <- merged_bulk_events_df %>%
+  select(-Case)
+rownames(top_col_anno_df) <- as.vector(merged_bulk_events_df$Case)
 top_col_anno_df <- top_col_anno_df[case_ids,]
 rownames(top_col_anno_df) <- rownames(plot_data_mat)
-## make annotation data frame with mutation type
-### filter maf file by case id
-maf_df <- maf_df %>%
-  mutate(case_id = str_split_fixed(string = Tumor_Sample_Barcode, pattern = "_", n = 2)[,1]) %>%
-  filter(case_id %in% case_ids)
-var_class_df <- generate_somatic_mutation_matrix(pair_tab = ccRCC_SMGs, maf = maf_df)
-var_class_anno_df <- t(var_class_df[,-1])
-var_class_anno_df
-var_class_anno_df <- var_class_anno_df[case_ids,]
-var_class_anno_df
-rownames(var_class_anno_df) <- rownames(plot_data_mat)
-### combine mutation data into top column annotation
-top_col_anno_df <- cbind(top_col_anno_df, var_class_anno_df)
-### remove variant info for the normal sample
+### make neutral variant info for the normal sample
 normal_aliquot_ids <- id_metadata_df$Aliquot.snRNA[id_metadata_df$Sample_Type == "Normal"]
-top_col_anno_df[rownames(top_col_anno_df) %in% normal_aliquot_ids,] <- ""
+#### for volumns other than methylation, make
+top_col_anno_df[rownames(top_col_anno_df) %in% normal_aliquot_ids, grepl(x = colnames(top_col_anno_df), pattern = "Mut.")] <- "None"
+top_col_anno_df[rownames(top_col_anno_df) %in% normal_aliquot_ids, paste0("CN.", c('3p', '5q', "14q"))] <- "Neutral"
+top_col_anno_df[rownames(top_col_anno_df) %in% normal_aliquot_ids, c("Chr3_Translocation_Chr1", "Chr3_Translocation_Chr2")] <- "None"
+top_col_anno_df[rownames(top_col_anno_df) %in% normal_aliquot_ids, c("Methyl.VHL")] <- NA
+### make color for translocated chromosomes
+uniq_translocation_chrs <- c(as.vector(top_col_anno_df$Chr3_Translocation_Chr1), as.vector(top_col_anno_df$Chr3_Translocation_Chr2))
+uniq_translocation_chrs <- unique(uniq_translocation_chrs)
+uniq_translocation_chrs
+#### 7 different chromosomes
+cartocolors_safe <- cartocolors_df[cartocolors_df$Name == "Safe", "n7"][[1]]
+uniq_translocation_chr_colors <- c(cartocolors_safe, "white")
+names(uniq_translocation_chr_colors) <- c(uniq_translocation_chrs[uniq_translocation_chrs!="None"], "None")
+### make color for methylation
+methyl_color_fun <- colorRamp2(c(quantile(top_col_anno_df$Methyl.VHL, 0.1, na.rm=T), 
+                                 quantile(top_col_anno_df$Methyl.VHL, 0.5, na.rm=T), 
+                                 quantile(top_col_anno_df$Methyl.VHL, 0.9, na.rm=T)),c("blue", "white", "red"))
+
 ### make color for this annotation data frame
 top_col_anno_colors <- lapply(colnames(top_col_anno_df), function(g) {
-  if (g %in% c('3p', '5q', "14q")) {
-    color_vector <- c("gain" = "red", "loss" = "blue")
+  if (g %in% paste0("CN.", c('3p', '5q', "14q"))) {
+    color_vector <- c("gain" = "red", "loss" = "blue", "Neutral" = "white")
   }
-  if (g %in% ccRCC_SMGs) {
+  if (g %in% paste0("Mut.", ccRCC_SMGs)) {
     color_vector <- variant_class_colors
+  }
+  if (g %in% c("Chr3_Translocation_Chr1", "Chr3_Translocation_Chr2")) {
+    color_vector <- uniq_translocation_chr_colors
+  }
+  if (g %in% c("Methyl.VHL")) {
+    color_vector <- methyl_color_fun
   }
   return(color_vector)
 })
@@ -91,12 +99,14 @@ bottom_col_anno = HeatmapAnnotation(foo = anno_text(case_ids,
 
 
 # plot pearson pairwise correlation for variably expressed genes within tumor cells ------------------------------------------------------
-## make function for colors
+## make color function for heatmap body colors
 col_fun = colorRamp2(c(0, 0.5, 1), c("blue", "white", "red"))
 ## make heatmap
 p <- Heatmap(matrix = plot_data_mat,
              col = col_fun, 
-             right_annotation = row_anno, bottom_annotation = bottom_col_anno, top_annotation = top_col_anno,
+             right_annotation = row_anno, 
+             bottom_annotation = bottom_col_anno, 
+             top_annotation = top_col_anno,
              show_heatmap_legend = F)
 p
 ## make legend for heattmap body
