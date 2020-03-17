@@ -1,6 +1,6 @@
 # Yige Wu @WashU March 2020
 ## running on local
-## for plotting the aliquot-pairwise correlation coefficients for averaged expression of all genes
+## for calculating the aliquot-pairwise correlation coefficients for averaged expression of all genes
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -21,9 +21,9 @@ dir.create(dir_out)
 ## input id meta data
 id_metadata_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/sample_info/make_meta_data/20191105.v1/meta_data.20191105.v1.tsv", data.table = F)
 ## input cnv profile
-arm_cnv_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/bulk/copy_number/write_sample_bicseq_cnv_profile/20200227.v1/Bulk_WGS_Chr_CNV_Profile.20200227.v1.tsv", data.table = F)
+bulk_cnv_profile_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/bulk/write_sample_bicseq_cnv_profile/20200227.v1/Bulk_WGS_Chr_CNV_Profile.20200227.v1.tsv", data.table = F)
 ## input the spearman pairwise correlation result
-pearson_coef.tumorcellvariable_genes.df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/30_aliquot_integration/pairwise_correlation/calculate_pairwise_correlation_tumorcellvariable_genes/20200310.v1/avg_exp.tumorcellvaraible_genes.pearson_coef.20200310.v1.tsv", data.table = F)
+pearson_coef.tumorcellvariable_genes.df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/30_aliquot_integration/pairwise_correlation/calculate_tumorsubcluster_pairwise_correlation_tumorcellvariable_genes/20200312.v1/avg_exp_by_tumorsubluster.tumorcellvaraible_genes.pearson_coef20200312.v1.tsv", data.table = F)
 ## input mutation
 maf_df <- loadMaf()
 
@@ -32,15 +32,19 @@ maf_df <- loadMaf()
 plot_data_df <- pearson_coef.tumorcellvariable_genes.df
 plot_data_mat <- as.matrix(plot_data_df[,-1])
 plot_data_mat %>% head()
+## add row names
 rownames(plot_data_mat) <- plot_data_df$V1
-### get case name
-case_ids <- mapvalues(x = rownames(plot_data_mat), from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Case))
+plot_data_mat %>% head()
+### get aliquot ids and case ids
+tumorsubcluster_ids <- rownames(plot_data_mat)
+aliquot_ids <- str_split_fixed(string = tumorsubcluster_ids, pattern = "_", n = 2)[,1]
+case_ids <- mapvalues(x = aliquot_ids, from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Case))
 
 # make top column annotation --------------------------------------------------
 ## make annotation data frame with copy number profile first
-top_col_anno_df <- arm_cnv_df %>%
+top_col_anno_df <- bulk_cnv_profile_df %>%
   select('3p', '5q', "14q")
-rownames(top_col_anno_df) <- arm_cnv_df$Case
+rownames(top_col_anno_df) <- bulk_cnv_profile_df$Case
 top_col_anno_df <- top_col_anno_df[case_ids,]
 rownames(top_col_anno_df) <- rownames(plot_data_mat)
 ## make annotation data frame with mutation type
@@ -74,7 +78,6 @@ names(top_col_anno_colors) <- colnames(top_col_anno_df)
 top_col_anno = HeatmapAnnotation(df = top_col_anno_df, col = top_col_anno_colors, show_legend = F)
 
 # make row annotation -------------------------------------------
-## make case name as row annotation
 ### create row annotation
 row_anno = rowAnnotation(foo = anno_text(case_ids, 
                                          location = 0.5, just = "center",
@@ -96,7 +99,9 @@ col_fun = colorRamp2(c(0, 0.5, 1), c("blue", "white", "red"))
 ## make heatmap
 p <- Heatmap(matrix = plot_data_mat,
              col = col_fun, 
-             right_annotation = row_anno, bottom_annotation = bottom_col_anno, top_annotation = top_col_anno,
+             right_annotation = row_anno, 
+             bottom_annotation = bottom_col_anno, 
+             # top_annotation = top_col_anno,
              show_heatmap_legend = F)
 p
 ## make legend for heattmap body
@@ -115,7 +120,7 @@ annotation_lgd = list(
 
 ## save heatmap
 png(filename = paste0(dir_out, "avg_exp.tumorcellvariable_genes.pearson_coef.heatmap.", run_id, ".png"), 
-    width = 1600, height = 1500, res = 150)
+    width = 5500, height = 5000, res = 150)
 ### combine heatmap and heatmap legend
 draw(object = p, 
      annotation_legend_side = "right", annotation_legend_list = annotation_lgd)

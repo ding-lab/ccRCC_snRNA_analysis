@@ -46,12 +46,13 @@ chr_cnv_state_mat <- matrix(data = unlist(chr_cnv_state_list), ncol = length(chr
                                 dimnames = list(row_names = colnames(cna_tab[,-1]),
                                                 col_names = chr_regions))
 chr_cnv_state_mat
+colnames(chr_cnv_state_mat) <- paste0("CN.", colnames(chr_cnv_state_mat))
 ## make matrix into data frame
 chr_cnv_state_df <- data.frame(Case = rownames(chr_cnv_state_mat))
 chr_cnv_state_df <- cbind(chr_cnv_state_df, as.data.frame(chr_cnv_state_mat))
-chr_cnv_state_df$chr_cnvs_summary <- paste0(ifelse(chr_cnv_state_df$`3p` != "", paste0("|", "3p_", chr_cnv_state_df$`3p`, "|"), ""),
-                                            ifelse(chr_cnv_state_df$`5q` != "", paste0("|","5q_", chr_cnv_state_df$`5q`, "|"), ""),
-                                            ifelse(chr_cnv_state_df$`14q` != "", paste0("|", "14q_", chr_cnv_state_df$`14q`, "|"), ""))
+chr_cnv_state_df$chr_cnvs_summary <- paste0(ifelse(chr_cnv_state_df$CN.3p != "", paste0("|", "3p_", chr_cnv_state_df$CN.3p, "|"), ""),
+                                            ifelse(chr_cnv_state_df$CN.5q != "", paste0("|","5q_", chr_cnv_state_df$CN.5q, "|"), ""),
+                                            ifelse(chr_cnv_state_df$CN.14q != "", paste0("|", "14q_", chr_cnv_state_df$CN.14q, "|"), ""))
 
 
 # write table -------------------------------------------------------------
