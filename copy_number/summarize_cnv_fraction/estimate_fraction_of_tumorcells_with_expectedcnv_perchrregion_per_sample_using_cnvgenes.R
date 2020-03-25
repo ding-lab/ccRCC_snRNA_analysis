@@ -1,5 +1,5 @@
 # Yige Wu @WashU March 2020
-## for calculating the fraction of tumor cells with cnv in different frequently altered genes
+## for calculating the fraction of tumor cells with cnv in each chr region using the cnvs in representative genes 
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -15,7 +15,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input barcode to chr-region cnv state
-barcode2cnv_bychr_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/copy_number/annotate_barcode_cnv/20200228.v1/Expected_CNV_State_By_Chr_Region_By_Barcode.20200228.v1.tsv", data.table = F)
+barcode2cnv_bychr_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/copy_number/annotate_barcode_with_cnv/annotate_barcode_with_chr_level_cnv_using_cnv_genes/20200318.v1/Expected_CNV_State_By_Chr_Region_By_Barcode.Using_Representative_Genes.20200318.v1.tsv", data.table = F)
 ## input barcode to cell type info
 barcode2celltype_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/30_aliquot_integration/map_celltype_to_barcode/20200309.v1/30_aliquot_integration.barcode2celltype.20200309.v1.tsv", data.table = F)
 ## input id meta data

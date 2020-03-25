@@ -1,5 +1,5 @@
 # Yige Wu @WashU Feb 2020
-## for each individual sample, isolating cells within the immune cell clusters and re-do clustering
+## for each individual sample, isolating tumor cells assigned from the integrated data and re-do clustering
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -13,23 +13,27 @@ run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
-
 # input dependencies ------------------------------------------------------
 ## input seurat object paths
-srat_paths <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/individual_cluster/write_path_to_srats_on_box/20200219.v1/srat_Paths.20200219.v1.tsv", data.table = F)
+srat_paths <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/individual_sample/write_path_to_seurat_objects_on_box/20200219.v1/Seurat_Object_Paths.20200219.v1.tsv", data.table = F)
 ### filter out normal sample
 srat_paths <- srat_paths %>%
   filter(Sample_Type == "Tumor")
 ## input the cell to cell type table
-barcode2celltype_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/30_aliquot_integration/map_celltype_to_barcode/20200224.v1/30_aliquot_integration.barcode2celltype.20200224.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/30_aliquot_integration/other/map_celltype_to_barcode/20200320.v1/30_aliquot_integration.barcode2celltype.20200320.v1.tsv", data.table = F)
+## input gene to cell type table
+gene2celltype_df <- fread(file = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Kidney_Markers/Gene2CellType_Tab.20200220.v1.tsv", data.table = F)
+## specify aliquots to process
+aliquots2process <- unique(srat_paths$Aliquot)
+# aliquots2process <- "CPT0025880013"
 
 # run reclustering by each aliquot ----------------------------------------
-for (aliquot_tmp in unique(srat_paths$Aliquot)) {
+for (aliquot_tmp in aliquots2process) {
   ## check if the reclustered object has been saved for this aliquot
-  file2write <- paste0(dir_out, aliquot_tmp, ".malignant_nephron_epithelium.", run_id, ".RDS")
+  file2write <- paste0(dir_out, aliquot_tmp, ".tumor_cells.", run_id, ".RDS")
   if (!file.exists(file2write)) {
     ## input individually processed seurat object
-    seurat_obj_path <- srat_paths$Path_srat[srat_paths$Aliquot == aliquot_tmp]
+    seurat_obj_path <- srat_paths$Path_seurat_object[srat_paths$Aliquot == aliquot_tmp]
     seurat_obj_path
     srat <- readRDS(file = seurat_obj_path)
     
@@ -41,12 +45,15 @@ for (aliquot_tmp in unique(srat_paths$Aliquot)) {
     rm(srat)
     
     ## Run the standard workflow for clustering and visualization
-    srat.new <- FindVariableFeatures(object = srat.new, selection.method = "vst", nfeatures = 2000)
-    srat.new <- ScaleData(srat.new, features = rownames(srat.new@assays$RNA@counts)) 
-    srat.new <- RunPCA(srat.new, npcs = 30, verbose = FALSE)
-    srat.new <- RunUMAP(srat.new, reduction = "pca", dims = 1:30)
-    srat.new <- FindNeighbors(srat.new, reduction = "pca", dims = 1:30, force.recalc = T)
+    srat.new <- ScaleData(srat.new, features = rownames(srat.new@assays$RNA@counts))
+    srat.new <- FindVariableFeatures(object = srat.new, selection.method = "vst", nfeatures = 3000)
+    
+    ## RunPCA
+    srat.new <- RunPCA(srat.new, npcs = num_pc, verbose = FALSE)
+    srat.new <- RunUMAP(srat.new, reduction = "pca", dims = 1:num_pc)
+    srat.new <- FindNeighbors(srat.new, reduction = "pca", dims = 1:num_pc, force.recalc = T)
     srat.new <- FindClusters(srat.new, resolution = 0.5)
+    # srat.new <- FindClusters(srat.new, resolution = 1.0)
     saveRDS(object = srat.new, file = file2write, compress = T)
   }
 }

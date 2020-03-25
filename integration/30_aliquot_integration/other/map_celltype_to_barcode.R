@@ -1,4 +1,4 @@
-# Yige Wu @WashU Feb 2020
+# Yige Wu @WashU March 2020
 ## make barcode to cell type mapping table for the integrated dataset
 
 # set up libraries and output directory -----------------------------------
@@ -22,6 +22,8 @@ all_integrated_cluster2celltype_df <- fread(input = "./Ding_Lab/Projects_Current
 immune_integrated_barcode2cluster_df <- fread("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/recluster/recluster_cell_groups_in_integrated_data/fetch_data/20200214.v1/integration.202002012.v3.immune_reclustered.20200213.v2.umap_data.20200214.v1.tsv", data.table = F)
 ## input cluster to cell type mapping table for immune clusters in the integrated dataset
 immune_integrated_cluster2celltype_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/Cell_Type_Assignment/integration.immune.cluster2celltype.20200224.v1.csv", data.table = F)
+## input tumor subclustering cell type assignment
+barcode2manualtumorcluster_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/recluster/recluster_cell_groups_in_individual_samples/recluster_nephron_epithelium/annotate_barcode/annotate_barcode_with_manual_tumorsubcluster_id/20200324.v1/barcode2tumorsubclusterid.20200324.v1.tsv", data.table = F)
 
 # map cell types for immune cell group ----------------------------------------------------------
 ## merge barcode to cluster info with cluster to cell type info
@@ -33,6 +35,8 @@ immune_integrated_barcode2celltype_df <- immune_integrated_barcode2celltype_df %
   mutate(Is_Normal_Nephron_Epithelium = F) %>%
   mutate(integrated_barcode = barcode) %>%
   select(orig.ident, individual_barcode, integrated_barcode, Most_Enriched_Cell_Group, Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type2, Most_Enriched_Cell_Type3, Most_Enriched_Cell_Type4, Is_Normal_Nephron_Epithelium)
+## correct NK cell nomenclature
+immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type2[immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type2 == "NK-cells"] <- "NK cells"
 
 # map cell types for cell groups other than immune----------------------------------------------------------
 ## merge barcode to cluster info with cluster to cell type info
@@ -45,9 +49,25 @@ all_integrated_barcode2celltype_df <- all_integrated_barcode2celltype_df %>%
   mutate(integrated_barcode = barcode) %>%
   select(orig.ident, individual_barcode, integrated_barcode, Most_Enriched_Cell_Group, Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type2, Most_Enriched_Cell_Type3, Most_Enriched_Cell_Type4, Is_Normal_Nephron_Epithelium)
 
-# merge the immune and non-immune info ------------------------------------
+# for tumor cells, label the unknown cells --------------------------------
+tumor_barcode2celltype_df <- merge(all_integrated_barcode2celltype_df, barcode2manualtumorcluster_df %>%
+                                     select(orig.ident, barcode, manual_cluster_id),
+                                   by.x = c("orig.ident", "individual_barcode"),
+                                   by.y = c("orig.ident", "barcode"),
+                                   all.y = T)
+## label the unknown cells within tumor cells
+tumor_barcode2celltype_df$Most_Enriched_Cell_Group[is.na(tumor_barcode2celltype_df$manual_cluster_id)] <- "Unknown"
+tumor_barcode2celltype_df$Most_Enriched_Cell_Type1[is.na(tumor_barcode2celltype_df$manual_cluster_id)] <- ""
+tumor_barcode2celltype_df$Most_Enriched_Cell_Type2[is.na(tumor_barcode2celltype_df$manual_cluster_id)] <- ""
+tumor_barcode2celltype_df$Most_Enriched_Cell_Type3[is.na(tumor_barcode2celltype_df$manual_cluster_id)] <- ""
+tumor_barcode2celltype_df$Most_Enriched_Cell_Type4[is.na(tumor_barcode2celltype_df$manual_cluster_id)] <- ""
+tumor_barcode2celltype_df <- tumor_barcode2celltype_df %>%
+  select(-manual_cluster_id)
+
+# merge the immune and tumor cells and other info ------------------------------------
 barcode2celltype_df <- rbind(immune_integrated_barcode2celltype_df,
-                             all_integrated_barcode2celltype_df[all_integrated_barcode2celltype_df$Most_Enriched_Cell_Group != "Immune",])
+                             tumor_barcode2celltype_df,
+                             all_integrated_barcode2celltype_df[!(all_integrated_barcode2celltype_df$integrated_barcode %in% immune_integrated_barcode2celltype_df$integrated_barcode) & !(all_integrated_barcode2celltype_df$integrated_barcode %in% tumor_barcode2celltype_df$integrated_barcode),])
 
 # write output ------------------------------------------------------------
 write.table(x = barcode2celltype_df, file = paste0(dir_out, "30_aliquot_integration.barcode2celltype.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)

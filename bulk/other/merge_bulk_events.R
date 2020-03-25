@@ -26,12 +26,10 @@ methylation_by_gene_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_s
 chr3_translocation_df <- openxlsx::read.xlsx("./Ding_Lab/Projects_Current/CPTAC/PGDAC/ccRCC_discovery_manuscript/ccRCC Manuscript/CPTAC3-ccRCC-SupplementaryTables_Final/CPTAC-3-ccRCC_paper_STable S2.xlsx", sheet = "Tab1.Chr3_translocation_all", fillMergedCells = T)
 ## input case ids to process
 srat_paths <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/individual_cluster/write_path_to_seurat_objects_on_box/20200219.v1/Seurat_Object_Paths.20200219.v1.tsv", data.table = F)
-
-# format all the dataset ready for merging --------------------------------
 ## set case ids to process
 case_ids <- unique(srat_paths$Case)
 
-## format mutation data
+# format mutation data ----------------------------------------------------
 maf_df <- maf_df %>%
   mutate(case_id = str_split_fixed(string = Tumor_Sample_Barcode, pattern = "_", n = 2)[,1]) %>%
   filter(case_id %in% case_ids)
@@ -44,33 +42,38 @@ var_class_by_case_df <- as.data.frame(var_class_by_case_mat)
 colnames(var_class_by_case_df) <- paste0("Mut.", colnames(var_class_by_case_df))
 var_class_by_case_df$Case <- rownames(var_class_by_case_df)
 
-## format arm level cnv
+# format arm level cnv ----------------------------------------------------
 arm_cnv_by_case_df <- arm_cnv_df %>%
   dplyr::select("Case", 'CN.3p', 'CN.5q', "CN.14q") %>%
   rename(CN.bulk.3p = CN.3p) %>%
   rename(CN.bulk.5q = CN.5q) %>%
   rename(CN.bulk.14q = CN.14q) %>%
   dplyr::filter(Case %in% case_ids)
-arm_cnv_by_case_df[arm_cnv_by_case_df == ""] <- "Neutral"
+arm_cnv_by_case_df[arm_cnv_by_case_df == ""] <- "neutral"
 
-## format translocation data
+
+# format translocation data -----------------------------------------------
 ### get the unique chr3 translocation for each case
 uniq_chr3_translocation_long_df <- chr3_translocation_df %>%
   select(CASE_ID, TYPE) %>%
   unique() %>%
   as.data.frame() %>%
   rename(Case = CASE_ID) %>%
-  mutate(Chr3_Translocation_Chr = str_split_fixed(string = TYPE, pattern = "-", n = 2)[,2]) %>%
-  select(Case, Chr3_Translocation_Chr) %>%
+  rename(Translocation = TYPE) %>%
   filter(Case %in% case_ids) %>%
-  arrange(Chr3_Translocation_Chr)
-uniq_chr3_translocation_long_df1 <- uniq_chr3_translocation_long_df %>%
-  filter(!duplicated(Case))
-uniq_chr3_translocation_long_df2 <- uniq_chr3_translocation_long_df %>%
-  filter(duplicated(Case))
+  arrange(Translocation)
+chr35_translocation_long_df <- uniq_chr3_translocation_long_df %>%
+  filter(Translocation == "chr3-5")
+chr32_translocation_long_df <- uniq_chr3_translocation_long_df %>%
+  filter(Translocation == "chr3-2")
+chr3_translocation_other_long_df <- uniq_chr3_translocation_long_df %>%
+  filter(!(Translocation %in% c("chr3-2", "chr3-5"))) %>%
+  rename(Translocation.t3_other = Translocation)
 ### merge the first translocation with the second
-chr3_translocation_wide_df <- merge(uniq_chr3_translocation_long_df1, uniq_chr3_translocation_long_df2, by = c("Case"), suffixes = c("1", "2"), all = T)
-## format methylation data
+chr3_translocation_wide_df <- merge(chr35_translocation_long_df, chr32_translocation_long_df, by = c("Case"), suffixes = c(".t35", ".t32"), all = T)
+chr3_translocation_wide_df <- merge(chr3_translocation_wide_df, chr3_translocation_other_long_df, by = c("Case"), all = T)
+
+# format methylation data -------------------------------------------------
 ### filter down to VHL only
 methylation_vhl_wide_df <- methylation_by_gene_df %>%
   filter(gene_symbol == "VHL")
@@ -79,6 +82,7 @@ methylation_vhl_long_df <- t(methylation_vhl_wide_mat)
 colnames(methylation_vhl_long_df) <- "Methyl.VHL"
 methylation_vhl_long_df <- as.data.frame(methylation_vhl_long_df)
 methylation_vhl_long_df$Case <- rownames(methylation_vhl_long_df)
+
 # merge data --------------------------------------------------------------
 merged_bulk_events_df <- data.frame(Case = case_ids)
 merged_bulk_events_df <- merge(merged_bulk_events_df, var_class_by_case_df, by = c("Case"), all.x = T)

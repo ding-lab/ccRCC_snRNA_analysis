@@ -8,8 +8,6 @@ baseD = "~/Box/"
 setwd(baseD)
 source("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/ccRCC_snRNA_analysis/ccRCC_snRNA_shared.R")
 source("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/ccRCC_snRNA_analysis/aes.R")
-library(ComplexHeatmap)
-library(circlize)
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -21,7 +19,7 @@ dir.create(dir_out)
 ## input id meta data
 id_metadata_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/sample_info/make_meta_data/20191105.v1/meta_data.20191105.v1.tsv", data.table = F)
 ## input te bulk genomics/methylation events
-merged_bulk_events_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/bulk/other/merge_bulk_events/20200317.v1/merged_bulk_events.20200317.v1.tsv", data.table = F)
+bulk_sn_omicsprofile_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/bulk/other/merge_bulk_sn_profiles/20200319.v1/bulk_sn_omics_profile.20200319.v1.tsv", data.table = F)
 ## input the spearman pairwise correlation result
 pearson_coef.tumorcellvariable_genes.df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/30_aliquot_integration/pairwise_correlation/calculate_pairwise_correlation_tumorcellvariable_genes/20200310.v1/avg_exp.tumorcellvaraible_genes.pearson_coef.20200310.v1.tsv", data.table = F)
 
@@ -32,20 +30,21 @@ plot_data_mat <- as.matrix(plot_data_df[,-1])
 plot_data_mat %>% head()
 rownames(plot_data_mat) <- plot_data_df$V1
 ### get case name
-case_ids <- mapvalues(x = rownames(plot_data_mat), from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Case))
+aliquot_ids <- rownames(plot_data_mat)
+case_ids <- mapvalues(x = aliquot_ids, from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Case))
 
 # make top column annotation --------------------------------------------------
-## transform the translocation data
-top_col_anno_df <- merged_bulk_events_df %>%
-  select(-Case)
-rownames(top_col_anno_df) <- as.vector(merged_bulk_events_df$Case)
-top_col_anno_df <- top_col_anno_df[case_ids,]
-rownames(top_col_anno_df) <- rownames(plot_data_mat)
+top_col_anno_df <- bulk_sn_omicsprofile_df %>%
+  select(-Case) %>%
+  select(-Aliquot.snRNA)
+rownames(top_col_anno_df) <- as.vector(bulk_sn_omicsprofile_df$Aliquot.snRNA)
+top_col_anno_df <- top_col_anno_df[aliquot_ids,]
+rownames(top_col_anno_df) <- aliquot_ids
 ### make neutral variant info for the normal sample
 normal_aliquot_ids <- id_metadata_df$Aliquot.snRNA[id_metadata_df$Sample_Type == "Normal"]
 #### for volumns other than methylation, make
 top_col_anno_df[rownames(top_col_anno_df) %in% normal_aliquot_ids, grepl(x = colnames(top_col_anno_df), pattern = "Mut.")] <- "None"
-top_col_anno_df[rownames(top_col_anno_df) %in% normal_aliquot_ids, paste0("CN.", c('3p', '5q', "14q"))] <- "Neutral"
+top_col_anno_df[rownames(top_col_anno_df) %in% normal_aliquot_ids, paste0("CN.", c('3p', '5q', "14q"))] <- "neutral"
 top_col_anno_df[rownames(top_col_anno_df) %in% normal_aliquot_ids, c("Chr3_Translocation_Chr1", "Chr3_Translocation_Chr2")] <- "None"
 top_col_anno_df[rownames(top_col_anno_df) %in% normal_aliquot_ids, c("Methyl.VHL")] <- NA
 ### make color for translocated chromosomes
@@ -60,26 +59,67 @@ names(uniq_translocation_chr_colors) <- c(uniq_translocation_chrs[uniq_transloca
 methyl_color_fun <- colorRamp2(c(quantile(top_col_anno_df$Methyl.VHL, 0.1, na.rm=T), 
                                  quantile(top_col_anno_df$Methyl.VHL, 0.5, na.rm=T), 
                                  quantile(top_col_anno_df$Methyl.VHL, 0.9, na.rm=T)),c("blue", "white", "red"))
-
-### make color for this annotation data frame
-top_col_anno_colors <- lapply(colnames(top_col_anno_df), function(g) {
-  if (g %in% paste0("CN.", c('3p', '5q', "14q"))) {
-    color_vector <- c("gain" = "red", "loss" = "blue", "Neutral" = "white")
-  }
-  if (g %in% paste0("Mut.", ccRCC_SMGs)) {
-    color_vector <- variant_class_colors
-  }
-  if (g %in% c("Chr3_Translocation_Chr1", "Chr3_Translocation_Chr2")) {
-    color_vector <- uniq_translocation_chr_colors
-  }
-  if (g %in% c("Methyl.VHL")) {
-    color_vector <- methyl_color_fun
-  }
-  return(color_vector)
-})
-names(top_col_anno_colors) <- colnames(top_col_anno_df)
-### make top column annotation object
-top_col_anno = HeatmapAnnotation(df = top_col_anno_df, col = top_col_anno_colors, show_legend = F)
+### make color for tumor purity
+tumorpurity_color_fun <-  colorRamp2(c(quantile(top_col_anno_df$TumorPurity.snRNA, 0.1, na.rm=T), 
+                                     quantile(top_col_anno_df$TumorPurity.snRNA, 0.5, na.rm=T), 
+                                     quantile(top_col_anno_df$TumorPurity.snRNA, 0.9, na.rm=T)),c("blue", "white", "red"))
+### make text for translocations
+Translocation.t3_other_text <- top_col_anno_df$Translocation.t3_other
+Translocation.t3_other_text[is.na(Translocation.t3_other_text)] <- ""
+Translocation.t3_other_text[Translocation.t3_other_text == "None"] <- ""
+## top column annotation object
+top_col_anno = HeatmapAnnotation(CN.bulk.3p = anno_simple(x = top_col_anno_df$CN.bulk.3p,
+                                                          simple_anno_size = unit(2, "mm"), 
+                                                          col = cnv_state_colors),
+                                 CN.sn.3p_loss.fraction = anno_barplot(top_col_anno_df$CN.sn.3p_loss.fraction, 
+                                                                       height = unit(5, "mm")),
+                                 Mut.VHL = anno_simple(x = top_col_anno_df$Mut.VHL,
+                                                       simple_anno_size = unit(3, "mm"),
+                                                       col = variant_class_colors),
+                                 Methyl.VHL = anno_simple(x = top_col_anno_df$Methyl.VHL,
+                                                          simple_anno_size = unit(3, "mm"),
+                                                          col = methyl_color_fun),
+                                 Mut.PBRM1 = anno_simple(x = top_col_anno_df$Mut.PBRM1,
+                                                         simple_anno_size = unit(3, "mm"),
+                                                         col = variant_class_colors),
+                                 Mut.SETD2 = anno_simple(x = top_col_anno_df$Mut.SETD2,
+                                                         simple_anno_size = unit(3, "mm"),
+                                                         col = variant_class_colors),
+                                 Mut.BAP1 = anno_simple(x = top_col_anno_df$Mut.BAP1,
+                                                        simple_anno_size = unit(3, "mm"),
+                                                        col = variant_class_colors),
+                                 Translocation.t35 = anno_simple(x = top_col_anno_df$Translocation.t35,
+                                                                 simple_anno_size = unit(3, "mm"),
+                                                                 col = c("chr3-5" = "black", "None" = "white")),
+                                 Translocation.t32 = anno_simple(x = top_col_anno_df$Translocation.t32,
+                                                                 simple_anno_size = unit(3, "mm"),
+                                                                 col = c("chr3-2" = "black", "None" = "white")),
+                                 Translocation.other = anno_text(x = Translocation.t3_other_text,
+                                                                 which = "column", rot = 0, 
+                                                                 location = 0.5, just = "center", height = unit(2, "mm"),
+                                                                 gp = gpar(fill = "white", col = "black", fontsize = 5)),
+                                 CN.bulk.5q = anno_simple(x = top_col_anno_df$CN.bulk.5q,
+                                                          simple_anno_size = unit(2, "mm"), 
+                                                          col = cnv_state_colors),
+                                 CN.sn.5q_gain.fraction = anno_barplot(x = top_col_anno_df$CN.sn.5q_gain.fraction, 
+                                                                       height = unit(5, "mm")),
+                                 CN.bulk.14q = anno_simple(x = top_col_anno_df$CN.bulk.14q,
+                                                           simple_anno_size = unit(2, "mm"), 
+                                                           col = cnv_state_colors),
+                                 CN.sn.14q_loss.fraction = anno_barplot(x = top_col_anno_df$CN.sn.14q_loss.fraction, 
+                                                                        height = unit(5, "mm")),
+                                 Mut.KDM5C = anno_simple(x = top_col_anno_df$Mut.KDM5C,
+                                                        simple_anno_size = unit(3, "mm"),
+                                                        col = variant_class_colors),
+                                 Mut.PTEN = anno_simple(x = top_col_anno_df$Mut.PTEN,
+                                                        simple_anno_size = unit(3, "mm"),
+                                                        col = variant_class_colors),
+                                 Mut.TSC1 = anno_simple(x = top_col_anno_df$Mut.TSC1,
+                                                        simple_anno_size = unit(3, "mm"),
+                                                        col = variant_class_colors),
+                                 TumorPurity.snRNa = anno_simple(x = top_col_anno_df$TumorPurity.snRNA,
+                                                        simple_anno_size = unit(3, "mm"),
+                                                        col = tumorpurity_color_fun))
 
 # make row annotation -------------------------------------------
 ## make case name as row annotation
@@ -92,17 +132,18 @@ row_anno = rowAnnotation(foo = anno_text(case_ids,
 
 # make bottom column annotation -------------------------------------------
 bottom_col_anno = HeatmapAnnotation(foo = anno_text(case_ids, 
-                                             location = 0.5, just = "center",
-                                             gp = gpar(fill = uniq_case_colors[case_ids], col = "white", border = "black"),
-                                             width = max_text_width(case_ids)*1.2))
+                                                    location = 0.5, just = "center",
+                                                    gp = gpar(fill = uniq_case_colors[case_ids], col = "white", border = "black"),
+                                                    width = max_text_width(case_ids)*1.2))
 
 
-
-# plot pearson pairwise correlation for variably expressed genes within tumor cells ------------------------------------------------------
+# plot heatmap body with white-yellow-red ------------------------------------------------------
 ## make color function for heatmap body colors
-col_fun = colorRamp2(c(0, 0.5, 1), c("blue", "white", "red"))
+col_fun = colorRamp2(c(0, 0.5, 1), c("white", "yellow", "red"))
 ## make heatmap
 p <- Heatmap(matrix = plot_data_mat,
+             column_km = 2, column_km_repeats = 100,
+             row_km = 2, row_km_repeats = 100,
              col = col_fun, 
              right_annotation = row_anno, 
              bottom_annotation = bottom_col_anno, 
@@ -110,23 +151,30 @@ p <- Heatmap(matrix = plot_data_mat,
              show_heatmap_legend = F)
 p
 ## make legend for heattmap body
-heatmap_lgd = Legend(col_fun = col_fun, title = "Pearson's coeffcient\n(variably expressed genes\nwithin tumor cells)", direction = "vertical")
+heatmap_lgd = Legend(col_fun = col_fun, 
+                     title = "Pearson's coeffcient\n(variably expressed genes\nwithin tumor cells)", 
+                     direction = "vertical")
 ## make legend for top annotation
 annotation_lgd = list(
   heatmap_lgd,
-  Legend(labels = c("copy loss", "copy gain"), 
-         title = "Chr Arm Copy Number Alteration", 
-         legend_gp = gpar(fill = c("blue", "red"), direction = "horizontal"),
-         direction = "horizontal"),
+  Legend(labels = names(cnv_state_colors), 
+         title = "Bulk WGS CNV", 
+         legend_gp = gpar(fill = cnv_state_colors)),
   Legend(labels = names(variant_class_colors), 
-         title = "Mutation Class", 
-         legend_gp = gpar(fill = variant_class_colors),
-         direction = "horizontal"))
-
+         title = "Bulk Mutation Class", 
+         legend_gp = gpar(fill = variant_class_colors)),
+  Legend(labels = c("With Chr3 Translocation", "None"),
+         title = "Bulk Chr3 Translocation",
+         legend_gp = gpar(fill = c("black", "white"))),
+  Legend(col_fun = methyl_color_fun,
+         title = "Bulk VHL Promoter Methylation"),
+  Legend(col_fun = tumorpurity_color_fun,
+         title = "snRNA-based Tumor Purity"))
 ## save heatmap
-png(filename = paste0(dir_out, "avg_exp.tumorcellvariable_genes.pearson_coef.heatmap.", run_id, ".png"), 
-    width = 1600, height = 1500, res = 150)
+png(filename = paste0(dir_out, "avg_exp.tumorcellvariable_genes.pearson_coef.heatmap.WYR.", run_id, ".png"), 
+    width = 1600, height = 1600, res = 150)
 ### combine heatmap and heatmap legend
 draw(object = p, 
      annotation_legend_side = "right", annotation_legend_list = annotation_lgd)
 dev.off()
+

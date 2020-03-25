@@ -1,5 +1,5 @@
-# Yige Wu @WashU Feb 2020
-## for annotating the barcode with cnv state
+# Yige Wu @WashU March 2020
+## for annotating the infercnv subcluster CNV segment to cytoband level
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -16,14 +16,13 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## set infercnv output directory
 dir_infercnv_output <- "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/InferCNV/outputs/"
-infercnv_run_id <- "Individual.20200207.v1"
+infercnv_run_id <- "Individual.20200305.v1"
 dir_infercnv_run <- paste0(dir_infercnv_output, infercnv_run_id, "/")
 ## get aliquots to process
 aliquots2process <- list.files(dir_infercnv_run)
 ## chromosome regions from which the CNVs are annotated here
 chr_regions2process <- unique(ccrcc_cna_genes_df$chr_region)
 chr_regions2process <- as.vector(chr_regions2process)
-
 
 # process by aliquot ------------------------------------------------------
 cnv_state_per_cell_per_chr_region_aliquots <- NULL

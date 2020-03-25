@@ -28,6 +28,10 @@ for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
 
+# set shared snRNA processing parameters ----------------------------------
+num_pc <- 30
+
+
 # gene lists --------------------------------------------------------------
 ## significantly mutated genes
 ccRCC_SMGs <- c("VHL", 
