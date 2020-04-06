@@ -36,7 +36,8 @@ num_pc <- 30
 ## significantly mutated genes
 ccRCC_SMGs <- c("VHL", 
                 "PBRM1", 
-                "SETD2", "BAP1", "KDM5C",   
+                "SETD2", "BAP1", 
+                "KDM5C", "KDM6A",
                 "PTEN", 
                 "MTOR", "TSC1",
                 "TP53")
