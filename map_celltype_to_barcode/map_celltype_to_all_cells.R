@@ -17,11 +17,13 @@ dir.create(dir_out)
 ## input barcode to cluster mapping table from 
 all_integrated_barcode2cluster_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/30_aliquot_integration/fetch_data/20200212.v3/30_aliquot_integration.20200212.v3.umap_data.tsv", data.table = F)
 ## input cluster to cell type mapping table for all clusters in the integrated dataset
-all_integrated_cluster2celltype_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/Cell_Type_Assignment/integration.allcluster2celltype.20200213.v3.tsv")
+all_integrated_cluster2celltype_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/Cell_Type_Assignment/Integration_AllClusters/integration.allcluster2celltype.20200213.v3.tsv")
 ## input Alla's immune cell type assignment
 immune_integrated_barcode2celltype_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/Cell_Type_Assignment/Immune/30_aliquot_integration.barcode2celltype.20200330.AK.v1.tsv", data.table = F)
 ## input tumor subclustering cell type assignment
 barcode2manualtumorcluster_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/recluster/recluster_cell_groups_in_individual_samples/recluster_nephron_epithelium/annotate_barcode/annotate_barcode_with_manual_tumorsubcluster_id/20200324.v1/barcode2tumorsubclusterid.20200324.v1.tsv", data.table = F)
+## input barcode-to-cell-type table
+normal_epithelial_barcode2celltype_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/map_celltype_to_barcode/map_celltype_to_normal_epithelial_cells/20200410.v1/normal_epithelial_reclustered.barcode2celltype.20200410.v1.tsv", data.table = F)
 
 # map cell types for immune cell group ----------------------------------------------------------
 ## filter to immune cells only and select columns
@@ -57,6 +59,8 @@ immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type2[immune_integrated
 immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type3[immune_integrated_barcode2celltype_df$Cell_type.shorter == "Plasma"] <- "Plasma cells"
 immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type4[immune_integrated_barcode2celltype_df$Cell_type.shorter == "Plasma"] <- ""
 immune_integrated_barcode2celltype_df$Cell_type.detailed[immune_integrated_barcode2celltype_df$Cell_type.shorter == "Plasma"] <- "Plasma cells"
+immune_integrated_barcode2celltype_df$Cell_type.shorter[immune_integrated_barcode2celltype_df$Cell_type.shorter == "Plasma"] <- "Plasma cells"
+
 
 ## correct Basophils using Alla's assignment
 ### see if there are more detailed cell type
@@ -74,6 +78,7 @@ immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type2[immune_integrated
 immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type3[immune_integrated_barcode2celltype_df$Cell_type.shorter == "CD4 T cells"] <- "CD4+ T-cells"
 immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type4[immune_integrated_barcode2celltype_df$Cell_type.shorter == "CD4 T cells"] <- ""
 immune_integrated_barcode2celltype_df$Cell_type.detailed[immune_integrated_barcode2celltype_df$Cell_type.shorter == "CD4 T cells"] <- "CD4+ T-cells"
+immune_integrated_barcode2celltype_df$Cell_type.shorter[immune_integrated_barcode2celltype_df$Cell_type.shorter == "CD4 T cells"] <- "CD4+ T-cells"
 
 ## correct CD4/CD8 proliferating using Alla's assignment
 table(immune_integrated_barcode2celltype_df$Cell_type.detailed[immune_integrated_barcode2celltype_df$Cell_type.shorter == "CD4/CD8 proliferating"])
@@ -89,6 +94,7 @@ immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type2[immune_integrated
 immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type3[immune_integrated_barcode2celltype_df$Cell_type.shorter == "CD8 T cells activated"] <- "CD8+ T-cells"
 immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type4[immune_integrated_barcode2celltype_df$Cell_type.shorter == "CD8 T cells activated"] <- ""
 immune_integrated_barcode2celltype_df$Cell_type.detailed[immune_integrated_barcode2celltype_df$Cell_type.shorter == "CD8 T cells activated"] <- "CD8+ T-cells activated"
+immune_integrated_barcode2celltype_df$Cell_type.shorter[immune_integrated_barcode2celltype_df$Cell_type.shorter == "CD8 T cells activated"] <- "CD8+ T-cells activated"
 
 ## correct CD8 T cells exhausted using Alla's assignment
 table(immune_integrated_barcode2celltype_df$Cell_type.detailed[immune_integrated_barcode2celltype_df$Cell_type.shorter == "CD8 T cells exhausted"])
@@ -97,6 +103,7 @@ immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type2[immune_integrated
 immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type3[immune_integrated_barcode2celltype_df$Cell_type.shorter == "CD8 T cells exhausted"] <- "CD8+ T-cells"
 immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type4[immune_integrated_barcode2celltype_df$Cell_type.shorter == "CD8 T cells exhausted"] <- ""
 immune_integrated_barcode2celltype_df$Cell_type.detailed[immune_integrated_barcode2celltype_df$Cell_type.shorter == "CD8 T cells exhausted"] <- "CD8+ T-cells exhausted"
+immune_integrated_barcode2celltype_df$Cell_type.shorter[immune_integrated_barcode2celltype_df$Cell_type.shorter == "CD8 T cells exhausted"] <- "CD8+ T-cells exhausted"
 
 ## correct cDC exhausted using Alla's assignment
 table(immune_integrated_barcode2celltype_df$Cell_type.detailed[immune_integrated_barcode2celltype_df$Cell_type.shorter == "cDC"])
@@ -147,6 +154,7 @@ immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type2[immune_integrated
 immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type3[immune_integrated_barcode2celltype_df$Cell_type.shorter == "Treg"] <- "CD4+ T-cells"
 immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type4[immune_integrated_barcode2celltype_df$Cell_type.shorter == "Treg"] <- "Tregs"
 immune_integrated_barcode2celltype_df$Cell_type.detailed[immune_integrated_barcode2celltype_df$Cell_type.shorter == "Treg"] <- "Tregs"
+immune_integrated_barcode2celltype_df$Cell_type.shorter[immune_integrated_barcode2celltype_df$Cell_type.shorter == "Treg"] <- "Tregs"
 
 ## correct TRM
 table(immune_integrated_barcode2celltype_df$Cell_type.detailed[immune_integrated_barcode2celltype_df$Cell_type.shorter == "TRM"])
@@ -220,22 +228,6 @@ stroma_barcode2celltype_df <- stroma_barcode2celltype_df %>%
          Cell_type.shorter, Cell_type.detailed, 
          Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type2, Most_Enriched_Cell_Type3, Most_Enriched_Cell_Type4, manual_tumorsubcluster_id, Is_Normal_Nephron_Epithelium)
 
-# map normal epithelial cells -------------------------------------------------------
-normal_epithelial_barcode2celltype_df <- all_integrated_barcode2celltype_df %>%
-  filter(Is_Normal_Nephron_Epithelium == T) %>%
-  mutate(Cell_type.shorter = Most_Enriched_Cell_Type1) %>%
-  mutate(Cell_type.detailed = Most_Enriched_Cell_Type2)
-table(normal_epithelial_barcode2celltype_df$Most_Enriched_Cell_Type1)
-table(normal_epithelial_barcode2celltype_df$Most_Enriched_Cell_Type2)
-## add columns
-normal_epithelial_barcode2celltype_df <- normal_epithelial_barcode2celltype_df %>%
-  mutate(is_malignant = F) %>%
-  mutate(manual_tumorsubcluster_id = NA) %>%
-  select(orig.ident, individual_barcode, integrated_barcode, 
-         Most_Enriched_Cell_Group, is_malignant,
-         Cell_type.shorter, Cell_type.detailed, 
-         Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type2, Most_Enriched_Cell_Type3, Most_Enriched_Cell_Type4, manual_tumorsubcluster_id, Is_Normal_Nephron_Epithelium)
-
 # map unknown cells -------------------------------------------------------
 assigned_integrated_barcodes <- c(immune_integrated_barcode2celltype_df$integrated_barcode,
                                   tumor_barcode2celltype_df$integrated_barcode,
@@ -263,11 +255,17 @@ unknown_barcode2celltype_df <- unknown_barcode2celltype_df %>%
          Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type2, Most_Enriched_Cell_Type3, Most_Enriched_Cell_Type4, manual_tumorsubcluster_id, Is_Normal_Nephron_Epithelium)
 
 # merge the immune and tumor cells and other info ------------------------------------
-barcode2celltype_df <- rbind(immune_integrated_barcode2celltype_df,
-                             tumor_barcode2celltype_df,
-                             stroma_barcode2celltype_df,
-                             normal_epithelial_barcode2celltype_df,
-                             unknown_barcode2celltype_df)
-
+barcode2celltype_df <- rbind(immune_integrated_barcode2celltype_df %>%
+                               mutate(Cell_group = ifelse(Most_Enriched_Cell_Group == "Immune", "Immune", "Unknown")),
+                             tumor_barcode2celltype_df %>%
+                               mutate(Cell_group = ifelse(Cell_type.shorter == "Tumor cells", "Tumor cells", "Unknown")),
+                             stroma_barcode2celltype_df %>%
+                               mutate(Cell_group = "Stroma"),
+                             normal_epithelial_barcode2celltype_df %>%
+                               mutate(Cell_group = ifelse(Most_Enriched_Cell_Group == "Nephron_Epithelium", "Normal epithelial cells", "Unknown")),
+                             unknown_barcode2celltype_df %>%
+                               mutate(Cell_group = "Unknown"))
+nrow(barcode2celltype_df)
+table(barcode2celltype_df$Cell_type.shorter)
 # write output ------------------------------------------------------------
 write.table(x = barcode2celltype_df, file = paste0(dir_out, "30_aliquot_integration.barcode2celltype.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)

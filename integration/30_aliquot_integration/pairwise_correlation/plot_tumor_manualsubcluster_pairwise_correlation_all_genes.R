@@ -21,13 +21,13 @@ dir.create(dir_out)
 ## input id meta data
 id_metadata_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/sample_info/make_meta_data/20191105.v1/meta_data.20191105.v1.tsv", data.table = F)
 ## input the spearman pairwise correlation result
-pearson_coef.tumorcellvariable_genes.df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/30_aliquot_integration/pairwise_correlation/calculate_tumor_manualsubcluster_pairwise_correlation_tumorcellvariable_genes/20200325.v1/avg_exp_by_tumorsubluster.tumorcellvaraible_genes.pearson_coef20200325.v1.tsv", data.table = F)
+pearson_coef_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/30_aliquot_integration/pairwise_correlation/calculate_tumor_manualsubcluster_pairwise_correlation_all_genes/20200407.v1/avg_exp_by_tumorsubluster.all_genes.pearson_coef20200407.v1.tsv", data.table = F)
 ## input pathway score
 pathway_score_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/recluster/recluster_cell_groups_in_individual_samples/recluster_nephron_epithelium/calculate_pathway_score/unite_pathway_scores/20200407.v1/avg_pathway_scaled_avgexp.20200407.v1.tsv", data.table = F)
 
 # make data matrix for heatmap body ---------------------------------------
 ## reformat data frame to matrix
-plot_data_df <- pearson_coef.tumorcellvariable_genes.df
+plot_data_df <- pearson_coef_df
 plot_data_mat <- as.matrix(plot_data_df[,-1])
 plot_data_mat %>% head()
 ## add row names
@@ -114,7 +114,7 @@ annotation_lgd = list(
          direction = "horizontal"))
 
 ## save heatmap
-png(filename = paste0(dir_out, "avg_exp.tumorcellvariable_genes.pearson_coef.heatmap.", run_id, ".png"), 
+png(filename = paste0(dir_out, "avg_exp.all_genes.pearson_coef.heatmap.", run_id, ".png"), 
     width = 4500, height = 4000, res = 150)
 ### combine heatmap and heatmap legend
 draw(object = p, 

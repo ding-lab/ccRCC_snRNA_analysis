@@ -1,5 +1,5 @@
 # Yige Wu @WashU Sep 2019
-## for integrating two snRNA datasets for sample CPT0086820004 and CPT0075130004 (from cellranger output with premrna reference)
+## for integrating 30 snRNA datasets
 
 # library or install.packages-----------------------------------------------------------------
 packages = c(
