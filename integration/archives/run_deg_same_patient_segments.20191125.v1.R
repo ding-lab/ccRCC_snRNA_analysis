@@ -16,12 +16,17 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # set case ids to be processed --------------------------------------------
-case_ids <- c("C3N-01200")
+case_ids <- c("C3N-00733", "C3N-01200")
+case_ids <- c("C3N-00733")
 
+case_id_tmp <- "C3N-00733"
 for (case_id_tmp in case_ids) {
   ## input seurat object
+  if (case_id_tmp == "C3N-00733") {
+    seurat_obj_path <- paste0("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/integrate_same_patient_segments/20191125.v1/", case_id_tmp, ".Tummor_Segments.Integrated.20191125.v1.RDS")
+  }
   if (case_id_tmp == "C3N-01200") {
-    seurat_obj_path <- paste0("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/integrate_same_patient_tumor_normal/20200117.v1/", case_id_tmp, ".Tummor_Normal.Integrated.20200117.v1.RDS")
+    seurat_obj_path <- paste0("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/integrate_same_patient_segments/20191122.v1/", case_id_tmp, ".Tummor_Segments.Integrated.20191122.v1.RDS")
   }
   seurat_obj <- readRDS(file = seurat_obj_path)
   DefaultAssay(seurat_obj) <- "RNA"
@@ -30,7 +35,7 @@ for (case_id_tmp in case_ids) {
   renal.markers %>%
     colnames()
   renal.markers <- renal.markers[, c("gene", "cluster", "p_val_adj", "p_val", "avg_logFC", "pct.1", "pct.2")]
-  write.table(renal.markers, file = paste0(dir_out, case_id_tmp, ".Tumor_Normal.DEGs.Pos.txt"), quote = F, sep = "\t", row.names = F)
+  write.table(renal.markers, file = paste0(dir_out, case_id_tmp, ".Tumor_Segments.DEGs.Pos.txt"), quote = F, sep = "\t", row.names = F)
   
   
   list_DEGs_by_cluster <- list()
@@ -40,6 +45,6 @@ for (case_id_tmp in case_ids) {
       arrange(desc(avg_logFC))
     list_DEGs_by_cluster[[i]] <- df2write
   }
-  file2write <- paste0(dir_out, case_id_tmp, ".Tumor_Normal.DEGs.Pos.", run_id, ".xlsx")
+  file2write <- paste0(dir_out, case_id_tmp, ".Tumor_Segments.DEGs.Pos.", run_id, ".xlsx")
   write.xlsx(list_DEGs_by_cluster, file = file2write)
 }

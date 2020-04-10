@@ -39,21 +39,30 @@ path_srat <- args[3]
 cat(paste0("Path to the seurat object: ", path_srat, "\n"))
 cat("###########################################\n")
 
+## argument : path to the barcode to cell type table
+path_barcode2celltype_df <- args[4]
+cat(paste0("Path to the barcode to cell type marker table: ", path_barcode2celltype_df, "\n"))
+cat("###########################################\n")
+
+## input cell type marker table
+barcode2celltype_df <- fread(input = path_barcode2celltype_df, data.table = F)
+cat("finish reading the barcode-cell-type table!\n")
+cat("###########################################\n")
+
 ## input srat
 cat(paste0("Start reading the seurat object: ", "\n"))
 srat <- readRDS(path_srat)
 print("Finish reading the seurat object!\n")
 cat("###########################################\n")
 
-## change identification for the cells to be aliquot id
-Idents(srat) <- "orig.ident"
+## get the tumor cell barcodes
+barcodes2process <- barcode2celltype_df$integrated_barcode[barcode2celltype_df$Most_Enriched_Cell_Group == "Nephron_Epithelium" & barcode2celltype_df$Is_Normal_Nephron_Epithelium == T]
 
-## run average expression
-aliquot.averages <- AverageExpression(srat)
-print("Finish running AverageExpression!\n")
-cat("###########################################\n")
+## subset data
+srat.new <- subset(srat, cells = barcodes2process)
+rm(srat)
 
 ## write output
-write.table(aliquot.averages, file = path_output, quote = F, sep = "\t", row.names = T)
+saveRDS(object = srat.new, file = path_output, compress = T)
 cat("Finished saving the output\n")
 cat("###########################################\n")
