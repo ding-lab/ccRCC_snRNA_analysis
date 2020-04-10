@@ -1,6 +1,7 @@
 # Yige Wu @ WashU 2020 Apr
 
 # make output directory ---------------------------------------------------
+dir_analysis_result <- paste0(dir_base, "/Resources/Analysis_Results/")
 makeOutDir_katmai = function(path_script) {
   folders <- strsplit(x = path_script, split = "\\/")[[1]]
   folder_num <- which(folders == "ccRCC_snRNA_analysis") + 1
@@ -32,21 +33,21 @@ makeOutDir_katmai = function(path_script) {
 makeOutDir = function() {
   folders <- strsplit(x = rstudioapi::getSourceEditorContext()$path, split = "\\/")[[1]]
   folder_num <- which(folders == "ccRCC_snRNA_analysis") + 1
-  dir2analysis_resultsnow <- paste(strsplit(paste(folders[folder_num:length(folders)], collapse = "/"), split = "\\.")[[1]][1], sep = "/")
-  dir2analysis_resultsnow <- paste0(dir2analysis_results, dir2analysis_resultsnow, "/")
-  dir.create(dir2analysis_resultsnow)
-  dir2analysis_resultsnow_son <- dir2analysis_resultsnow
+  dir_analysis_resultnow <- paste(strsplit(paste(folders[folder_num:length(folders)], collapse = "/"), split = "\\.")[[1]][1], sep = "/")
+  dir_analysis_resultnow <- paste0(dir_analysis_result, dir_analysis_resultnow, "/")
+  dir.create(dir_analysis_resultnow)
+  dir_analysis_resultnow_son <- dir_analysis_resultnow
   dirs2make <- NULL
-  while (!dir.exists(dir2analysis_resultsnow_son)) {
-    tmp <- strsplit(dir2analysis_resultsnow_son, split = "\\/")[[1]]
-    dir2analysis_resultsnow_parent <-paste(tmp[-length(tmp)], collapse = "/")
-    dir.create(dir2analysis_resultsnow_parent)
-    dir.create(dir2analysis_resultsnow_son)
-    dir.create(dir2analysis_resultsnow)
-    if (!dir.exists(dir2analysis_resultsnow_son)) {
-      dirs2make[length(dirs2make) + 1] <- dir2analysis_resultsnow_son
+  while (!dir.exists(dir_analysis_resultnow_son)) {
+    tmp <- strsplit(dir_analysis_resultnow_son, split = "\\/")[[1]]
+    dir_analysis_resultnow_parent <-paste(tmp[-length(tmp)], collapse = "/")
+    dir.create(dir_analysis_resultnow_parent)
+    dir.create(dir_analysis_resultnow_son)
+    dir.create(dir_analysis_resultnow)
+    if (!dir.exists(dir_analysis_resultnow_son)) {
+      dirs2make[length(dirs2make) + 1] <- dir_analysis_resultnow_son
     }
-    dir2analysis_resultsnow_son <- dir2analysis_resultsnow_parent
+    dir_analysis_resultnow_son <- dir_analysis_resultnow_parent
   }
   
   if (length(dirs2make) > 0){
@@ -54,7 +55,7 @@ makeOutDir = function() {
       dir.create(dirs2make[i])
     }
   } 
-  return(dir2analysis_resultsnow)
+  return(dir_analysis_resultnow)
 }
 
 
