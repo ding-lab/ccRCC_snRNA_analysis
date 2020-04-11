@@ -43,7 +43,7 @@ barcode2celltype_df <- barcode2celltype_df %>%
   mutate(id_bycelltype_byaliquot = paste0(orig.ident, "_", Cell_type.shorter))
 srat@meta.data <- barcode2celltype_df
 rownames(srat@meta.data) <- barcode2celltype_df$integrated_barcode
-Idents(srat) <- "barcode2celltype_df"
+Idents(srat) <- "id_bycelltype_byaliquot" 
 
 # run average expression --------------------------------------------------
 aliquot.averages <- AverageExpression(srat)
