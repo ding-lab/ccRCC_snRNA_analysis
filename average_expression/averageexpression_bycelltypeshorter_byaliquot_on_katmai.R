@@ -39,9 +39,11 @@ path_barcode2celltype <- "./Resources/Analysis_Results/map_celltype_to_barcode/m
 barcode2celltype_df <- fread(input = path_barcode2celltype, data.table = F)
 
 # set ident ---------------------------------------------------------------
+barcode2celltype_df <- barcode2celltype_df %>%
+  mutate(id_bycelltype_byaliquot = paste0(orig.ident, "_", Cell_type.shorter))
 srat@meta.data <- barcode2celltype_df
 rownames(srat@meta.data) <- barcode2celltype_df$integrated_barcode
-Idents(srat) <- "Cell_type.shorter"
+Idents(srat) <- "barcode2celltype_df"
 
 # run average expression --------------------------------------------------
 aliquot.averages <- AverageExpression(srat)
