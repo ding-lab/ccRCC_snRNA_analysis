@@ -15,14 +15,15 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input denpendencies -----------------------------------------------------
-## input cell type markers
-celltypemarker_filtered_df <- fread(input = "./Resources/Analysis_Results/findmarkers/findallmarker_roc_subsample_bycelltypeshorter_on_katmai/20200411.v1/findallmarkers_roc_bycelltypeshorter.20200411.v1.tsv", data.table = F)
-## input average expression
-
-## input barcode2celltype table
+## input average expression by cell type by aliquot
+avgexp_bycelltype_byaliquot_df <- fread(input = "./Resources/Analysis_Results/average_expression/averageexpression_bycelltypeshorter_byaliquot_on_katmai/20200411.v1/averageexpression_bycelltypeshorter.30_aliquot_integration.20200411.v1.tsv", data.table = F)
 
 # make adjustment ---------------------------------------------------------
 ## get unique filtered genes
+genes_filtered <- unique(celltypemarker_filtered_df$gene)
+length(genes_filtered)
 ## filter average expression by filtered genes
+avgexp_bycelltype_byaliquot_filtered_df <- avgexp_bycelltype_byaliquot_df %>%
+  filter(V1 %in% genes_filtered)
 ## adjust average expression by 
 
