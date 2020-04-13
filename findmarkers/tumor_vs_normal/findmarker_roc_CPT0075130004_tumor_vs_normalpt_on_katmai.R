@@ -57,7 +57,7 @@ srat@meta.data <- barcode2celltype_df
 rownames(srat@meta.data) <- barcode2celltype_df$integrated_barcode
 Idents(srat) <- "group_findmarkers"
 # run findmarkers ------------------------------------------------------
-marker_roc_df <- FindMarkers(object = srat, test.use = "roc", return.thresh = 0.5, verbose = T, Ident.1 = "group1", Ident.2 = "group2")
+marker_roc_df <- FindMarkers(object = srat, test.use = "roc", return.thresh = 0.5, verbose = T, ident.1 = "group1", ident.2 = "group2")
 marker_roc_df$row_name <- rownames(marker_roc_df)
 
 # write output ------------------------------------------------------------

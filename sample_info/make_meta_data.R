@@ -1,13 +1,14 @@
 # Yige Wu @ WashU 2020 March
 ## make meta data table to map case ID to sample ID to aliquot ID (proteomics + snRNA)
-## 2020-03-16 make new aliquot to simplify the aliquot ids
+## 2020-04-13 make new aliquot to simplify the aliquot ids
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-baseD = "~/Box/"
-setwd(baseD)
-source("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/ccRCC_snRNA_analysis/ccRCC_snRNA_shared.R")
-library(dplyr)
+dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+setwd(dir_base)
+source("./ccRCC_snRNA_analysis/load_pkgs.R")
+source("./ccRCC_snRNA_analysis/functions.R")
+source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -17,13 +18,15 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input meta data with proteomics aliquot ids from discovery manuscript
-bulk_id_metadata_df <- fread("./Ding_Lab/Projects_Current/CPTAC/PGDAC/ccRCC_discovery_manuscript/ccRCC_expression_matrices/cptac-metadata.csv")
+bulk_id_metadata_df <- fread("./Resources/Bulk_Processed_Data/Meta_Data/cptac-metadata.csv")
 ## input sample info shipped for snRNA at 2019-June
-snRNA_id_metadata_df1 <- read_xlsx("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Sample_Info/02_Post_request_CPTAC3_shipment/JHU Distribution Manifest_ccRCC material to WUSTL_6.17.2019.xlsx")
+snRNA_id_metadata_df1 <- readxl::read_xlsx("./Resources/Sample_Info/02_Post_request_CPTAC3_shipment/JHU Distribution Manifest_ccRCC material to WUSTL_6.17.2019.xlsx")
 ## input sample info shipped for snRNA at 2019-Oct
-snRNA_id_metadata_df2 <- read_xlsx("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Sample_Info/02_Post_request_CPTAC3_shipment/Wash U_ccRCC and GBM bulk tissues_Manifest_10.7.2019.xlsx")
+snRNA_id_metadata_df2 <- readxl::read_xlsx("./Resources/Sample_Info/02_Post_request_CPTAC3_shipment/Wash U_ccRCC and GBM bulk tissues_Manifest_10.7.2019.xlsx")
 ## input info about the original tumor piece for snRNA aliquots
-snRNA_id_metadata_df1_original <- read_xlsx("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Sample_Info/02_Post_request_CPTAC3_shipment/JHU Distribution Manifest_ccRCC material to WUSTL_6.17.2019_original_segment.xlsx")
+snRNA_id_metadata_df1_original <- readxl::read_xlsx("./Resources/Sample_Info/02_Post_request_CPTAC3_shipment/JHU Distribution Manifest_ccRCC material to WUSTL_6.17.2019_original_segment.xlsx")
+## input the new aliquot id for the multi-segment sample
+id_multisegment_df <- fread(input = "./Resources/Meta_Data/ccRCC_Specimen_Data_Tracking - Multi-Segment_Info.tsv", data.table = F)
 
 # transform snRNA aliquot id table-------------------------------------
 ## transform sample info shipped for snRNA at 2019-June
@@ -61,6 +64,15 @@ bulk_id_metadata_df <- bulk_id_metadata_df %>%
   rename(Sample_Type =  Type)
 ## merge
 id_metadata_df <- merge(snRNA_id_metadata_df, bulk_id_metadata_df, by = c("Case", "Sample_Type", "Is_discovery_set"), all.x = T, suffixes = c(".snRNA", ".bulk"))
+
+# make new aliquot id -----------------------------------------------------
+id_metadata_df <- id_metadata_df %>%
+  mutate(Aliquot.snRNA.WU = ifelse(Sample_Type == "Normal", paste0(Case, "_N"),
+                                   ifelse(Is_discovery_set, paste0(Case, "_T1"), Aliquot.snRNA)))
+id_metadata_df$Aliquot.snRNA.WU <- mapvalues(x = id_metadata_df$Aliquot.snRNA.WU, from = id_multisegment_df$Aliquot, to = as.vector(id_multisegment_df$Naming))
+## filter out samples that are not snRNA-seqed
+id_metadata_df <- id_metadata_df %>%
+  filter(Aliquot.snRNA.WU != Aliquot.snRNA)
 
 # Write meta data table ---------------------------------------------------
 write.table(x = id_metadata_df, file = paste0(dir_out, "meta_data", ".", run_id ,".tsv"), quote = F, sep = "\t", row.names = F)
