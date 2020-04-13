@@ -50,8 +50,8 @@ barcode2celltype_df$id_case <- mapvalues(x = barcode2celltype_df$orig.ident, fro
 integratedbarcodes_group1 <- barcode2celltype_df$integrated_barcode[barcode2celltype_df$orig.ident == id_aliquot & barcode2celltype_df$Cell_type.detailed == "Tumor cells"]
 integratedbarcodes_group2 <- barcode2celltype_df$integrated_barcode[barcode2celltype_df$id_case == id_case & barcode2celltype_df$Cell_type.detailed == "Proximal tubule"]
 barcode2celltype_df <- barcode2celltype_df %>%
-  mutate(group_findmarkers = ifelse(integrated_barcode %in% integratedbarcodes_group1), "group1",
-         ifelse(integrated_barcode %in% integratedbarcodes_group2, "group2", "other"))
+  mutate(group_findmarkers = ifelse(integrated_barcode %in% integratedbarcodes_group1, "group1", 
+                                    ifelse(integrated_barcode %in% integratedbarcodes_group2, "group2", "other")))
 ## modify meta data
 srat@meta.data <- barcode2celltype_df
 rownames(srat@meta.data) <- barcode2celltype_df$integrated_barcode
