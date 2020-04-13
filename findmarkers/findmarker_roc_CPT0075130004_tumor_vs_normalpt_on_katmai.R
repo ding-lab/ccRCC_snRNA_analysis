@@ -49,11 +49,15 @@ barcode2celltype_df$id_case <- mapvalues(x = barcode2celltype_df$orig.ident, fro
 ## get the barcode name for tumor cells and normal proximal tubule
 integratedbarcodes_group1 <- barcode2celltype_df$integrated_barcode[barcode2celltype_df$orig.ident == id_aliquot & barcode2celltype_df$Cell_type.detailed == "Tumor cells"]
 integratedbarcodes_group2 <- barcode2celltype_df$integrated_barcode[barcode2celltype_df$id_case == id_case & barcode2celltype_df$Cell_type.detailed == "Proximal tubule"]
+barcode2celltype_df <- barcode2celltype_df %>%
+  mutate(group_findmarkers = ifelse(integrated_barcode %in% integratedbarcodes_group1), "group1",
+         ifelse(integrated_barcode %in% integratedbarcodes_group2, "group2", "other"))
 ## modify meta data
 srat@meta.data <- barcode2celltype_df
 rownames(srat@meta.data) <- barcode2celltype_df$integrated_barcode
+Idents(srat) <- "group_findmarkers"
 # run findmarkers ------------------------------------------------------
-marker_roc_df <- FindMarkers(object = srat, test.use = "roc", return.thresh = 0.5, verbose = T, cells.1 = integratedbarcodes_group1, cells.2 = integratedbarcodes_group2)
+marker_roc_df <- FindMarkers(object = srat, test.use = "roc", return.thresh = 0.5, verbose = T, Ident.1 = "group1", Ident.2 = "group2")
 marker_roc_df$row_name <- rownames(marker_roc_df)
 
 # write output ------------------------------------------------------------
