@@ -6,7 +6,7 @@ baseD = "~/Box/"
 setwd(baseD)
 source("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/ccRCC_snRNA_analysis/ccRCC_snRNA_shared.R")
 ## set run id
-run_id <- "20200408.v1"
+run_id <- "20200413.v1"
 ## set output directory
 dir_infercnv <- "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/InferCNV/"
 dir_infercnv_inputs <- paste0(dir_infercnv, "inputs/")
@@ -28,8 +28,16 @@ for (snRNA_aliquot_id_tmp in unique(barcode2celltype_df$orig.ident)) {
     ## get barcode to cluster annotation from the meta data
     anno_tab <- barcode2celltype_df %>%
       filter(orig.ident == snRNA_aliquot_id_tmp) %>%
-      mutate(infercnv_group = ifelse(Cell_type.shorter %in% c("Tumor cells", "Unknown"), "Obs", "Ref")) %>%
+      mutate(infercnv_group = Cell_type.shorter) %>%
       select(individual_barcode, infercnv_group)
+    
+    anno_tab$infercnv_group <- gsub(x = anno_tab$infercnv_group, pattern = '[/ +]', replacement = ".")
+    anno_tab$infercnv_group <- gsub(x = anno_tab$infercnv_group, pattern = '\\-', replacement = ".")
+    ## group ref cell types with too few cells into one group
+    anno_count_df <- data.frame(table(anno_tab$infercnv_group))
+    anno_count_regroup_df <- anno_count_df %>%
+      filter(Freq < 10)
+    anno_tab$infercnv_group[anno_tab$infercnv_group %in% anno_count_regroup_df$Var1] <- "Ref_SmallNumber"
     
     nrow(anno_tab)
     write.table(x = anno_tab, file = path_annotations_file_out, quote = F, sep = "\t", row.names = F, col.names = F)

@@ -53,16 +53,11 @@
 #   return(rna_tab) 
 # }
 # 
-# loadParseProteomicsData <- function(expression_type, sample_type) {
-#   ## expresson_type: PRO or PHO (phosphosite level) or PHO_collapsed (protein level)
-#   ## sample_type: tumor or normal
-#   ## pipeline_type: CDAP or PGDAC
-#   ## norm_type: unnormalized or scaled
-#   cancer <- "CCRCC"
-#   pipeline_type <-  "PGDAC"
-#   norm_type <- "MD_MAD"
-#   
-#   dir1 <- paste0("./Ding_Lab/Projects_Current/PanCan_Phospho-signaling/analysis_results/preprocess_files/tables/parse_", cancer, "_data_freeze", "" , "/")
-#   exp_data <- fread(input = paste0(dir1, cancer, "_", expression_type, "_", sample_type, "_", pipeline_type, "_", norm_type, "_", "partID", ".txt"), data.table = F)
-#   return(exp_data)
-# }
+loadParseProteomicsData <- function(expression_type, sample_type) {
+  ## expresson_type: PRO or PHO (phosphosite level) or PHO_collapsed (protein level)
+  if (expression_type == "protein") {
+    path_protein <- paste0("./Resources/Bulk_Processed_Data/Protein/CCRCC_PRO_tumor_PGDAC_MD_MAD_partID.txt")
+    exp_data <- fread(input = path_protein, data.table = F)
+  }
+  return(exp_data)
+}
