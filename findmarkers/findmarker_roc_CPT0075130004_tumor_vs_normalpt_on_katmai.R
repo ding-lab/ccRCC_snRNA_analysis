@@ -37,18 +37,27 @@ srat <- readRDS(file = path_rds)
 ## input the barcode-cell-type table
 path_barcode2celltype <- "./Resources/Analysis_Results/map_celltype_to_barcode/map_celltype_to_all_cells/20200410.v1/30_aliquot_integration.barcode2celltype.20200410.v1.tsv"
 barcode2celltype_df <- fread(input = path_barcode2celltype, data.table = F)
+## input id meta data
+id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20191105.v1/meta_data.20191105.v1.tsv", data.table = F)
+## set tumor aliquot id
+id_aliquot <- "CPT0075130004"
+id_case <- id_metadata_df$Case[id_metadata_df$Aliquot.snRNA == id_aliquot]
+id_case
 
 # set ident ---------------------------------------------------------------
+barcode2celltype_df$id_case <- mapvalues(x = barcode2celltype_df$orig.ident, from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Case))
+## get the barcode name for tumor cells and normal proximal tubule
+integratedbarcodes_group1 <- barcode2celltype_df$integrated_barcode[barcode2celltype_df$orig.ident == id_aliquot & barcode2celltype_df$Cell_type.detailed == "Tumor cells"]
+integratedbarcodes_group2 <- barcode2celltype_df$integrated_barcode[barcode2celltype_df$id_case == id_case & barcode2celltype_df$Cell_type.detailed == "Proximal tubule"]
+## modify meta data
 srat@meta.data <- barcode2celltype_df
 rownames(srat@meta.data) <- barcode2celltype_df$integrated_barcode
-Idents(srat) <- "Cell_type.shorter"
-
-# run findallmarkers ------------------------------------------------------
-marker_roc_df <- FindAllMarkers(object = srat, test.use = "roc", return.thresh = 0.5, verbose = T, max.cells.per.ident = 200)
+# run findmarkers ------------------------------------------------------
+marker_roc_df <- FindMarkers(object = srat, test.use = "roc", return.thresh = 0.5, verbose = T, cells.1 = integratedbarcodes_group1, cells.2 = integratedbarcodes_group2)
 marker_roc_df$row_name <- rownames(marker_roc_df)
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "findallmarkers_roc_bycelltypeshorter.", run_id, ".tsv")
+file2write <- paste0(dir_out, "findmarkers_roc.", id_aliquot, "tumor_vs_normalpt.",  run_id, ".tsv")
 write.table(x = marker_roc_df, file = file2write, sep = "\t", quote = F, row.names = F)
 
 
