@@ -40,7 +40,7 @@ barcode2celltype_df <- fread(input = path_barcode2celltype, data.table = F)
 ## input id meta data
 id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20191105.v1/meta_data.20191105.v1.tsv", data.table = F)
 ## set tumor aliquot id
-id_aliquot <- "CPT0075130004"
+id_aliquot <- "CPT0075140002"
 id_case <- id_metadata_df$Case[id_metadata_df$Aliquot.snRNA == id_aliquot]
 id_case
 
