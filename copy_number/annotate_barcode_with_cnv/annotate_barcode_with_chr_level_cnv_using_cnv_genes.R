@@ -3,9 +3,11 @@
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-baseD = "~/Box/"
-setwd(baseD)
-source("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/ccRCC_snRNA_analysis/ccRCC_snRNA_shared.R")
+dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+setwd(dir_base)
+source("./ccRCC_snRNA_analysis/load_pkgs.R")
+source("./ccRCC_snRNA_analysis/functions.R")
+source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -15,15 +17,15 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## set infercnv output directory
-dir_infercnv_output <- "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/InferCNV/outputs/"
-infercnv_run_id <- "Individual.20200305.v1"
+dir_infercnv_output <- "./Resources/snRNA_Processed_Data/InferCNV/outputs/"
+# infercnv_run_id <- "Individual.20200305.v1"
+infercnv_run_id <- "Individual.20200207.v1"
 dir_infercnv_run <- paste0(dir_infercnv_output, infercnv_run_id, "/")
 ## get aliquots to process
 aliquots2process <- list.files(dir_infercnv_run)
 ## chromosome regions from which the CNVs are annotated here
 chr_regions2process <- unique(ccrcc_cna_genes_df$chr_region)
 chr_regions2process <- as.vector(chr_regions2process)
-
 
 # process by aliquot ------------------------------------------------------
 cnv_state_per_cell_per_chr_region_aliquots <- NULL
@@ -70,5 +72,5 @@ for (aliquot_tmp in aliquots2process) {
 
 # write table -------------------------------------------------------------
 write.table(x = cnv_state_per_cell_per_chr_region_aliquots,
-            file = paste0(dir_out, "Expected_CNV_State_By_Chr_Region_By_Barcode.Using_Representative_Genes.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)
+            file = paste0(dir_out, infercnv_run_id, ".CNV_State_By_Chr_Region_By_Barcode.Using_Representative_Genes.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)
 

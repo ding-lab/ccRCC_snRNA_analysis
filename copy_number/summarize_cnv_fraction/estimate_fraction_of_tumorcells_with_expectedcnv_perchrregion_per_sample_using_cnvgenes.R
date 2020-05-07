@@ -3,10 +3,11 @@
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-baseD = "~/Box/"
-setwd(baseD)
-source("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/ccRCC_snRNA_analysis/ccRCC_snRNA_shared.R")
-## set run id
+dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+setwd(dir_base)
+source("./ccRCC_snRNA_analysis/load_pkgs.R")
+source("./ccRCC_snRNA_analysis/functions.R")
+source("./ccRCC_snRNA_analysis/variables.R")## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
@@ -15,11 +16,18 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input barcode to chr-region cnv state
-barcode2cnv_bychr_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/copy_number/annotate_barcode_with_cnv/annotate_barcode_with_chr_level_cnv_using_cnv_genes/20200318.v1/Expected_CNV_State_By_Chr_Region_By_Barcode.Using_Representative_Genes.20200318.v1.tsv", data.table = F)
+# infercnv_run_id <- "Individual.20200305.v1"
+# barcode2cnv_bychr_df <- fread(input = "./Resources/Analysis_Results/copy_number/annotate_barcode_with_cnv/annotate_barcode_with_chr_level_cnv_using_cnv_genes/20200318.v1/Expected_CNV_State_By_Chr_Region_By_Barcode.Using_Representative_Genes.20200318.v1.tsv", data.table = F)
+infercnv_run_id <- "Individual.20200207.v1"
+annotation_run_id <- "20200415.v1"
+file2read <- paste0("./Resources/Analysis_Results/copy_number/annotate_barcode_with_cnv/annotate_barcode_with_chr_level_cnv_using_cnv_genes/",
+                    annotation_run_id, "/",
+                    infercnv_run_id, ".CNV_State_By_Chr_Region_By_Barcode.Using_Representative_Genes.", annotation_run_id, ".tsv")
+barcode2cnv_bychr_df <- fread(input = file2read, data.table = F)
 ## input barcode to cell type info
-barcode2celltype_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/30_aliquot_integration/map_celltype_to_barcode/20200309.v1/30_aliquot_integration.barcode2celltype.20200309.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/map_celltype_to_barcode/map_celltype_to_all_cells/20200410.v1/30_aliquot_integration.barcode2celltype.20200410.v1.tsv", data.table = F)
 ## input id meta data
-id_metadata_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/sample_info/make_meta_data/20191105.v1/meta_data.20191105.v1.tsv", data.table = F)
+id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20191105.v1/meta_data.20191105.v1.tsv", data.table = F)
 ## chromosome regions from which the CNVs are annotated here
 chr_regions2process <- unique(ccrcc_cna_genes_df$chr_region)
 chr_regions2process <- as.vector(chr_regions2process)
@@ -36,7 +44,7 @@ barcode2cnv_bychr_df <- merge(barcode2cnv_bychr_df %>%
 ## get the tumor aliquot ids
 tumor_aliquot_ids <- id_metadata_df$Aliquot.snRNA[id_metadata_df$Sample_Type == "Tumor"]
 ## get malignant nephron epithelium cell barcodes
-malignant_barcodes <- barcode2celltype_df$integrated_barcode[barcode2celltype_df$Most_Enriched_Cell_Group == "Nephron_Epithelium" & barcode2celltype_df$Is_Normal_Nephron_Epithelium == F]
+malignant_barcodes <- barcode2celltype_df$integrated_barcode[barcode2celltype_df$Cell_type.detailed == "Tumor cells"]
 ## filter by malignant cell barcodes and tumor samples only
 tumorcell2cnv_bychr_df <- barcode2cnv_bychr_df %>%
   filter(integrated_barcode %in% malignant_barcodes) %>%
@@ -55,14 +63,14 @@ count_cnv_bychr_byaliquot_df <- count_cnv_bychr_byaliquot_df %>%
   rename(aliquot = Group.1)
 # write outputs -------------------------------------------
 ## write the number cells with expected cnv
-file2write <- paste0(dir_out, "number_of_tumorcells.expectedCNA.by_chr_region.", run_id, ".tsv")
+file2write <- paste0(dir_out, infercnv_run_id, "number_of_tumorcells.expectedCNA.by_chr_region.", run_id, ".tsv")
 write.table(x = count_expectedcnv_bychr_byaliquot_df, file = file2write, quote = F, sep = "\t", row.names = F)
 ## write the number cells with cnv calls
-file2write <- paste0(dir_out, "number_of_tumorcells.withCNAcalls.by_chr_region.", run_id, ".tsv")
+file2write <- paste0(dir_out, infercnv_run_id, "number_of_tumorcells.withCNAcalls.by_chr_region.", run_id, ".tsv")
 write.table(x = count_cnv_bychr_byaliquot_df, file = file2write, quote = F, sep = "\t", row.names = F)
 ## write the number cells with cnv calls
 frac_expectedcnv_bychr_byaliquot_df <- count_expectedcnv_bychr_byaliquot_df[, chr_regions2process]/count_cnv_bychr_byaliquot_df[,chr_regions2process]
 frac_expectedcnv_bychr_byaliquot_df <- cbind(data.frame(aliquot = count_expectedcnv_bychr_byaliquot_df$aliquot),
                                              frac_expectedcnv_bychr_byaliquot_df)
-file2write <- paste0(dir_out, "fraction_of_tumorcells.expectedCNA.by_chr_region.", run_id, ".tsv")
+file2write <- paste0(dir_out, infercnv_run_id, "fraction_of_tumorcells.expectedCNA.by_chr_region.", run_id, ".tsv")
 write.table(x = frac_expectedcnv_bychr_byaliquot_df, file = file2write, quote = F, sep = "\t", row.names = F)

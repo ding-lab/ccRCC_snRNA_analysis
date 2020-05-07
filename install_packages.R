@@ -1,6 +1,7 @@
 # library or install.packages-----------------------------------------------------------------
 packages = c(
   "rstudioapi",
+  "D3GB",
   "openxlsx",
   "Matrix",
   "optparse",

@@ -24,7 +24,9 @@ dir_infercnv_run <- paste0(dir_infercnv_output, infercnv_run_id, "/")
 ## get aliquots to process
 aliquots2process <- list.files(dir_infercnv_run)
 ## input barcode to cell type info
-barcode2cluster_df <- fread(input = "./Resources/Analysis_Results/recluster/recluster_cell_groups_in_individual_samples/recluster_nephron_epithelium/fetch_data_malignant_nephron_epithelium_cells_reclustered/20200225.v1/Cluster_UMAP_Data.Malignant_Nephron_Epithelium.20200225.v1.tsv", data.table = F)
+barcode2cluster_df <- fread(input = "./Resources/Analysis_Results/recluster/recluster_cell_groups_in_individual_samples/recluster_nephron_epithelium/annotate_barcode/annotate_barcode_with_manual_tumorsubcluster_id/20200324.v1/barcode2tumorsubclusterid.20200324.v1.tsv", data.table = F)
+## input known CNV genes
+knowncnvgenes_df <- readxl::read_xlsx(path = "./Resources/Known_Genetic_Alterations/Known_CNV.20200505.v1.xlsx", sheet = "Genes")
 
 # input infercnv results ------------------------------------------------
 cnv_state_count_aliquots <- NULL
@@ -36,10 +38,10 @@ for (aliquot_tmp in aliquots2process) {
   ## filter cnv results to only selected genes
   cnv_state_obs_mat <- cnv_state_obs_mat %>%
     rename(gene_symbol = V1) %>%
-    filter(gene_symbol %in% ccrcc_cna_genes_df$gene_symbol)
+    filter(gene_symbol %in% knowncnvgenes_df$Gene_Symbol)
   cnv_state_ref_mat <- cnv_state_ref_mat %>%
     rename(gene_symbol = V1) %>%
-    filter(gene_symbol %in% ccrcc_cna_genes_df$gene_symbol)
+    filter(gene_symbol %in% knowncnvgenes_df$Gene_Symbol)
   
   ## melt wide data frame to long data frame
   cnv_state_obs_mat.m <- melt(cnv_state_obs_mat, id.vars = c("gene_symbol"))
@@ -57,9 +59,8 @@ for (aliquot_tmp in aliquots2process) {
     rename(cna_state = value) %>%
     rename(barcode = variable) %>%
     filter(barcode %in% aliquot_barcode2cluster_df$barcode)
-  
   ## map barcode to tumor subcluster
-  cnv_state_mat.m$tumor_subcluster <- mapvalues(x = cnv_state_mat.m$barcode, from = aliquot_barcode2cluster_df$barcode, to = aliquot_barcode2cluster_df$ident)
+  cnv_state_mat.m$tumor_subcluster <- mapvalues(x = cnv_state_mat.m$barcode, from = aliquot_barcode2cluster_df$barcode, to = aliquot_barcode2cluster_df$manual_cluster_id)
   
   ## count number of cells with different cnv state per gene
   cnv_state_count <- cnv_state_mat.m %>%
@@ -80,19 +81,27 @@ for (aliquot_tmp in aliquots2process) {
   ## combine with super table
   cnv_state_count_aliquots <- rbind(cnv_state_count, cnv_state_count_aliquots)
 }
+
+# write out CNA frequency by 6 state by cluster -------------------------------------------
 ## calculate fraction
-table2write <- cnv_state_count_aliquots
-table2write$Fraction <- table2write$Freq/(table2write$num_cells_nonna)
+tmp <- cnv_state_count_aliquots
+tmp$Fraction <- tmp$Freq/(tmp$num_cells_nonna)
+tmp$cna_state <- as.vector(tmp$cna_state)
+## write
+write.table(x = cnv_6state_count_aliquots, file = paste0(dir_out, "fraction_of_tumorcells_with_cnv_by_gene_by_6state.per_manualsubcluster.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)
 
-## annotate each gene with expected cnv state and chromosome region
-table2write <- merge(table2write, ccrcc_cna_genes_df, by = c("gene_symbol"))
-
+# write out CNA frequency by 3 state by cluster -------------------------------------------
+## calculate fraction
+tmp <- cnv_state_count_aliquots
+tmp$Fraction <- tmp$Freq/(tmp$num_cells_nonna)
+tmp$cna_state <- as.vector(tmp$cna_state)
 ## annotate cells with expected cnv state
-table2write <- table2write %>%
-  mutate(expected_cna = (gene_cna_type == "Loss" & cna_state %in% c(0.5, 0)) | (gene_cna_type == "Gain" & cna_state %in% c(1.5, 2)))
-
-# write out CNA frequency table -------------------------------------------
-write.table(x = table2write, file = paste0(dir_out, "Fraction_of_Malignant_Nephron_Epithelium_with_CNA_by_Gene.Per_Tumor_Subcluster.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)
+cnv_3state_count_aliquots <- tmp %>%
+  mutate(cna_3state = ifelse(cna_state > 1, "Gain", ifelse(cna_state < 1, "Loss", "Neutral"))) %>%
+  group_by(aliquot, tumor_subcluster, gene_symbol, cna_3state) %>%
+  summarise(Fraction = sum(Fraction, na.rm = T))
+## write
+write.table(x = cnv_3state_count_aliquots, file = paste0(dir_out, "fraction_of_tumorcells_with_cnv_by_gene_by_3state.per_manualsubcluster.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)
 
 
 

@@ -5,9 +5,11 @@
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-baseD = "~/Box/"
-setwd(baseD)
-source("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/ccRCC_snRNA_analysis/ccRCC_snRNA_shared.R")
+dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+setwd(dir_base)
+source("./ccRCC_snRNA_analysis/load_pkgs.R")
+source("./ccRCC_snRNA_analysis/functions.R")
+source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -18,13 +20,13 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input bulk omics profile
 ## input te bulk genomics/methylation events
-merged_bulk_events_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/bulk/other/merge_bulk_events/20200317.v1/merged_bulk_events.20200317.v1.tsv", data.table = F)
+merged_bulk_events_df <- fread(input = "./Resources/Analysis_Results/bulk/other/merge_bulk_events/20200430.v1/merged_bulk_events.20200430.v1.tsv", data.table = F)
 ## input snRNA copy number profile for tumor cells
-merged_sn_events_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/copy_number/summarize_cnv_fraction/estimate_fraction_of_tumorcells_with_expectedcnv_perchrregion_per_sample_using_cnvgenes/20200318.v1/fraction_of_tumorcells.expectedCNA.by_chr_region.20200318.v1.tsv", data.table = F)
+merged_sn_events_df <- fread(input = "./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/estimate_fraction_of_tumorcells_with_expectedcnv_perchrregion_per_sample_using_cnvgenes/20200318.v1/fraction_of_tumorcells.expectedCNA.by_chr_region.20200318.v1.tsv", data.table = F)
 ## input the tumor content
-merged_tumorpurity_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/bulk/tumor_content/merge_tumor_content_from_bulk_and_snRNA/20200319.v1/Perc_Tumor_Content_from_snRNA_and_bulkRNA.20200319.v1.tsv", data.table = F)
+merged_tumorpurity_df <- fread(input = "./Resources/Analysis_Results/bulk/tumor_content/merge_tumor_content_from_bulk_and_snRNA/20200319.v1/Perc_Tumor_Content_from_snRNA_and_bulkRNA.20200319.v1.tsv", data.table = F)
 ## input id meta data
-id_metadata_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/sample_info/make_meta_data/20191105.v1/meta_data.20191105.v1.tsv", data.table = F)
+id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200427.v1/meta_data.20200427.v1.tsv", data.table = F)
 
 # filter snRNA copy number to 3p, 5q, 14q ---------------------------------
 merged_sn_events_df <- merged_sn_events_df %>%
@@ -34,16 +36,18 @@ merged_sn_events_df <- merged_sn_events_df %>%
   select(aliquot, CN.sn.3p_loss.fraction, CN.sn.5q_gain.fraction, CN.sn.14q_loss.fraction)
 ## add case ids for the aliquot ids
 merged_sn_events_df$Case <- mapvalues(x = merged_sn_events_df$aliquot, from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Case))
+merged_sn_events_df$Aliquot_snRNA_WU <- mapvalues(x = merged_sn_events_df$aliquot, from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Aliquot.snRNA.WU))
+
 # merge sn cnv with bulk omics profile ------------------------------------
 ## filter meta data by just the original tumor segment (discovery cohort)
 id_metadata_original_df <- id_metadata_df %>%
   filter(Is_discovery_set == T) %>%
   filter(Sample_Type == "Tumor")
-## add aliquot ids for snRNA-Seq to the bulk omics profile
-merged_bulk_events_df$Aliquot.snRNA <- mapvalues(x = merged_bulk_events_df$Case, from = id_metadata_original_df$Case, to = as.vector(id_metadata_original_df$Aliquot.snRNA))
 ## merge by snRNA aliquot ids
 bulk_sn_omicsprofile_df <- merge(merged_bulk_events_df, merged_sn_events_df, 
-                                 by.x = c("Case", "Aliquot.snRNA"), by.y = c("Case", "aliquot"), all = T)
+                                 by.x = c("Case", "Aliquot_snRNA_WU"), by.y = c("Case", "Aliquot_snRNA_WU"), all = T)
+bulk_sn_omicsprofile_df <- bulk_sn_omicsprofile_df %>%
+  rename(Aliquot.snRNA = aliquot)
 ## merge with bulk and sn tumor purity
 bulk_sn_omicsprofile_df <- merge(bulk_sn_omicsprofile_df, 
                                  merged_tumorpurity_df %>%

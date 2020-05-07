@@ -67,8 +67,8 @@ id_metadata_df <- merge(snRNA_id_metadata_df, bulk_id_metadata_df, by = c("Case"
 
 # make new aliquot id -----------------------------------------------------
 id_metadata_df <- id_metadata_df %>%
-  mutate(Aliquot.snRNA.WU = ifelse(Sample_Type == "Normal", paste0(Case, "_N"),
-                                   ifelse(Is_discovery_set, paste0(Case, "_T1"), Aliquot.snRNA)))
+  mutate(Aliquot.snRNA.WU = ifelse(Sample_Type == "Normal", paste0(Case, "-N"),
+                                   ifelse(Is_discovery_set, paste0(Case, "-T1"), Aliquot.snRNA)))
 id_metadata_df$Aliquot.snRNA.WU <- mapvalues(x = id_metadata_df$Aliquot.snRNA.WU, from = id_multisegment_df$Aliquot, to = as.vector(id_multisegment_df$Naming))
 ## filter out samples that are not snRNA-seqed
 id_metadata_df <- id_metadata_df %>%

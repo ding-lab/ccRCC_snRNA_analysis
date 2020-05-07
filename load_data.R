@@ -21,12 +21,12 @@
 
 
 # load omics data ---------------------------------------------------------
-# loadMaf <- function() {
-#   maf <- fread(input = paste0(dir2cptac_pgdac, "ccRCC_discovery_manuscript/ccRCC_expression_matrices/Somatic_Variants/ccrcc.somatic.consensus.gdc.umichigan.wu.112918.maf"), data.table = F, fill=TRUE) 
-#   maf <- data.frame(maf)
-#   print(paste0("MAF has ", nrow(maf), " lines\n"))
-#   return(maf)
-# }
+loadMaf <- function() {
+  maf <- fread(input = paste0(dir_base, "Resources/Bulk_Processed_Data/Somatic_Variants/ccrcc.somatic.consensus.gdc.umichigan.wu.112918.maf"), data.table = F, fill=TRUE)
+  maf <- data.frame(maf)
+  print(paste0("MAF has ", nrow(maf), " lines\n"))
+  return(maf)
+}
 # loadCNAstatus <- function() {
 #   ## input CNA values
 #   cancer <- "CCRCC"
