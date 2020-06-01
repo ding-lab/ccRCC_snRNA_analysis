@@ -1,4 +1,4 @@
-# Yige Wu @WashU March 2020
+# Yige Wu @WashU May 2020
 ## running on local
 ## for plotting the aliquot-pairwise correlation coefficients for averaged expression of all genes
 
@@ -34,6 +34,7 @@ rownames(plot_data_mat) <- plot_data_df$V1
 ### get case name
 aliquot_ids <- rownames(plot_data_mat)
 case_ids <- mapvalues(x = aliquot_ids, from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Case))
+aliquot_wu_ids <- mapvalues(x = aliquot_ids, from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Aliquot.snRNA.WU))
 
 # make top column annotation --------------------------------------------------
 top_col_anno_df <- bulk_sn_omicsprofile_df %>%
@@ -81,21 +82,9 @@ top_col_anno = HeatmapAnnotation(CN.bulk.3p = anno_simple(x = top_col_anno_df$CN
                                  Mut.VHL = anno_simple(x = top_col_anno_df$Mut.VHL,
                                                        simple_anno_size = unit(3, "mm"),
                                                        col = variant_class_colors),
-                                 Mut.USP24 = anno_simple(x = top_col_anno_df$Mut.USP24,
-                                                         simple_anno_size = unit(3, "mm"),
-                                                         col = variant_class_colors),
-                                 Mut.USP34 = anno_simple(x = top_col_anno_df$Mut.USP34,
-                                                         simple_anno_size = unit(3, "mm"),
-                                                         col = variant_class_colors),
                                  Mut.PBRM1 = anno_simple(x = top_col_anno_df$Mut.PBRM1,
                                                          simple_anno_size = unit(3, "mm"),
                                                          col = variant_class_colors),
-                                 Mut.ARID1B = anno_simple(x = top_col_anno_df$Mut.ARID1B,
-                                                          simple_anno_size = unit(3, "mm"),
-                                                          col = variant_class_colors),
-                                 Mut.SMARCD2 = anno_simple(x = top_col_anno_df$Mut.SMARCD2,
-                                                           simple_anno_size = unit(3, "mm"),
-                                                           col = variant_class_colors),
                                  Mut.SETD2 = anno_simple(x = top_col_anno_df$Mut.SETD2,
                                                          simple_anno_size = unit(3, "mm"),
                                                          col = variant_class_colors),
@@ -109,15 +98,6 @@ top_col_anno = HeatmapAnnotation(CN.bulk.3p = anno_simple(x = top_col_anno_df$CN
                                                         simple_anno_size = unit(3, "mm"),
                                                         col = variant_class_colors),
                                  Mut.TSC1 = anno_simple(x = top_col_anno_df$Mut.TSC1,
-                                                        simple_anno_size = unit(3, "mm"),
-                                                        col = variant_class_colors),
-                                 Mut.FAT1 = anno_simple(x = top_col_anno_df$Mut.FAT1,
-                                                        simple_anno_size = unit(3, "mm"),
-                                                        col = variant_class_colors),
-                                 Mut.FAT2 = anno_simple(x = top_col_anno_df$Mut.FAT2,
-                                                        simple_anno_size = unit(3, "mm"),
-                                                        col = variant_class_colors),
-                                 Mut.FAT3 = anno_simple(x = top_col_anno_df$Mut.FAT3,
                                                         simple_anno_size = unit(3, "mm"),
                                                         col = variant_class_colors),
                                  CN.bulk.5q = anno_simple(x = top_col_anno_df$CN.bulk.5q,
@@ -143,6 +123,7 @@ top_col_anno = HeatmapAnnotation(CN.bulk.3p = anno_simple(x = top_col_anno_df$CN
                                  TumorPurity.snRNA = anno_simple(x = top_col_anno_df$TumorPurity.snRNA,
                                                                  simple_anno_size = unit(3, "mm"),
                                                                  col = tumorpurity_color_fun))
+
 # make color palette for each case ----------------------------------------
 ## input id meta data
 uniq_case_ids <- unique(case_ids)
@@ -154,24 +135,25 @@ names(uniq_case_colors) <- uniq_case_ids
 # make row annotation -------------------------------------------
 ## make case name as row annotation
 ### create row annotation
-row_anno = rowAnnotation(foo = anno_text(case_ids, 
+row_anno = rowAnnotation(foo = anno_text(aliquot_wu_ids, 
                                          location = 0.5, just = "center",
                                          gp = gpar(fill = uniq_case_colors[case_ids], col = "white", border = "black"),
-                                         width = max_text_width(case_ids)*1.2))
+                                         width = max_text_width(aliquot_wu_ids)*1.2))
 
 
 # make bottom column annotation -------------------------------------------
-bottom_col_anno = HeatmapAnnotation(foo = anno_text(case_ids, 
+bottom_col_anno = HeatmapAnnotation(foo = anno_text(aliquot_wu_ids, 
                                                     location = 0.5, just = "center",
                                                     gp = gpar(fill = uniq_case_colors[case_ids], col = "white", border = "black"),
-                                                    width = max_text_width(case_ids)*1.2))
+                                                    width = max_text_width(aliquot_wu_ids)*1.2))
 
 
 # plot heatmap body with white-yellow-red ------------------------------------------------------
 ## make color function for heatmap body colors
 col_fun = colorRamp2(c(0, 0.5, 1), c("white", "yellow", "red"))
 ## make heatmap
-p <- Heatmap(matrix = plot_data_mat,
+p <- Heatmap(matrix = plot_data_mat, 
+             show_row_names = F, show_column_names = F, show_column_dend = F, show_row_dend = F,
              column_km = 2, column_km_repeats = 100,
              row_km = 2, row_km_repeats = 100,
              col = col_fun, 
@@ -200,11 +182,18 @@ annotation_lgd = list(
          title = "Bulk VHL Promoter Methylation"),
   Legend(col_fun = tumorpurity_color_fun,
          title = "snRNA-based Tumor Purity"))
-## save heatmap
+## save heatmap as png
 png(filename = paste0(dir_out, "avg_exp.tumorcellvariable_genes.pearson_coef.heatmap.WYR.", run_id, ".png"), 
-    width = 1600, height = 1600, res = 150)
-### combine heatmap and heatmap legend
+    width = 1200, height = 1800, res = 150)
 draw(object = p, 
-     annotation_legend_side = "right", annotation_legend_list = annotation_lgd)
+     annotation_legend_side = "bottom", annotation_legend_list = annotation_lgd)
 dev.off()
+
+## save heatmap as pdf
+pdf(file = paste0(dir_out, "avg_exp.tumorcellvariable_genes.pearson_coef.heatmap.WYR.", run_id, ".pdf"), 
+    width = 8, height = 13)
+draw(object = p, 
+     annotation_legend_side = "bottom", annotation_legend_list = annotation_lgd)
+dev.off()
+
 

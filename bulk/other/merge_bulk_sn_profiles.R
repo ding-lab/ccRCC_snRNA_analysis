@@ -20,7 +20,7 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input bulk omics profile
 ## input te bulk genomics/methylation events
-merged_bulk_events_df <- fread(input = "./Resources/Analysis_Results/bulk/other/merge_bulk_events/20200430.v1/merged_bulk_events.20200430.v1.tsv", data.table = F)
+merged_bulk_events_df <- fread(input = "./Resources/Analysis_Results/bulk/other/merge_bulk_events/20200512.v1/merged_bulk_events.20200512.v1.tsv", data.table = F)
 ## input snRNA copy number profile for tumor cells
 merged_sn_events_df <- fread(input = "./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/estimate_fraction_of_tumorcells_with_expectedcnv_perchrregion_per_sample_using_cnvgenes/20200318.v1/fraction_of_tumorcells.expectedCNA.by_chr_region.20200318.v1.tsv", data.table = F)
 ## input the tumor content

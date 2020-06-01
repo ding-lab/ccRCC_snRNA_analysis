@@ -10,19 +10,19 @@ packages = c(
   "rcartocolor",
   "Polychrome"
 )
-cartocolors_df <- rcartocolor::cartocolors
 
 for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
+cartocolors_df <- rcartocolor::cartocolors
 
 # make color palette for major cell groups -----------------------------------
-cellgroup_colors <- cartocolors_df[cartocolors_df$Name == "Bold", "n12"][[1]][1:4]
+cellgroup_colors <- Polychrome::palette36.colors(n = 36)[3:6]
 cellgroup_colors <- c(cellgroup_colors, "grey50")
 names(cellgroup_colors) <- c("Tumor cells", "Immune",  "Stroma", "Normal epithelial cells", "Unknown")
 
 # make color palette for detailed cell types -----------------------------------
-normal_epithelial_colors <- cartocolors_df[cartocolors_df$Name == "Pastel", "n12"][[1]][5:10]
+normal_epithelial_colors <- Polychrome::palette36.colors(n = 36)[7:12]
 names(normal_epithelial_colors) <- c("Distal convoluted tubule",
                                      "Intercalated cells type A",
                                      "Intercalated cells type B",
@@ -30,7 +30,7 @@ names(normal_epithelial_colors) <- c("Distal convoluted tubule",
                                      "Podocytes", 
                                      "Proximal tubule")
 
-immune_stroma_colors <- Polychrome::dark.colors(n = 18)
+immune_stroma_colors <- Polychrome::palette36.colors(n = 36)[13:30]
 names(immune_stroma_colors) <- c("B-cells", 
                                  "Basophils", 
                                  "CD4/CD8 proliferating", 
@@ -49,8 +49,8 @@ names(immune_stroma_colors) <- c("B-cells",
                                  "Endothelial cells",
                                  "Fibroblasts",
                                  "Myofibroblasts")
-tumor_unknown_colors <- cellgroup_colors[c("Tumor cells", "Unknown")]
-names(tumor_unknown_colors) <- c("Tumor cells", "Unknown")
+tumor_unknown_colors <- cellgroup_colors[c("Tumor cells", "Unknown", "Normal epithelial cells")]
+names(tumor_unknown_colors) <- c("Tumor cells", "Unknown", "Normal epithelial cells")
 celltype_shorter_colors <- c(tumor_unknown_colors, immune_stroma_colors, normal_epithelial_colors)
 # save(cellgroup_colors, celltype_shorter_colors, file = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Figures/r_colorpalette.RData")
 

@@ -22,7 +22,7 @@ barcode2subclusterid_df <- fread(input = "./Resources/Analysis_Results/recluster
 ## set min.pct
 # min.pct.wilcox <- 0.25
 min.pct.wilcox <- 0.1
-logfc.threshold.wilcox <- 0.25
+logfc.threshold.wilcox <- 0.1
 # for each aliquot, input seurat object and fetch data and write data --------------------
 markers_wilcox_df <- NULL
 for (aliquot_tmp in unique(srat_paths$Aliquot)) {
@@ -53,5 +53,4 @@ for (aliquot_tmp in unique(srat_paths$Aliquot)) {
 # write output ------------------------------------------------------------
 # write.table(markers_wilcox_df, file = paste0(dir_out, "Tumormanualsubcluster.FindAllMarkers.Wilcox.Pos.Minpct", min.pct.wilcox, ".Logfc", logfc.threshold.wilcox,".tsv"),
 write.table(markers_wilcox_df, file = paste0(dir_out, "Tumormanualsubcluster.FindAllMarkers.Wilcox.Minpct", min.pct.wilcox, ".Logfc", logfc.threshold.wilcox,".tsv"), 
-            
             quote = F, sep = "\t", row.names = F)

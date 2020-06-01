@@ -18,7 +18,7 @@ dir.create(dir_out)
 
 # input denpendencies -----------------------------------------------------
 ## input average expression by cell type by aliquot
-avgexp_bycelltype_byaliquot_df <- fread(input = "./Resources/Analysis_Results/average_expression/averageexpression_bycelltypedetailed_byaliquot_on_katmai/20200413.v1/averageexpression_bycelltypedetailed.30_aliquot_integration.20200413.v1.tsv", data.table = F)
+avgexp_bycelltype_byaliquot_df <- fread(input = "./Resources/Analysis_Results/average_expression/averageexpression_bycelltypeshorter_byaliquot_on_katmai/20200411.v1/averageexpression_bycelltypeshorter.30_aliquot_integration.20200411.v1.tsv", data.table = F)
 ## input the hif pathway members
 hiftargets_df <- fread(input = "./Resources/Analysis_Results/dependencies/write_hif_targets/20200302.v1/HIF_Target_Genes.20200302.v1.tsv", data.table = F)
 ## input barcode 2 cell type table
@@ -30,14 +30,14 @@ idmetadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_me
 genes_plot <- c(hiftargets_df$target_genesymbol, "HIF1A", "EPAS1", "VHL")
 
 # count number of cells per celltype per aliquot --------------------------
-count_bycelltype_byaliquot_df <- data.frame(table(barcode2celltype_df[, c("Cell_type.detailed", "orig.ident")]))
-unique(count_bycelltype_byaliquot_df$Cell_type.detailed)
-count_bycelltype_byaliquot_df$celltype <- gsub(x = count_bycelltype_byaliquot_df$Cell_type.detailed, pattern = '[/ +]', replacement = ".")
+count_bycelltype_byaliquot_df <- data.frame(table(barcode2celltype_df[, c("Cell_type.shorter", "orig.ident")]))
+unique(count_bycelltype_byaliquot_df$Cell_type.shorter)
+count_bycelltype_byaliquot_df$celltype <- gsub(x = count_bycelltype_byaliquot_df$Cell_type.shorter, pattern = '[/ +]', replacement = ".")
 count_bycelltype_byaliquot_df$celltype <- gsub(x = count_bycelltype_byaliquot_df$celltype, pattern = '\\-', replacement = ".")
 count_bycelltype_byaliquot_df <- count_bycelltype_byaliquot_df %>%
   mutate(id_aliquot_celltype = paste0(orig.ident, "_", celltype))
 count_bycelltype_byaliquot_filtered <- count_bycelltype_byaliquot_df %>%
-  filter(celltype %in% c("Tumor.cells", "Proximal.tubule")) %>%
+  filter(!(celltype %in% c("Unknown"))) %>%
   filter(Freq >= 10)
 
 # make matrix for heatmap body --------------------------------------------
@@ -71,14 +71,27 @@ ids_aliquot_celltype <- data_col_names.keep
 ids_aliquot <- str_split_fixed(string = ids_aliquot_celltype, pattern = "_", n = 2)[,1]
 ids_aliquot_wu <- mapvalues(x = ids_aliquot, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
 ids_celltype <- str_split_fixed(string = ids_aliquot_celltype, pattern = "_", n = 2)[,2]
-# case_ids <- mapvalues(x = aliquot_ids, from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Case))
+ids_case <- mapvalues(x = ids_aliquot, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Case))
 
-# make top annotation -----------------------------------------------------
-## make colors for cell types
-colors_celltype <- c("green", "yellow")
-names(colors_celltype) <- c("Tumor.cells", "Proximal.tubule")
-
-top_col_anno <- HeatmapAnnotation(Cell_Type = anno_simple(x = ids_celltype, col = colors_celltype))
+# make column annotation -----------------------------------------------------
+## make color for cell types
+names_celltype_shorter_colors <- names(celltype_shorter_colors)
+names_celltype_shorter_colors
+names_celltype_shorter_colors.new <- gsub(x = names_celltype_shorter_colors, pattern = '[ /+-]', replacement = ".")
+names_celltype_shorter_colors.new
+celltype_shorter_colors.new <- celltype_shorter_colors
+names(celltype_shorter_colors.new) <- names_celltype_shorter_colors.new
+## input id meta data
+uniq_case_ids <- unique(ids_case)
+uniq_case_ids
+### get unique color for each case
+uniq_case_colors <- Polychrome::dark.colors(n = length(uniq_case_ids))
+names(uniq_case_colors) <- uniq_case_ids
+## make column annotation
+top_col_anno = HeatmapAnnotation(CellType = anno_text(x = ids_celltype, 
+                                                    location = 0.5, just = "center",
+                                                    gp = gpar(fill = celltype_shorter_colors.new[ids_celltype], col = "white", border = "black"),
+                                                    width = max_text_width(ids_celltype)*1.2))
 # make row annotation -----------------------------------------------------
 is_hif1a_target <- data_row_names.keep %in% hiftargets_df$target_genesymbol[hiftargets_df$source_genesymbol == "HIF1A"]
 is_hif1a_target
@@ -92,6 +105,10 @@ names(colors_is_epas1_target) <- c("TRUE", "FALSE")
 row_anno = rowAnnotation(Is_HIF1A_Target = anno_simple(x = as.character(is_hif1a_target), col = colors_is_hif1a_target),
                          Is_EPAS1_Target = anno_simple(x = as.character(is_epas1_target), col = colors_is_epas1_target))
 
+# make row split ----------------------------------------------------------
+rowsplit_vec <- ifelse(data_row_names.keep %in% c(vhl_complex_genes, "HIF1A", "EPAS1"), "VHL-HIF complex genes", "HIF targets")
+rowsplit_factor <- factor(x = rowsplit_vec, levels = c("VHL-HIF complex genes", "HIF targets"))
+
 # make heatmap body ------------------------------------------------------------
 heatmapbody_color_fun <- colorRamp2(c(quantile(plot_data_mat, 0.025, na.rm=T), 
                                       quantile(plot_data_mat, 0.5, na.rm=T), 
@@ -100,11 +117,11 @@ heatmapbody_color_fun <- colorRamp2(c(quantile(plot_data_mat, 0.025, na.rm=T),
 
 p <- Heatmap(matrix = plot_data_mat,
              col = heatmapbody_color_fun, 
-             row_km = 4, row_km_repeats = 100,
              right_annotation = row_anno, 
-             # bottom_annotation = bottom_col_anno,
-             top_annotation = top_col_anno,
-             column_labels = ids_aliquot_wu,
+             cluster_rows = T, row_split = rowsplit_factor, show_row_dend = F,
+             top_annotation = top_col_anno, 
+             # show_column_names = F,
+             column_labels = ids_aliquot_wu, column_names_side = "bottom",
              show_heatmap_legend = F)
 p
 # make legend -------------------------------------------------------------
@@ -113,13 +130,14 @@ annotation_lgd = list(
   Legend(col_fun = heatmapbody_color_fun, 
          title = "Average expression value\nby cell type (Normalized)", 
          direction = "vertical"),
-  Legend(labels = names(colors_celltype), 
+  Legend(labels = names(celltype_shorter_colors.new), 
          title = "Cell type", 
-         legend_gp = gpar(fill = colors_celltype)))
+         legend_gp = gpar(fill = celltype_shorter_colors.new)))
 
 # save output -------------------------------------------------------------
 file2write <- paste0(dir_out, "hifpathway.", "expression.", "tumor_vs_normal_epithelial_cells.", run_id, ".png")
-png(filename = file2write, width = 1500, height = 2000, res = 150)
+png(filename = file2write, width = 7000, height = 2200, res = 150)
 draw(object = p, 
      annotation_legend_side = "right", annotation_legend_list = annotation_lgd)
 dev.off()
+

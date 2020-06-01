@@ -22,6 +22,9 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input bulk mutation result
 maf_df <- loadMaf()
+## input germline mutation result
+vhl_germline_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Germline_Variants/2019-09-10/VHL_var.txt")
+bap1_germline_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Germline_Variants/2019-09-10/BAP1_var.txt")
 ## input bulk CNV profile
 arm_cnv_df <- fread(input = "./Resources/Analysis_Results/bulk/copy_number/write_sample_bicseq_cnv_profile/20200316.v1/Bulk_WGS_Chr_CNV_Profile.20200316.v1.tsv", data.table = F)
 ## input methylatin value
@@ -37,7 +40,7 @@ sn_mut_df <- fread(input = "./Resources/Analysis_Results/mutation/unite_10xmappi
 ## set case ids to process
 case_ids <- unique(srat_paths$Case)
 
-# format mutation data ----------------------------------------------------
+# format somatic mutation data ----------------------------------------------------
 maf_df <- maf_df %>%
   mutate(case_id = str_split_fixed(string = Tumor_Sample_Barcode, pattern = "_", n = 2)[,1]) %>%
   filter(case_id %in% case_ids)
@@ -51,6 +54,12 @@ colnames(var_class_by_case_df) <- paste0("Mut.", colnames(var_class_by_case_df))
 var_class_by_case_df$Case <- rownames(var_class_by_case_df)
 ## add new aliquot id
 var_class_by_case_df$Aliquot_snRNA_WU <- paste0(var_class_by_case_df$Case, "-T1")
+
+# add germline mutation data ----------------------------------------------
+var_class_by_case_df[, "Mut.VHL.Germline"] <- "None"
+var_class_by_case_df[var_class_by_case_df$Aliquot_snRNA_WU == "C3L-00917-T1", "Mut.VHL.Germline"] <- "Nonsense_Mutation"
+var_class_by_case_df[, "Mut.BAP1.Germline"] <- "None"
+var_class_by_case_df[var_class_by_case_df$Aliquot_snRNA_WU == "C3N-00177-T1", "Mut.BAP1.Germline"] <- "Frame_Shift_Del"
 
 # add 10xmapping data -----------------------------------------------------
 sn_mut_df$Aliquot_snRNA_WU <- mapvalues(x = sn_mut_df$aliquot, from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Aliquot.snRNA.WU))

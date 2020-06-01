@@ -17,7 +17,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the CNV regions
-group2cnv_region_df <- fread(data.table = F, input = "./Resources/Analysis_Results/copy_number/annotate_barcode_with_cnv/unite_infercnv_group2cnv_region/20200504.v1/InferCNV_Group2CNV_Region.20200504.v1.tsv")
+group2cnv_region_df <- fread(data.table = F, input = "./Resources/Analysis_Results/copy_number/annotate_barcode_with_cnv/unite_infercnv_group2cnv_region/20200511.v1/InferCNV_Group2CNV_Region.20200511.v1.tsv")
 ## edit Cytoband
 GRCh38.bands <- GRCh38.bands %>%
   mutate(cytoband_name = paste0(chr, name))

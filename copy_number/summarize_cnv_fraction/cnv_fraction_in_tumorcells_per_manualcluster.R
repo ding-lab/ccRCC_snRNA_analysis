@@ -23,6 +23,7 @@ infercnv_run_id <- "Individual.20200305.v1"
 dir_infercnv_run <- paste0(dir_infercnv_output, infercnv_run_id, "/")
 ## get aliquots to process
 aliquots2process <- list.files(dir_infercnv_run)
+aliquots2process <- aliquots2process[grepl(pattern = "CPT", x = aliquots2process)]
 ## input barcode to cell type info
 barcode2cluster_df <- fread(input = "./Resources/Analysis_Results/recluster/recluster_cell_groups_in_individual_samples/recluster_nephron_epithelium/annotate_barcode/annotate_barcode_with_manual_tumorsubcluster_id/20200324.v1/barcode2tumorsubclusterid.20200324.v1.tsv", data.table = F)
 ## input known CNV genes
@@ -87,6 +88,7 @@ for (aliquot_tmp in aliquots2process) {
 tmp <- cnv_state_count_aliquots
 tmp$Fraction <- tmp$Freq/(tmp$num_cells_nonna)
 tmp$cna_state <- as.vector(tmp$cna_state)
+cnv_6state_count_aliquots <- tmp
 ## write
 write.table(x = cnv_6state_count_aliquots, file = paste0(dir_out, "fraction_of_tumorcells_with_cnv_by_gene_by_6state.per_manualsubcluster.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)
 

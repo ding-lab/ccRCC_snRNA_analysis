@@ -63,6 +63,7 @@ packages = c(
   "rtracklayer",
   "monocle",
   "SingleCellExperiment",
+  "copynumber",
   "dplyr"
 )
 
@@ -100,3 +101,43 @@ if (!(pkg_name_tmp %in% installed.packages()[,1])) {
   install.packages(pkg_name_tmp, dependencies = T)
 }
 library(package = pkg_name_tmp, character.only = T)
+
+# install SCENIC ----------------------------------------------------------
+# ## Required
+# BiocManager::install(c("AUCell", "RcisTarget"))
+# BiocManager::install(c("GENIE3")) # Optional. Can be replaced by GRNBoost
+# 
+# ## Optional (but highly recommended):
+# # To score the network on cells (i.e. run AUCell):
+# BiocManager::install(c("zoo", "mixtools", "rbokeh"))
+# # For various visualizations and perform t-SNEs:
+# BiocManager::install(c("DT", "NMF", "pheatmap", "R2HTML", "Rtsne"))
+# # To support paralell execution (not available in Windows):
+# BiocManager::install(c("doMC", "doRNG"))
+if (!("SCENIC" %in% installed.packages()[,1])) {
+  packages = c("AUCell", "RcisTarget", "GENIE3", "zoo",  "mixtools", "rbokeh", "DT", "NMF", "pheatmap", "R2HTML", "Rtsne", "doMC", "doRNG")
+  for (pkg_name_tmp in packages) {
+    if (!(pkg_name_tmp %in% installed.packages()[,1])) {
+      BiocManager::install(pkgs = pkg_name_tmp, update = F)
+    }
+  }
+  if (!("SCopeLoomR" %in% installed.packages()[,1])) {
+    devtools::install_github("aertslab/SCopeLoomR", build_vignettes = TRUE)
+  }
+  
+  packageVersion("AUCell")
+  packageVersion("RcisTarget")
+  packageVersion("GENIE3")
+  
+  devtools::install_github("aertslab/SCENIC") 
+  packageVersion("SCENIC")
+  
+}
+
+
+# install TxDb.Hsapiens.UCSC.hg38.knownGene ----------------------------------------------------------
+if (!("TxDb.Hsapiens.UCSC.hg38.knownGene" %in% installed.packages()[,1])) {
+  BiocManager::install("TxDb.Hsapiens.UCSC.hg38.knownGene")
+}
+
+

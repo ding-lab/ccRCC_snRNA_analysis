@@ -9,8 +9,6 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
-# devtools::install_github("teunbrand/ggh4x")
-library(ggh4x)
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -22,7 +20,7 @@ dir.create(dir_out)
 ## load meta data
 idmetadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200427.v1/meta_data.20200427.v1.tsv", data.table = F)
 ## load CNV fraction in tumor cells
-cnv_3state_count_aliquots <- fread("./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/cnv_fraction_in_tumorcells_per_manualcluster/20200505.v1/fraction_of_tumorcells_with_cnv_by_gene_by_3state.per_manualsubcluster.20200505.v1.tsv", data.table = F)
+cnv_3state_count_aliquots <- fread("./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/cnv_fraction_in_tumorcells_per_manualcluster/20200512.v1/fraction_of_tumorcells_with_cnv_by_gene_by_3state.per_manualsubcluster.20200512.v1.tsv", data.table = F)
 table(cnv_3state_count_aliquots$tumor_subcluster)
 ## input the CNV type per tumor
 cnvtype_aliquot_df <- fread(data.table = F, input = "./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/summarize_cnv_ith_per_tumor/20200505.v1/CNV_Type_Assignment_Per_Tumor.20200505.v1.tsv")
@@ -35,52 +33,81 @@ cnv_3state_count_aliquots$aliquot.wu <- mapvalues(x = cnv_3state_count_aliquots$
 plot_data_df <- cnv_3state_count_aliquots
 plot_data_df$case <- mapvalues(x = plot_data_df$aliquot, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Case))
 plot_data_df$aliquot_cnv_type <- mapvalues(x = plot_data_df$aliquot.wu, from = cnvtype_aliquot_df$aliquot.wu, to = as.vector(cnvtype_aliquot_df$CNV_ITH_Type))
+
 ## add cytoband and expected cna type
 plot_data_df$gene_cytoband <- mapvalues(x = plot_data_df$gene_symbol, from = knowncnvgenes_df$Gene_Symbol, to = as.vector(knowncnvgenes_df$Cytoband))
 plot_data_df$gene_expected_state <- mapvalues(x = plot_data_df$gene_symbol, from = knowncnvgenes_df$Gene_Symbol, to = as.vector(knowncnvgenes_df$CNV_Type))
-## make data frame for the background
+plot_data_df <- plot_data_df %>%
+  mutate(id_aliquot_cluster = paste0(aliquot.wu, "_C", (tumor_subcluster + 1)))
+
+## get the data with only expected CNV state
+plot_data_cc_df <- plot_data_df %>%
+  filter(gene_expected_state == cna_3state) 
+
+## filter genes
+genes_filtered <- unique(plot_data_cc_df$gene_symbol[plot_data_cc_df$Fraction > 0.1])
+plot_data_cc_df <- plot_data_cc_df %>%
+  filter(gene_symbol %in% genes_filtered) %>%
+  mutate(Fraction_Range = ifelse(Fraction < 0.5, "<=50%", ">50%")) %>%
+  mutate(aliquot.wu = str_split_fixed(string = id_aliquot_cluster, pattern = "_", n = 2)[,1]) %>%
+  mutate(name_tumorsubcluster = str_split_fixed(string = id_aliquot_cluster, pattern = "_", n = 2)[,2]) %>%
+  mutate(Data_detected = T) %>%
+  select(id_aliquot_cluster, gene_symbol, Fraction, name_tumorsubcluster, cna_3state, Fraction_Range, Data_detected, aliquot.wu, gene_cytoband)
+  
+## make data frame for the NA data
 all_data_df <- plot_data_df %>%
-  mutate(id_aliquot_cluster = paste0(aliquot.wu, "_C", (tumor_subcluster + 1))) %>%
-  filter(gene_symbol %in% y_filtered) %>%
+  filter(gene_symbol %in% genes_filtered) %>%
   select(id_aliquot_cluster, gene_symbol, gene_cytoband, aliquot.wu) %>%
   unique()
-plotbackground_data_df <- all_data_df %>%
+plot_data_na_df <- all_data_df %>%
   select(id_aliquot_cluster, gene_symbol) %>%
   table() %>%
   as.data.frame() %>%
   filter(Freq == 0) %>%
-  mutate(Data_Notdetected = T)
+  mutate(Data_detected = F) %>%
+  mutate(Fraction = 1) %>%
+  mutate(aliquot.wu = str_split_fixed(string = id_aliquot_cluster, pattern = "_", n = 2)[,1]) %>%
+  mutate(name_tumorsubcluster = str_split_fixed(string = id_aliquot_cluster, pattern = "_", n = 2)[,2]) %>%
+  mutate(cna_3state = "NA") %>%
+  mutate(Fraction_Range = "NA") %>%
+  select(id_aliquot_cluster, gene_symbol, Fraction, name_tumorsubcluster, cna_3state, Fraction_Range, Data_detected, aliquot.wu)
+plot_data_na_df$gene_cytoband <- mapvalues(x = plot_data_na_df$gene_symbol, from = knowncnvgenes_df$Gene_Symbol, to = as.vector(knowncnvgenes_df$Cytoband))
 
-## filter out copy neutral ones
-plot_data_df <- plot_data_df %>%
-  filter(gene_expected_state == cna_3state) %>%
-  mutate(id_aliquot_cluster = paste0(aliquot.wu, "_C", (tumor_subcluster + 1))) %>%
-  mutate(Fraction_Range = ifelse(Fraction < 0.5, "<=50%", ">50%")) %>%
-  mutate(segment_suffix = str_split_fixed(string = aliquot.wu, pattern = "-", n = 3)[,3]) %>%
-  mutate(name_tumorsubcluster = paste0("C", (tumor_subcluster + 1))) %>%
-  filter(cna_3state != "Neutral")
-  
-## filter rows
-y_filtered <- unique(plot_data_df$gene_symbol[plot_data_df$Fraction > 0.5])
-plot_data_df <- plot_data_df %>%
-  filter(gene_symbol %in% y_filtered)
+## merge
+plot_data_df <- rbind(plot_data_cc_df, plot_data_na_df)
 
 # make colors --------------------------------------------------------------
 cnvtype_aliquot_df <- cnvtype_aliquot_df %>%
   mutate(color_cnv_type = ifelse(CNV_ITH_Type == "Intra-segment_Heterogeneous", "yellow", "grey")) 
 
 # order x axis facet ------------------------------------------------------
-cnvtype_aliquot_df <- cnvtype_aliquot_df %>%
-  arrange(CNV_ITH_Type) 
-levels_aliquot.wu <- cnvtype_aliquot_df$aliquot.wu
+## count the number of subclusters per aliquot
+count_subclusters_df <- cnv_3state_count_aliquots %>%
+  select(aliquot.wu, tumor_subcluster) %>%
+  unique() %>%
+  select(aliquot.wu) %>%
+  table() %>%
+  as.data.frame() %>%
+  rename(aliquot.wu = '.') %>%
+  rename(count_subclusters = Freq) %>%
+  arrange(count_subclusters)
+levels_aliquot.wu <- count_subclusters_df$aliquot.wu
+## order aliquot id by transformating into factor
 plot_data_df$aliquot.wu <- factor(plot_data_df$aliquot.wu, levels = levels_aliquot.wu)
 # plot expected CNVs--------------------------------------------------------------------
 p <- ggplot()
 p <- p + geom_point(data = plot_data_df, 
-                    mapping = aes(y = gene_symbol, x = id_aliquot_cluster, size = Fraction, fill = cna_3state, color = Fraction_Range),
-                    shape = 21, alpha = 0.8)
-# p <- p + scale_fill_manual(values = copy_number_colors)
-p <- p + scale_color_manual(values = c(">50%" = "#000000", "<=50%" = "#FFFFFF"))
+                    mapping = aes(y = gene_symbol, 
+                                  x = id_aliquot_cluster, 
+                                  size = Fraction, 
+                                  fill = cna_3state, 
+                                  color = Fraction_Range,
+                                  shape = Data_detected),
+                    # shape = 21, 
+                    alpha = 0.8)
+p <- p + scale_shape_manual(values = c("TRUE" = 21, "FALSE" = 4))
+p <- p + scale_fill_manual(values = c("Gain" = "red", "Loss" = "blue", "NA" = "#000000"))
+p <- p + scale_color_manual(values = c(">50%" = "#000000", "<=50%" = "#FFFFFF", "NA" = "#000000"))
 p <- p + facet_grid(gene_cytoband~aliquot.wu,
                     scales = "free", space = "free", shrink = T)
 p <- p + scale_x_discrete(breaks=plot_data_df$id_aliquot_cluster,
