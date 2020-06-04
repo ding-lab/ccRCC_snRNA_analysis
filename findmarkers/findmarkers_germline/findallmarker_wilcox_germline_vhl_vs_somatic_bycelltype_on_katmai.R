@@ -72,7 +72,7 @@ for (celltype_tmp in celltypes2process) {
     as.data.frame() %>%
     rename(group_findmarkers = '.')
   # run findallmarkers ------------------------------------------------------
-  markers_df <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = "group1", ident.2 = "group2")
+  markers_df <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = "group1", ident.2 = "group2", logfc.threshold = 0)
   markers_df$deg_gene_symbol <- rownames(markers_df)
   markers_df$Cell_type.shorter <- celltype_tmp
   markers_df$cellcount_group1_findmarkers <- cellcount_group_df$Freq[cellcount_group_df$group_findmarkers == "group1"]
