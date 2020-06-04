@@ -24,7 +24,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -43,7 +43,8 @@ bulk_sn_omicsprofile_df <- fread(input = "./Resources/Analysis_Results/bulk/othe
 group1_findmarkers <- "VHL_Germline"
 group2_findmarkers <- "VHL_Somatic"
 ## set cell type to compare
-celltypes2process <- c("Tumor cells", "Fibroblasts", "Endothelial cells", "Macrophages")
+# celltypes2process <- c("Tumor cells", "Fibroblasts", "Endothelial cells", "Macrophages")
+celltypes2process <- c("Tumor cells", "Fibroblasts", "Endothelial cells")
 # celltypes2process <- c("Tumor cells", "Macrophages")
 
 # make column split -------------------------------------------------------
