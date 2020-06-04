@@ -52,7 +52,7 @@ idaliquot[["3p_loss_only"]] <- bulk_sn_omicsprofile_df$Aliquot.snRNA[!is.na(bulk
 idaliquot_vhl_somatic <- as.vector(bulk_sn_omicsprofile_df$Aliquot.snRNA)
 idaliquot_vhl_somatic <- bulk_sn_omicsprofile_df$Aliquot.snRNA[!is.na(bulk_sn_omicsprofile_df$Mut.VHL) & (bulk_sn_omicsprofile_df$Mut.VHL != "None") & (bulk_sn_omicsprofile_df$Mut.VHL.Germline == "None")]
 idaliquot[["VHL_Somatic"]] <- idaliquot_vhl_somatic
-
+markers_allcelltypes_df <- NULL
 for (celltype_tmp in celltypes2process) {
   # set ident ---------------------------------------------------------------
   ## make new meta data with marker analysis groups annotated
@@ -71,12 +71,13 @@ for (celltype_tmp in celltypes2process) {
   markers_df <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = "group1", ident.2 = "group2")
   markers_df$deg_gene_symbol <- rownames(markers_df)
   markers_df$Cell_type.shorter <- celltype_tmp
+  markers_allcelltypes_df <- rbind(markers_allcelltypes_df, markers_df)
 }
-markers_df$group1_findmarkers <- group1_findmarkers
-markers_df$group2_findmarkers <- group1_findmarkers
+markers_allcelltypes_df$group1_findmarkers <- group1_findmarkers
+markers_allcelltypes_df$group2_findmarkers <- group1_findmarkers
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, group1_findmarkers, "_vs_", "group2_findmarkers.", "FindMarkers.", "Wilcox.", run_id, ".tsv")
-write.table(x = markers_df, file = file2write, sep = "\t", quote = F, row.names = F)
+file2write <- paste0(dir_out, group1_findmarkers, "_vs_", group2_findmarkers, ".", "FindMarkers.", "Wilcox.", run_id, ".tsv")
+write.table(x = markers_allcelltypes_df, file = file2write, sep = "\t", quote = F, row.names = F)
 
 
