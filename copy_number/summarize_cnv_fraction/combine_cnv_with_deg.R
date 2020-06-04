@@ -18,16 +18,15 @@ dir.create(dir_out)
 
 # input dependencies -------------------------------------------------------
 ## input cnv plot
-cnv_plot <- readRDS(file = "./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/bubble_cnv_fraction_per_tumormanualsubcluster/20200602.v2/bubbleplot_cnv_fraction.20200602.v2.RDS")
+cnv_plot <- readRDS(file = "./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/bubble_cnv_fraction_per_tumormanualsubcluster/20200603.v1/bubbleplot_cnv_fraction.20200603.v1.RDS")
 ## input deg plot
-deg_plot <- readRDS(file = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/bubbleplot_deg_by_tumormanualsubcluster/20200602.v1/bubbleplot_deg_by_tumorsubcluster.20200602.v1.RDS")
+deg_plot <- readRDS(file = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/bubbleplot_deg_by_tumormanualsubcluster/20200602.v2/bubbleplot_deg_by_tumorsubcluster.20200602.v2.RDS")
 
 # combine plots together --------------------------------------------------
 # p <- ggarrange(cnv_plot, deg_plot, align = "v", 
 #                labels = c("A", "B"),
 #                ncol = 1, nrow = 2)
 p <- cowplot::plot_grid(cnv_plot, deg_plot, ncol = 1, align = "v", axis = "l", rel_heights = c(3,2))
-
 
 # save output -------------------------------------------------------------
 ## save plot
@@ -36,5 +35,3 @@ png(file = file2write,
     width = 2500, height = 2000, res = 150)
 print(p)
 dev.off()
-
-

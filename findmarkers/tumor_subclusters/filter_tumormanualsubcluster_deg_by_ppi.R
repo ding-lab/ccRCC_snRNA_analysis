@@ -25,7 +25,7 @@ known_cnv_genes_df <- readxl::read_xlsx(path = "./Resources/Known_Genetic_Altera
 ## input ppi table
 ppi_pair_df <- fread(data.table = F, input = "./Resources/Databases/Protein_Protein_Interactions/protein_pair_table_v2.txt")
 ## load CNV fraction in tumor cells
-cnv_3state_count_aliquots <- fread("./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/cnv_fraction_in_tumorcells_per_manualcluster/20200512.v1/fraction_of_tumorcells_with_cnv_by_gene_by_3state.per_manualsubcluster.20200512.v1.tsv", data.table = F)
+cnv_3state_count_aliquots <- fread("./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/cnv_fraction_in_tumorcells_per_manualcluster/20200603.v1/fraction_of_tumorcells_with_cnv_by_gene_by_3state.per_manualsubcluster.20200603.v1.tsv", data.table = F)
 table(cnv_3state_count_aliquots$tumor_subcluster)
 
 # get genes that are altered for each sampe --------------------------------------------
@@ -85,6 +85,9 @@ count_deg_by_ppi_df <- markers_filtered_df %>%
   filter(Freq > 0)
 
 # save output -------------------------------------------------------------
+file2write <- paste0(dir_out, "tumormanualsubcluster.", "cnv_genes_interactome.", run_id, ".tsv")
+write.table(x = markers_filtered_df, file = file2write, quote = F, sep = "\t", row.names = F)
+
 file2write <- paste0(dir_out, "tumormanualsubcluster.", "deg_count.", "cnv_genes_interactome.", run_id, ".tsv")
 write.table(x = count_deg_by_ppi_df, file = file2write, quote = F, sep = "\t", row.names = F)
 

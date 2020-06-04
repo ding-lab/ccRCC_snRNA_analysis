@@ -8,7 +8,6 @@ setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
-source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -27,7 +26,7 @@ aliquots2process <- aliquots2process[grepl(pattern = "CPT", x = aliquots2process
 ## input barcode to cell type info
 barcode2cluster_df <- fread(input = "./Resources/Analysis_Results/recluster/recluster_cell_groups_in_individual_samples/recluster_nephron_epithelium/annotate_barcode/annotate_barcode_with_manual_tumorsubcluster_id/20200324.v1/barcode2tumorsubclusterid.20200324.v1.tsv", data.table = F)
 ## input known CNV genes
-knowncnvgenes_df <- readxl::read_xlsx(path = "./Resources/Known_Genetic_Alterations/Known_CNV.20200505.v1.xlsx", sheet = "Genes")
+knowncnvgenes_df <- readxl::read_xlsx(path = "./Resources/Known_Genetic_Alterations/Known_CNV.20200528.v1.xlsx", sheet = "Genes")
 
 # input infercnv results ------------------------------------------------
 cnv_state_count_aliquots <- NULL
@@ -75,7 +74,6 @@ for (aliquot_tmp in aliquots2process) {
   cnv_nonna_count <- cnv_state_count %>%
     group_by(gene_symbol, tumor_subcluster) %>%
     summarize(num_cells_nonna = sum(Freq))
-  
   ## merge counts
   cnv_state_count <- merge(cnv_state_count, cnv_nonna_count, by = c("gene_symbol", "tumor_subcluster"), all.x = T)
   
@@ -96,10 +94,10 @@ write.table(x = cnv_6state_count_aliquots, file = paste0(dir_out, "fraction_of_t
 ## calculate fraction
 tmp <- cnv_state_count_aliquots
 tmp$Fraction <- tmp$Freq/(tmp$num_cells_nonna)
-tmp$cna_state <- as.vector(tmp$cna_state)
+tmp$cna_state <- as.numeric(as.vector(tmp$cna_state))
 ## annotate cells with expected cnv state
 cnv_3state_count_aliquots <- tmp %>%
-  mutate(cna_3state = ifelse(cna_state > 1, "Gain", ifelse(cna_state < 1, "Loss", "Neutral"))) %>%
+  mutate(cna_3state = ifelse(cna_state %in% c(1.5, 2, 3), "Gain", ifelse(cna_state %in% c(0, 0.5), "Loss", "Neutral"))) %>%
   group_by(aliquot, tumor_subcluster, gene_symbol, cna_3state) %>%
   summarise(Fraction = sum(Fraction, na.rm = T))
 ## write
