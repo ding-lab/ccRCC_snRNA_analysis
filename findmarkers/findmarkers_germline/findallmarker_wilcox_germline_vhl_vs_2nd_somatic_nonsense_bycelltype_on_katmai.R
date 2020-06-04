@@ -52,7 +52,7 @@ idaliquot <- list()
 idaliquot[["VHL_Germline"]] <- bulk_sn_omicsprofile_df$Aliquot.snRNA[!is.na(bulk_sn_omicsprofile_df$Mut.VHL.Germline) & (bulk_sn_omicsprofile_df$Mut.VHL.Germline != "None")]
 idaliquot[["3p_loss_only"]] <- bulk_sn_omicsprofile_df$Aliquot.snRNA[!is.na(bulk_sn_omicsprofile_df$Mut.VHL) & (bulk_sn_omicsprofile_df$Mut.VHL == "None")]
 idaliquot_vhl_somatic <- bulk_sn_omicsprofile_df$Aliquot.snRNA[!is.na(bulk_sn_omicsprofile_df$Mut.VHL) & (bulk_sn_omicsprofile_df$Mut.VHL == "Nonsense_Mutation") & !is.na(bulk_sn_omicsprofile_df$Mut.VHL.Germline) & (bulk_sn_omicsprofile_df$Mut.VHL.Germline == "None")]
-idaliquot[["VHL_Somatic"]] <- idaliquot_vhl_somatic[1]
+idaliquot[["VHL_Somatic"]] <- idaliquot_vhl_somatic[2]
 markers_allcelltypes_df <- NULL
 for (celltype_tmp in celltypes2process) {
   # set ident ---------------------------------------------------------------
