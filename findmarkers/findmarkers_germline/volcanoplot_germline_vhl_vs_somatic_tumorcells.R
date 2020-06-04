@@ -50,7 +50,7 @@ for (celltype_plot in c("Tumor cells")) {
   
   # plot --------------------------------------------------------------------
   p <- ggplot()
-  p <- p + geom_point(data = plot_data_df, mapping = aes(x = avg_logFC, y = y_plot, color = genegroup), alpha = 0.5, shape = 16)
+  p <- p + geom_point(data = plot_data_df, mapping = aes(x = avg_logFC, y = y_plot, color = genegroup), alpha = 0.7, shape = 16, size = 0.7)
   p <- p + geom_text_repel(data = subset(plot_data_df, genegroup == "P.adjusted<0.05, Known to interact with VHL"), 
                            mapping = aes(x = avg_logFC, y = y_plot, label = deg_gene_symbol), color = "red", force = 3, xlim = c(-0.25, 0.25))
   p <- p + scale_color_manual(values = colors_genegroup)
