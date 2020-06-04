@@ -44,7 +44,7 @@ group1_findmarkers <- "VHL_Germline"
 group2_findmarkers <- "VHL_Somatic"
 ## set cell type to compare
 # celltypes2process <- c("Tumor cells", "Fibroblasts", "Endothelial cells", "Macrophages")
-celltypes2process <- c("Tumor cells", "Fibroblasts", "Endothelial cells")
+celltypes2process <- c("Tumor cells")
 # celltypes2process <- c("Tumor cells", "Macrophages")
 
 # make column split -------------------------------------------------------
