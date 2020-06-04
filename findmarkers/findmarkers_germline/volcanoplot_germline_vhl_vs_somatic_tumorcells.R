@@ -30,7 +30,8 @@ genes_highlight_df <- ppi_pair_df %>%
 
 # make plot data  ---------------------------------------------------------
 celltype_plot <- "Tumor cells"
-for (celltype_plot in c("Tumor cells", "Macrophages")) {
+for (celltype_plot in c("Tumor cells")) {
+# for (celltype_plot in c("Tumor cells", "Macrophages")) {
   max()
   plot_data_df <- markers_df %>%
     filter(Cell_type.shorter == celltype_plot) %>%
