@@ -1,5 +1,4 @@
-# Yige Wu @WashU Apr 2020
-## plot heatmap the the average expression (not scaled) of HIF pathway members to compare tumor and normal epithelial cells
+# Yige Wu @WashU Jun 2020
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
