@@ -18,8 +18,8 @@ dir.create(dir_out)
 ## input ppi table
 ppi_pair_df <- fread(data.table = F, input = "./Resources/Databases/Protein_Protein_Interactions/protein_pair_table_v2.txt")
 ## input marker table
-markers_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_germline/findallmarker_wilcox_germline_vhl_vs_somatic_tumorcells_on_katmai/20200604.v1/Germline_vs_Somatic_VHL.TumorCells.FindMarkers.Wilcox.20200604.v1.tsv")
-markers_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_germline/findallmarker_wilcox_germline_vhl_vs_somatic_bycelltype_on_katmai/20200604.v1/VHL_Germline_vs_group2_findmarkers.FindMarkers.Wilcox.20200604.v1.tsv")
+# markers_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_germline/findallmarker_wilcox_germline_vhl_vs_somatic_tumorcells_on_katmai/20200604.v1/Germline_vs_Somatic_VHL.TumorCells.FindMarkers.Wilcox.20200604.v1.tsv")
+markers_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_germline/findallmarker_wilcox_germline_vhl_vs_somatic_bycelltype_on_katmai/20200604.v1/VHL_Germline_vs_VHL_Somatic.FindMarkers.Wilcox.20200604.v1.tsv")
 
 # filter markers ----------------------------------------------------------
 markers_filtered_df <- markers_df %>%
@@ -32,5 +32,5 @@ ppi_pair_filtered_df <- ppi_pair_df %>%
 # merge -------------------------------------------------------------------
 markers_filtered_anno_df <- merge(markers_filtered_df, ppi_pair_filtered_df, by.x = c("deg_gene_symbol"), by.y = c("SUB_GENE"), all.x = T)
 markers_filtered_anno_df <- markers_filtered_anno_df %>%
-  arrange(GENE, SUB_GENE.is_complex_partner, avg_logFC)
+  arrange(GENE, Cell_type.shorter, SUB_GENE.is_complex_partner, avg_logFC)
 
