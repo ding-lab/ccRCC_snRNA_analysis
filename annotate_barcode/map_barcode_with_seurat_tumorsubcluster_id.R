@@ -26,7 +26,7 @@ for (aliquot_tmp in srat_paths$Aliquot) {
   srat <- readRDS(file = srat_path)
   
   ## extract current meta data
-  barcode_metadata_tmp <- srat@meta.data
+  barcode_metadata_tmp <- FetchData(object = srat, vars = c("orig.ident", "seurat_clusters", "UMAP_1", "UMAP_2"))
   barcode_metadata_tmp$barcode <- rownames(barcode_metadata_tmp)
   ## bind with the super table
   barcode_metadata_df <- rbind(barcode_metadata_tmp, barcode_metadata_df)

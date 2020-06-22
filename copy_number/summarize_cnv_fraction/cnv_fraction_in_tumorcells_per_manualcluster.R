@@ -24,9 +24,9 @@ dir_infercnv_run <- paste0(dir_infercnv_output, infercnv_run_id, "/")
 aliquots2process <- list.files(dir_infercnv_run)
 aliquots2process <- aliquots2process[grepl(pattern = "CPT", x = aliquots2process)]
 ## input barcode to cell type info
-barcode2cluster_df <- fread(input = "./Resources/Analysis_Results/recluster/recluster_cell_groups_in_individual_samples/recluster_nephron_epithelium/annotate_barcode/annotate_barcode_with_manual_tumorsubcluster_id/20200324.v1/barcode2tumorsubclusterid.20200324.v1.tsv", data.table = F)
+barcode2cluster_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_barcode_with_manual_tumorsubcluster_id/20200616.v1/Barcode2TumorSubclusterId.20200616.v1.tsv", data.table = F)
 ## input known CNV genes
-knowncnvgenes_df <- readxl::read_xlsx(path = "./Resources/Known_Genetic_Alterations/Known_CNV.20200528.v1.xlsx", sheet = "Genes")
+knowncnvgenes_df <- readxl::read_xlsx(path = "./Resources/Knowledge/Known_Genetic_Alterations/Known_CNV.20200528.v1.xlsx", sheet = "Genes")
 
 # input infercnv results ------------------------------------------------
 cnv_state_count_aliquots <- NULL
@@ -58,9 +58,10 @@ for (aliquot_tmp in aliquots2process) {
   cnv_state_mat.m <- cnv_state_mat.m %>%
     rename(cna_state = value) %>%
     rename(barcode = variable) %>%
-    filter(barcode %in% aliquot_barcode2cluster_df$barcode)
+    filter(barcode %in% aliquot_barcode2cluster_df$individual_barcode)
   ## map barcode to tumor subcluster
-  cnv_state_mat.m$tumor_subcluster <- mapvalues(x = cnv_state_mat.m$barcode, from = aliquot_barcode2cluster_df$barcode, to = aliquot_barcode2cluster_df$manual_cluster_id)
+  colnames(barcode2cluster_df)
+  cnv_state_mat.m$tumor_subcluster <- mapvalues(x = cnv_state_mat.m$barcode, from = aliquot_barcode2cluster_df$individual_barcode, to = aliquot_barcode2cluster_df$Id_TumorManualCluster)
   
   ## count number of cells with different cnv state per gene
   cnv_state_count <- cnv_state_mat.m %>%

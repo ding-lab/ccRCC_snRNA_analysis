@@ -19,7 +19,7 @@ dir.create(dir_out)
 
 # input denpendencies -----------------------------------------------------
 ## input marker table
-markers_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_germline/findallmarker_wilcox_germline_vhl_vs_1_somatic_nonsense_bycelltype_on_katmai/20200604.v1/VHL_Germline_vs_VHL_Somatic.FindMarkers.Wilcox.20200604.v1.tsv")
+markers_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_germline/findallmarker_wilcox_germline_vhl_vs_3rd_somatic_nonsense_bycelltype_on_katmai/20200604.v1/VHL_Germline_vs_VHL_Somatic.FindMarkers.Wilcox.20200604.v1.tsv")
 ## input ppi table
 ppi_pair_df <- fread(data.table = F, input = "./Resources/Databases/Protein_Protein_Interactions/protein_pair_table_v2.txt")
 
@@ -42,7 +42,7 @@ for (celltype_plot in c("Tumor cells")) {
   plot_data_df <- plot_data_df %>%
     mutate(y_plot = ifelse(is.infinite(logPvalue), max_logp, logPvalue)) %>%
     mutate(genegroup = ifelse(p_val_adj > 0.05, "P.adjusted>0.05",
-                              ifelse(deg_gene_symbol %in% c(as.vector(genes_highlight_df$SUB_GENE)), "P.adjusted<0.05, Known to interact with VHL", "P.adjusted<0.05")))
+                              ifelse(deg_gene_symbol %in% genes_highlight_df$SUB_GENE, "P.adjusted<0.05, Known to interact with VHL", "P.adjusted<0.05")))
   table(plot_data_df$genegroup)
   # make plot dependencies --------------------------------------------------
   colors_genegroup <- c("grey50", "black", "red")

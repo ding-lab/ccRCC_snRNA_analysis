@@ -26,7 +26,6 @@ seurat_summary2process <- seurat_summary %>%
                                      "/", Aliquot, FACS, "_processed.rds"))
 seurat_summary2process$Path_seurat_object
 
-
 # input gene position file ------------------------------------------------
 tab_gene_order_symbol = read.delim(file = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/InferCNV/inputs/gencode_v21_gen_pos.MatchCellRangerFeatures.NoDuplicates.20191005.v1.txt", header = FALSE,stringsAsFactors = FALSE)
 
