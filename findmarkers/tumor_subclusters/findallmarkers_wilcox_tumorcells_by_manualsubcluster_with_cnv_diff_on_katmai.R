@@ -80,14 +80,12 @@ for (aliquot_wu_tmp in unique(cnvfraction_pair_filtered_df$aliquot.wu)) {
     ## add the current DEGs into the super table
     if (nrow(markers_wilcox_tmp) > 0) {
       markers_wilcox_tmp$deg_gene_symbol <- rownames(markers_wilcox_tmp)
-      markers_wilcox_tmp$id_aliquot <- aliquot_tmp
       markers_wilcox_tmp$id_aliquot_wu <- aliquot_wu_tmp
       markers_wilcox_tmp$ident.1 <- id_aliquot_cluster.1
       markers_wilcox_tmp$ident.2 <- id_aliquot_cluster.2
       markers_wilcox_df <- rbind(markers_wilcox_df, markers_wilcox_tmp)
     }
   }
-  stop("test")
 }
 
 # write output ------------------------------------------------------------
