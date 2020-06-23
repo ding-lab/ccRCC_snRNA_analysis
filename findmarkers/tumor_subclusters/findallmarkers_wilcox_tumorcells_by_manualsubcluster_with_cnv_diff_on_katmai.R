@@ -23,7 +23,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -43,9 +43,9 @@ idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sam
 # set parameters for findmarkers ------------------------------------------
 ## set min.pct
 # min.pct.wilcox <- 0.25
-min.pct.wilcox <- 0.1
+# min.pct.wilcox <- 0.1
 logfc.threshold.wilcox <- 0.1
-# min.pct.wilcox <- 0
+min.pct.wilcox <- 0
 # logfc.threshold.wilcox <- 0
 
 # change metadata ---------------------------------------------------------
