@@ -43,10 +43,10 @@ idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sam
 # set parameters for findmarkers ------------------------------------------
 ## set min.pct
 # min.pct.wilcox <- 0.25
-# min.pct.wilcox <- 0.1
-# logfc.threshold.wilcox <- 0.1
-min.pct.wilcox <- 0
-logfc.threshold.wilcox <- 0
+min.pct.wilcox <- 0.1
+logfc.threshold.wilcox <- 0.1
+# min.pct.wilcox <- 0
+# logfc.threshold.wilcox <- 0
 
 # change metadata ---------------------------------------------------------
 ## format the barcode table
