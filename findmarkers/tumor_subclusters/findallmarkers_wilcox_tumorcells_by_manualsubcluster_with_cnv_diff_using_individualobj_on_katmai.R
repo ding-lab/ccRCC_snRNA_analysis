@@ -33,6 +33,7 @@ dir.create(dir_out)
 ## input the paths for reclustered seurat objects
 srat_paths <- fread(input = "./Resources/Analysis_Results/recluster/recluster_cell_groups_in_individual_samples/recluster_nephron_epithelium/recluster_nephron_epithelium_cells_in_individual_samples/20200225.v1/Seurat_Object_Paths.Malignant_Nephron_Epithelium20200225.v1.tsv", data.table = F)
 srat_paths$Path_relative <- gsub(x = srat_paths$Path_seurat_object, pattern = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/", replacement = "./")
+srat_paths$Path_relative
 ## input the barcode-manualsubcluster info
 barcode2subclusterid_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_all_cells/20200616.v1/30AliquotIntegration.Barcode2CellType.TumorManualCluster.20200616.v1.tsv", data.table = F)
 ## input the tumor subcluster pairs 
