@@ -7,6 +7,7 @@ packages = c(
   "ComplexHeatmap",
   "circlize",
   "RColorBrewer",
+  "ggthemes",
   "rcartocolor",
   "Polychrome"
 )
@@ -17,9 +18,14 @@ for (pkg_name_tmp in packages) {
 cartocolors_df <- rcartocolor::cartocolors
 
 # make color palette for major cell groups -----------------------------------
-cellgroup_colors <- Polychrome::palette36.colors(n = 36)[3:6]
+# cellgroup_colors <- Polychrome::palette36.colors(n = 36)[3:6]
+cellgroup_colors <- RColorBrewer::brewer.pal(n = 4, name = "Dark2")[c(4,3,2,1)]
 cellgroup_colors <- c(cellgroup_colors, "grey50")
 names(cellgroup_colors) <- c("Tumor cells", "Immune",  "Stroma", "Normal epithelial cells", "Unknown")
+
+# make color palette for immune cell groups -----------------------------------
+immunecelltype1_colors <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[c(5,7,8)]
+names(immunecelltype1_colors) <- c("Myleoid lineage immune cells", "Lymphoid lineage immune cells",  "Mixed myeloid/lymphoid lineage immune cells")
 
 # make color palette for detailed cell types -----------------------------------
 normal_epithelial_colors <- Polychrome::palette36.colors(n = 36)[7:12]
@@ -29,29 +35,36 @@ names(normal_epithelial_colors) <- c("Distal convoluted tubule",
                                      "Loop of Henle", 
                                      "Podocytes", 
                                      "Proximal tubule")
-
-immune_stroma_colors <- Polychrome::palette36.colors(n = 36)[13:30]
-names(immune_stroma_colors) <- c("B-cells", 
-                                 "Basophils", 
-                                 "CD4/CD8 proliferating", 
-                                 "CD4+ T-cells",
-                                 "CD8+ T-cells activated", 
-                                 "CD8+ T-cells exhausted", 
+# swatch(normal_epithelial_colors)
+stroma_colors <- Polychrome::palette36.colors(n = 36)[c(23, 24, 27)]
+names(stroma_colors) <- c("Endothelial cells",
+                          "Fibroblasts",
+                          "Myofibroblasts")
+# swatch(stroma_colors)
+immune_lymphoid_colors <- colorblind_pal()(8)
+# immune_lymphoid_colors <- Polychrome::palette36.colors(n = 36)[c(28, 14:20)]
+names(immune_lymphoid_colors) <- c("B-cells", 
+                                   "Plasma cells", 
+                                   "CD4/CD8 proliferating", 
+                                   "CD4+ T-cells",
+                                   "Tregs", 
+                                   "CD8+ T-cells activated", 
+                                   "CD8+ T-cells exhausted",
+                                   "NK cells")
+# swatch(immune_lymphoid_colors)
+immune_myeloid_colors <- Polychrome::palette36.colors(n = 36)[c(13:18)]
+names(immune_myeloid_colors) <- c("Basophils", 
                                  "cDC", 
                                  "Macrophages", 
                                  "Macrophages M2b", 
-                                 "Mixed myeloid/lymphoid", 
-                                 "NK cells", 
                                  "pDC",
-                                 "Plasma cells", 
-                                 "Tregs", 
-                                 "TRM",
-                                 "Endothelial cells",
-                                 "Fibroblasts",
-                                 "Myofibroblasts")
+                                 "TRM")
+# swatch(immune_myeloid_colors)
+immune_mixed_color <- immunecelltype1_colors["Myleoid lineage immune cells"]; names(immune_mixed_color) <- "Mixed myeloid/lymphoid"
+immune_colors <- c(immune_lymphoid_colors, immune_myeloid_colors, immune_mixed_color)
 tumor_unknown_colors <- cellgroup_colors[c("Tumor cells", "Unknown", "Normal epithelial cells")]
 names(tumor_unknown_colors) <- c("Tumor cells", "Unknown", "Normal epithelial cells")
-celltype_shorter_colors <- c(tumor_unknown_colors, immune_stroma_colors, normal_epithelial_colors)
+celltype_shorter_colors <- c(tumor_unknown_colors, stroma_colors, normal_epithelial_colors, immune_colors)
 # save(cellgroup_colors, celltype_shorter_colors, file = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Figures/r_colorpalette.RData")
 
 # make color palette for variant class ------------------------------------

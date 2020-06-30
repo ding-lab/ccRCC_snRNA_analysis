@@ -17,7 +17,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input TF integrations
-tf_tab <- fread(input = "./Resources/PPI/TF_interactions.txt", data.table = F)
+tf_tab <- fread(input = "./Resources/Knowledge/PPI/TF_interactions.txt", data.table = F)
 
 # filter ------------------------------------
 hif_tf_tab <- tf_tab %>%

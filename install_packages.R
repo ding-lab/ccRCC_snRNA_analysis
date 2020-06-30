@@ -11,6 +11,7 @@ packages = c(
   "ggplot2",
   "RColorBrewer",
   "ggrepel",
+  "ggthemes",
   "data.table",
   "pheatmap",
   "cowplot",

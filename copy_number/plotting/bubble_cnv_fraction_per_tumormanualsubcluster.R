@@ -10,7 +10,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -18,11 +18,11 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## load meta data
-idmetadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200427.v1/meta_data.20200427.v1.tsv", data.table = F)
+idmetadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200505.v1/meta_data.20200505.v1.tsv", data.table = F)
 ## load CNV fraction in tumor cells
-cnv_3state_count_aliquots <- fread("./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/cnv_fraction_in_tumorcells_per_manualcluster/20200603.v1/fraction_of_tumorcells_with_cnv_by_gene_by_3state.per_manualsubcluster.20200603.v1.tsv", data.table = F)
+cnv_3state_count_aliquots <- fread("./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/cnv_fraction_in_tumorcells_per_manualcluster/20200622.v1/fraction_of_tumorcells_with_cnv_by_gene_by_3state.per_manualsubcluster.20200622.v1.tsv", data.table = F)
 ## input known CNV genes
-knowncnvgenes_df <- readxl::read_xlsx(path = "./Resources/Known_Genetic_Alterations/Known_CNV.20200528.v1.xlsx", sheet = "Genes")
+knowncnvgenes_df <- readxl::read_xlsx(path = "./Resources/Knowledge/Known_Genetic_Alterations/Known_CNV.20200528.v1.xlsx", sheet = "Genes")
 
 # make data frame for plotting --------------------------------------------
 ## add aliquot.wu
@@ -91,7 +91,7 @@ plot_data_df$aliquot.wu <- factor(plot_data_df$aliquot.wu, levels = levels_aliqu
 hl_data_df <- plot_data_df %>%
   group_by(aliquot.wu, gene_symbol) %>%
   summarize(Fraction_maxdiff = (max(Fraction) - min(Fraction)), x1 = id_aliquot_cluster[which.min(Fraction)], x2 = id_aliquot_cluster[which.max(Fraction)]) %>%
-  filter(Fraction_maxdiff >= 0.5)
+  filter(Fraction_maxdiff >= 0.75)
 plot_data_comb_df <- merge(plot_data_df, hl_data_df, by.x = c("id_aliquot_cluster", "gene_symbol", "aliquot.wu"), by.y = c("x1", "gene_symbol", "aliquot.wu"), all.x = T)
 
 # plot expected CNVs--------------------------------------------------------------------
@@ -125,7 +125,7 @@ file2write <- paste0(dir_out, "bubbleplot_cnv_fraction.", run_id, ".RDS")
 saveRDS(object = p, file = file2write, compress = T)
 ## save plot
 png(file = paste0(dir_out, "Fraction_of_Tumorcells_with_Expected_CNA_by_Gene", ".", "By_Tumor_Subcluster", ".", run_id, ".png"), 
-    width = 2500, height = 1000, res = 150)
+    width = 3000, height = 1000, res = 150)
 print(p)
 dev.off()
 

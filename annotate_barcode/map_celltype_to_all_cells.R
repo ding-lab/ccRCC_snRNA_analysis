@@ -21,11 +21,22 @@ all_integrated_barcode2cluster_df <- fread(input = "./Resources/Analysis_Results
 ## input cluster to cell type mapping table for all clusters in the integrated dataset
 all_integrated_cluster2celltype_df <- fread(input = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Integration_AllClusters/integration.allcluster2celltype.20200213.v3.tsv")
 ## input Alla's immune cell type assignment
-immune_barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_immune_cells/20200616.v1/Barcode2ImmuneCellType.20200616.v1.tsv")
+immune_barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_immune_cells/20200626.v1/Barcode2ImmuneCellType.20200626.v1.tsv")
 ## input tumor subclustering cell type assignment: 93277 cells
 tumor_barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_barcode_with_manual_tumorsubcluster_id/20200616.v1/Barcode2TumorSubclusterId.20200616.v1.tsv", data.table = F)
 ## input barcode-to-cell-type table
 normal_epithelial_barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_normal_epithelial_cells/20200410.v1/normal_epithelial_reclustered.barcode2celltype.20200410.v1.tsv", data.table = F)
+
+
+# get barcode2celltype from integrated data -------------------------------
+nrow(all_integrated_barcode2cluster_df)
+## merge
+all_integrated_barcode2celltype_df <- merge(x = all_integrated_barcode2cluster_df, y = all_integrated_cluster2celltype_df, by.x = c("ident"), by.y = c("Cluster"), all.x = T)
+nrow(all_integrated_barcode2celltype_df)
+## add individual barcode
+all_integrated_barcode2celltype_df <- all_integrated_barcode2celltype_df %>%
+  rename(integrated_barcode = barcode) %>%
+  mutate(individual_barcode = str_split_fixed(string = integrated_barcode, pattern = "_", n = 2)[,1])
 
 # format normal epithelial cells ------------------------------------------
 normal_epithelial_barcode2celltype_df <- normal_epithelial_barcode2celltype_df %>%
@@ -55,7 +66,7 @@ stroma_barcode2celltype_df <- stroma_barcode2celltype_df %>%
          Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type2, Most_Enriched_Cell_Type3, Most_Enriched_Cell_Type4, Id_TumorManualCluster)
 
 # map unknown cells -------------------------------------------------------
-assigned_integrated_barcodes <- c(immune_integrated_barcode2celltype_df$integrated_barcode,
+assigned_integrated_barcodes <- c(immune_barcode2celltype_df$integrated_barcode,
                                   tumor_barcode2celltype_df$integrated_barcode,
                                   stroma_barcode2celltype_df$integrated_barcode,
                                   normal_epithelial_barcode2celltype_df$integrated_barcode)

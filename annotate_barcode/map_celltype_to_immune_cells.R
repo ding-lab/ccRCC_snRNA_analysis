@@ -37,6 +37,8 @@ table(immune_integrated_barcode2celltype_df$Cell_type.shorter)
 # Plasma                   Treg                    TRM 
 # 217                    574                    518 
 
+## no unknown
+
 ## correct B-cells using Alla's assignment
 ### see if there are more detailed cell type
 table(immune_integrated_barcode2celltype_df$Cell_type.detailed[immune_integrated_barcode2celltype_df$Cell_type.shorter == "B-cells"])
@@ -120,6 +122,13 @@ immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type2[immune_integrated
 immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type3[immune_integrated_barcode2celltype_df$Cell_type.shorter == "Macrophages"] <- "Macrophages"
 immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type4[immune_integrated_barcode2celltype_df$Cell_type.shorter == "Macrophages"] <- ""
 
+## correct TRM
+table(immune_integrated_barcode2celltype_df$Cell_type.detailed[immune_integrated_barcode2celltype_df$Cell_type.shorter == "TRM"])
+immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type1[immune_integrated_barcode2celltype_df$Cell_type.shorter == "TRM"] <- "Myleoid lineage immune cells"
+immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type2[immune_integrated_barcode2celltype_df$Cell_type.shorter == "TRM"] <- "Monocytic lineage immune cells"
+immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type3[immune_integrated_barcode2celltype_df$Cell_type.shorter == "TRM"] <- "Macrophages"
+immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type4[immune_integrated_barcode2celltype_df$Cell_type.shorter == "TRM"] <- "TRM"
+
 ## correct macrophage m2b cell types
 table(immune_integrated_barcode2celltype_df$Cell_type.detailed[immune_integrated_barcode2celltype_df$Cell_type.shorter == "Macrophages M2b"])
 immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type1[immune_integrated_barcode2celltype_df$Cell_type.shorter == "Macrophages M2b"] <- "Myleoid lineage immune cells"
@@ -150,13 +159,9 @@ immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type4[immune_integrated
 immune_integrated_barcode2celltype_df$Cell_type.detailed[immune_integrated_barcode2celltype_df$Cell_type.shorter == "Treg"] <- "Tregs"
 immune_integrated_barcode2celltype_df$Cell_type.shorter[immune_integrated_barcode2celltype_df$Cell_type.shorter == "Treg"] <- "Tregs"
 
-## correct TRM
-table(immune_integrated_barcode2celltype_df$Cell_type.detailed[immune_integrated_barcode2celltype_df$Cell_type.shorter == "TRM"])
-immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type1[immune_integrated_barcode2celltype_df$Cell_type.shorter == "TRM"] <- "Lymphoid lineage immune cells"
-immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type2[immune_integrated_barcode2celltype_df$Cell_type.shorter == "TRM"] <- "T-cells"
-immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type3[immune_integrated_barcode2celltype_df$Cell_type.shorter == "TRM"] <- "CD4+ T-cells"
-immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Type4[immune_integrated_barcode2celltype_df$Cell_type.shorter == "TRM"] <- "CD4+ memory T-cells"
 
+
+immune_integrated_barcode2celltype_df$Most_Enriched_Cell_Group <- "Immune"
 # write output ------------------------------------------------------------
 nrow(immune_integrated_barcode2celltype_df)
 ## [1] 33004
