@@ -1,32 +1,17 @@
 # Yige Wu @WashU Feb 2020
 
 # set up libraries and output directory -----------------------------------
-## getting the path to the current script
-thisFile <- function() {
-  cmdArgs <- commandArgs(trailingOnly = FALSE)
-  needle <- "--file="
-  match <- grep(needle, cmdArgs)
-  if (length(match) > 0) {
-    # Rscript
-    return(normalizePath(sub(needle, "", cmdArgs[match])))
-  } else {
-    # 'source'd via R console
-    return(normalizePath(sys.frames()[[1]]$ofile))
-  }
-}
-path_this_script <- thisFile()
 ## set working directory
-dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
-# dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 6
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
-dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
+dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
@@ -55,7 +40,8 @@ barcode2subclusterid_df <- barcode2subclusterid_df %>%
 
 # for each aliquot, input seurat object and fetch data and write data --------------------
 markers_wilcox_df <- NULL
-for (aliquot_wu_tmp in unique(cnvfraction_pair_filtered_df$aliquot.wu)) {
+for (aliquot_wu_tmp in c("C3N-01200-T1")) {
+  # for (aliquot_wu_tmp in unique(cnvfraction_pair_filtered_df$aliquot.wu)) {
   aliquot_tmp <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Aliquot.snRNA.WU == aliquot_wu_tmp]
   
   ## input individual seurat object
@@ -68,8 +54,8 @@ for (aliquot_wu_tmp in unique(cnvfraction_pair_filtered_df$aliquot.wu)) {
     filter(id_aliquot_wu == aliquot_wu_tmp) %>%
     filter(individual_barcode %in% rownames(srat@meta.data))
   rownames(barcode2subclusterid_aliquot_df) <- barcode2subclusterid_aliquot_df$individual_barcode
-  srat@meta.data <- barcode2subclusterid_aliquot_df
-  # srat@meta.data$id_aliquot_cluster <- mapvalues(x = rownames(srat@meta.data), from = barcode2subclusterid_aliquot_df$individual_barcode, to = as.vector(barcode2subclusterid_aliquot_df$id_aliquot_cluster))
+  # srat@meta.data <- barcode2subclusterid_aliquot_df
+  srat@meta.data$id_aliquot_cluster <- mapvalues(x = rownames(srat@meta.data), from = barcode2subclusterid_aliquot_df$individual_barcode, to = as.vector(barcode2subclusterid_aliquot_df$id_aliquot_cluster))
   
   ### change ident
   Idents(srat) <- "id_aliquot_cluster"
@@ -79,13 +65,14 @@ for (aliquot_wu_tmp in unique(cnvfraction_pair_filtered_df$aliquot.wu)) {
     filter(aliquot.wu == aliquot_wu_tmp) %>%
     select(id_aliquot_cluster.1, id_aliquot_cluster.2) %>%
     unique()
-  
-  for (i in 1:nrow(aliquot_pair_filtered_df)) {
+  for (i in 9) {
+  # for (i in 1:nrow(aliquot_pair_filtered_df)) {
     id_aliquot_cluster.1 <- aliquot_pair_filtered_df[i, "id_aliquot_cluster.1"]
     id_aliquot_cluster.2 <- aliquot_pair_filtered_df[i, "id_aliquot_cluster.2"]
     
     ## find all markers using Wilcox testing
-    markers_wilcox_tmp <- FindMarkers(object = srat, test.use = "wilcox", only.pos = F, min.pct = min.pct.wilcox, logfc.threshold = logfc.threshold.wilcox,
+    markers_wilcox_tmp <- FindMarkers(object = srat, test.use = "wilcox", only.pos = F, min.pct = min.pct.wilcox, logfc.threshold = logfc.threshold.wilcox, 
+                                      # return.thresh = 0.05, 
                                       ident.1 = id_aliquot_cluster.1, ident.2 = id_aliquot_cluster.2, verbose = T)
     
     ## add the current DEGs into the super table
@@ -104,3 +91,4 @@ for (aliquot_wu_tmp in unique(cnvfraction_pair_filtered_df$aliquot.wu)) {
 file2write <- paste0(dir_out, "Tumormanualsubcluster.withCNVDiff.FindMarkers.Wilcox.Minpct", min.pct.wilcox, ".Logfc", logfc.threshold.wilcox,".tsv")
 write.table(markers_wilcox_df, file = file2write, 
             quote = F, sep = "\t", row.names = F)
+
