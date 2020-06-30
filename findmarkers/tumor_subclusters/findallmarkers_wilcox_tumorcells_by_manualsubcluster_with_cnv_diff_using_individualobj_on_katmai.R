@@ -51,12 +51,6 @@ min.pct.wilcox <- 0.1
 barcode2subclusterid_df$id_aliquot_wu <- mapvalues(x = barcode2subclusterid_df$orig.ident, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
 barcode2subclusterid_df <- barcode2subclusterid_df %>%
   mutate(id_aliquot_cluster = paste0(id_aliquot_wu, "_C", (Id_TumorManualCluster + 1)))
-barcode2subclusterid_df$id_aliquot_cluster %>% unique()
-rownames(barcode2subclusterid_df) <- barcode2subclusterid_df$integrated_barcode
-### change meta data
-srat@meta.data <- barcode2subclusterid_df
-### change ident
-Idents(srat) <- "id_aliquot_cluster"
 
 # for each aliquot, input seurat object and fetch data and write data --------------------
 markers_wilcox_df <- NULL
@@ -67,6 +61,14 @@ for (aliquot_wu_tmp in unique(cnvfraction_pair_filtered_df$aliquot.wu)) {
   seurat_obj_path <- srat_paths$Path_relative[srat_paths$Aliquot == aliquot_tmp]
   seurat_obj_path
   srat <- readRDS(file = seurat_obj_path)
+  
+  ### change meta data
+  barcode2subclusterid_aliquot_df <- barcode2subclusterid_df %>%
+    filter(id_aliquot_wu == aliquot_wu_tmp)
+  rownames(barcode2subclusterid_aliquot_df) <- barcode2subclusterid_aliquot_df$individual_barcode
+  srat@meta.data <- barcode2subclusterid_aliquot_df
+  ### change ident
+  Idents(srat) <- "id_aliquot_cluster"
   
   # get which clusters to compare -------------------------------------------
   aliquot_pair_filtered_df <- cnvfraction_pair_filtered_df %>%
