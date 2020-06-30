@@ -23,7 +23,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 6
+version_tmp <- 7
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -67,9 +67,7 @@ for (aliquot_wu_tmp in unique(cnvfraction_pair_filtered_df$aliquot.wu)) {
   barcode2subclusterid_aliquot_df <- barcode2subclusterid_df %>%
     filter(id_aliquot_wu == aliquot_wu_tmp) %>%
     filter(individual_barcode %in% rownames(srat@meta.data))
-  rownames(barcode2subclusterid_aliquot_df) <- barcode2subclusterid_aliquot_df$individual_barcode
-  srat@meta.data <- barcode2subclusterid_aliquot_df
-  # srat@meta.data$id_aliquot_cluster <- mapvalues(x = rownames(srat@meta.data), from = barcode2subclusterid_aliquot_df$individual_barcode, to = as.vector(barcode2subclusterid_aliquot_df$id_aliquot_cluster))
+  srat@meta.data$id_aliquot_cluster <- mapvalues(x = rownames(srat@meta.data), from = barcode2subclusterid_aliquot_df$individual_barcode, to = as.vector(barcode2subclusterid_aliquot_df$id_aliquot_cluster))
   
   ### change ident
   Idents(srat) <- "id_aliquot_cluster"

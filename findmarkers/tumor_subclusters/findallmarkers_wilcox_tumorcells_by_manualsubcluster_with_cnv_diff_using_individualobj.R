@@ -53,7 +53,7 @@ for (aliquot_wu_tmp in c("C3N-01200-T1")) {
   barcode2subclusterid_aliquot_df <- barcode2subclusterid_df %>%
     filter(id_aliquot_wu == aliquot_wu_tmp) %>%
     filter(individual_barcode %in% rownames(srat@meta.data))
-  rownames(barcode2subclusterid_aliquot_df) <- barcode2subclusterid_aliquot_df$individual_barcode
+  ## map id aliquot cluster, do not substitute
   # srat@meta.data <- barcode2subclusterid_aliquot_df
   srat@meta.data$id_aliquot_cluster <- mapvalues(x = rownames(srat@meta.data), from = barcode2subclusterid_aliquot_df$individual_barcode, to = as.vector(barcode2subclusterid_aliquot_df$id_aliquot_cluster))
   
@@ -72,7 +72,6 @@ for (aliquot_wu_tmp in c("C3N-01200-T1")) {
     
     ## find all markers using Wilcox testing
     markers_wilcox_tmp <- FindMarkers(object = srat, test.use = "wilcox", only.pos = F, min.pct = min.pct.wilcox, logfc.threshold = logfc.threshold.wilcox, 
-                                      # return.thresh = 0.05, 
                                       ident.1 = id_aliquot_cluster.1, ident.2 = id_aliquot_cluster.2, verbose = T)
     
     ## add the current DEGs into the super table

@@ -20,6 +20,7 @@ dir.create(dir_out)
 # deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/findallmarkers_wilcox_tumorcells_by_manualsubcluster_with_cnv_diff_on_katmai/20200623.v1/Tumormanualsubcluster.withCNVDiff.FindMarkers.Wilcox.Minpct0.1.Logfc0.1.tsv")
 deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/findallmarkers_wilcox_tumorcells_by_manualsubcluster_with_cnv_maxdiff/20200603.v1/Tumormanualsubcluster.FindMarkers.Cluster_CNVLow_vs_CNVHigh.Wilcox.Minpct0.1.Logfc0.1.tsv")
 deg_df1 <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/findallmarkers_wilcox_tumorcells_by_manualsubcluster_with_cnv_diff_using_individualobj_on_katmai/20200630.v2/Tumormanualsubcluster.withCNVDiff.FindMarkers.Wilcox.Minpct0.1.Logfc0.1.tsv")
+deg_df1 <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/findallmarkers_wilcox_tumorcells_by_manualsubcluster_with_cnv_diff_using_individualobj_on_katmai/20200630.v6/Tumormanualsubcluster.withCNVDiff.FindMarkers.Wilcox.Minpct0.1.Logfc0.1.tsv")
 
 ## input id meta data
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200505.v1/meta_data.20200505.v1.tsv")
