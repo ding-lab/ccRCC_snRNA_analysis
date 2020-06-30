@@ -23,7 +23,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -35,7 +35,8 @@ srat_paths <- fread(input = "./Resources/Analysis_Results/recluster/recluster_ce
 srat_paths$Path_relative <- gsub(x = srat_paths$Path_seurat_object, pattern = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/", replacement = "./")
 srat_paths$Path_relative
 ## input the barcode-manualsubcluster info
-barcode2subclusterid_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_all_cells/20200616.v1/30AliquotIntegration.Barcode2CellType.TumorManualCluster.20200616.v1.tsv", data.table = F)
+# barcode2subclusterid_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_all_cells/20200616.v1/30AliquotIntegration.Barcode2CellType.TumorManualCluster.20200616.v1.tsv", data.table = F)
+barcode2subclusterid_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_barcode_with_manual_tumorsubcluster_id/20200616.v1/Barcode2TumorSubclusterId.20200616.v1.tsv", data.table = F)
 ## input the tumor subcluster pairs 
 cnvfraction_pair_filtered_df <- fread(data.table = F, input = "./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/summarize_tumormanualsubcluster_pairs_w_cnv_diff/20200622.v1/CNVFractionDifference_between_ManualSubclusterPairs_PerGene_PerTumor.Filtered20200622.v1.tsv")
 ## input id meta data
@@ -68,6 +69,8 @@ for (aliquot_wu_tmp in unique(cnvfraction_pair_filtered_df$aliquot.wu)) {
     filter(individual_barcode %in% rownames(srat@meta.data))
   rownames(barcode2subclusterid_aliquot_df) <- barcode2subclusterid_aliquot_df$individual_barcode
   srat@meta.data <- barcode2subclusterid_aliquot_df
+  # srat@meta.data$id_aliquot_cluster <- mapvalues(x = rownames(srat@meta.data), from = barcode2subclusterid_aliquot_df$individual_barcode, to = as.vector(barcode2subclusterid_aliquot_df$id_aliquot_cluster))
+  
   ### change ident
   Idents(srat) <- "id_aliquot_cluster"
   
@@ -91,11 +94,8 @@ for (aliquot_wu_tmp in unique(cnvfraction_pair_filtered_df$aliquot.wu)) {
       markers_wilcox_tmp$id_aliquot_wu <- aliquot_wu_tmp
       markers_wilcox_tmp$ident.1 <- id_aliquot_cluster.1
       markers_wilcox_tmp$ident.2 <- id_aliquot_cluster.2
-      file2write <- paste0(dir_out, aliquot_wu_tmp, ".tsv")
-      write.table(markers_wilcox_tmp, file = file2write, 
-                  quote = F, sep = "\t", row.names = F)
-      
       markers_wilcox_df <- rbind(markers_wilcox_df, markers_wilcox_tmp)
+      markers_wilcox_tmp <- NULL
     }
   }
 }
