@@ -64,7 +64,8 @@ for (aliquot_wu_tmp in unique(cnvfraction_pair_filtered_df$aliquot.wu)) {
   
   ### change meta data
   barcode2subclusterid_aliquot_df <- barcode2subclusterid_df %>%
-    filter(id_aliquot_wu == aliquot_wu_tmp)
+    filter(id_aliquot_wu == aliquot_wu_tmp) %>%
+    filter(individual_barcode %in% rownames(srat@meta.data))
   rownames(barcode2subclusterid_aliquot_df) <- barcode2subclusterid_aliquot_df$individual_barcode
   srat@meta.data <- barcode2subclusterid_aliquot_df
   ### change ident
