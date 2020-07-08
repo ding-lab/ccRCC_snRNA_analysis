@@ -4,9 +4,11 @@
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-baseD = "~/Box/"
-setwd(baseD)
-source("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/ccRCC_snRNA_analysis/ccRCC_snRNA_shared.R")
+dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+setwd(dir_base)
+source("./ccRCC_snRNA_analysis/load_pkgs.R")
+source("./ccRCC_snRNA_analysis/functions.R")
+source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -16,13 +18,13 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input barcode to cluster mapping table from 
-all_integrated_barcode2cluster_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/30_aliquot_integration/fetch_data/20200212.v3/30_aliquot_integration.20200212.v3.umap_data.tsv", data.table = F)
+all_integrated_barcode2cluster_df <- fread(input = "./Resources/Analysis_Results/integration/30_aliquot_integration/fetch_data/20200212.v3/30_aliquot_integration.20200212.v3.umap_data.tsv", data.table = F)
 ## input cluster to cell type mapping table for all clusters in the integrated dataset
-all_integrated_cluster2celltype_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/Cell_Type_Assignment/Integration_AllClusters/integration.allcluster2celltype.20200213.v3.tsv")
+all_integrated_cluster2celltype_df <- fread(input = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Integration_AllClusters/integration.allcluster2celltype.20200213.v3.tsv")
 ## input individual meta data
-normal_reclustered_metadata_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/recluster/recluster_cell_groups_in_integrated_data/fetch_data/fetch_data_for_normal_epithelial_cells_local/20200406.v1/normal_epithelial_reclustered..metadata.20200406.v1.tsv", data.table = F)
+normal_reclustered_metadata_df <- fread(input = "./Resources/Analysis_Results/recluster/recluster_cell_groups_in_integrated_data/fetch_data/fetch_data_for_normal_epithelial_cells_local/20200406.v1/normal_epithelial_reclustered..metadata.20200406.v1.tsv", data.table = F)
 ## input individual cluster-to-cell type data
-normal_reclustered_cluster2celltype_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/Cell_Type_Assignment/Normal_Epithelial_Cells/normal_epithelial_reclustered.cluster2celltype.20200406.v1.csv", data.table = F)
+normal_reclustered_cluster2celltype_df <- fread(input = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Normal_Epithelial_Cells/normal_epithelial_reclustered.cluster2celltype.20200406.v1.csv", data.table = F)
 
 # label the normal epithelial cells in the integrated data ---------------------------------------
 ## merge barcode to cluster info with cluster to cell type info

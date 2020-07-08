@@ -22,12 +22,10 @@ barcode2manualsubcluster_df <- fread(input = "./Resources/Analysis_Results/annot
 idmetadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200427.v1/meta_data.20200427.v1.tsv", data.table = F)
 ## input srat object
 srat_paths <- fread(input = "./Resources/Analysis_Results/recluster/recluster_cell_groups_in_individual_samples/recluster_nephron_epithelium/recluster_nephron_epithelium_cells_in_individual_samples/20200225.v1/Seurat_Object_Paths.Malignant_Nephron_Epithelium20200225.v1.tsv", data.table = F)
-## input HIF downstream to look up 
-ccrcc_downstream_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_ccrcc_genetic_event_downstream_genes/20200302.v2/ccRCC_Genetic_Event_Downstream_Genes.20200302.v2.tsv")
 ## set sample id
 id_aliquot_wu_filter <- "C3N-01200-T1"
 ## input selected deg
-genes2plot_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/examine_degs/examine_tumormanualsubcluster_degs_C3N-01200-T1/20200629.v1/C3N-01200-T1.DEG_selected.tsv")
+genes2plot_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/examine_degs/examine_tumormanualsubcluster_degs_C3N-01200-T1/20200701.v1/C3N-01200-T1.DEG_selected.tsv")
 
 # get ids -----------------------------------------------------------------
 ## set aliquot to plot
@@ -35,7 +33,8 @@ id_aliquot <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Aliquot.snRNA.WU == id_a
 id_aliquot
 ## set genes 2 plot
 genes2plot <- c("VHL", "EPAS1", "HIF1A", unique(genes2plot_df$deg_gene_symbol))
-genes2plot <- c("JAK2")
+# genes2plot <- c("JAK2")
+genes2plot <- unique(genes2plot)
 
 # input srat object and edit meta data ------------------------------------
 ## get barcode to cnv info for this aliquot
@@ -57,7 +56,7 @@ Idents(object = srat) <- "Name_Cluster"
 
 # plot --------------------------------------------------------------------
 for (gene_tmp in genes2plot) {
-  p <- VlnPlot(object = srat, features = gene_tmp, group.by = "Name_Cluster", idents = c("C1", "C2", "C3", "C4"), pt.size = 0.25)
+  p <- VlnPlot(object = srat, features = gene_tmp, group.by = "Name_Cluster", idents = c("C1", "C2", "C3", "C4"), pt.size = 0.1)
   png(filename = paste0(dir_out, id_aliquot_wu_filter, ".", gene_tmp, ".png"),width = 600, height = 500, res = 150)
   print(p)
   dev.off()
