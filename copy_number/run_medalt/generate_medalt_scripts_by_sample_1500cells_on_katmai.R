@@ -23,7 +23,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 7
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -56,7 +56,7 @@ for (name_file in names_files) {
   cat(paste0("docker run -v /diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/:/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/ yigewu/medalt:1.1 ",
              "python /diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/snRNA_Processed_Data/Tree_Analysis/scripts/MEDALT/scTree_setrecursionlimit.py ",
              "-P /diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/snRNA_Processed_Data/Tree_Analysis/scripts/MEDALT/ ",
-             "-I ", dir_out,  id_aliquot_wu, ".1500.tumorcells.expr.infercnv.dat ",
+             "-I ", dir_base, "Resources/Analysis_Results/copy_number/run_medalt/generate_medalt_input_files_by_sample_1500cells_on_katmai/", "20200708.v1/",  id_aliquot_wu, ".1500.tumorcells.expr.infercnv.dat ",
              "-O ", dir_medalt_out_aliquot, " -D R -G hg38 ",
              "&> ", dir_medalt_out_aliquot, "Log.$(date +%Y%m%d%H%M%S).txt&"))
   sink()
