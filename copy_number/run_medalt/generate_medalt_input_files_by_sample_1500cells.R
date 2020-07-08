@@ -30,6 +30,8 @@ for (name_file in names_files) {
   barcodes_tumorcells_all <- barcode2celltype_df$individual_barcode[barcode2celltype_df$orig.ident == id_aliquot & barcode2celltype_df$Cell_type.shorter == "Tumor cells"]
   if (length(barcodes_tumorcells_all > 1500)) {
     barcodes_tumorcells <- sample(x = barcodes_tumorcells_all, size = 1500, replace = F)
+  } else {
+    barcodes_tumorcells <- barcodes_tumorcells_all
   }
   ## input cnv file
   path_file <- paste0(dir_files, name_file)
