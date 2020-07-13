@@ -1,4 +1,4 @@
-# Yige Wu @WashU Apr 2020
+# Yige Wu @WashU Jul 2020
 ## make barcode to cell type mapping table for the integrated dataset
 
 # set up libraries and output directory -----------------------------------
@@ -25,7 +25,7 @@ immune_barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysi
 ## input tumor subclustering cell type assignment: 93277 cells
 tumor_barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_barcode_with_manual_tumorsubcluster_id/20200616.v1/Barcode2TumorSubclusterId.20200616.v1.tsv", data.table = F)
 ## input barcode-to-cell-type table
-normal_epithelial_barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_normal_epithelial_cells/20200410.v1/normal_epithelial_reclustered.barcode2celltype.20200410.v1.tsv", data.table = F)
+normal_epithelial_barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_normal_epithelial_cells/20200713.v1/normal_epithelial_reclustered.barcode2celltype.20200713.v1.tsv", data.table = F)
 
 
 # get barcode2celltype from integrated data -------------------------------

@@ -1,4 +1,4 @@
-# Yige Wu @WashU Apr 2020
+# Yige Wu @WashU Jul 2020
 ## make barcode to cell type mapping table for the integrated dataset
 ## just for normal epithelial cells
 
@@ -63,6 +63,7 @@ normal_epithelial_barcode2celltype_df$Cell_type.detailed[normal_epithelial_barco
 normal_epithelial_barcode2celltype_df$Cell_type.detailed[normal_epithelial_barcode2celltype_df$Cell_type.detailed == "Thick ascending limb"] <- "Loop of Henle"
 ## make detailed cell type
 normal_epithelial_barcode2celltype_df$Cell_type.shorter <- "Normal epithelial cells"
+normal_epithelial_barcode2celltype_df$Cell_type.shorter[normal_epithelial_barcode2celltype_df$Cell_type.detailed == "Unknown"] <- "Unknown"
 
 ## add columns
 normal_epithelial_barcode2celltype_df <- normal_epithelial_barcode2celltype_df %>%
