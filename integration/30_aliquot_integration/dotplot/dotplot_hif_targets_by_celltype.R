@@ -87,7 +87,7 @@ celltype_cat_df <- barcode2celltype_filtered_df %>%
 
 # plot --------------------------------------------------------------------
 ## actual plotting
-DefaultAssay(object2plot) <- "RNA"
+DefaultAssay(srat) <- "RNA"
 p <- DotPlot(object = srat, features = genes2plot, col.min = 0)
 p$data$Cell_group <- mapvalues(x = p$data$id, from = celltype_cat_df$Cell_type.shorter, to = celltype_cat_df$Cell_group)
 p$data$gene_celltypeexp_cat <- mapvalues(x = p$data$features.plot, from = gene_celltype_exp_cat_df$gene, to = as.vector(gene_celltype_exp_cat_df$gene_celltypeexp_cat))
