@@ -17,13 +17,13 @@ thisFile <- function() {
 path_this_script <- thisFile()
 ## set working directory
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
-dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+# dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -39,7 +39,7 @@ path_barcode2celltype <- "./Resources/Analysis_Results/annotate_barcode/map_cell
 barcode2celltype_df <- fread(input = path_barcode2celltype, data.table = F)
 table(barcode2celltype_df$Cell_type.shorter)
 ## input DEG for each cell type
-deg_tab <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/integration/integrate_seurat_objects/20191021.v1/Renal.DEGs.Pos.txt", data.table = F)
+deg_df <- fread(input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/findallmarker_wilcox_cellgroup_on_katmai/20200714.v1/findallmarkers_roc_bycellgroup.pos.20200714.v1.tsv", data.table = F)
 ## input hif targets
 hif_targets_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_hif_targets/20200428.v1/HIF_Target_Genes.20200428.v1.tsv")
 
@@ -58,6 +58,8 @@ Idents(srat) <- "Cell_type.shorter"
 # prepare plotting parameters ---------------------------------------------
 ## get genes to plot
 genes2plot <- unique(hif_targets_df$target_genesymbol)
+genes2plot <- intersect(genes2plot, unique(deg_df$gene))
+genes2plot
 ## celltype to cell type category
 celltype_cat_df <- barcode2celltype_filtered_df %>%
   select(Cell_type.shorter, Cell_group) %>%

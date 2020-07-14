@@ -23,7 +23,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -38,7 +38,7 @@ path_barcode2celltype <- "./Resources/Analysis_Results/annotate_barcode/map_cell
 barcode2celltype_df <- fread(input = path_barcode2celltype, data.table = F)
 
 # set parameters for findmarkers ------------------------------------------
-logfc.threshold.run <- log(2)
+logfc.threshold.run <- 0.1
 min.pct.run <- 0.1
 min.diff.pct.run <- 0.1
 
@@ -52,7 +52,7 @@ markers_df <- FindAllMarkers(object = srat, test.use = "wilcox", only.pos = T,
 markers_df$row_name <- rownames(markers_df)
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "findallmarkers_roc_bycellgroup.pos.", run_id, ".tsv")
+file2write <- paste0(dir_out, "findallmarkers_wilcox_bycellgroup.pos.", ".logfcthreshold", logfc.threshold.run, ".minpct", min.pct.run, ".mindiffpct", min.diff.pct.run, ".tsv")
 write.table(x = markers_df, file = file2write, sep = "\t", quote = F, row.names = F)
 
 
