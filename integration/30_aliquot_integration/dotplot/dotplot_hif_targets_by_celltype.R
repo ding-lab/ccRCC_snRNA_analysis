@@ -24,7 +24,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -105,13 +105,8 @@ p <- p + theme(panel.spacing = unit(0, "lines"),
                strip.placement = "outside")
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "Dotplot_HIF_Downstream_Exp", ".png")
-png(filename = file2write, width = 2500, height = 1300, res = 150)
-print(p)
-dev.off()
-
 file2write <- paste0(dir_out, "Dotplot_HIF_Downstream_Exp", ".pdf")
-pdf(file = file2write, width = 20, height = 15)
+pdf(file = file2write, width = 18, height = 12)
 print(p)
 dev.off()
 
