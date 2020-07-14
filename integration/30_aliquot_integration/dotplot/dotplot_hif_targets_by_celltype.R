@@ -60,6 +60,26 @@ Idents(srat) <- "Cell_type.shorter"
 genes2plot <- unique(hif_targets_df$target_genesymbol)
 genes2plot <- intersect(genes2plot, unique(deg_df$gene))
 genes2plot
+## define the cell type the genes are most highly expressed
+### category: MultiCellTypeExpressed, TumorCellExpressed, NormalEpitheliumExpressed, StromaExpressed, ImmuneExpressed
+table(deg_df$cluster)
+sort(table(deg_df$gene), decreasing = T)
+genes_multicelltypeexpr <- names(table(deg_df$gene)[table(deg_df$gene) == 2])
+genes_tumorcellexpr <- deg_df$gene[deg_df$cluster == "Tumor cells" & !(deg_df$gene %in% genes_multicelltypeexpr)]
+genes_normalepitheliumexpr <- deg_df$gene[deg_df$cluster == "Normal epithelial cells" & !(deg_df$gene %in% genes_multicelltypeexpr)]
+genes_stromaexpr <- deg_df$gene[deg_df$cluster == "Stroma" & !(deg_df$gene %in% genes_multicelltypeexpr)]
+genes_immuneexpr <- deg_df$gene[deg_df$cluster == "Immune" & !(deg_df$gene %in% genes_multicelltypeexpr)]
+gene_celltype_exp_cat_df <- data.frame(gene = c(genes_multicelltypeexpr, 
+                                                genes_tumorcellexpr, 
+                                                genes_normalepitheliumexpr,
+                                                genes_stromaexpr, 
+                                                genes_immuneexpr),
+                                       gene_celltypeexp_cat = c(rep("MultiCellTypeExpressed", length(genes_multicelltypeexpr)),
+                                                                rep("TumorCellExpressed", length(genes_tumorcellexpr)),
+                                                                rep("NormalEpitheliumExpressed", length(genes_normalepitheliumexpr)),
+                                                                rep("StromaExpressed", length(genes_stromaexpr)),
+                                                                rep("ImmuneExpressed", length(genes_immuneexpr))))
+table(gene_celltype_exp_cat_df$gene_celltypeexp_cat)
 ## celltype to cell type category
 celltype_cat_df <- barcode2celltype_filtered_df %>%
   select(Cell_type.shorter, Cell_group) %>%
@@ -70,8 +90,8 @@ celltype_cat_df <- barcode2celltype_filtered_df %>%
 DefaultAssay(object2plot) <- "RNA"
 p <- DotPlot(object = srat, features = genes2plot, col.min = 0)
 p$data$Cell_group <- mapvalues(x = p$data$id, from = celltype_cat_df$Cell_type.shorter, to = celltype_cat_df$Cell_group)
-p$data$gene_celltype_exp_cat <- mapvalues(x = p$data$features.plot, from = genes2plot, to = gene_celltype_exp_cats)
-p$data$gene_celltype_exp_cat <- factor(p$data$gene_celltype_exp_cat, levels = c("Malignant_Expressed", "Stromal_Expressed", "Immune_Expressed"))
+p$data$gene_celltypeexp_cat <- mapvalues(x = p$data$features.plot, from = gene_celltype_exp_cat_df$gene, to = as.vector(gene_celltype_exp_cat_df$gene_celltypeexp_cat))
+p$data$gene_celltypeexp_cat <- factor(p$data$gene_celltypeexp_cat, levels = c("TumorCellExpressed", "NormalEpitheliumExpressed", "StromaExpressed", "ImmuneExpressed", "MultiCellTypeExpressed"))
 p <- p  + RotatedAxis()
 p <- p + facet_grid(Cell_group + id~gene_celltype_exp_cat, scales = "free", space = "free", drop = T)
 p <- p + theme(panel.spacing = unit(0, "lines"),
