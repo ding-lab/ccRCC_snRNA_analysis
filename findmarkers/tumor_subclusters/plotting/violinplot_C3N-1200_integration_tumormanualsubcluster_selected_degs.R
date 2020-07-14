@@ -22,7 +22,7 @@ barcode2manualsubcluster_df <- fread(input = "./Resources/Analysis_Results/annot
 ## load meta data
 idmetadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200427.v1/meta_data.20200427.v1.tsv", data.table = F)
 ## input srat object
-srat <- readRDS(file = "./Resources/snRNA_Processed_Data/Integration/C3N-01200.Tumor_Segments.Merged.20200319.v1.RDS")
+srat <- readRDS(file = "./Resources/snRNA_Processed_Data/Merged_Seurat_Objects/C3N-01200.Tumor_Segments.Merged.20200319.v1.RDS")
 ## set genes to plot
 genes2plot <- c("VHL", "EPAS1", "HIF1A", "PFKFB4")
 

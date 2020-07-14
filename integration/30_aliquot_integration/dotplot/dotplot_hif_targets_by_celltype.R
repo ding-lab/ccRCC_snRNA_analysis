@@ -106,7 +106,7 @@ p <- p + theme(panel.spacing = unit(0, "lines"),
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "Dotplot_HIF_Downstream_Exp", ".pdf")
-pdf(file = file2write, width = 18, height = 12)
+pdf(file = file2write, width = 18, height = 12, useDingbats = F)
 print(p)
 dev.off()
 

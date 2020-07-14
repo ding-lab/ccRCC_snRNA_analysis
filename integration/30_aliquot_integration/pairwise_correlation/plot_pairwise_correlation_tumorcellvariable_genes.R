@@ -19,9 +19,9 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input id meta data
-id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200427.v1/meta_data.20200427.v1.tsv", data.table = F)
+id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200505.v1/meta_data.20200505.v1.tsv", data.table = F)
 ## input te bulk genomics/methylation events
-bulk_sn_omicsprofile_df <- fread(input = "./Resources/Analysis_Results/bulk/other/merge_bulk_sn_profiles/20200430.v1/bulk_sn_omics_profile.20200430.v1.tsv", data.table = F)
+bulk_sn_omicsprofile_df <- fread(input = "./Resources/Analysis_Results/bulk/other/merge_bulk_sn_profiles/20200512.v1/bulk_sn_omics_profile.20200512.v1.tsv", data.table = F)
 ## input the spearman pairwise correlation result
 pearson_coef.tumorcellvariable_genes.df <- fread(input = "./Resources/Analysis_Results/integration/30_aliquot_integration/pairwise_correlation/calculate_pairwise_correlation_tumorcellvariable_genes/20200310.v1/avg_exp.tumorcellvaraible_genes.pearson_coef.20200310.v1.tsv", data.table = F)
 
@@ -71,49 +71,65 @@ Translocation.t3_other_text <- top_col_anno_df$Translocation.t3_other
 Translocation.t3_other_text[is.na(Translocation.t3_other_text)] <- ""
 Translocation.t3_other_text[Translocation.t3_other_text == "None"] <- ""
 ## top column annotation object
-top_col_anno = HeatmapAnnotation(CN.bulk.3p = anno_simple(x = top_col_anno_df$CN.bulk.3p,
+top_col_anno = HeatmapAnnotation(CN.bulk.3p = anno_simple(x = top_col_anno_df$CN.bulk.3p, 
+                                                          gp = gpar(color = "black"),
                                                           simple_anno_size = unit(2, "mm"), 
                                                           col = cnv_state_colors),
-                                 CN.sn.3p_loss.fraction = anno_barplot(top_col_anno_df$CN.sn.3p_loss.fraction, 
+                                 CN.sn.3p_loss.fraction = anno_barplot(top_col_anno_df$CN.sn.3p_loss.fraction,
+                                                                       gp = gpar(fill = "lightblue", color = NA),
                                                                        height = unit(5, "mm")),
-                                 Methyl.VHL = anno_simple(x = top_col_anno_df$Methyl.VHL,
-                                                          simple_anno_size = unit(3, "mm"),
-                                                          col = methyl_color_fun),
-                                 Mut.VHL = anno_simple(x = top_col_anno_df$Mut.VHL,
-                                                       simple_anno_size = unit(3, "mm"),
-                                                       col = variant_class_colors),
-                                 Mut.PBRM1 = anno_simple(x = top_col_anno_df$Mut.PBRM1,
-                                                         simple_anno_size = unit(3, "mm"),
-                                                         col = variant_class_colors),
-                                 Mut.SETD2 = anno_simple(x = top_col_anno_df$Mut.SETD2,
-                                                         simple_anno_size = unit(3, "mm"),
-                                                         col = variant_class_colors),
-                                 Mut.BAP1 = anno_simple(x = top_col_anno_df$Mut.BAP1,
-                                                        simple_anno_size = unit(3, "mm"),
-                                                        col = variant_class_colors),
-                                 Mut.KDM5C = anno_simple(x = top_col_anno_df$Mut.KDM5C,
-                                                         simple_anno_size = unit(3, "mm"),
-                                                         col = variant_class_colors),
-                                 Mut.PTEN = anno_simple(x = top_col_anno_df$Mut.PTEN,
-                                                        simple_anno_size = unit(3, "mm"),
-                                                        col = variant_class_colors),
-                                 Mut.TSC1 = anno_simple(x = top_col_anno_df$Mut.TSC1,
-                                                        simple_anno_size = unit(3, "mm"),
-                                                        col = variant_class_colors),
                                  CN.bulk.5q = anno_simple(x = top_col_anno_df$CN.bulk.5q,
+                                                          gp = gpar(color = "black"),
                                                           simple_anno_size = unit(2, "mm"), 
                                                           col = cnv_state_colors),
                                  CN.sn.5q_gain.fraction = anno_barplot(x = top_col_anno_df$CN.sn.5q_gain.fraction, 
+                                                                       gp = gpar(fill = "pink", color = NA),
                                                                        height = unit(5, "mm")),
                                  CN.bulk.14q = anno_simple(x = top_col_anno_df$CN.bulk.14q,
+                                                           gp = gpar(color = "black"),
                                                            simple_anno_size = unit(2, "mm"), 
                                                            col = cnv_state_colors),
                                  CN.sn.14q_loss.fraction = anno_barplot(x = top_col_anno_df$CN.sn.14q_loss.fraction, 
+                                                                        gp = gpar(fill = "lightblue", color = NA),
                                                                         height = unit(5, "mm")),
+                                 Methyl.VHL = anno_simple(x = top_col_anno_df$Methyl.VHL, 
+                                                          gp = gpar(color = "black"),
+                                                          simple_anno_size = unit(3, "mm"),
+                                                          col = methyl_color_fun),
+                                 Mut.VHL = anno_simple(x = top_col_anno_df$Mut.VHL,
+                                                       gp = gpar(color = "black"),
+                                                       simple_anno_size = unit(3, "mm"),
+                                                       col = variant_class_colors),
+                                 Mut.PBRM1 = anno_simple(x = top_col_anno_df$Mut.PBRM1,
+                                                         gp = gpar(color = "black"),
+                                                         simple_anno_size = unit(3, "mm"),
+                                                         col = variant_class_colors),
+                                 Mut.SETD2 = anno_simple(x = top_col_anno_df$Mut.SETD2,
+                                                         gp = gpar(color = "black"),
+                                                         simple_anno_size = unit(3, "mm"),
+                                                         col = variant_class_colors),
+                                 Mut.BAP1 = anno_simple(x = top_col_anno_df$Mut.BAP1,
+                                                        gp = gpar(color = "black"),
+                                                        simple_anno_size = unit(3, "mm"),
+                                                        col = variant_class_colors),
+                                 Mut.KDM5C = anno_simple(x = top_col_anno_df$Mut.KDM5C,
+                                                         gp = gpar(color = "black"),
+                                                         simple_anno_size = unit(3, "mm"),
+                                                         col = variant_class_colors),
+                                 Mut.PTEN = anno_simple(x = top_col_anno_df$Mut.PTEN,
+                                                        gp = gpar(color = "black"),
+                                                        simple_anno_size = unit(3, "mm"),
+                                                        col = variant_class_colors),
+                                 Mut.TSC1 = anno_simple(x = top_col_anno_df$Mut.TSC1,
+                                                        gp = gpar(color = "black"),
+                                                        simple_anno_size = unit(3, "mm"),
+                                                        col = variant_class_colors),
                                  Translocation.t35 = anno_simple(x = top_col_anno_df$Translocation.t35,
+                                                                 gp = gpar(color = "black"),
                                                                  simple_anno_size = unit(3, "mm"),
                                                                  col = c("chr3-5" = "black", "None" = "white")),
                                  Translocation.t32 = anno_simple(x = top_col_anno_df$Translocation.t32,
+                                                                 gp = gpar(color = "black"),
                                                                  simple_anno_size = unit(3, "mm"),
                                                                  col = c("chr3-2" = "black", "None" = "white")),
                                  Translocation.other = anno_text(x = Translocation.t3_other_text,
@@ -121,6 +137,7 @@ top_col_anno = HeatmapAnnotation(CN.bulk.3p = anno_simple(x = top_col_anno_df$CN
                                                                  location = 0.5, just = "center", height = unit(2, "mm"),
                                                                  gp = gpar(fill = "white", col = "black", fontsize = 5)),
                                  TumorPurity.snRNA = anno_simple(x = top_col_anno_df$TumorPurity.snRNA,
+                                                                 gp = gpar(color = "black"),
                                                                  simple_anno_size = unit(3, "mm"),
                                                                  col = tumorpurity_color_fun))
 
@@ -137,14 +154,16 @@ names(uniq_case_colors) <- uniq_case_ids
 ### create row annotation
 row_anno = rowAnnotation(foo = anno_text(aliquot_wu_ids, 
                                          location = 0.5, just = "center",
-                                         gp = gpar(fill = uniq_case_colors[case_ids], col = "white", border = "black"),
+                                         # gp = gpar(fill = uniq_case_colors[case_ids], col = "white", border = "black"),
+                                         gp = gpar(fill = NA, col = "black", border = NA),
                                          width = max_text_width(aliquot_wu_ids)*1.2))
 
 
 # make bottom column annotation -------------------------------------------
 bottom_col_anno = HeatmapAnnotation(foo = anno_text(aliquot_wu_ids, 
                                                     location = 0.5, just = "center",
-                                                    gp = gpar(fill = uniq_case_colors[case_ids], col = "white", border = "black"),
+                                                    # gp = gpar(fill = uniq_case_colors[case_ids], col = "white", border = "black"),
+                                                    gp = gpar(fill = NA, col = "black", border = NA),
                                                     width = max_text_width(aliquot_wu_ids)*1.2))
 
 
