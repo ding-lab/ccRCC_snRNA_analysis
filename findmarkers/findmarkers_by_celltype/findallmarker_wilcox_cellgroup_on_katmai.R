@@ -38,16 +38,17 @@ path_barcode2celltype <- "./Resources/Analysis_Results/annotate_barcode/map_cell
 barcode2celltype_df <- fread(input = path_barcode2celltype, data.table = F)
 
 # set parameters for findmarkers ------------------------------------------
-## set min.pct
-logfc.threshold.wilcox <- 0.1
-min.pct.wilcox <- 0.1
+logfc.threshold.run <- log(2)
+min.pct.run <- 0.1
+min.diff.pct.run <- 0.1
 
 # set ident ---------------------------------------------------------------
 srat@meta.data$Cell_group <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_df$integrated_barcode, to = as.vector(barcode2celltype_df$Cell_group))
 Idents(srat) <- "Cell_group"
 
 # run findallmarkers ------------------------------------------------------
-markers_df <- FindAllMarkers(object = srat, test.use = "wilcox", only.pos = T, min.pct = min.pct.wilcox, logfc.threshold = logfc.threshold.wilcox, verbose = T)
+markers_df <- FindAllMarkers(object = srat, test.use = "wilcox", only.pos = T,
+                             min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
 markers_df$row_name <- rownames(markers_df)
 
 # write output ------------------------------------------------------------
