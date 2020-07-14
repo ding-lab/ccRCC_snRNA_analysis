@@ -94,7 +94,7 @@ p$data$Cell_group <- mapvalues(x = p$data$id, from = celltype_cat_df$Cell_type.s
 p$data$gene_celltypeexp_cat <- mapvalues(x = p$data$features.plot, from = gene_celltype_exp_cat_df$gene, to = as.vector(gene_celltype_exp_cat_df$gene_celltypeexp_cat))
 p$data$gene_celltypeexp_cat <- factor(p$data$gene_celltypeexp_cat, levels = c("TumorCellExpressed", "NormalEpitheliumExpressed", "StromaExpressed", "ImmuneExpressed", "MultiCellTypeExpressed"))
 p <- p + RotatedAxis()
-p <- p + facet_grid(Cell_group + id~gene_celltypeexp_cat, scales = "free", space = "free", drop = T)
+p <- p + facet_grid(Cell_group ~ gene_celltypeexp_cat, scales = "free", space = "free", drop = T)
 p <- p + theme(panel.spacing = unit(0, "lines"),
                strip.background.y = element_rect(colour = "black", fill = "white"),
                strip.background.x = element_rect(colour = "black", fill = "white"),
@@ -105,8 +105,13 @@ p <- p + theme(panel.spacing = unit(0, "lines"),
                strip.placement = "outside")
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "Dotplot_HIF_Downstream_Exp.", ".png")
-png(file = file2write, width = 2500, height = 1300, res = 150)
+file2write <- paste0(dir_out, "Dotplot_HIF_Downstream_Exp", ".png")
+png(filename = file2write, width = 2500, height = 1300, res = 150)
+print(p)
+dev.off()
+
+file2write <- paste0(dir_out, "Dotplot_HIF_Downstream_Exp", ".pdf")
+pdf(file = file2write, width = 20, height = 15)
 print(p)
 dev.off()
 
