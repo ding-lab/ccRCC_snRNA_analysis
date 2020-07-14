@@ -22,6 +22,7 @@ setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
+library(ggplot2)
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -39,7 +40,7 @@ path_barcode2celltype <- "./Resources/Analysis_Results/annotate_barcode/map_cell
 barcode2celltype_df <- fread(input = path_barcode2celltype, data.table = F)
 table(barcode2celltype_df$Cell_type.shorter)
 ## input DEG for each cell type
-deg_df <- fread(input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/findallmarker_wilcox_cellgroup_on_katmai/20200714.v1/findallmarkers_roc_bycellgroup.pos.20200714.v1.tsv", data.table = F)
+deg_df <- fread(input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/findallmarker_wilcox_cellgroup_on_katmai/20200714.v2/findallmarkers_wilcox_bycellgroup.pos..logfcthreshold0.1.minpct0.1.mindiffpct0.1.tsv", data.table = F)
 ## input hif targets
 hif_targets_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_hif_targets/20200428.v1/HIF_Target_Genes.20200428.v1.tsv")
 
