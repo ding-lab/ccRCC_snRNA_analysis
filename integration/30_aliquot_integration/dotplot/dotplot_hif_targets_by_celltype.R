@@ -24,7 +24,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -75,11 +75,11 @@ gene_celltype_exp_cat_df <- data.frame(gene = c(genes_multicelltypeexpr,
                                                 genes_normalepitheliumexpr,
                                                 genes_stromaexpr, 
                                                 genes_immuneexpr),
-                                       gene_celltypeexp_cat = c(rep("MultiCellTypeExpressed", length(genes_multicelltypeexpr)),
-                                                                rep("TumorCellExpressed", length(genes_tumorcellexpr)),
-                                                                rep("NormalEpitheliumExpressed", length(genes_normalepitheliumexpr)),
-                                                                rep("StromaExpressed", length(genes_stromaexpr)),
-                                                                rep("ImmuneExpressed", length(genes_immuneexpr))))
+                                       gene_celltypeexp_cat = c(rep("Other", length(genes_multicelltypeexpr)),
+                                                                rep("TumorCells\nExpressed", length(genes_tumorcellexpr)),
+                                                                rep("NormalEpithelium\nExpressed", length(genes_normalepitheliumexpr)),
+                                                                rep("Stroma\nExpressed", length(genes_stromaexpr)),
+                                                                rep("Immune\nExpressed", length(genes_immuneexpr))))
 table(gene_celltype_exp_cat_df$gene_celltypeexp_cat)
 ## celltype to cell type category
 celltype_cat_df <- barcode2celltype_filtered_df %>%
@@ -91,8 +91,9 @@ celltype_cat_df <- barcode2celltype_filtered_df %>%
 DefaultAssay(srat) <- "RNA"
 p <- DotPlot(object = srat, features = genes2plot, col.min = 0)
 p$data$Cell_group <- mapvalues(x = p$data$id, from = celltype_cat_df$Cell_type.shorter, to = celltype_cat_df$Cell_group)
+p$data$Cell_group <- factor(p$data$Cell_group, levels = c("Tumor cells", "Normal epithelial cells", "Stroma", "Immune"))
 p$data$gene_celltypeexp_cat <- mapvalues(x = p$data$features.plot, from = gene_celltype_exp_cat_df$gene, to = as.vector(gene_celltype_exp_cat_df$gene_celltypeexp_cat))
-p$data$gene_celltypeexp_cat <- factor(p$data$gene_celltypeexp_cat, levels = c("TumorCellExpressed", "NormalEpitheliumExpressed", "StromaExpressed", "ImmuneExpressed", "MultiCellTypeExpressed"))
+p$data$gene_celltypeexp_cat <- factor(p$data$gene_celltypeexp_cat, levels = c("TumorCelsl\nExpressed", "NormalEpithelium\nExpressed", "Stroma\nExpressed", "Immune\nExpressed", "Other"))
 p <- p + RotatedAxis()
 p <- p + facet_grid(Cell_group ~ gene_celltypeexp_cat, scales = "free", space = "free", drop = T)
 p <- p + theme(panel.spacing = unit(0, "lines"),
@@ -101,7 +102,7 @@ p <- p + theme(panel.spacing = unit(0, "lines"),
                panel.border = element_rect(colour = "black"),
                strip.text.x = element_text(angle = 90, vjust = 0.5),
                strip.text.y = element_text(angle = 0, vjust = 0.5),
-               axis.text.x = element_text(size = 12, face = "bold"),
+               axis.text.x = element_text(size = 14, face = "bold"),
                strip.placement = "outside")
 
 # write output ------------------------------------------------------------
@@ -109,5 +110,6 @@ file2write <- paste0(dir_out, "Dotplot_HIF_Downstream_Exp", ".pdf")
 pdf(file = file2write, width = 18, height = 12, useDingbats = F)
 print(p)
 dev.off()
-
+file2write <- paste0(dir_out, "Dotplot_HIF_Downstream_Exp", ".RDS")
+saveRDS(object = p, file = file2write, compress = T)
 
