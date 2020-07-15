@@ -73,10 +73,15 @@ ca = HeatmapAnnotation(Sample_Type = ifelse(colnames(mat2plot) %in% tumor_bulk_a
 p <- Heatmap(mat2plot,
              top_annotation = ca,
              cluster_columns = T, show_column_dend = F,
-             cluster_rows = F,
+             cluster_rows = F, row_names_gp = gpar(fontsize = 12),
              name = "log2Intensity\n(Sample-Reference)", show_column_names = F)
 
 ## save heatmap to file
+file2write <- paste0(dir_out, "All_HIF_Downstream_Protein_Expression.", run_id, ".pdf")
+pdf(file2write, width = 20, height = 7)
+print(p)
+dev.off()
+
 file2write <- paste0(dir_out, "All_HIF_Downstream_Protein_Expression.", run_id, ".png")
 png(file2write, width = 2000, height = 1000, res = 150)
 print(p)
