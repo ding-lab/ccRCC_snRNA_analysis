@@ -60,7 +60,8 @@ Idents(srat) <- "Cell_type.shorter"
 ## get genes to plot
 genes2plot <- unique(hif_targets_df$target_genesymbol)
 genes2plot <- intersect(genes2plot, unique(deg_df$gene))
-genes2plot
+genes2plot <- unique(c("VHL", "HIF1A", "EPAS1", genes2plot))
+
 ## define the cell type the genes are most highly expressed
 ### category: MultiCellTypeExpressed, TumorCellExpressed, NormalEpitheliumExpressed, StromaExpressed, ImmuneExpressed
 table(deg_df$cluster)
@@ -70,12 +71,13 @@ genes_tumorcellexpr <- deg_df$gene[deg_df$cluster == "Tumor cells" & !(deg_df$ge
 genes_normalepitheliumexpr <- deg_df$gene[deg_df$cluster == "Normal epithelial cells" & !(deg_df$gene %in% genes_multicelltypeexpr)]
 genes_stromaexpr <- deg_df$gene[deg_df$cluster == "Stroma" & !(deg_df$gene %in% genes_multicelltypeexpr)]
 genes_immuneexpr <- deg_df$gene[deg_df$cluster == "Immune" & !(deg_df$gene %in% genes_multicelltypeexpr)]
-gene_celltype_exp_cat_df <- data.frame(gene = c(genes_multicelltypeexpr, 
+genes_other <- unique(deg_df$gene); genes_other <- genes_other[!(genes_other %in% c(genes_tumorcellexpr, genes_normalepitheliumexpr, genes_stromaexpr, genes_immuneexpr))]
+gene_celltype_exp_cat_df <- data.frame(gene = c(genes_other, 
                                                 genes_tumorcellexpr, 
                                                 genes_normalepitheliumexpr,
                                                 genes_stromaexpr, 
                                                 genes_immuneexpr),
-                                       gene_celltypeexp_cat = c(rep("Other", length(genes_multicelltypeexpr)),
+                                       gene_celltypeexp_cat = c(rep("Other", length(genes_other)),
                                                                 rep("TumorCells\nExpressed", length(genes_tumorcellexpr)),
                                                                 rep("NormalEpithelium\nExpressed", length(genes_normalepitheliumexpr)),
                                                                 rep("Stroma\nExpressed", length(genes_stromaexpr)),
@@ -93,14 +95,14 @@ p <- DotPlot(object = srat, features = genes2plot, col.min = 0)
 p$data$Cell_group <- mapvalues(x = p$data$id, from = celltype_cat_df$Cell_type.shorter, to = celltype_cat_df$Cell_group)
 p$data$Cell_group <- factor(p$data$Cell_group, levels = c("Tumor cells", "Normal epithelial cells", "Stroma", "Immune"))
 p$data$gene_celltypeexp_cat <- mapvalues(x = p$data$features.plot, from = gene_celltype_exp_cat_df$gene, to = as.vector(gene_celltype_exp_cat_df$gene_celltypeexp_cat))
-p$data$gene_celltypeexp_cat <- factor(p$data$gene_celltypeexp_cat, levels = c("TumorCelsl\nExpressed", "NormalEpithelium\nExpressed", "Stroma\nExpressed", "Immune\nExpressed", "Other"))
+p$data$gene_celltypeexp_cat <- factor(p$data$gene_celltypeexp_cat, levels = c("Other", "TumorCelsl\nExpressed", "NormalEpithelium\nExpressed", "Stroma\nExpressed", "Immune\nExpressed"))
 p <- p + RotatedAxis()
 p <- p + facet_grid(Cell_group ~ gene_celltypeexp_cat, scales = "free", space = "free", drop = T)
 p <- p + theme(panel.spacing = unit(0, "lines"),
                strip.background.y = element_rect(colour = "black", fill = "white"),
                strip.background.x = element_rect(colour = "black", fill = "white"),
                panel.border = element_rect(colour = "black"),
-               strip.text.x = element_text(angle = 90, vjust = 0.5),
+               strip.text.x = element_text(angle = 0, vjust = 0.5),
                strip.text.y = element_text(angle = 0, vjust = 0.5),
                axis.text.x = element_text(size = 14, face = "bold"),
                strip.placement = "outside")
