@@ -72,7 +72,7 @@ genes_tumorcellexpr <- deg_df$gene[deg_df$cluster == "Tumor cells" & !(deg_df$ge
 genes_normalepitheliumexpr <- deg_df$gene[deg_df$cluster == "Normal epithelial cells" & !(deg_df$gene %in% genes_multicelltypeexpr)]
 genes_stromaexpr <- deg_df$gene[deg_df$cluster == "Stroma" & !(deg_df$gene %in% genes_multicelltypeexpr)]
 genes_immuneexpr <- deg_df$gene[deg_df$cluster == "Immune" & !(deg_df$gene %in% genes_multicelltypeexpr)]
-genes_other <- unique(deg_df$gene); genes_other <- genes_other[!(genes_other %in% c(genes_tumorcellexpr, genes_normalepitheliumexpr, genes_stromaexpr, genes_immuneexpr))]
+genes_other <- genes2plot[!(genes2plot %in% c(genes_tumorcellexpr, genes_normalepitheliumexpr, genes_stromaexpr, genes_immuneexpr))]
 gene_celltype_exp_cat_df <- data.frame(gene = c(genes_other, 
                                                 genes_tumorcellexpr, 
                                                 genes_normalepitheliumexpr,

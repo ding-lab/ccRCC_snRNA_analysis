@@ -43,13 +43,12 @@ hif_targets_df <- tf_tab %>%
   filter(source_genesymbol %in% c("HIF1A", "EPAS1"))
 
 
-# plot the genes refined by snRNA-seq -------------------------------------
-## specify the genes to be plotted 
-## get genes to plot
+# specify the genes to be plotted  -------------------------------------
 genes2plot <- intersect(hif_targets_df$target_genesymbol, protein_tab$Index)
 genes2plot <- intersect(genes2plot, unique(deg_df$gene))
 genes2plot <- unique(c("VHL", "HIF1A", "EPAS1", genes2plot))
 
+# make heatmap body -------------------------------------------------------
 ## make the matrix to plot the heatmap
 protein_tab2plot <- protein_tab %>%
   filter(Index %in% genes2plot) %>%
@@ -63,17 +62,37 @@ rownames(protein_mat2plot) <- protein_tab2plot$Index
 mat2plot <- as.matrix(protein_mat2plot) - as.vector(protein_tab2plot$ReferenceIntensity)
 mat2plot <- mat2plot[genes2plot,]
 
-## make column annotation
+
+# make column annotation --------------------------------------------------
 ca = HeatmapAnnotation(Sample_Type = ifelse(colnames(mat2plot) %in% tumor_bulk_aliquot_ids2plot, "Tumor", "Normal"),
                        col = list(Sample_Type = c("Tumor" = "red", "Normal" = "green")))
 # ra = rowAnnotation(Sample_Type = ifelse(rownames(mat2plot) %in% tumor_bulk_aliquot_ids2plot, "Tumor", "Normal"),
 #                        col = list(Sample_Type = c("Tumor" = "red", "Normal" = "green")))
 
-## plot heatmap
+# make row split ----------------------------------------------------------
+genes_multicelltypeexpr <- names(table(deg_df$gene)[table(deg_df$gene) == 2])
+genes_tumorcellexpr <- deg_df$gene[deg_df$cluster == "Tumor cells" & !(deg_df$gene %in% genes_multicelltypeexpr)]
+genes_normalepitheliumexpr <- deg_df$gene[deg_df$cluster == "Normal epithelial cells" & !(deg_df$gene %in% genes_multicelltypeexpr)]
+genes_stromaexpr <- deg_df$gene[deg_df$cluster == "Stroma" & !(deg_df$gene %in% genes_multicelltypeexpr)]
+genes_immuneexpr <- deg_df$gene[deg_df$cluster == "Immune" & !(deg_df$gene %in% genes_multicelltypeexpr)]
+genes_other <- genes2plot[!(genes2plot %in% c(genes_tumorcellexpr, genes_normalepitheliumexpr, genes_stromaexpr, genes_immuneexpr))]
+gene_celltype_exp_cat_df <- data.frame(gene = c(genes_other, 
+                                                genes_tumorcellexpr, 
+                                                genes_normalepitheliumexpr,
+                                                genes_stromaexpr, 
+                                                genes_immuneexpr),
+                                       gene_celltypeexp_cat = c(rep("Other", length(genes_other)),
+                                                                rep("TumorCells\nExpressed", length(genes_tumorcellexpr)),
+                                                                rep("NormalEpithelium\nExpressed", length(genes_normalepitheliumexpr)),
+                                                                rep("Stroma\nExpressed", length(genes_stromaexpr)),
+                                                                rep("Immune\nExpressed", length(genes_immuneexpr))))
+row_split_vec <- mapvalues(x = rownames(mat2plot), from = gene_celltype_exp_cat_df$gene, to = as.vector(gene_celltype_exp_cat_df$gene_celltypeexp_cat))
+row_split_factor <- factor(x = row_split_vec, levels = c("Other", "TumorCells\nExpressed", "NormalEpithelium\nExpressed", "Stroma\nExpressed", "Immune\nExpressed"))
+# plot heatmap ------------------------------------------------------------
 p <- Heatmap(mat2plot,
              top_annotation = ca,
              cluster_columns = T, show_column_dend = F,
-             cluster_rows = F, row_names_gp = gpar(fontsize = 12),
+             cluster_rows = F, row_names_gp = gpar(fontsize = 12), row_split = row_split_factor, row_title_gp = gpar(fontsize = 12),
              name = "log2Intensity\n(Sample-Reference)", show_column_names = F)
 
 ## save heatmap to file
@@ -81,10 +100,9 @@ file2write <- paste0(dir_out, "All_HIF_Downstream_Protein_Expression.", run_id, 
 pdf(file2write, width = 20, height = 7)
 print(p)
 dev.off()
-
-file2write <- paste0(dir_out, "All_HIF_Downstream_Protein_Expression.", run_id, ".png")
-png(file2write, width = 2000, height = 1000, res = 150)
-print(p)
-dev.off()
+# file2write <- paste0(dir_out, "All_HIF_Downstream_Protein_Expression.", run_id, ".png")
+# png(file2write, width = 2000, height = 1000, res = 150)
+# print(p)
+# dev.off()
 
 
