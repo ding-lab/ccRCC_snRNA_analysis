@@ -91,7 +91,8 @@ row_split_factor <- factor(x = row_split_vec, levels = c("Other", "TumorCells\nE
 # plot heatmap ------------------------------------------------------------
 p <- Heatmap(mat2plot,
              top_annotation = ca,
-             cluster_columns = T, show_column_dend = F, column_title = "Bulk Protein Level of HIF Pathway Proteins Between\nTumor and Normal Adjacent Tissue",
+             cluster_columns = T, show_column_dend = F, 
+             column_title = "Bulk Protein Level of HIF Pathway Proteins Between\nTumor and Normal Adjacent Tissue", column_title_gp = gpar(fontsize = 18),
              cluster_rows = F, row_names_gp = gpar(fontsize = 12), row_split = row_split_factor, row_title_gp = gpar(fontsize = 12),
              name = "log2Intensity\n(Sample-Reference)", show_column_names = F)
 

@@ -98,6 +98,7 @@ p$data$gene_celltypeexp_cat <- mapvalues(x = p$data$features.plot, from = gene_c
 p$data$gene_celltypeexp_cat <- factor(p$data$gene_celltypeexp_cat, levels = c("Other", "TumorCells\nExpressed", "NormalEpithelium\nExpressed", "Stroma\nExpressed", "Immune\nExpressed"))
 p <- p + RotatedAxis()
 p <- p + facet_grid(. ~ gene_celltypeexp_cat, scales = "free", space = "free", drop = T)
+p <- p + ggtitle("Single Nulcei Expression of HIF Pathway Genes Across Cell Groups")
 p <- p + theme(panel.spacing = unit(0, "lines"),
                strip.background.y = element_rect(colour = "black", fill = "white"),
                strip.background.x = element_rect(colour = "black", fill = "white"),
@@ -106,6 +107,7 @@ p <- p + theme(panel.spacing = unit(0, "lines"),
                strip.text.y = element_text(angle = 0, vjust = 0.5),
                axis.text.x = element_text(size = 14, face = "bold"),
                strip.placement = "outside")
+p <- p + theme(legend.position = "bottom")
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "Dotplot_HIF_Downstream_Exp", ".pdf")
