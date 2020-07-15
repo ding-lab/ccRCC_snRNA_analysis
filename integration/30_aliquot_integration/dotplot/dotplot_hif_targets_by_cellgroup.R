@@ -95,7 +95,7 @@ DefaultAssay(srat) <- "RNA"
 p <- DotPlot(object = srat, features = genes2plot, col.min = 0)
 p$data$Cell_group <- factor(p$data$id, levels = c("Tumor cells", "Normal epithelial cells", "Stroma", "Immune"))
 p$data$gene_celltypeexp_cat <- mapvalues(x = p$data$features.plot, from = gene_celltype_exp_cat_df$gene, to = as.vector(gene_celltype_exp_cat_df$gene_celltypeexp_cat))
-p$data$gene_celltypeexp_cat <- factor(p$data$gene_celltypeexp_cat, levels = c("Other", "TumorCelsl\nExpressed", "NormalEpithelium\nExpressed", "Stroma\nExpressed", "Immune\nExpressed"))
+p$data$gene_celltypeexp_cat <- factor(p$data$gene_celltypeexp_cat, levels = c("Other", "TumorCells\nExpressed", "NormalEpithelium\nExpressed", "Stroma\nExpressed", "Immune\nExpressed"))
 p <- p + RotatedAxis()
 p <- p + facet_grid(. ~ gene_celltypeexp_cat, scales = "free", space = "free", drop = T)
 p <- p + theme(panel.spacing = unit(0, "lines"),
