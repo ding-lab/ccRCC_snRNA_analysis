@@ -86,12 +86,12 @@ p$data$gene_cell_type2 <- plyr::mapvalues(p$data$features.plot, from = gene2cell
 p$data$gene_cell_type3 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type3)
 p$data$gene_cell_type4 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type4)
 p <- p  + RotatedAxis()
-p <- p + facet_grid(.~gene_cell_type1 + gene_cell_type2 + gene_cell_type3 + gene_cell_type4, scales = "free", space = "free", drop = T)
+p <- p + facet_grid(.~gene_cell_type1 + gene_cell_type2 + gene_cell_type3, scales = "free", space = "free", drop = T)
 p <- p + theme(panel.spacing = unit(0, "lines"),
                strip.background = element_blank(),
                panel.border = element_rect(colour = "black"),
                panel.grid.major = element_line(colour = "grey50"),
-               strip.text.x = element_text(angle = 90, vjust = 0.5),
+               strip.text.x = element_text(angle = 0, vjust = 0.5),
                axis.text.x = element_text(size = 90, face = "bold"),
                strip.placement = "outside")
 cat("Finished Dotplot\n")
@@ -99,7 +99,7 @@ cat("###########################################\n")
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "Dotplot_CellTypeMarkers_Exp", ".pdf")
-pdf(file = file2write, width = 18, height = 12, useDingbats = F)
+pdf(file = file2write, width = 20, height = 8, useDingbats = F)
 print(p)
 dev.off()
 
