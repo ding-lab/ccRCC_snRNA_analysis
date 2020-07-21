@@ -48,7 +48,7 @@ barcode2tumorsubcluster_df$Aliquot_WU <- mapvalues(x = barcode2tumorsubcluster_d
 barcode2tumorsubcluster_df <- barcode2tumorsubcluster_df %>%
   mutate(Name_TumorSubcluster = paste0(Aliquot_WU, "_C", (Id_TumorManualCluster + 1)))
 ## change meta data
-srat@meta.data$Name_TumorSubcluster <- mapvalues(x = rownames(srat@meta.data), from = barcode2tumorsubcluster_df$integrated_barcode, to = as.vector(barcode2tumorsubcluster_filtered_df$Name_TumorSubcluster))
+srat@meta.data$Name_TumorSubcluster <- mapvalues(x = rownames(srat@meta.data), from = barcode2tumorsubcluster_df$integrated_barcode, to = as.vector(barcode2tumorsubcluster_df$Name_TumorSubcluster))
 ## change ident
 Idents(srat) <- "Name_TumorSubcluster"
 
