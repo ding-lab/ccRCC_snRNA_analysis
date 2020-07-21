@@ -30,8 +30,8 @@ names(immunecelltype1_colors) <- c("Myleoid lineage immune cells", "Lymphoid lin
 # make color palette for detailed cell types -----------------------------------
 normal_epithelial_colors <- Polychrome::palette36.colors(n = 36)[7:12]
 names(normal_epithelial_colors) <- c("Distal convoluted tubule",
-                                     "Intercalated cells type A",
-                                     "Intercalated cells type B",
+                                     "Intercalated cells",
+                                     "Principle cells",
                                      "Loop of Henle", 
                                      "Podocytes", 
                                      "Proximal tubule")
@@ -82,7 +82,7 @@ names(variant_class_colors) <- c("Frame_Shift_Del", "Frame_Shift_Ins", "Nonsense
 
 
 # make color palette for copy number state --------------------------------
-cnv_state_colors <- c("gain" = "red", "loss" = "blue", "neutral" = "white")
+cnv_state_colors <- c("gain" = "#e41a1c", "loss" = "#377eb8", "neutral" = "white")
 
 # make colors for cell type -----------------------------------------------
 ## set color for different immune cell types

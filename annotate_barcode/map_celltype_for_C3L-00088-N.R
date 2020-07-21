@@ -27,7 +27,7 @@ srat <- readRDS(file = "./Resources/snRNA_Processed_Data/scRNA_auto/outputs/CPT0
 barcode2cluster_df <- srat@meta.data 
 barcode2cluster_df <- as.data.frame(barcode2cluster_df)
 barcode2cluster_df$individual_barcode <- rownames(barcode2cluster_df)
-barcode2celltype_df$seurat_clusters <- as.numeric(barcode2celltype_df$seurat_clusters)
+barcode2cluster_df$seurat_clusters <- as.numeric(barcode2cluster_df$seurat_clusters)
 barcode2celltype_df <- merge(barcode2cluster_df, 
                              cluster2celltype_df %>%
                                filter(Aliquot == "CPT0000890002"), 
@@ -36,6 +36,8 @@ barcode2celltype_df <- merge(barcode2cluster_df,
 barcode2celltype_df$Cell_type.detailed <- barcode2celltype_df$Most_Enriched_Cell_Type2
 barcode2celltype_df$Cell_type.detailed[barcode2celltype_df$Cell_type.detailed == ""] <- barcode2celltype_df$Most_Enriched_Cell_Type1[barcode2celltype_df$Cell_type.detailed == ""]
 barcode2celltype_df$Cell_type.detailed %>% unique()
+barcode2celltype_df$Cell_type.detailed[barcode2celltype_df$Cell_type.detailed == "Thick ascending limb"] <- "Loop of Henle"
+
 ## add cell type shorter
 barcode2celltype_df$Cell_type.shorter <- barcode2celltype_df$Cell_type.detailed
 barcode2celltype_df$Cell_type.shorter[barcode2celltype_df$Most_Enriched_Cell_Group == "Nephron_Epithelium"] <- "Normal epithelial cells"

@@ -27,6 +27,12 @@ snRNA_id_metadata_df2 <- readxl::read_xlsx("./Resources/Sample_Info/02_Post_requ
 snRNA_id_metadata_df1_original <- readxl::read_xlsx("./Resources/Sample_Info/02_Post_request_CPTAC3_shipment/JHU Distribution Manifest_ccRCC material to WUSTL_6.17.2019_original_segment.xlsx")
 ## input the new aliquot id for the multi-segment sample
 id_multisegment_df <- fread(input = "./Resources/Meta_Data/ccRCC_Specimen_Data_Tracking - Multi-Segment_Info.tsv", data.table = F)
+## input samples with snRNA data
+snrna_sample_df <- fread(data.table = F, input = "./Resources/snRNA_Processed_Data/scRNA_auto/summary/Seurat_Preprocessing.20200701.v1.tsv")
+## input samples with snATAC data
+snatac_sample_df <- fread(data.table = F, input = "../ccRCC_snATAC/Resources/snATAC_Data_Generation/snATAC_Sample_Selection_Rationale.tsv")
+## input FFPE slides availability
+ffpe_sample_df <- readxl::read_excel(path = "./Resources/Sample_Info/02_Post_request_CPTAC3_shipment/Manfiest_ccRCC and GBM slides for IHC @ Wash U_10.28.2019.xlsx")
 
 # transform snRNA aliquot id table-------------------------------------
 ## transform sample info shipped for snRNA at 2019-June
@@ -73,6 +79,22 @@ id_metadata_df$Aliquot.snRNA.WU <- mapvalues(x = id_metadata_df$Aliquot.snRNA.WU
 ## filter out samples that are not snRNA-seqed
 id_metadata_df <- id_metadata_df %>%
   filter(Aliquot.snRNA.WU != Aliquot.snRNA)
+
+# annotate which samples has snRNA data ------------------------
+id_metadata_df <- id_metadata_df %>%
+  mutate(snRNA_available = (Aliquot.snRNA %in% snrna_sample_df$Aliquot))
+
+# annotate which samples has snATAC data ------------------------
+id_metadata_df <- id_metadata_df %>%
+  mutate(snATAC_available = (Aliquot.snRNA %in% snatac_sample_df$Aliquot))
+
+# annotate which samples have FFPE slides ---------------------------------
+ffpe_sample_df <- as.data.frame(ffpe_sample_df)
+ffpe_sample_count_df <- table(ffpe_sample_df$`Corresponding Tissue Block ID`)
+ffpe_sample_count_df <- as.data.frame(ffpe_sample_count_df)
+id_metadata_df$FFPE_available_slides <- mapvalues(x = id_metadata_df$Sample, from = ffpe_sample_count_df$Var1, to = as.vector(ffpe_sample_count_df$Freq))
+id_metadata_df$FFPE_available_slides[id_metadata_df$FFPE_available_slides == id_metadata_df$Sample] <- 0
+id_metadata_df$FFPE_available_slides <- as.numeric(id_metadata_df$FFPE_available_slides)
 
 # Write meta data table ---------------------------------------------------
 write.table(x = id_metadata_df, file = paste0(dir_out, "meta_data", ".", run_id ,".tsv"), quote = F, sep = "\t", row.names = F)

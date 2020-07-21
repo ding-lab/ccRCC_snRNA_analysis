@@ -25,9 +25,9 @@ immune_barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysi
 ## input tumor subclustering cell type assignment: 93277 cells
 tumor_barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_barcode_with_manual_tumorsubcluster_id/20200616.v1/Barcode2TumorSubclusterId.20200616.v1.tsv", data.table = F)
 ## input barcode-to-cell-type table
-normal_epithelial_barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_normal_epithelial_cells/20200410.v1/normal_epithelial_reclustered.barcode2celltype.20200410.v1.tsv", data.table = F)
+normal_epithelial_barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_normal_epithelial_cells/20200720.v1/normal_epithelial_reclustered.barcode2celltype.20200720.v1.tsv", data.table = F)
 ## input patch barcode2cell type table
-bc2celltype_patch_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_for_C3L-00088-N/20200707.v1/Barcode2CellType.C3L-00088-N.20200707.v1.tsv")
+bc2celltype_patch_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_for_C3L-00088-N/20200720.v1/Barcode2CellType.C3L-00088-N.20200720.v1.tsv")
 
 # get barcode2celltype from integrated data -------------------------------
 nrow(all_integrated_barcode2cluster_df)
@@ -109,6 +109,7 @@ table(barcode2celltype_df$Cell_type.shorter)
 barcode2celltype_df <- rbind(barcode2celltype_df, bc2celltype_patch_df)
 nrow(barcode2celltype_df)
 table(barcode2celltype_df$Cell_type.shorter)
+table(barcode2celltype_df$Cell_type.detailed)
 
 # write output ------------------------------------------------------------
 write.table(x = barcode2celltype_df, file = paste0(dir_out, "31AliquotIntegration.Barcode2CellType.TumorManualCluster.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)

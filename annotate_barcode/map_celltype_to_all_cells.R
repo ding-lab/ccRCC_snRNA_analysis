@@ -25,7 +25,7 @@ immune_barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysi
 ## input tumor subclustering cell type assignment: 93277 cells
 tumor_barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_barcode_with_manual_tumorsubcluster_id/20200616.v1/Barcode2TumorSubclusterId.20200616.v1.tsv", data.table = F)
 ## input barcode-to-cell-type table
-normal_epithelial_barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_normal_epithelial_cells/20200713.v1/normal_epithelial_reclustered.barcode2celltype.20200713.v1.tsv", data.table = F)
+normal_epithelial_barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_normal_epithelial_cells/20200720.v1/normal_epithelial_reclustered.barcode2celltype.20200720.v1.tsv", data.table = F)
 
 
 # get barcode2celltype from integrated data -------------------------------
@@ -103,5 +103,7 @@ barcode2celltype_df <- rbind(immune_barcode2celltype_df %>%
                                mutate(Cell_group = "Unknown"))
 nrow(barcode2celltype_df)
 table(barcode2celltype_df$Cell_type.shorter)
+table(barcode2celltype_df$Cell_type.detailed[barcode2celltype_df$Most_Enriched_Cell_Group == "Nephron_Epithelium"])
+
 # write output ------------------------------------------------------------
 write.table(x = barcode2celltype_df, file = paste0(dir_out, "30AliquotIntegration.Barcode2CellType.TumorManualCluster.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)

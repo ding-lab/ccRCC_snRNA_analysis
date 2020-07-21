@@ -61,6 +61,8 @@ normal_epithelial_barcode2celltype_df$Cell_type.detailed <- normal_epithelial_ba
 normal_epithelial_barcode2celltype_df$Cell_type.detailed[normal_epithelial_barcode2celltype_df$Cell_type.detailed == ""] <- normal_epithelial_barcode2celltype_df$Most_Enriched_Cell_Type1[normal_epithelial_barcode2celltype_df$Cell_type.detailed == ""]
 normal_epithelial_barcode2celltype_df$Cell_type.detailed[normal_epithelial_barcode2celltype_df$Cell_type.detailed == ""] <- normal_epithelial_barcode2celltype_df$Most_Enriched_Cell_Group[normal_epithelial_barcode2celltype_df$Cell_type.detailed == ""]
 normal_epithelial_barcode2celltype_df$Cell_type.detailed[normal_epithelial_barcode2celltype_df$Cell_type.detailed == "Thick ascending limb"] <- "Loop of Henle"
+normal_epithelial_barcode2celltype_df$Cell_type.detailed[normal_epithelial_barcode2celltype_df$Most_Enriched_Cell_Type1 == "Intercalated cells"] <- "Intercalated cells"
+normal_epithelial_barcode2celltype_df$Cell_type.detailed %>% unique()
 ## make detailed cell type
 normal_epithelial_barcode2celltype_df$Cell_type.shorter <- "Normal epithelial cells"
 normal_epithelial_barcode2celltype_df$Cell_type.shorter[normal_epithelial_barcode2celltype_df$Cell_type.detailed == "Unknown"] <- "Unknown"
