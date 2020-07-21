@@ -92,7 +92,7 @@ p <- p + theme(panel.spacing = unit(0, "lines"),
                panel.border = element_rect(colour = "black"),
                panel.grid.major = element_line(colour = "grey50"),
                strip.text.x = element_text(angle = 0, vjust = 0.5),
-               axis.text.x = element_text(size = 90, face = "bold"),
+               axis.text.x = element_text(angle = 90, face = "bold"),
                strip.placement = "outside")
 cat("Finished Dotplot\n")
 cat("###########################################\n")
