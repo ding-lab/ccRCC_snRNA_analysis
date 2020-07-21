@@ -1,4 +1,4 @@
-Yige Wu @WashU Jul 2020
+# Yige Wu @WashU Jul 2020
 
 # set up libraries and output directory -----------------------------------
 ## getting the path to the current script
