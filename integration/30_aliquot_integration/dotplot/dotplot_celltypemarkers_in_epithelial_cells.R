@@ -103,3 +103,6 @@ pdf(file = file2write, width = 20, height = 10, useDingbats = F)
 print(p)
 dev.off()
 
+file2write <- paste0(dir_out, "Dotplot_CellTypeMarkers_Exp", ".RDS")
+saveRDS(object = file2write, compress = T)
+
