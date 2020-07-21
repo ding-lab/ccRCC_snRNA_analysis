@@ -24,7 +24,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 2
+version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -91,7 +91,7 @@ p <- p + theme(panel.spacing = unit(0, "lines"),
                strip.background = element_blank(),
                panel.border = element_rect(colour = "black"),
                panel.grid.major = element_line(colour = "grey50"),
-               strip.text.x = element_text(angle = 0, vjust = 0.5),
+               strip.text.x = element_text(angle = 90, vjust = 0.5),
                axis.text.x = element_text(angle = 90, face = "bold"),
                strip.placement = "outside")
 cat("Finished Dotplot\n")
@@ -99,7 +99,7 @@ cat("###########################################\n")
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "Dotplot_CellTypeMarkers_Exp", ".pdf")
-pdf(file = file2write, width = 20, height = 8, useDingbats = F)
+pdf(file = file2write, width = 20, height = 10, useDingbats = F)
 print(p)
 dev.off()
 
