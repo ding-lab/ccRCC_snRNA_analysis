@@ -80,13 +80,13 @@ genes2plot_filtered <- unique(genes2plot_filtered)
 cat("###########################################\n")
 cat("Dotplot now\n")
 p <- DotPlot(object = srat, features = genes2plot_filtered, col.min = 0)
-p$data$gene_cell_type_group <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type_Group)
-p$data$gene_cell_type1 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type1)
-p$data$gene_cell_type2 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type2)
-p$data$gene_cell_type3 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type3)
-p$data$gene_cell_type4 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type4)
+# p$data$gene_cell_type_group <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type_Group)
+# p$data$gene_cell_type1 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type1)
+# p$data$gene_cell_type2 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type2)
+# p$data$gene_cell_type3 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type3)
+# p$data$gene_cell_type4 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type4)
 p <- p  + RotatedAxis()
-p <- p + facet_grid(.~gene_cell_type1 + gene_cell_type2 + gene_cell_type3, scales = "free", space = "free", drop = T)
+# p <- p + facet_grid(.~gene_cell_type1 + gene_cell_type2 + gene_cell_type3, scales = "free", space = "free", drop = T)
 p <- p + theme(panel.spacing = unit(0, "lines"),
                strip.background = element_blank(),
                panel.border = element_rect(colour = "black"),
@@ -99,7 +99,7 @@ cat("###########################################\n")
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "Dotplot_CellTypeMarkers_Exp", ".pdf")
-pdf(file = file2write, width = 20, height = 10, useDingbats = F)
+pdf(file = file2write, width = 20, height = 6, useDingbats = F)
 print(p)
 dev.off()
 
