@@ -17,6 +17,10 @@ for (pkg_name_tmp in packages) {
 }
 cartocolors_df <- rcartocolor::cartocolors
 
+
+# make colors for tumor segments ------------------------------------------
+colors_tumor_segments <- c("T1" = "#FF7F00", "T2" = "#C2A5CF", "T3"  = "#7B3294", "N" = "#008837")
+
 # make color palette for major cell groups -----------------------------------
 # cellgroup_colors <- Polychrome::palette36.colors(n = 36)[3:6]
 cellgroup_colors <- RColorBrewer::brewer.pal(n = 4, name = "Dark2")[c(4,3,2,1)]

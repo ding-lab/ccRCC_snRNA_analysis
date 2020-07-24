@@ -24,7 +24,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 4
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -80,7 +80,7 @@ genes2plot_filtered <- unique(genes2plot_filtered)
 cat("###########################################\n")
 cat("Dotplot now\n")
 p <- DotPlot(object = srat, features = genes2plot_filtered, col.min = 0)
-p$data$id <- factor(x = p$data$id, levels = rev(c("Tumor cells", "Proximal tubule", "Loop of Henle", "Distal convoluted tubule", "Intercalated cells", "Podocytes")))
+p$data$id <- factor(x = p$data$id, levels = rev(c("Tumor cells", "Proximal tubule", "Loop of Henle", "Distal convoluted tubule", "Principle cells", "Intercalated cells", "Podocytes")))
 # p$data$gene_cell_type_group <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type_Group)
 # p$data$gene_cell_type1 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type1)
 # p$data$gene_cell_type2 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type2)
