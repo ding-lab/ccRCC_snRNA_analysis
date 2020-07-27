@@ -42,6 +42,24 @@ plot_df <- frac_barcodes_by_cellgroup %>%
 plot_df$Sample_Type <- mapvalues(x = plot_df$Aliquot_WU, from = idmetadata_df$Aliquot.snRNA.WU, to = idmetadata_df$Sample_Type)
 plot_df$Case <- mapvalues(x = plot_df$Aliquot_WU, from = idmetadata_df$Aliquot.snRNA.WU, to = idmetadata_df$Case)
 
+# sort cases by sample numbers and then normal epithelial cells--------------------------------------------------------------
+case_sorted_df <- idmetadata_df %>%
+  filter(snRNA_available) %>%
+  select(Case) %>%
+  table() %>%
+  as.data.frame() %>%
+  rename(Case = '.')
+frac_normalepithelialcells_by_case <- plot_df %>%
+  filter(Cell_group == "Normal epithelial cells") %>%
+  group_by(Case) %>%
+  summarise(Fraction_NormalEpiCell = sum(Frac_Barcodes_ByAliquotCellGroup))
+case_sorted_df <- merge(case_sorted_df, frac_normalepithelialcells_by_case, by = c("Case"), all.x = T)
+case_sorted_df$Fraction_NormalEpiCell[is.na(case_sorted_df$Fraction_NormalEpiCell)] <- 0
+case_sorted_df <- case_sorted_df %>%
+  arrange(Freq, Fraction_NormalEpiCell)
+## sort
+plot_df$Case <- factor(x = plot_df$Case, levels = case_sorted_df$Case)
+
 # plot data frame ---------------------------------------------------------
 p <- ggplot()
 p <- p + geom_col(data = plot_df, mapping = aes(x = Aliquot_WU, y = Frac_Barcodes_ByAliquotCellGroup, fill = Cell_group), position = "stack")

@@ -38,11 +38,12 @@ p <- p + scale_y_continuous(breaks = seq(0, 15000, 2500), labels = seq(0, 15000,
 p <- p + xlim(c(0, 5000))
 p <- p + annotate("text", label = paste0("Min = ", min_x, "\n",
                                          "Max = ", max_x, "\n",
-                                         "Mean = ", mean_x), x = 1000, y = 12500)
-
+                                         "Mean = ", mean_x), x = 4000, y = 11000, size = 6)
 p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                panel.background = element_blank(), axis.line = element_line(colour = "black"))
-p <- p + theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+p <- p + theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20))
+p <- p + theme(axis.title.x = element_text(face = "bold", size = 15),
+               axis.title.y = element_text(face = "bold", size = 15))
 p
 
 # save output -------------------------------------------------------------

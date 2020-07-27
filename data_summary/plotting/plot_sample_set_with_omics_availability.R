@@ -164,10 +164,12 @@ top_col_anno = HeatmapAnnotation(Sample_Type_Suffix = anno_text(aliquot_id_suffi
                                                         gp = gpar(color = "black"),
                                                         simple_anno_size = unit(3, "mm"),
                                                         col = c("TRUE" = "#e7298a", "FALSE" = "white")),
-                                 Mut.VHL = anno_simple(x = as.character(!(top_col_anno_df$Mut.VHL == "None" | top_col_anno_df$Mut.VHL == "Silent")),
-                                                       gp = gpar(color = "black"),
-                                                       simple_anno_size = unit(4, "mm"),
-                                                       col = c("TRUE" = "#e7298a", "FALSE" = "white")),
+                                 Mut.VHL = anno_simple(x = ifelse(is.na(top_col_anno_df$Mut.VHL), NA, 
+                                                                   ifelse(!(top_col_anno_df$Mut.VHL == "None" | top_col_anno_df$Mut.VHL == "Silent"), 
+                                                                          ifelse(top_col_anno_df$Is_discovery_set, "Mutated (WES)", "Mutated (Mapped the Mutation of T1 to snRNA Reads)"), "None")),
+                                                        gp = gpar(color = "black"),
+                                                        simple_anno_size = unit(3, "mm"),
+                                                        col = c("Mutated (WES)" = "#e7298a", "Mutated (Mapped the Mutation of T1 to snRNA Reads)" = "#c994c7", "None" = "white")),
                                  Methyl.VHL = anno_simple(x = top_col_anno_df$Methyl.VHL, 
                                                           gp = gpar(color = "black"),
                                                           simple_anno_size = unit(4, "mm"),
@@ -210,12 +212,29 @@ top_col_anno = HeatmapAnnotation(Sample_Type_Suffix = anno_text(aliquot_id_suffi
 
 # make column split -------------------------------------------------------
 col_split_vec <- case_ids
+## sort cases
+case_sorted_df <- id_metadata_df %>%
+  filter(snRNA_available) %>%
+  select(Case) %>%
+  table() %>%
+  as.data.frame() %>%
+  rename(Case = '.')
+histology_bycase_df <- plot_data_df %>%
+  filter(Aliquot_Suffix == "T1") %>%
+  select(Case, Histologic_Type) %>%
+  unique()
+case_sorted_df <- merge(case_sorted_df, histology_bycase_df, by = c("Case"))
+case_sorted_df <- case_sorted_df %>%
+  arrange(Freq, Histologic_Type)
+
+## make factor
+col_split_factor <- factor(x = case_ids, levels = case_sorted_df$Case)
 
 # plot heatmap body with white-yellow-red ------------------------------------------------------
 ## make heatmap
 color_na <- "grey50"
 p <- Heatmap(matrix = plot_data_mat,
-             column_split = col_split_vec,
+             column_split = col_split_factor,
              column_order = order(match(plot_data_df$Aliquot_Suffix, c("T1", "T2", "T3", "N"))),
              column_title_gp = gpar(frontsize = 12), column_title_rot = 90,
              # bottom_annotation = bottom_col_anno, 

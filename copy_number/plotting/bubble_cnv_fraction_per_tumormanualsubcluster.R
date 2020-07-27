@@ -10,7 +10,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -113,7 +113,7 @@ p <- p + scale_x_discrete(breaks=plot_data_df$id_aliquot_cluster,
                           labels=plot_data_df$name_tumorsubcluster)
 p <- p + theme_bw()
 p <- p + theme(axis.title.x = element_blank())
-p <- p + theme(axis.text.x = element_text(size = 10),
+p <- p + theme(axis.text.x = element_text(size = 10, angle = 90, hjust = 0.5),
                axis.text.y = element_text(size = 12, face = "bold"))
 p <- p + theme(panel.spacing = unit(0, "lines"))
 p <- p + theme(strip.text.y = element_text(angle = 0),
@@ -121,10 +121,15 @@ p <- p + theme(strip.text.y = element_text(angle = 0),
 # p
 # save output -------------------------------------------------------------
 ## save plot as an object
-file2write <- paste0(dir_out, "bubbleplot_cnv_fraction.", run_id, ".RDS")
-saveRDS(object = p, file = file2write, compress = T)
+# file2write <- paste0(dir_out, "bubbleplot_cnv_fraction.", run_id, ".RDS")
+# saveRDS(object = p, file = file2write, compress = T)
 ## save plot
-png(file = paste0(dir_out, "Fraction_of_Tumorcells_with_Expected_CNA_by_Gene", ".", "By_Tumor_Subcluster", ".", run_id, ".png"), 
+pdf(paste0(dir_out, "Fraction_of_Tumorcells_with_Expected_CNA_by_Gene", ".", "By_Tumor_Subcluster", ".pdf"), 
+    width = 20, height = 6)
+print(p)
+dev.off()
+
+png(file = paste0(dir_out, "Fraction_of_Tumorcells_with_Expected_CNA_by_Gene", ".", "By_Tumor_Subcluster", ".png"), 
     width = 3000, height = 1000, res = 150)
 print(p)
 dev.off()

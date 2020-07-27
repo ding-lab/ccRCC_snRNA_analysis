@@ -38,7 +38,6 @@ print("Finish reading RDS file")
 ## input the barcode-cell-type table
 path_barcode2celltype <- "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_all_cells/20200720.v1/30AliquotIntegration.Barcode2CellType.TumorManualCluster.20200720.v1.tsv"
 barcode2celltype_df <- fread(input = path_barcode2celltype, data.table = F)
-table(barcode2celltype_df$Cell_type.shorter)
 ## input DEG for each cell type
 gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_Markers/Gene2CellType_Tab.20200406.v1.tsv")
 ## specify minimal percentage of cell in any clustering expressing the genes to show
@@ -48,6 +47,7 @@ min.exp.pct <- 25
 ## get barcodes to process
 barcode2celltype_filtered_df <- barcode2celltype_df %>%
   filter(Most_Enriched_Cell_Group == "Nephron_Epithelium")
+table(barcode2celltype_filtered_df$Cell_type.detailed)
 ## remove unknown cell group 
 barcodes2process <- barcode2celltype_filtered_df$integrated_barcode
 srat <- subset(srat, cells = barcodes2process)
