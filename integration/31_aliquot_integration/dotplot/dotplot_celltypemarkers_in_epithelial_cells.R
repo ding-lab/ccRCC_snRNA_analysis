@@ -41,18 +41,23 @@ barcode2celltype_df <- fread(input = path_barcode2celltype, data.table = F)
 ## input DEG for each cell type
 gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_Markers/Gene2CellType_Tab.20200406.v1.tsv")
 ## specify minimal percentage of cell in any clustering expressing the genes to show
-min.exp.pct <- 25
+min.exp.pct <- 20
 
 # modify srat object ------------------------------------------------------
-## get barcodes to process
+## remove unknown cell group 
+metadata_df <- srat@meta.data
+metadata_df$integrated31_barcode <- rownames(metadata_df)
+metadata_df <- metadata_df %>%
+  mutate(individual_barcode = str_split_fixed(string = integrated31_barcode, pattern = "_", n = 3)[,1])
+barcode2celltype_df <- merge(barcode2celltype_df, metadata_df, by = c("orig.ident", "individual_barcode"), all.x = T)
 barcode2celltype_filtered_df <- barcode2celltype_df %>%
   filter(Most_Enriched_Cell_Group == "Nephron_Epithelium")
-table(barcode2celltype_filtered_df$Cell_type.detailed)
-## remove unknown cell group 
-barcodes2process <- barcode2celltype_filtered_df$integrated_barcode
+barcode2celltype_filtered_df$Cell_type.detailed %>% table()
+barcodes2process <- barcode2celltype_filtered_df$integrated31_barcode
 srat <- subset(srat, cells = barcodes2process)
 ## change meta data
-srat@meta.data$Cell_type.detailed <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_df$integrated_barcode, to = as.vector(barcode2celltype_df$Cell_type.detailed))
+srat@meta.data$Cell_type.detailed <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_df$integrated31_barcode, to = as.vector(barcode2celltype_df$Cell_type.detailed))
+srat@meta.data$Cell_type.detailed %>% table()
 ## change ident
 Idents(srat) <- "Cell_type.detailed"
 
