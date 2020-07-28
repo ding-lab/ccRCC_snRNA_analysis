@@ -1,26 +1,13 @@
 # Yige Wu @WashU Jul 2020
 
 # set up libraries and output directory -----------------------------------
-## getting the path to the current script
-thisFile <- function() {
-  cmdArgs <- commandArgs(trailingOnly = FALSE)
-  needle <- "--file="
-  match <- grep(needle, cmdArgs)
-  if (length(match) > 0) {
-    # Rscript
-    return(normalizePath(sub(needle, "", cmdArgs[match])))
-  } else {
-    # 'source'd via R console
-    return(normalizePath(sys.frames()[[1]]$ofile))
-  }
-}
-path_this_script <- thisFile()
 ## set working directory
-dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
+dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
+source("./ccRCC_snRNA_analysis/plotting.R")
 library(monocle)
 library(pheatmap)
 library(tidyverse)
@@ -28,28 +15,14 @@ library(tidyverse)
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
-dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
+dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input monocle object
-obj_monocle <- readRDS(file = "./Resources/snRNA_Processed_Data/Monocle/outputs/3Sample_PT_and_Tumorcells_ByCellTypeSampleID/combined_subset_pseudotime_qval_1e-10.rds")
+obj_monocle <- readRDS(file = "./Resources/snRNA_Processed_Data/Monocle/outputs/C3N-01200/combined_subset_pseudotime_qval_1e-10.rds")
 ## input deg table
 deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/monocle/deg/unite_pseudotime_degs_across_3samples/20200728.v1/PT_and_TumorCells_ByCellType.Pseudotim_DE_genes.Combine3Samples.20200728.v1.tsv")
-## functions
-save_pheatmap_pdf <- function(x, filename, width=6, height=6) {
-  pdf(filename, width = width, height = height)
-  grid::grid.newpage()
-  grid::grid.draw(x$gtable)
-  dev.off()
-}
-
-save_pheatmap_png <- function(x, filename, width=1200, height=1000, res = 150) {
-  png(filename, width = width, height = height, res = res)
-  grid::grid.newpage()
-  grid::grid.draw(x$gtable)
-  dev.off()
-}
 
 # prepare parameters --------------------------------------------------
 deg_filtered <- deg_df %>%
@@ -63,6 +36,7 @@ deg_count_df <- deg_filtered %>%
   rename(gene_symbol = ".")
 ## specify genes to plot
 genes_plot <- as.vector(deg_count_df$gene_symbol[deg_count_df$Freq == 3])
+# genes_plot <- genes_plot[1:20]
 ## make color palette
 cold <- colorRampPalette(c('#f7fcf0','#41b6c4','#253494','#081d58','#081d58'))
 warm <- colorRampPalette(c('#ffffb2','#fecc5c','#e31a1c','#800026','#800026'))
@@ -80,7 +54,6 @@ scale_min = -3
 hmcols <- mypalette
 norm_method <- "vstExprs"
 hclust_method = "ward.D2"
-file2write <- paste0(dir_out, "test2.png")
 show_rownames <- T
 num_clusters = 4
 # get data matrix for the heatmap ------------------------------------------------------
@@ -161,7 +134,7 @@ row_dist[is.na(row_dist)] <- 1
 df <- new_cds.pdata[-col_gap_ind,]
 ### for selecting which features go into the the column annotation
 df <- df %>% 
-  select(Cell_type.detailed, State,Branch,Pseudotime)
+  select(Aliquot.snRNA.WU, State, Branch, Cell_type.detailed, Pseudotime)
 
 ###only clustering not plot
 ph <- pheatmap(heatmap_matrix, 
@@ -184,24 +157,26 @@ annotation_row <- data.frame(Cluster = factor(cutree(ph$tree_row,
 
 # plot --------------------------------------------------------------------
 p <- pheatmap(heatmap_matrix, 
-              useRaster = T, 
-              cluster_cols = FALSE, 
-              cluster_rows = TRUE, 
-              show_rownames = show_rownames, 
-              show_colnames = F, 
-              annotation_col = df,
-              annotation_row = annotation_row,
-              gaps_col = col_gap_ind,
-              clustering_distance_rows = row_dist, 
-              clustering_method = hclust_method, 
-              cutree_rows = num_clusters, 
-              silent = F, ###not plot
-              #breaks = bks, 
-              color = hmcols)
+         useRaster = T, 
+         cluster_cols = FALSE, 
+         cluster_rows = TRUE, 
+         show_rownames = show_rownames, 
+         show_colnames = F, 
+         annotation_col = df,
+         annotation_row = annotation_row,
+         gaps_col = col_gap_ind,
+         clustering_distance_rows = row_dist, 
+         clustering_method = hclust_method, 
+         cutree_rows = num_clusters, 
+         silent = F, ###not plot
+         #breaks = bks, 
+         color = hmcols)
 
 
 # save output -------------------------------------------------------------
 file2write <- paste0(dir_out, "Pseudotie_DEG.png")
-save_pheatmap_png(x = p, filename = file2write, width = 4000, height = 2200, res = 150)
+save_pheatmap_png(x = p, filename = file2write, width = 2000, height = 2200, res = 150)
 file2write <- paste0(dir_out, "Pseudotie_DEG.pdf")
-save_pheatmap_pdf(x = p, filename = file2write, width = 20, height = 15)
+save_pheatmap_pdf(x = p, filename = file2write, width = 10, height = 15)
+
+
