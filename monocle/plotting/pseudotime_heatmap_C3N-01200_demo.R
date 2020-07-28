@@ -1,7 +1,26 @@
+# Yige Wu @WashU Jul 2020
+
+# set up libraries and output directory -----------------------------------
+## set working directory
+dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+setwd(dir_base)
+source("./ccRCC_snRNA_analysis/load_pkgs.R")
+source("./ccRCC_snRNA_analysis/functions.R")
+source("./ccRCC_snRNA_analysis/variables.R")
+source("./ccRCC_snRNA_analysis/plotting.R")
 library(monocle)
-library(tidyverse)
 library(pheatmap)
-# my_branchplot <- function(cds_subset, 
+library(tidyverse)
+## set run id
+version_tmp <- 2
+run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
+## set output directory
+dir_out <- paste0(makeOutDir(), run_id, "/")
+dir.create(dir_out)
+
+
+# make function for the branch plot ---------------------------------------
+# wu_branchplot <- function(cds_subset, 
 #                           branch_point = 1, 
 #                           branch_states = NULL, 
 #                           branch_labels = c("Cell fate 1", "Cell fate 2"), 
@@ -19,29 +38,45 @@ library(pheatmap)
 #                           norm_method = c("log", "vstExprs"), 
 #                           trend_formula = "~sm.ns(Pseudotime, df=3) * Branch", 
 #                           return_heatmap = FALSE, 
+#                           filename = NULL,
 #                           cores = 1, ...) 
-# {
-# 
-# }
-### test it if it worked
 
+# input dependencies ------------------------------------------------------
+## input monocle object
+obj_monocle <- readRDS(file = "./Resources/snRNA_Processed_Data/Monocle/outputs/C3N-01200/combined_subset_pseudotime_qval_1e-10.rds")
+## input deg table
+deg_df <- fread(data.table = F, input = "./Resources/snRNA_Processed_Data/Monocle/outputs/C3N-01200/pseudotime_associated_genes/DE_genes_ModelBy_Pseudotime.txt")
+## input other interesting genes
+genes_interest_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_markers_by_intratumorheterogeneity_types/20200504.v1/markergenes_by_intratumorheterogeneity_types.20200504.v1.tsv")
+## input cell type marker genes
+genes2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_Markers/Gene2CellType_Tab.20200406.v1.tsv")
 
-# specify the parameters --------------------------------------------------
-lung <- load_lung()
-cds_subset = lung
+# prepare parameters --------------------------------------------------
+## specify genes to plot
+genes_proximaltubule <- genes2celltype_df$Gene[genes2celltype_df$Cell_Type1  == "Proximal tuble" | genes2celltype_df$Cell_Type_Group == "Malignant_Nephron_Epithelium"]
+genes_plot <- deg_df$gene_short_name[deg_df$qval < 0.1 & deg_df$gene_short_name %in% c(genes_proximaltubule, genes_interest_df$gene_symbol)]
+genes_plot <- unique(genes_plot)
+## make color palette
+cold <- colorRampPalette(c('#f7fcf0','#41b6c4','#253494','#081d58','#081d58'))
+warm <- colorRampPalette(c('#ffffb2','#fecc5c','#e31a1c','#800026','#800026'))
+mypalette <- c(rev(cold(21)), warm(20))
+
+# specify parameters ------------------------------------------------------
+## subset the monocle object
+cds_subset <- obj_monocle[genes_plot,]
 branch_point = 1
 branch_states <- NULL
 cores = 1
 trend_formula = "~sm.ns(Pseudotime, df=3) * Branch"
 scale_max = 3
 scale_min = -3
-## make color palette
-cold <- colorRampPalette(c('#f7fcf0','#41b6c4','#253494','#081d58','#081d58'))
-warm <- colorRampPalette(c('#ffffb2','#fecc5c','#e31a1c','#800026','#800026'))
-mypalette <- c(rev(cold(21)), warm(20))
-hmcols = mypalette
-
-# the inside of the function ----------------------------------------------
+hmcols <- mypalette
+norm_method <- "vstExprs"
+hclust_method = "ward.D2"
+file2write <- paste0(dir_out, "test2.png")
+show_rownames <- T
+num_clusters = 6
+# get data matrix for the heatmap ------------------------------------------------------
 pData(cds_subset)$Pseudotime <- (pData(cds_subset)$Pseudotime*100)/max(pData(cds_subset)$Pseudotime) 
 new_cds <- buildBranchCellDataSet(cds_subset, 
                                   branch_states = branch_states, 
@@ -108,7 +143,8 @@ heatmap_matrix[is.nan(heatmap_matrix)] = 0
 heatmap_matrix[heatmap_matrix > scale_max] = scale_max
 heatmap_matrix[heatmap_matrix < scale_min] = scale_min
 heatmap_matrix_ori <- heatmap_matrix
-heatmap_matrix <- heatmap_matrix[is.finite(heatmap_matrix[,1]) & is.finite(heatmap_matrix[, col_gap_ind]), ]
+heatmap_matrix <- heatmap_matrix[is.finite(heatmap_matrix[, 
+                                                          1]) & is.finite(heatmap_matrix[, col_gap_ind]), ]
 row_dist <- as.dist((1 - cor(Matrix::t(heatmap_matrix)))/2)
 row_dist[is.na(row_dist)] <- 1
 # exp_rng <- range(heatmap_matrix)
@@ -118,8 +154,9 @@ row_dist[is.na(row_dist)] <- 1
 # }
 
 df <- new_cds.pdata[-col_gap_ind,]
+### for selecting which features go into the the column annotation
 df <- df %>% 
-  select(Time,State,Branch,Pseudotime)
+  select(Cell_type.detailed, State,Branch,Pseudotime)
 
 ###only clustering not plot
 ph <- pheatmap(heatmap_matrix, 
@@ -139,6 +176,8 @@ ph <- pheatmap(heatmap_matrix,
                color = hmcols)
 annotation_row <- data.frame(Cluster = factor(cutree(ph$tree_row, 
                                                      num_clusters)))
+
+# plot --------------------------------------------------------------------
 pheatmap(heatmap_matrix, 
          useRaster = T, 
          cluster_cols = FALSE, 
@@ -152,7 +191,6 @@ pheatmap(heatmap_matrix,
          clustering_method = hclust_method, 
          cutree_rows = num_clusters, 
          silent = F, ###not plot
-         filename = NA, 
+         filename = file2write, width = 1000, height = 1000,
          #breaks = bks, 
          color = hmcols)
-
