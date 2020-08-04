@@ -32,7 +32,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
-path_rds <- "./Resources/Analysis_Results/integration/30_aliquot_integration/subset/subset_tumor_cells/20200309.v1/30_aliquot_integration.20200212.v3.RDS.tumor_cells.20200309.v1.RDS"
+path_rds <- "./Resources/Analysis_Results/integration/30_aliquot_integration/docker_run_integration/20200212.v3/30_aliquot_integration.20200212.v3.RDS"
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 ## input the barcode-cell-type table
