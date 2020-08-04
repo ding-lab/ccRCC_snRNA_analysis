@@ -12,7 +12,7 @@ library(monocle)
 library(pheatmap)
 library(tidyverse)
 ## set run id
-version_tmp <- 3
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -20,13 +20,22 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input monocle object
-obj_monocle <- readRDS(file = "./Resources/snRNA_Processed_Data/Monocle/outputs/C3N-01200/combined_subset_pseudotime_qval_1e-10.rds")
+obj_monocle <- readRDS(file = "./Resources/snRNA_Processed_Data/Monocle/outputs/C3L-00088/combined_subset_pseudotime_qval_1e-10.rds")
 ## input deg table
 deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/monocle/deg/filter_pseudotime_degs_3samples/20200728.v2/PT_and_TumorCells_ByCellType.Pseudotim_DE_genes.Combine3Samples.Filtered.20200728.v2.tsv")
 
 # prepare parameters --------------------------------------------------
+deg_filtered <- deg_df %>%
+  filter(use_for_ordering) %>%
+  filter(qval<0.1)
+deg_count_df <- deg_filtered %>%
+  select(gene_short_name) %>%
+  table() %>%
+  data.frame() %>%
+  arrange(desc(Freq)) %>%
+  rename(gene_symbol = ".")
 ## specify genes to plot
-genes_plot <- as.vector(deg_df$gene_symbol)
+genes_plot <- as.vector(deg_count_df$gene_symbol[deg_count_df$Freq == 3])
 # genes_plot <- genes_plot[1:20]
 ## make color palette
 cold <- colorRampPalette(c('#f7fcf0','#41b6c4','#253494','#081d58','#081d58'))
@@ -62,6 +71,8 @@ if (is.null(branch_states)) {
 }
 new_cds.pdata <- pData(new_cds)
 new_cds.pdata$Cell_ID <- rownames(new_cds.pdata)
+# new_cds.pdata <- new_cds.pdata %>%
+#   arrange(Branch)
 col_gap_ind <- table(new_cds.pdata$Branch)[[1]]
 
 pseudotime.A <- new_cds.pdata %>%

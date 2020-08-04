@@ -24,7 +24,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 2
+version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -111,5 +111,5 @@ file2write <- paste0(dir_out, "Dotplot_CellTypeMarkers_Exp", ".pdf")
 pdf(file = file2write, width = 20, height = 5, useDingbats = F)
 print(p)
 dev.off()
-file2write <- paste0(dir_out, "Dotplot_CellTypeMarkers_Exp", ".RDS")
-saveRDS(object = p, file = file2write, compress = T)
+# file2write <- paste0(dir_out, "Dotplot_CellTypeMarkers_Exp", ".RDS")
+# saveRDS(object = p, file = file2write, compress = T)

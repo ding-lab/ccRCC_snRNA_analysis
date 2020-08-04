@@ -21,7 +21,7 @@ idmetadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_me
 ## input DEGs
 degfile_names <- list.files(path = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/", recursive = T)
 degfile_names
-degfile_names <- degdir_names[grepl(pattern = "findmarker_roc", x = degfile_names)]
+degfile_names <- degfile_names[grepl(pattern = "findmarker_roc", x = degfile_names)]
 degfile_names
 
 # read deg files ----------------------------------------------------------
@@ -44,6 +44,8 @@ deg_summary_df <- deg_df %>%
   arrange(-Freq, -mean_power)
 
 # write output ------------------------------------------------------------
+file2write <- paste0(dir_out, "findmarkers_roc.", "tumor_vs_normalpt.", run_id, ".tsv")
+write.table(x = deg_df, file = file2write, sep = "\t", quote = F, row.names = F)
 file2write <- paste0(dir_out, "summary_findmarkers_roc.", "tumor_vs_normalpt.", run_id, ".tsv")
 write.table(x = deg_summary_df, file = file2write, sep = "\t", quote = F, row.names = F)
 

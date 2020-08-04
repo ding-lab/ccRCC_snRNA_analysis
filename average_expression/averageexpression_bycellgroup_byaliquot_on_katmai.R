@@ -45,9 +45,9 @@ cat("###########################################\n")
 
 # set ident ---------------------------------------------------------------
 barcode2celltype_df <- barcode2celltype_df %>%
-  mutate(id_bycelltype_byaliquot = paste0(orig.ident, "_", Cell_type.shorter))
-srat@meta.data$id_bycelltype_byaliquot <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_df$integrated_barcode, to = as.vector(barcode2celltype_df$id_bycelltype_byaliquot))
-Idents(srat) <- "id_bycelltype_byaliquot" 
+  mutate(id_bycellgroup_byaliquot = paste0(orig.ident, "_", Cell_group))
+srat@meta.data$id_bycellgroup_byaliquot <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_df$integrated_barcode, to = as.vector(barcode2celltype_df$id_bycellgroup_byaliquot))
+Idents(srat) <- "id_bycellgroup_byaliquot" 
 
 # run average expression --------------------------------------------------
 aliquot.averages <- AverageExpression(srat)
@@ -55,7 +55,7 @@ print("Finish running AverageExpression!\n")
 cat("###########################################\n")
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "averageexpression_bycelltypeshorter_byaliquot.", "30_aliquot_integration.", run_id, ".tsv")
+file2write <- paste0(dir_out, "averageexpression_bycellgroup_byaliquot.", "30_aliquot_integration.", run_id, ".tsv")
 write.table(aliquot.averages, file = file2write, quote = F, sep = "\t", row.names = T)
 cat("Finished saving the output\n")
 cat("###########################################\n")
