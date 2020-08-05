@@ -67,27 +67,27 @@ markers_df$gene <- rownames(markers_df)
 markers_df$ident.1 <- name_group1
 markers_df$ident.2 <- name_group3
 markers_all_df <- rbind(markers_all_df, markers_df)
-## 2 vs 3
-markers_df <- FindMarkers(object = srat, ident.1 = "group2", ident.2 = "group3", test.use = "wilcox", only.pos = F, 
-                          min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
-print("Finish running FindMarkers for group2 vs group3!\n")
-markers_df$gene <- rownames(markers_df)
-markers_df$ident.1 <- name_group2
-markers_df$ident.2 <- name_group3
-markers_all_df <- rbind(markers_all_df, markers_df)
-## 1 vs 2
-markers_df <- FindMarkers(object = srat, ident.1 = "group1", ident.2 = "group2", test.use = "wilcox", only.pos = F, 
-                          min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
-print("Finish running FindMarkers for group1 vs group2!\n")
-markers_df$gene <- rownames(markers_df)
-markers_df$ident.1 <- name_group1
-markers_df$ident.2 <- name_group2
-markers_all_df <- rbind(markers_all_df, markers_df)
+# ## 2 vs 3
+# markers_df <- FindMarkers(object = srat, ident.1 = "group2", ident.2 = "group3", test.use = "wilcox", only.pos = F, 
+#                           min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
+# print("Finish running FindMarkers for group2 vs group3!\n")
+# markers_df$gene <- rownames(markers_df)
+# markers_df$ident.1 <- name_group2
+# markers_df$ident.2 <- name_group3
+# markers_all_df <- rbind(markers_all_df, markers_df)
+# ## 1 vs 2
+# markers_df <- FindMarkers(object = srat, ident.1 = "group1", ident.2 = "group2", test.use = "wilcox", only.pos = F, 
+#                           min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
+# print("Finish running FindMarkers for group1 vs group2!\n")
+# markers_df$gene <- rownames(markers_df)
+# markers_df$ident.1 <- name_group1
+# markers_df$ident.2 <- name_group2
+# markers_all_df <- rbind(markers_all_df, markers_df)
 cat("###########################################\n")
 
 # write output -------------------------------------------------------------
 file2write <- paste0(dir_out, "findallmarkers_wilcox_1213_1302_vs_others.", ".logfcthreshold", logfc.threshold.run, ".minpct", min.pct.run, ".mindiffpct", min.diff.pct.run, ".tsv")
-write.table(x = markers_df, file = file2write, sep = "\t", quote = F, row.names = F)
+write.table(x = markers_all_df, file = file2write, sep = "\t", quote = F, row.names = F)
 
 
 
