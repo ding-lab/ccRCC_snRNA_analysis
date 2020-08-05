@@ -1,5 +1,4 @@
 # Yige Wu @WashU Aug 2020
-## finding differentially expressed gene for each cell type using integrared object
 
 # set up libraries and output directory -----------------------------------
 ## getting the path to the current script
@@ -39,24 +38,29 @@ print("Finish reading RDS file")
 barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_all_cells/20200720.v1/30AliquotIntegration.Barcode2CellType.TumorManualCluster.20200720.v1.tsv", data.table = F)
 barcode2celltype_df <- as.data.frame(barcode2celltype_df)
 cat("finish reading the barcode-to-cell type table!\n")
-## input id meta data
-idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200505.v1/meta_data.20200505.v1.tsv")
+## specify the cell group
+cellgroup2process <- "Immune"
+
+# subset seurat object ----------------------------------------------------
+## get the tumor cell barcodes
+barcodes2process <- barcode2celltype_df$integrated_barcode[barcode2celltype_df$Cell_group == cellgroup2process]
+## subset data
+cat("Start subsetting\n")
+srat.new <- subset(srat, cells = barcodes2process)
+rm(srat)
+## set default assay
+DefaultAssay(object = srat.new) <- "RNA"
 cat("###########################################\n")
 
-# set ident ---------------------------------------------------------------
-barcode2celltype_df <- barcode2celltype_df %>%
-  mutate(id_bycellgroup_byaliquot = paste0(orig.ident, "_", Cell_group))
-srat@meta.data$id_bycellgroup_byaliquot <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_df$integrated_barcode, to = as.vector(barcode2celltype_df$id_bycellgroup_byaliquot))
-Idents(srat) <- "id_bycellgroup_byaliquot" 
-
-# run average expression --------------------------------------------------
-aliquot.averages <- AverageExpression(srat)
-print("Finish running AverageExpression!\n")
+# find variable genes -----------------------------------------------------
+cat("Start running FindVariableFeatures\n")
+srat.new <- FindVariableFeatures(srat.new, selection.method = "vst", nfeatures = 3000, verbose = T)
 cat("###########################################\n")
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "averageexpression_bycellgroup_byaliquot.", "30_aliquot_integration.", run_id, ".tsv")
-write.table(aliquot.averages, file = file2write, quote = F, sep = "\t", row.names = T)
+file2write <- paste0(dir_out, "findvariablefeatures.", "cellgroup.", cellgroup2process, ".", run_id, ".tsv")
+var_features_df <- data.frame(gene = srat.new@assays$RNA@var.features)
+write.table(var_features_df, file = file2write, quote = F, sep = "\t", row.names = F)
 cat("Finished saving the output\n")
 cat("###########################################\n")
 
