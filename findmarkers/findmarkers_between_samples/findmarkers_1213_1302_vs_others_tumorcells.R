@@ -42,6 +42,10 @@ cat("###########################################\n")
 ## set aliquot ids for groups
 aliquotids_group1 <- c("CPT0075720013", "CPT0063630004")
 aliquotids_group2 <- c("CPT0002270013")
+aliquotids_group3 <- unique(srat@meta.data$orig.ident)[!(unique(srat@meta.data$orig.ident) %in% c(aliquotids_group1, aliquotids_group2))]
+name_group1 <- paste0(mapvalues(x = aliquotids_group1, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Aliquot.snRNA.WU)), collapse = "_")
+name_group2 <- paste0(mapvalues(x = aliquotids_group2, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Aliquot.snRNA.WU)), collapse = "_")
+name_group3 <- paste0(mapvalues(x = aliquotids_group3, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Aliquot.snRNA.WU)), collapse = "_")
 
 # set parameters for findmarkers ------------------------------------------
 logfc.threshold.run <- 0.1
@@ -60,18 +64,24 @@ markers_df <- FindMarkers(object = srat, ident.1 = "group1", ident.2 = "group3",
                           min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
 print("Finish running FindMarkers for group1 vs group3!\n")
 markers_df$gene <- rownames(markers_df)
+markers_df$ident.1 <- name_group1
+markers_df$ident.2 <- name_group3
 markers_all_df <- rbind(markers_all_df, markers_df)
 ## 2 vs 3
 markers_df <- FindMarkers(object = srat, ident.1 = "group2", ident.2 = "group3", test.use = "wilcox", only.pos = F, 
                           min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
 print("Finish running FindMarkers for group2 vs group3!\n")
 markers_df$gene <- rownames(markers_df)
+markers_df$ident.1 <- name_group2
+markers_df$ident.2 <- name_group3
 markers_all_df <- rbind(markers_all_df, markers_df)
 ## 1 vs 2
 markers_df <- FindMarkers(object = srat, ident.1 = "group1", ident.2 = "group2", test.use = "wilcox", only.pos = F, 
                           min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
 print("Finish running FindMarkers for group1 vs group2!\n")
 markers_df$gene <- rownames(markers_df)
+markers_df$ident.1 <- name_group1
+markers_df$ident.2 <- name_group2
 markers_all_df <- rbind(markers_all_df, markers_df)
 cat("###########################################\n")
 
