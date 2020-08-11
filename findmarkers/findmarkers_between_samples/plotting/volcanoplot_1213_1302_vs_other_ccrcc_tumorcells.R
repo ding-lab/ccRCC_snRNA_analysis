@@ -19,10 +19,9 @@ dir.create(dir_out)
 
 # input denpendencies -----------------------------------------------------
 ## input marker table
-markers_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_between_samples/findmarkers_1213_1302_vs_others_tumorcells/20200804.v1/findallmarkers_wilcox_1213_1302_vs_others..logfcthreshold0.1.minpct0.1.mindiffpct0.1.tsv")
+markers_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_between_samples/findmarkers_1213_1302_vs_others_tumorcells/20200805.v1/findallmarkers_wilcox_1213_1302_vs_others..logfcthreshold0.1.minpct0.1.mindiffpct0.1.tsv")
 ## input interesting genes
 genes_highlight_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_markers_by_intratumorheterogeneity_types/20200504.v1/markergenes_by_intratumorheterogeneity_types.20200504.v1.tsv")
-
 
 # make plot data ----------------------------------------------------
 plot_data_df <- markers_df %>%
