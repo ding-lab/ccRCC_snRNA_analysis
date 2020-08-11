@@ -66,7 +66,7 @@ normal_epithelial_barcode2celltype_df$Cell_type.detailed %>% unique()
 ## make detailed cell type
 normal_epithelial_barcode2celltype_df$Cell_type.shorter <- "Normal epithelial cells"
 normal_epithelial_barcode2celltype_df$Cell_type.shorter[normal_epithelial_barcode2celltype_df$Cell_type.detailed == "Unknown"] <- "Unknown"
-
+normal_epithelial_barcode2celltype_df$Is_Normal_Nephron_Epithelium <- ifelse(normal_epithelial_barcode2celltype_df$Cell_type.shorter == "Unknown", F, T)
 ## add columns
 normal_epithelial_barcode2celltype_df <- normal_epithelial_barcode2celltype_df %>%
   mutate(is_malignant = F) %>%

@@ -20,6 +20,8 @@ dir.create(dir_out)
 mut_mapping_run_id <- "20200219.v1"
 ## input the seurat object path
 paths_srat_df <- fread(data.table = F, input = "./Resources/Analysis_Results/data_summary/write_individual_srat_object_paths/20200717.v1/Seurat_Object_Paths.20200717.v1.tsv")
+## input cell tpe by barcode
+barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_all_cells/20200720.v1/30AliquotIntegration.Barcode2CellType.TumorManualCluster.20200720.v1.tsv")
 
 # plot  by sample --------------------------------------------------
 for (snRNA_aliquot_id_tmp in unique(paths_srat_df$Aliquot)) {
@@ -35,7 +37,7 @@ for (snRNA_aliquot_id_tmp in unique(paths_srat_df$Aliquot)) {
   ## get the coordinates for each cluster label
   p <- DimPlot(seurat_obj, reduction = "umap", label = T, label.size	= 5, repel = T)
   label_data <- p$layers[[2]]$data
-  
+  ## get the coordinates for each barcode
   umap_tab <- FetchData(seurat_obj, vars = c("orig.ident", "ident", "UMAP_1", "UMAP_2"))
   umap_tab$barcode <- rownames(umap_tab)
   
@@ -102,4 +104,6 @@ for (snRNA_aliquot_id_tmp in unique(paths_srat_df$Aliquot)) {
   png(file2write, width = 800, height = 900, res = 150)
   print(p)
   dev.off()
+  
+  stop("test")
 }

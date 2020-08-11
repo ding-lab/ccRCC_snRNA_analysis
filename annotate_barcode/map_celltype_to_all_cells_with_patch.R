@@ -107,7 +107,7 @@ table(barcode2celltype_df$Cell_type.shorter)
 
 # add patch ---------------------------------------------------------------
 barcode2celltype_df <- rbind(barcode2celltype_df, bc2celltype_patch_df)
-nrow(barcode2celltype_df)
+nrow(barcode2celltype_df) ## 138529
 table(barcode2celltype_df$Cell_type.shorter)
 table(barcode2celltype_df$Cell_type.detailed)
 

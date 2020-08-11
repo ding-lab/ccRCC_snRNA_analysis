@@ -18,9 +18,9 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the variable gene list
-variable_genes_df <- fread(input = "./Resources/Analysis_Results/integration/30_aliquot_integration/findvariablefeatures/findvariablefeatures_tumor_cells/20200310.v1/findvariablefeatures_tumor_cells.20200310.v1.tsv", data.table = F)
+variable_genes_df <- fread(input = "./Resources/Analysis_Results/findvariablefeatures/findvariablefeatures_cellgroup_immune/20200805.v1/findvariablefeatures.cellgroup.Immune.20200805.v1.tsv", data.table = F)
 ## input the average expression calculated (RNA)
-avg.exp.mat <- fread(input = "./Resources/Analysis_Results/integration/30_aliquot_integration/averageexpression/averageexpression_tumor_cells_by_manual_subcluster/20200721.v1/AverageExpression_ByManualTumorSubcluster.20200721.v1.tsv", data.table = F)
+avg.exp.mat <- fread(input = "./Resources/Analysis_Results/average_expression/averageexpression_bycellgroup_byaliquot_on_katmai/20200804.v1/averageexpression_bycellgroup_byaliquot.30_aliquot_integration.20200804.v1.tsv", data.table = F)
 avg.exp.mat <- avg.exp.mat %>%
   rename(gene = V1)
 
@@ -31,7 +31,8 @@ data_col_names.changed <- str_split_fixed(string = data_col_names, pattern = "\\
 ## rename the data frame
 colnames(avg.exp.mat) <- c("gene", data_col_names.changed)
 ## remove the subcluster without NA as manual subcluster id
-data_col_names.filtered <- data_col_names.changed[!grepl(pattern = "CNA", x = data_col_names.changed)]
+data_col_names.filtered <- data_col_names.changed[grepl(pattern = "_Immune", x = data_col_names.changed)]
+data_col_names.filtered
 avg.exp.mat <- avg.exp.mat[, c("gene", data_col_names.filtered)]
 
 # filter down to only variably expressed genes------------------------------------------------------------------
@@ -41,5 +42,5 @@ avg.exp.mat <- avg.exp.mat %>%
 # run and write pearson pairwise correlation ------------------------------------------------
 pearson_coef <- cor(x = avg.exp.mat[, -1], use="complete.obs", method = "pearson")
 pearson_coef
-write.table(x = pearson_coef, file = paste0(dir_out, "avg_exp_by_tumorsubluster.", "tumorcellvaraible_genes.", "pearson_coef", run_id, ".tsv"), quote = F, sep = "\t", row.names = T)
+write.table(x = pearson_coef, file = paste0(dir_out, "avg_exp_bycellgroup_byaliquot.", "immune.", "immunevaraible_genes.", "pearson_coef", run_id, ".tsv"), quote = F, sep = "\t", row.names = T)
 

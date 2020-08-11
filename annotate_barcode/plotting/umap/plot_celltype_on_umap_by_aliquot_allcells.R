@@ -1,5 +1,4 @@
 # Yige Wu @WashU Apr 2020
-## plot cell type on integration UMAP
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -18,9 +17,9 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input cell type per barcode table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/map_celltype_to_barcode/map_celltype_to_all_cells/20200406.v1/30_aliquot_integration.barcode2celltype.20200406.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_all_cells/20200720.v1/30AliquotIntegration.Barcode2CellType.TumorManualCluster.20200720.v1.tsv", data.table = F)
 ## input UMAP info per barcode
-umap_df <- fread(input = "./Resources/Analysis_Results/individual_sample/fetch_data/fetch_data/20200406.v1/individual_cluster_meta_data.20200406.v1.tsv", data.table = F)
+umap_df <- fread(input = "./Resources/Analysis_Results/data_summary/fetch_data/fetch_data_by_individual_sample//20200406.v1/individual_cluster_meta_data.20200406.v1.tsv", data.table = F)
 
 # plot for cell group----------------------------------------------------------
 for (id_aliquot_tmp in unique(umap_df$aliquot)) {
