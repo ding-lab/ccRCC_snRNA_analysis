@@ -46,6 +46,7 @@ cellgroup2process <- "Stroma"
 BC <- srat@meta.data %>% rownames
 #### get original barcode
 srat@meta.data$original_barcode <- BC %>% strsplit("_") %>% lapply("[[",1) %>% unlist
+srat@meta.data <- srat@meta.data %>% rownames_to_column
 srat@meta.data <- merge(srat@meta.data,barcode2celltype_df,
                             by.x=c("orig.ident","original_barcode"), by.y=c("orig.ident","individual_barcode"))
 srat@meta.data <- column_to_rownames(srat@meta.data,"rowname")[BC,]
