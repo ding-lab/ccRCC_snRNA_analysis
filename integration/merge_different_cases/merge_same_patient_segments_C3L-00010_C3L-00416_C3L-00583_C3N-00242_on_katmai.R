@@ -44,7 +44,7 @@ paths_srat_df <- paths_srat_df %>%
 renal.list <- list()
 for (i in 1:nrow(paths_srat_df)) {
   sample_id_tmp <- paths_srat_df$Aliquot[i]
-  seurat_obj_path <- paths_srat_df$Path_box_seurat_object[i]
+  seurat_obj_path <- paths_srat_df$Path_katmai_seurat_object[i]
   seurat_obj <- readRDS(file = seurat_obj_path)
   
   seurat_obj$orig.ident  <- sample_id_tmp
