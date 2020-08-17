@@ -168,8 +168,6 @@ row_anno = rowAnnotation(Sample_Type_Suffix = anno_text(x = suffixes_aliquot_id_
                                                   gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_clustername[names_cluster_suffix_plot_row]), 
                                                   width = unit(1, "cm"),
                                                   rot = 0),
-                         FracCells_with_VHL_CN_Loss = anno_simple(x = cnv_wide_df$VHL, width = unit(1, "cm"), col = color_fun_frac_loss),
-                         FracCells_with_SQSTM1_CN_Loss = anno_simple(x = cnv_wide_df$SQSTM1, width = unit(1, "cm"), col = color_fun_frac_gain),
                          annotation_name_side = "bottom", annotation_name_gp = gpar(fontsize = 20))
 
 # make top column annotation -------------------------------------------
@@ -183,16 +181,20 @@ col_anno = HeatmapAnnotation(Sample_Type_Suffix = anno_text(x = suffixes_aliquot
                                                       location = 0.5, just = "center",
                                                       gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_clustername[names_cluster_suffix_plot_row]), 
                                                       height = unit(1, "cm"),
-                                                      rot = 0))
+                                                      rot = 0),
+                             FracCells_with_VHL_CN_Loss = anno_simple(x = cnv_wide_df$VHL, width = unit(1, "cm"), col = color_fun_frac_loss),
+                             FracCells_with_SQSTM1_CN_Loss = anno_simple(x = cnv_wide_df$SQSTM1, width = unit(1, "cm"), col = color_fun_frac_gain))
 
 # plot pearson pairwise correlation for variably expressed genes within tumor cells ------------------------------------------------------
 ## make heatmap
 p <- Heatmap(matrix = plot_data_mat,
              width = unit(nrow(plot_data_mat), "cm"), height = unit(ncol(plot_data_mat), "cm"),
              col = col_fun, 
+             cluster_rows = T,
              show_row_dend = F,
              row_gap = unit(0, "mm"),
              left_annotation = row_anno,
+             cluster_columns = T,
              show_column_dend = F,
              column_gap = unit(0, "mm"),
              border = "grey50",
@@ -203,49 +205,6 @@ p <- Heatmap(matrix = plot_data_mat,
 ## save heatmap
 file2write <- paste0(dir_out, "C3N-01200", ".pdf")
 pdf(file2write,
-    width = 7, height = 5)
+    width = 7, height = 7)
 draw(object = p)
 dev.off()
-
-
-# plot legend -------------------------------------------------------------
-## make horizontal legend
-list_lgd = list(
-  Legend(col_fun = col_fun, 
-         title = "Pearson's coeffcient\n(variably expressed genes\nwithin tumor cells)", 
-         legend_width = unit(6, "cm"),
-         direction = "horizontal"),
-  Legend(title = "Tumor Segment No.",
-         labels = c("Tumor#1(T1)", "Tumor#2(T2)", "Tumor#3(T3)"),
-         legend_gp = gpar(fill = colors_tumor_segments[c("T1", "T2", "T3")])),
-  Legend(title = "Tumor Subcluster No.",
-         labels = names(colors_clustername),
-         legend_gp = gpar(fill = colors_clustername),
-         nr = 2),
-  Legend(labels = names(colors_hist_type),
-         title = "Histologic Type",
-         legend_gp = gpar(fill = colors_hist_type)),
-  Legend(labels = c("Mutated (WES)", "Mutated (Mapped the Mutation of T1 to snRNA Reads)", "None", "No Data"),
-         title = "Somatic Mutation Status",
-         legend_gp = gpar(fill = c("#e7298a", "#c994c7", "white", color_na))),
-  Legend(col_fun = methyl_color_fun,
-         title = "Bulk VHL Promoter Methylation",
-         direction = "horizontal"),
-  Legend(col_fun = color_fun_frac_loss, 
-         title = "Fraction of tumor cells\nwith copy number loss", 
-         legend_width = unit(6, "cm"),
-         direction = "horizontal"),
-  Legend(col_fun = color_fun_frac_gain, 
-         title = "Fraction of tumor cells\nwith copy number gain", 
-         legend_width = unit(6, "cm"),
-         direction = "horizontal"))
-dir_out_legend <- paste0(dir_out, "Legends/")
-dir.create(dir_out_legend)
-for (i in 1:length(list_lgd)) {
-  file2write <- paste0(dir_out_legend, "Legend", i, ".pdf")
-  pdf(file2write,
-      width = 4, height = 3)
-  draw(list_lgd[[i]])
-  dev.off()
-}
-
