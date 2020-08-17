@@ -122,21 +122,13 @@ cnv_wide_df <- cnv_wide_df[names_tumorsubclusters,]
 # specify colors ----------------------------------------------------------
 ## specify color for NA values
 color_na <- "grey50"
-### make color for methylation
-methyl_color_fun <- colorRamp2(c(quantile(bulk_sn_omicsprofile_df$Methyl.VHL, 0.1, na.rm=T), 
-                                 quantile(bulk_sn_omicsprofile_df$Methyl.VHL, 0.5, na.rm=T), 
-                                 quantile(bulk_sn_omicsprofile_df$Methyl.VHL, 0.9, na.rm=T)),
-                               c("#018571", "white", "#a6611a"))
-## make colors for deletion CNV fraction
-color_fun_frac_loss <-  colorRamp2(c(0, 1),c("white", cnv_state_colors["loss"]))
-color_fun_frac_gain <-  colorRamp2(c(0, 1),c("white", cnv_state_colors["gain"]))
 ## make colors for histogical type
 colors_hist_type <- c("Clear cell renal cell carcinoma" = "#fc8d62", "non-Clear cell renal cell carcinoma" = "#8da0cb")
 ## make color function for heatmap body colors
 col_fun = colorRamp2(c(0, 0.5, 1), c("white", "yellow", "red"))
 ## make color for the cluster name suffix
 unique(names_cluster_suffix)
-colors_clustername <- RColorBrewer::brewer.pal(n = 9, name = "YlGn")[c(1:4, 6:9)]
+colors_clustername <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")
 names(colors_clustername) <- paste0("C", 1:8)
 swatch(colors_clustername)
 
@@ -144,66 +136,28 @@ swatch(colors_clustername)
 ## sort omics
 omics_long_df <- omics_df[ids_aliquot_wu,]
 ## create left row annotation
-row_left_anno = rowAnnotation(Sample_Type_Suffix = anno_text(x = ifelse(case_ids %in% ids_showsuffix, suffixes_aliquot_id, ""), 
-                                                             location = 0.5, just = "center",
-                                                             gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_tumor_segments[suffixes_aliquot_id]), 
-                                                             width = unit(2, "cm"),
-                                                             rot = 0),
-                              Cluster_Name = anno_text(x = names_cluster_suffix, 
-                                                       location = 0.5, just = "center",
-                                                       gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_clustername[names_cluster_suffix]), 
-                                                       width = unit(2, "cm"),
-                                                       rot = 0),
+row_left_anno = rowAnnotation(Sample_Type_Suffix = anno_simple(x = suffixes_aliquot_id, col = colors_tumor_segments,
+                                                               width = unit(1.5, "cm")),
+                              Cluster_Name = anno_simple(x = names_cluster_suffix, col = colors_clustername,
+                                                         width = unit(1.5, "cm")),
                               Histologic_Type = anno_simple(x = omics_long_df$Histologic_Type,
                                                             col = colors_hist_type,
-                                                            width = unit(1, "cm")),
-                              Mut.VHL.Bulk = anno_simple(x = ifelse(is.na(omics_long_df$Mut.VHL), NA, 
-                                                                    ifelse(!(omics_long_df$Mut.VHL == "None" | omics_long_df$Mut.VHL == "Silent"), 
-                                                                           ifelse(omics_long_df$Is_discovery_set, "Mutated (WES)", "Mutated (Mapped the Mutation of T1 to snRNA Reads)"), "None")),
-                                                         width = unit(1, "cm"),
-                                                         col = c("Mutated (WES)" = "#e7298a", "Mutated (Mapped the Mutation of T1 to snRNA Reads)" = "#c994c7", "None" = "white")),
-                              Methyl.VHL.Bulk = anno_simple(x = omics_long_df$Methyl.VHL, 
-                                                            width = unit(1, "cm"),
-                                                            col = methyl_color_fun),
-                              FracCells_with_VHL_CN_Loss = anno_simple(x = cnv_wide_df$VHL, width = unit(1, "cm"), col = color_fun_frac_loss), 
-                              Mut.SETD2.Bulk = anno_simple(x = ifelse(is.na(omics_long_df$Mut.SETD2), NA, 
-                                                                      ifelse(!(omics_long_df$Mut.SETD2 == "None" | omics_long_df$Mut.SETD2 == "Silent"), 
-                                                                             ifelse(omics_long_df$Is_discovery_set, "Mutated (WES)", "Mutated (Mapped the Mutation of T1 to snRNA Reads)"), "None")),
-                                                           width = unit(1, "cm"),
-                                                           col = c("Mutated (WES)" = "#e7298a", "Mutated (Mapped the Mutation of T1 to snRNA Reads)" = "#c994c7", "None" = "white")),
-                              FracCells_with_SETD2_CN_Loss = anno_simple(x = cnv_wide_df$SETD2, width = unit(1, "cm"), col = color_fun_frac_loss), 
-                              Mut.PBRM1.Bulk = anno_simple(x = ifelse(is.na(omics_long_df$Mut.PBRM1), NA, 
-                                                                      ifelse(!(omics_long_df$Mut.PBRM1 == "None" | omics_long_df$Mut.PBRM1 == "Silent"), 
-                                                                             ifelse(omics_long_df$Is_discovery_set, "Mutated (WES)", "Mutated (Mapped the Mutation of T1 to snRNA Reads)"), "None")),
-                                                           width = unit(1, "cm"),
-                                                           col = c("Mutated (WES)" = "#e7298a", "Mutated (Mapped the Mutation of T1 to snRNA Reads)" = "#c994c7", "None" = "white")),
-                              FracCells_with_PBRM1_CN_Loss = anno_simple(x = cnv_wide_df$PBRM1, width = unit(1, "cm"), col = color_fun_frac_loss), 
-                              Mut.BAP1.Bulk = anno_simple(x = ifelse(is.na(omics_long_df$Mut.BAP1), NA, 
-                                                                     ifelse(!(omics_long_df$Mut.BAP1 == "None" | omics_long_df$Mut.BAP1 == "Silent"), 
-                                                                            ifelse(omics_long_df$Is_discovery_set, "Mutated (WES)", "Mutated (Mapped the Mutation of T1 to snRNA Reads)"), "None")),
-                                                          width = unit(1, "cm"),
-                                                          col = c("Mutated (WES)" = "#e7298a", "Mutated (Mapped the Mutation of T1 to snRNA Reads)" = "#c994c7", "None" = "white")),
-                              FracCells_with_BAP1_CN_Loss = anno_simple(x = cnv_wide_df$BAP1, width = unit(1, "cm"), col = color_fun_frac_loss), 
-                              FracCells_with_SQSTM1_CN_Loss = anno_simple(x = cnv_wide_df$SQSTM1, width = unit(1, "cm"), col = color_fun_frac_gain), 
-                              FracCells_with_HIF1A_CN_Loss = anno_simple(x = cnv_wide_df$HIF1A, width = unit(1, "cm"), col = color_fun_frac_loss), 
+                                                            width = unit(1.5, "cm")), 
                               annotation_name_side = "bottom", annotation_name_gp = gpar(fontsize = 20))
 
 # make top column annotation -------------------------------------------
-## do not show T1 for samples with only one segments
-top_col_anno = HeatmapAnnotation(Sample_Type_Suffix = anno_text(x = ifelse(case_ids %in% ids_showsuffix, suffixes_aliquot_id, ""), 
-                                                                location = 0.5, just = "center",
-                                                                gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_tumor_segments[suffixes_aliquot_id]), 
-                                                                height = unit(2, "cm"),
-                                                                rot = 90),
-                                 Cluster_Name = anno_text(x = names_cluster_suffix, 
-                                                          location = 0.5, just = "center",
-                                                          gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_clustername[names_cluster_suffix]), 
-                                                          height = unit(2, "cm"),
-                                                          rot = 90))
+col_anno = HeatmapAnnotation(Sample_Type_Suffix = anno_simple(x = suffixes_aliquot_id, col = colors_tumor_segments,
+                                                                  height = unit(1.5, "cm")),
+                                 Cluster_Name = anno_simple(x = names_cluster_suffix, col = colors_clustername,
+                                                            height = unit(1.5, "cm")),
+                             Histologic_Type = anno_simple(x = omics_long_df$Histologic_Type,
+                                                           col = colors_hist_type,
+                                                           height = unit(1.5, "cm")))
 
 # plot pearson pairwise correlation for variably expressed genes within tumor cells ------------------------------------------------------
 ## make heatmap
 p <- Heatmap(matrix = plot_data_mat,
+             width = unit(nrow(plot_data_mat), "cm"), height = unit(ncol(plot_data_mat), "cm"),
              col = col_fun, 
              row_split = factor_case_ids, cluster_row_slices = F,
              show_row_dend = F, row_title_rot = 0, row_title_gp = gpar(fontsize = 40, fontface = "bold"),
@@ -212,7 +166,7 @@ p <- Heatmap(matrix = plot_data_mat,
              show_column_dend = F, column_title_rot = 90, column_title_gp = gpar(fontsize = 40, fontface = "bold"),
              column_gap = unit(0, "mm"),
              border = "grey50",
-             bottom_annotation= top_col_anno,
+             bottom_annotation= col_anno,
              left_annotation = row_left_anno,
              # right_annotation = row_right_anno,
              show_row_names = F,
@@ -221,7 +175,7 @@ p <- Heatmap(matrix = plot_data_mat,
 ## save heatmap
 file2write <- paste0(dir_out, "Heatmap", ".pdf")
 pdf(file2write,
-    width = 45, height = 40)
+    width = 50, height = 50)
 draw(object = p)
 dev.off()
 
@@ -242,21 +196,7 @@ list_lgd = list(
          nr = 2),
   Legend(labels = names(colors_hist_type),
          title = "Histologic Type",
-         legend_gp = gpar(fill = colors_hist_type)),
-  Legend(labels = c("Mutated (WES)", "Mutated (Mapped the Mutation of T1 to snRNA Reads)", "None", "No Data"),
-         title = "Somatic Mutation Status",
-         legend_gp = gpar(fill = c("#e7298a", "#c994c7", "white", color_na))),
-  Legend(col_fun = methyl_color_fun,
-         title = "Bulk VHL Promoter Methylation",
-         direction = "horizontal"),
-  Legend(col_fun = color_fun_frac_loss, 
-         title = "Fraction of tumor cells\nwith copy number loss", 
-         legend_width = unit(6, "cm"),
-         direction = "horizontal"),
-  Legend(col_fun = color_fun_frac_gain, 
-         title = "Fraction of tumor cells\nwith copy number gain", 
-         legend_width = unit(6, "cm"),
-         direction = "horizontal"))
+         legend_gp = gpar(fill = colors_hist_type)))
 dir_out_legend <- paste0(dir_out, "Legends/")
 dir.create(dir_out_legend)
 for (i in 1:length(list_lgd)) {
