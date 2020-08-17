@@ -140,77 +140,70 @@ cnv_wide_df <- cnv_wide_df[names_tumorsubclusters_plot_row,]
 # specify colors ----------------------------------------------------------
 ## specify color for NA values
 color_na <- "grey50"
-### make color for methylation
-methyl_color_fun <- colorRamp2(c(quantile(bulk_sn_omicsprofile_df$Methyl.VHL, 0.1, na.rm=T), 
-                                 quantile(bulk_sn_omicsprofile_df$Methyl.VHL, 0.5, na.rm=T), 
-                                 quantile(bulk_sn_omicsprofile_df$Methyl.VHL, 0.9, na.rm=T)),
-                               c("#018571", "white", "#a6611a"))
-## make colors for deletion CNV fraction
-color_fun_frac_loss <-  colorRamp2(c(0, 1),c("white", cnv_state_colors["loss"]))
-color_fun_frac_gain <-  colorRamp2(c(0, 1),c("white", cnv_state_colors["gain"]))
 ## make colors for histogical type
 colors_hist_type <- c("Clear cell renal cell carcinoma" = "#fc8d62", "non-Clear cell renal cell carcinoma" = "#8da0cb")
 ## make color function for heatmap body colors
 col_fun = colorRamp2(c(0, 0.5, 1), c("white", "yellow", "red"))
 ## make color for the cluster name suffix
 unique(names_cluster_suffix)
-colors_clustername <- RColorBrewer::brewer.pal(n = 9, name = "YlGn")[c(1:4, 6:9)]
+colors_clustername <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")
 names(colors_clustername) <- paste0("C", 1:8)
 swatch(colors_clustername)
+## make colors for deletion CNV fraction
+color_fun_frac_loss <-  colorRamp2(c(0, 1),c("white", cnv_state_colors["loss"]))
+color_fun_frac_gain <-  colorRamp2(c(0, 1),c("white", cnv_state_colors["gain"]))
+
 
 # make row annotation -------------------------------------------
 ## sort omics
 omics_long_df <- omics_df[ids_aliquot_wu_plot_row,]
 ## create left row annotation
-row_left_anno = rowAnnotation(Sample_Type_Suffix = anno_text(x = suffixes_aliquot_id_plot_row, 
-                                                             location = 0.5, just = "center",
-                                                             gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_tumor_segments[suffixes_aliquot_id_plot_row]), 
-                                                             width = unit(1, "cm"),
-                                                             rot = 0),
-                              Cluster_Name = anno_text(x = names_cluster_suffix_plot_row, 
-                                                       location = 0.5, just = "center",
-                                                       gp = gpar(col = "black", fontsize = 15, fontface = "bold"), 
-                                                       width = unit(1, "cm"),
-                                                       rot = 0),
-                              FracCells_with_VHL_CN_Loss = anno_simple(x = cnv_wide_df$VHL, width = unit(1, "cm"), col = color_fun_frac_loss), 
-                              FracCells_with_SETD2_CN_Loss = anno_simple(x = cnv_wide_df$SETD2, width = unit(1, "cm"), col = color_fun_frac_loss), 
-                              FracCells_with_SQSTM1_CN_Loss = anno_simple(x = cnv_wide_df$SQSTM1, width = unit(1, "cm"), col = color_fun_frac_gain), 
-                              annotation_name_side = "bottom", annotation_name_gp = gpar(fontsize = 20))
+row_anno = rowAnnotation(Sample_Type_Suffix = anno_text(x = suffixes_aliquot_id_plot_row, 
+                                                        location = 0.5, just = "center",
+                                                        gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_tumor_segments[suffixes_aliquot_id_plot_row]), 
+                                                        width = unit(1, "cm"),
+                                                        rot = 0),
+                         Cluster_Name = anno_text(x = names_cluster_suffix_plot_row, 
+                                                  location = 0.5, just = "center",
+                                                  gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_clustername[names_cluster_suffix_plot_row]), 
+                                                  width = unit(1, "cm"),
+                                                  rot = 0),
+                         FracCells_with_VHL_CN_Loss = anno_simple(x = cnv_wide_df$VHL, width = unit(1, "cm"), col = color_fun_frac_loss),
+                         FracCells_with_SQSTM1_CN_Loss = anno_simple(x = cnv_wide_df$SQSTM1, width = unit(1, "cm"), col = color_fun_frac_gain),
+                         annotation_name_side = "bottom", annotation_name_gp = gpar(fontsize = 20))
 
 # make top column annotation -------------------------------------------
 ## do not show T1 for samples with only one segments
 col_anno = HeatmapAnnotation(Sample_Type_Suffix = anno_text(x = suffixes_aliquot_id_plot_column, 
-                                                                location = 0.5, just = "center",
-                                                                gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_tumor_segments[suffixes_aliquot_id_plot_column]), 
-                                                                height = unit(1, "cm"),
-                                                                rot = 90),
-                                 Cluster_Name = anno_text(x = names_cluster_suffix_plot_column, 
-                                                          location = 0.5, just = "center",
-                                                          gp = gpar(col = "black", fontsize = 15, fontface = "bold"), 
-                                                          height = unit(1, "cm"),
-                                                          rot = 90))
+                                                            location = 0.5, just = "center",
+                                                            gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_tumor_segments[suffixes_aliquot_id_plot_column]), 
+                                                            height = unit(1, "cm"),
+                                                            rot = 0),
+                             Cluster_Name = anno_text(x = names_cluster_suffix_plot_column, 
+                                                      location = 0.5, just = "center",
+                                                      gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_clustername[names_cluster_suffix_plot_row]), 
+                                                      height = unit(1, "cm"),
+                                                      rot = 0))
 
 # plot pearson pairwise correlation for variably expressed genes within tumor cells ------------------------------------------------------
 ## make heatmap
 p <- Heatmap(matrix = plot_data_mat,
+             width = unit(nrow(plot_data_mat), "cm"), height = unit(ncol(plot_data_mat), "cm"),
              col = col_fun, 
-             row_split = ids_case_plot_row, cluster_row_slices = T,
-             show_row_dend = F, row_title_rot = 0, row_title_gp = gpar(fontsize = 20, fontface = "bold"),
+             show_row_dend = F,
              row_gap = unit(0, "mm"),
-             column_split = ids_case_plot_column, cluster_column_slices = T, column_title_side = "bottom",
-             show_column_dend = F, column_title_rot = 90, column_title_gp = gpar(fontsize = 20, fontface = "bold"),
+             left_annotation = row_anno,
+             show_column_dend = F,
              column_gap = unit(0, "mm"),
              border = "grey50",
              bottom_annotation= col_anno,
-             left_annotation = row_left_anno,
-             # right_annotation = row_right_anno,
              show_row_names = F,
              show_column_names = F,
              show_heatmap_legend = F)
 ## save heatmap
-file2write <- paste0(dir_out, "Heatmap", ".pdf")
+file2write <- paste0(dir_out, "C3N-01200", ".pdf")
 pdf(file2write,
-    width = 7, height = 7)
+    width = 7, height = 5)
 draw(object = p)
 dev.off()
 
