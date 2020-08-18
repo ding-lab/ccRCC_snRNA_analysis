@@ -27,19 +27,21 @@ loadMaf <- function() {
   print(paste0("MAF has ", nrow(maf), " lines\n"))
   return(maf)
 }
-# loadCNAstatus <- function() {
-#   ## input CNA values
-#   cancer <- "CCRCC"
-#   cna <- fread(input = paste0("./Ding_Lab/Projects_Current/PanCan_Phospho-signaling/analysis_results/preprocess_files/tables/parse_", cancer, "_data_freeze/somatic_CNA.", cancer, ".partID.txt"), data.table = F)
-#   cna_head <- cna$gene
-#   cna_mat <- cna[, colnames(cna)[!(colnames(cna) %in% "gene")]]
-#   cna_status <- matrix(data = "neutral", nrow = nrow(cna_mat), ncol = ncol(cna_mat))
-#   cna_status[cna_mat > 0.1] <- "amplification"
-#   cna_status[cna_mat < -0.1] <- "deletion"
-#   cna_status <- data.frame(cbind(cna$gene, cna_status))
-#   colnames(cna_status) <- colnames(cna)
-#   return(cna_status)
-# }
+
+loadCNAstatus <- function() {
+  ## input CNA values
+  cna <- fread(input = paste0(dir_base, "Resources/Bulk_Processed_Data/WGS_CNV_Somatic/Michigan/somatic_CNA.CCRCC.partID.txt"), data.table = F)
+  ## reformat
+  cna_head <- cna$gene
+  cna_mat <- cna[, colnames(cna)[!(colnames(cna) %in% "gene")]]
+  ## create new matrix for the CNV status
+  cna_status <- matrix(data = "neutral", nrow = nrow(cna_mat), ncol = ncol(cna_mat))
+  cna_status[cna_mat > 0.1] <- "amplification"
+  cna_status[cna_mat < -0.1] <- "deletion"
+  cna_status <- data.frame(cbind(cna$gene, cna_status))
+  colnames(cna_status) <- colnames(cna)
+  return(cna_status)
+}
 # 
 # loadRNA <- function() {
 #   rna_fn <- "ccRcc_RNA_rpkm_Mich_formatted_tumor.csv"

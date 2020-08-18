@@ -36,8 +36,11 @@ umap_df <- umap_df %>%
 
 # snRNA_aliquot_id_tmp <- "CPT0086820004"
 for (snRNA_aliquot_id_tmp in unique(umap_df$orig.ident)) {
+  ## get the readable aliquot id
+  id_aliquot_wu <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == snRNA_aliquot_id_tmp]
+  
   ## create output directory by aliquot
-  dir_out1 <- paste0(dir_out, snRNA_aliquot_id_tmp, "/")
+  dir_out1 <- paste0(dir_out, id_aliquot_wu, "/")
   dir.create(dir_out1)
   
   ## get umap coordates
@@ -85,15 +88,13 @@ for (snRNA_aliquot_id_tmp in unique(umap_df$orig.ident)) {
         tab2p <- tab2p %>%
           arrange(desc(cnv_cat))
         
-        ## get the readable aliquot id
-        id_aliquot_wu <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == snRNA_aliquot_id_tmp]
+
         
         p <- ggplot() +
           geom_point(data = tab2p, mapping = aes(UMAP_1, UMAP_2, color=cnv_cat), alpha = 1, size = 0.3) +
           scale_color_manual(values = copy_number_colors)
         p <- p + ggtitle(paste0("Aliquot: ",  id_aliquot_wu), 
                          subtitle = paste0(gene_tmp, " Copy Number Status"))
-        p <- p + geom_text_repel(data = label_data, mapping = aes(UMAP_1, UMAP_2, label = ident))
         p <- p + theme_bw()
         p <- p + theme(panel.border = element_blank(), 
                        panel.grid.major = element_blank(),
