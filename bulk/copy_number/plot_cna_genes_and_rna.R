@@ -81,9 +81,9 @@ col_anno_colors <- lapply(genes2plot, function(g) {
   return(color_vector)
 })
 names(col_anno_colors) <- genes2plot
-bca = HeatmapAnnotation(df = col_anno_df, col = col_anno_colors, height = unit(1, "cm"))
+bca = HeatmapAnnotation(df = col_anno_df, col = col_anno_colors, height = unit(1, "cm"), show_legend = F)
 tca = HeatmapAnnotation(Sample_Type = ifelse(grepl(x = colnames(mat2plot), pattern = "Tumor"), "Tumor", "Normal"),
-                        col = list(Sample_Type = c("Tumor" = "red", "Normal" = "green")))
+                        col = list(Sample_Type = c("Tumor" = "red", "Normal" = "green")), show_legend = T)
 
 ## plot heatmaps
 p <- Heatmap(mat2plot[(rowSums(!is.na(mat2plot)) >= num_nonna),],

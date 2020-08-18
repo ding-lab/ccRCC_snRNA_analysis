@@ -57,7 +57,7 @@ for (aliquotid_group1 in aliquotids_group1) {
                                                ifelse(srat@meta.data$orig.ident %in% aliquotid_group2, "group2", "other"))
     Idents(srat) <- "group_findmarkers"
 
-    markers_df <- FindMarkers(object = srat, ident.1 = "group1", ident.2 = "group3", test.use = "wilcox", only.pos = F, 
+    markers_df <- FindMarkers(object = srat, ident.1 = "group1", ident.2 = "group2", test.use = "wilcox", only.pos = F, 
                               min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
     cat(paste0("Finished ", aliquotid_group1, " vs ", aliquotid_group2, "###########################################\n"))
     markers_df$gene <- rownames(markers_df)
