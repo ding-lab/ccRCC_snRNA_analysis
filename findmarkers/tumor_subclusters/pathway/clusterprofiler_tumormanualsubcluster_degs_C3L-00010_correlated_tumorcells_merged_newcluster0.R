@@ -31,11 +31,11 @@ wpid2gene <- wp2gene %>% dplyr::select(wpid, gene) #TERM2GENE
 wpid2name <- wp2gene %>% dplyr::select(wpid, name) #TERM2NAME
 ## input degs table
 deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/findallmarkers_C3L-00010_correlated_tumorcells_bynewcluster0_on_katmai/20200818.v1/C3N-00010.correlatedtumorcells.FindAllMarkers.bynewcluster0.Wilcox.Minpct0.1.Logfc0.1.tsv")
-
+## input degs shared by all cluster comparisons
+deg_shared_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/examine_degs/intersect_degs_C3L-00010_correlated_tumorcells_newcluser0_vs_others/20200818.v1/shared_degs_C3L-00010_correlated_tumorcells_newcluster0vsothers20200818.v1.tsv")
 # convert gene symbol to entrez ids ---------------------------------------
 ## filter degs
 deg_df <- deg_df %>%
-  filter(p_val_adj < 0.05) %>%
   dplyr::rename(gene = rowname)
 ## get genes to convert
 genes2convert <- unique(deg_df$gene)
@@ -55,7 +55,8 @@ deg_df <- deg_df %>%
 ## initiate result 
 ovaresult_df <- NULL
 ovaresult_list <- list()
-deg_tmp_df <- deg_df
+deg_tmp_df <- deg_df %>%
+  filter(gene %in% deg_shared_df$gene)
 ## get gene list
 de_genes <- deg_tmp_df$avg_logFC
 de_genes
@@ -65,30 +66,33 @@ de_genes <- sort(de_genes, decreasing = T)
 de_genes
 
 # test over-representation analysis and gene set enrichment using wikipathway ------------------------------
-ora_up_tmp <- tryCatch(expr = enricher(gene = names(de_genes), TERM2GENE = wpid2gene, TERM2NAME = wpid2name, pvalueCutoff = 0.1),
+ora_up_tmp <- tryCatch(expr = enricher(gene = names(de_genes), TERM2GENE = wpid2gene, TERM2NAME = wpid2name, pvalueCutoff = 0.1, universe = deg_df$entrezgene_id),
                        error = function(e) {warning("ORA failed.");return(NULL)})
 if (length(ora_up_tmp) > 0 ) {
   ## convert entrez id to gene symbol
   ora_up_tmp <- setReadable(ora_up_tmp, org.Hs.eg.db, keyType = "ENTREZID")
   ora_up_tmp_df <- as.data.frame(ora_up_tmp)
-  
-  ## make plots
-  p <- cnetplot(x = ora_up_tmp, foldChange=de_genes)
-  p <- p + scale_color_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0)
-  p <- p + labs(color = "Average Expression\nFold Change")
-  file2write <- paste0(dir_out, "cnetplot.png")
-  png(filename = file2write, width = 1500, height = 1000, res = 150)
-  print(p)
-  dev.off()
+  if (nrow(ora_up_tmp_df) > 0 ) {
+    ## make plots
+    p <- cnetplot(x = ora_up_tmp, foldChange=de_genes)
+    p <- p + scale_color_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0)
+    p <- p + labs(color = "Average Expression\nFold Change")
+    file2write <- paste0(dir_out, "cnetplot.png")
+    png(filename = file2write, width = 1500, height = 1000, res = 150)
+    print(p)
+    dev.off()
+    
+    # save outputs ------------------------------------------------------------
+    ## save data frames
+    file2write <- paste0(dir_out, "ORA.", "Result.", run_id, ".tsv")
+    write.table(x = ovaresult_df, file = file2write, quote = F, sep = "\t", row.names = F)
+    ## save lists
+    file2write <- paste0(dir_out, "ORA.", "Result.", run_id, ".RDS")
+    saveRDS(file = file2write, object = ovaresult_list, compress = T)
+  }
 }
 
-# save outputs ------------------------------------------------------------
-## save data frames
-file2write <- paste0(dir_out, "ORA.", "Result.", run_id, ".tsv")
-write.table(x = ovaresult_df, file = file2write, quote = F, sep = "\t", row.names = F)
-## save lists
-file2write <- paste0(dir_out, "ORA.", "Result.", run_id, ".RDS")
-saveRDS(file = file2write, object = ovaresult_list, compress = T)
+
 
 
 

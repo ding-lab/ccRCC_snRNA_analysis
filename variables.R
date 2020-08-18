@@ -33,13 +33,13 @@ p53_cellcycle_genes <- c("ATM", "CHECK2", "TP53", "MDM2", "CDKN2A", "CCND1", "E2
 fat_cadherins_genes <- c("FAT1", "FAT2", "FAT3", "FAT4")
 
 ## genes mutated in ccRCC
-genes_mutated_in_ccRCC <- c(ubiquitin_proteasome_genes,
+genes_pathogenicpathways_in_ccRCC <- c(ubiquitin_proteasome_genes,
                             swisnf_genes,
                             other_epigeneticregulator_genes,
                             pi3k_mtor_genes,
                             p53_cellcycle_genes,
                             fat_cadherins_genes)
-genes_mutated_in_ccRCC <- unique(genes_mutated_in_ccRCC)
+genes_pathogenicpathways_in_ccRCC <- unique(genes_pathogenicpathways_in_ccRCC)
 ## PBAF gens
 ### reference: https://www.nature.com/articles/onc20094/figures/1
 ### reference: https://www.nature.com/articles/onc20094/tables/1
