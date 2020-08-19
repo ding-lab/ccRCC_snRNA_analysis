@@ -46,15 +46,16 @@ barcode2manualsubcluster_df$id_case <- mapvalues(x = barcode2manualsubcluster_df
 barcode2manualsubcluster_df$id_aliquot_wu <- mapvalues(x = barcode2manualsubcluster_df$orig.ident, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
 ## merge info
 metadata_df <- srat@meta.data
-metadata_df$barcode_integrated_case <- rownames(metadata_df)
+metadata_df$barcode_integrated_case <- rownames(srat@meta.data)
+cat("Added barcode info from meta data!\n")
 metadata_df <- metadata_df %>%
-  mutate(barcode_individual = str_split_fixed(string = barcode_integrated_case, pattern = "_", n = 3)[,1])
+  dplyr::mutate(barcode_individual = str_split_fixed(string = barcode_integrated_case, pattern = "_", n = 3)[,1])
 barcode2manualsubcluster_df <- merge(barcode2manualsubcluster_df, metadata_df, 
                                              by.x = c("orig.ident", "individual_barcode"), by.y = c("orig.ident", "barcode_individual"), all.y = T)
 
 ## filter down to only tumor cells with manual cluster assigned
 barcode2manualsubcluster_df <- barcode2manualsubcluster_df %>%
-  mutate(Name_Cluster = paste0(id_aliquot_wu, "_C", (Id_TumorManualCluster+1)))
+  dplyr::mutate(Name_Cluster = paste0(id_aliquot_wu, "_C", (Id_TumorManualCluster+1)))
 ### subset
 srat_plot <- subset(srat, cells = barcode2manualsubcluster_df$barcode_integrated_case[!is.na(barcode_integrated_case$Name_Cluster)])
 ## change meta data
@@ -72,3 +73,4 @@ for (gene_tmp in genes2plot) {
   print(p)
   dev.off()
 }
+cat("Finished all\n")
