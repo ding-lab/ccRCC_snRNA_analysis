@@ -193,15 +193,18 @@ col_anno = HeatmapAnnotation(Sample_Type_Suffix = anno_text(x = suffixes_aliquot
                                                           height = unit(1, "cm"),
                                                           rot = 90))
 
+# make row/column split ---------------------------------------------------
+row_split_factor <- factor(x = ids_case_plot_row, levels = c("C3N-00242", "C3L-00010", "C3L-00583", "C3L-00416"))
+column_split_factor <-factor(x = ids_case_plot_column, levels = c("C3N-00242", "C3L-00010", "C3L-00583", "C3L-00416"))
 # plot pearson pairwise correlation for variably expressed genes within tumor cells ------------------------------------------------------
 ## make heatmap
 p <- Heatmap(matrix = plot_data_mat,
              col = col_fun, 
              width = unit(nrow(plot_data_mat), "cm"), height = unit(ncol(plot_data_mat), "cm"),
-             row_split = ids_case_plot_row, cluster_row_slices = T,
+             row_split = row_split_factor, cluster_row_slices = F,
              show_row_dend = F, row_title_rot = 0, row_title_gp = gpar(fontsize = 20, fontface = "bold"),
              row_gap = unit(0, "mm"),
-             column_split = ids_case_plot_column, cluster_column_slices = T, column_title_side = "bottom",
+             column_split = column_split_factor, cluster_column_slices = F, column_title_side = "bottom",
              show_column_dend = F, column_title_rot = 90, column_title_gp = gpar(fontsize = 20, fontface = "bold"),
              column_gap = unit(0, "mm"),
              border = "grey50",
@@ -223,46 +226,4 @@ png(file2write,
     width = 2000, height = 2000, res= 150)
 draw(object = p)
 dev.off()
-
-
-# plot legend -------------------------------------------------------------
-## make horizontal legend
-list_lgd = list(
-  Legend(col_fun = col_fun, 
-         title = "Pearson's coeffcient\n(variably expressed genes\nwithin tumor cells)", 
-         legend_width = unit(6, "cm"),
-         direction = "horizontal"),
-  Legend(title = "Tumor Segment No.",
-         labels = c("Tumor#1(T1)", "Tumor#2(T2)", "Tumor#3(T3)"),
-         legend_gp = gpar(fill = colors_tumor_segments[c("T1", "T2", "T3")])),
-  Legend(title = "Tumor Subcluster No.",
-         labels = names(colors_clustername),
-         legend_gp = gpar(fill = colors_clustername),
-         nr = 2),
-  Legend(labels = names(colors_hist_type),
-         title = "Histologic Type",
-         legend_gp = gpar(fill = colors_hist_type)),
-  Legend(labels = c("Mutated (WES)", "Mutated (Mapped the Mutation of T1 to snRNA Reads)", "None", "No Data"),
-         title = "Somatic Mutation Status",
-         legend_gp = gpar(fill = c("#e7298a", "#c994c7", "white", color_na))),
-  Legend(col_fun = methyl_color_fun,
-         title = "Bulk VHL Promoter Methylation",
-         direction = "horizontal"),
-  Legend(col_fun = color_fun_frac_loss, 
-         title = "Fraction of tumor cells\nwith copy number loss", 
-         legend_width = unit(6, "cm"),
-         direction = "horizontal"),
-  Legend(col_fun = color_fun_frac_gain, 
-         title = "Fraction of tumor cells\nwith copy number gain", 
-         legend_width = unit(6, "cm"),
-         direction = "horizontal"))
-dir_out_legend <- paste0(dir_out, "Legends/")
-dir.create(dir_out_legend)
-for (i in 1:length(list_lgd)) {
-  file2write <- paste0(dir_out_legend, "Legend", i, ".pdf")
-  pdf(file2write,
-      width = 4, height = 3)
-  draw(list_lgd[[i]])
-  dev.off()
-}
 

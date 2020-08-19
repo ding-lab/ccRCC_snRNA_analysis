@@ -34,11 +34,15 @@ plotdata_df <- merge(plotdata_df, barcode2celltype_df, by = c("orig.ident", "ind
 plotdata_df <- plotdata_df %>%
   mutate(Name_Cluster = paste0("C", (Id_TumorManualCluster + 1)))
 
-# plot by csample--------------------------------------------------------------------
+# plot by sample--------------------------------------------------------------------
+## make color palette
+colors_sample <- RColorBrewer::brewer.pal(n = 5, name = "Dark2")
+names(colors_sample) <- unique(plotdata_df$Id_Aliquot_WU)
 p <- ggplot()
 p <- p + geom_point(data = plotdata_df, 
                     mapping = aes(x = UMAP_1, y = UMAP_2, color = Id_Aliquot_WU),
                     alpha = 1, size = 0.05)
+p <- p + scale_color_manual(values = colors_sample)
 p <- p + guides(colour = guide_legend(override.aes = list(size=5)))
 p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                panel.background = element_blank(), axis.line = element_line(colour = "black"))
@@ -46,10 +50,15 @@ p <- p + theme(axis.text.x=element_blank(),
                axis.ticks.x=element_blank())
 p <- p + theme(axis.text.y=element_blank(),
                axis.ticks.y=element_blank())
+p <- p + theme(legend.position = "top")
 p
 ## save output
 file2write <- paste0(dir_out, "bysample", ".png")
-png(file2write, width = 1000, height = 800, res = 150)
+png(file2write, width = 1000, height = 1000, res = 150)
+print(p)
+dev.off()
+file2write <- paste0(dir_out, "bysample", ".pdf")
+pdf(file2write, width = 9, height = 10, useDingbats = F)
 print(p)
 dev.off()
 

@@ -59,6 +59,8 @@ barcode2manualsubcluster_df <- barcode2manualsubcluster_df %>%
   dplyr::mutate(Name_Cluster = paste0(id_aliquot_wu, "_C", (Id_TumorManualCluster+1)))
 ### subset
 srat_plot <- subset(srat, cells = barcode2manualsubcluster_df$barcode_integrated_case[!is.na(barcode2manualsubcluster_df$Name_Cluster)])
+cat("Finished subsetting the seurat object!\n")
+dim(srat_plot)
 ## change meta data
 srat_plot@meta.data$Name_Cluster <- mapvalues(x = rownames(metadata_df), from = barcode2manualsubcluster_df$barcode_integrated_case, to = as.vector(barcode2manualsubcluster_df$Name_Cluster))
 ### set the identities to cluster in the meta data
@@ -69,11 +71,11 @@ for (gene_tmp in genes2plot) {
   p <- VlnPlot(object = srat_plot, features = gene_tmp, group.by = "Name_Cluster", pt.size = 0)
   p <- p + theme(axis.text.x = element_text(angle = 90))
   p <- p + theme(legend.position = "none")
-  png(filename = paste0(dir_out, "C3L-00010_correlated_tumorcells", ".", gene_tmp, ".png"),width = 1000, height = 800, res = 150)
+  png(paste0(dir_out, "C3L-00010_correlated_tumorcells", ".", gene_tmp, ".png"),width = 1000, height = 800, res = 150)
   print(p)
   dev.off()
   
-  pdf(filename = paste0(dir_out, "C3L-00010_correlated_tumorcells", ".", gene_tmp, ".pdf"),width = 10, height = 10, useDingbats = F)
+  pdf(paste0(dir_out, "C3L-00010_correlated_tumorcells", ".", gene_tmp, ".pdf"),width = 10, height = 10, useDingbats = F)
   print(p)
   dev.off()
 }
