@@ -57,7 +57,7 @@ barcode2manualsubcluster_df <- merge(barcode2manualsubcluster_df, metadata_df,
 barcode2manualsubcluster_df <- barcode2manualsubcluster_df %>%
   dplyr::mutate(Name_Cluster = paste0(id_aliquot_wu, "_C", (Id_TumorManualCluster+1)))
 ### subset
-srat_plot <- subset(srat, cells = barcode2manualsubcluster_df$barcode_integrated_case[!is.na(barcode_integrated_case$Name_Cluster)])
+srat_plot <- subset(srat, cells = barcode2manualsubcluster_df$barcode_integrated_case[!is.na(barcode2manualsubcluster_df$Name_Cluster)])
 ## change meta data
 srat_plot@meta.data$Name_Cluster <- mapvalues(x = rownames(metadata_df), from = barcode2manualsubcluster_df$barcode_integrated_case, to = as.vector(barcode2manualsubcluster_df$Name_Cluster))
 ### set the identities to cluster in the meta data
