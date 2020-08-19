@@ -65,10 +65,10 @@ Idents(object = srat_plot) <- "Name_Cluster"
 
 # plot --------------------------------------------------------------------
 for (gene_tmp in genes2plot) {
-  p <- VlnPlot(object = srat_plot, features = gene_tmp, group.by = "Name_Cluster", pt.size = 0)
+  p <- VlnPlot(object = srat_plot, features = gene_tmp, group.by = "Name_Cluster", pt.size = 0, ncol = 5)
   p <- p + theme(axis.text.x = element_text(angle = 90))
   p <- p + theme(legend.position = "none")
-  png(filename = paste0(dir_out, "C3L-00010_correlated_tumorcells", ".", gene_tmp, ".png"),width = 700, height = 500, res = 150)
+  png(filename = paste0(dir_out, "C3L-00010_correlated_tumorcells", ".", gene_tmp, ".png"),width = 1000, height = 800, res = 150)
   print(p)
   dev.off()
 }
