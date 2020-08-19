@@ -154,7 +154,7 @@ colors_hist_type <- c("Clear cell renal cell carcinoma" = "#fc8d62", "non-Clear 
 col_fun = colorRamp2(c(0, 0.5, 1), c("white", "yellow", "red"))
 ## make color for the cluster name suffix
 unique(names_cluster_suffix)
-colors_clustername <- RColorBrewer::brewer.pal(n = 9, name = "YlGn")[c(1:4, 6:9)]
+colors_clustername <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")
 names(colors_clustername) <- paste0("C", 1:8)
 swatch(colors_clustername)
 
@@ -169,15 +169,15 @@ row_left_anno = rowAnnotation(Sample_Type_Suffix = anno_text(x = suffixes_aliquo
                                                              rot = 0),
                               Cluster_Name = anno_text(x = names_cluster_suffix_plot_row, 
                                                        location = 0.5, just = "center",
-                                                       gp = gpar(col = "black", fontsize = 15, fontface = "bold"), 
+                                                       gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_clustername[names_cluster_suffix_plot_row]), 
                                                        width = unit(1, "cm"),
                                                        rot = 0),
-                              FracCells_with_VHL_CN_Loss = anno_simple(x = cnv_wide_df$VHL, width = unit(1, "cm"), col = color_fun_frac_loss), 
-                              FracCells_with_SETD2_CN_Loss = anno_simple(x = cnv_wide_df$SETD2, width = unit(1, "cm"), col = color_fun_frac_loss), 
-                              FracCells_with_PBRM1_CN_Loss = anno_simple(x = cnv_wide_df$PBRM1, width = unit(1, "cm"), col = color_fun_frac_loss), 
-                              FracCells_with_BAP1_CN_Loss = anno_simple(x = cnv_wide_df$BAP1, width = unit(1, "cm"), col = color_fun_frac_loss), 
-                              FracCells_with_SQSTM1_CN_Loss = anno_simple(x = cnv_wide_df$SQSTM1, width = unit(1, "cm"), col = color_fun_frac_gain), 
-                              FracCells_with_HIF1A_CN_Loss = anno_simple(x = cnv_wide_df$HIF1A, width = unit(1, "cm"), col = color_fun_frac_loss), 
+                              # FracCells_with_VHL_CN_Loss = anno_simple(x = cnv_wide_df$VHL, width = unit(1, "cm"), col = color_fun_frac_loss), 
+                              # FracCells_with_SETD2_CN_Loss = anno_simple(x = cnv_wide_df$SETD2, width = unit(1, "cm"), col = color_fun_frac_loss), 
+                              # FracCells_with_PBRM1_CN_Loss = anno_simple(x = cnv_wide_df$PBRM1, width = unit(1, "cm"), col = color_fun_frac_loss), 
+                              # FracCells_with_BAP1_CN_Loss = anno_simple(x = cnv_wide_df$BAP1, width = unit(1, "cm"), col = color_fun_frac_loss), 
+                              # FracCells_with_SQSTM1_CN_Loss = anno_simple(x = cnv_wide_df$SQSTM1, width = unit(1, "cm"), col = color_fun_frac_gain), 
+                              # FracCells_with_HIF1A_CN_Loss = anno_simple(x = cnv_wide_df$HIF1A, width = unit(1, "cm"), col = color_fun_frac_loss), 
                               annotation_name_side = "bottom", annotation_name_gp = gpar(fontsize = 20))
 
 # make top column annotation -------------------------------------------
@@ -189,7 +189,7 @@ col_anno = HeatmapAnnotation(Sample_Type_Suffix = anno_text(x = suffixes_aliquot
                                                                 rot = 90),
                                  Cluster_Name = anno_text(x = names_cluster_suffix_plot_column, 
                                                           location = 0.5, just = "center",
-                                                          gp = gpar(col = "black", fontsize = 15, fontface = "bold"), 
+                                                          gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_clustername[names_cluster_suffix_plot_column]), 
                                                           height = unit(1, "cm"),
                                                           rot = 90))
 
@@ -197,6 +197,7 @@ col_anno = HeatmapAnnotation(Sample_Type_Suffix = anno_text(x = suffixes_aliquot
 ## make heatmap
 p <- Heatmap(matrix = plot_data_mat,
              col = col_fun, 
+             width = unit(nrow(plot_data_mat), "cm"), height = unit(ncol(plot_data_mat), "cm"),
              row_split = ids_case_plot_row, cluster_row_slices = T,
              show_row_dend = F, row_title_rot = 0, row_title_gp = gpar(fontsize = 20, fontface = "bold"),
              row_gap = unit(0, "mm"),
@@ -211,9 +212,15 @@ p <- Heatmap(matrix = plot_data_mat,
              show_column_names = F,
              show_heatmap_legend = F)
 ## save heatmap
-file2write <- paste0(dir_out, "Heatmap", ".pdf")
+file2write <- paste0(dir_out, "C3L-00010_correlated_tumorcells", ".pdf")
 pdf(file2write,
-    width = 12, height = 10)
+    width = 20, height = 20)
+draw(object = p)
+dev.off()
+
+file2write <- paste0(dir_out, "C3L-00010_correlated_tumorcells", ".png")
+png(file2write,
+    width = 2000, height = 2000, res= 150)
 draw(object = p)
 dev.off()
 
