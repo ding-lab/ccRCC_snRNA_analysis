@@ -50,7 +50,7 @@ metadata_df <- srat@meta.data
 metadata_df$barcode_integrated_case <- rownames(srat@meta.data)
 cat("Added barcode info from meta data!\n")
 metadata_df <- metadata_df %>%
-  dplyr::mutate(barcode_individual = str_split_fixed(string = barcode_integrated_case, pattern = "_", n = 3)[,1])
+  dplyr::mutate(barcode_individual = str_split_fixed(string = barcode_integrated_case, pattern = "_", n = 2)[,1])
 barcode2manualsubcluster_df <- merge(barcode2manualsubcluster_df, metadata_df, 
                                              by.x = c("orig.ident", "individual_barcode"), by.y = c("orig.ident", "barcode_individual"), all.y = T)
 
@@ -62,9 +62,10 @@ srat_plot <- subset(srat, cells = barcode2manualsubcluster_df$barcode_integrated
 cat("Finished subsetting the seurat object!\n")
 dim(srat_plot)
 ## change meta data
-srat_plot@meta.data$Name_Cluster <- mapvalues(x = rownames(metadata_df), from = barcode2manualsubcluster_df$barcode_integrated_case, to = as.vector(barcode2manualsubcluster_df$Name_Cluster))
+srat_plot@meta.data$Name_Cluster <- mapvalues(x = rownames(srat_plot@meta.data), from = barcode2manualsubcluster_df$barcode_integrated_case, to = as.vector(barcode2manualsubcluster_df$Name_Cluster))
 ### set the identities to cluster in the meta data
 Idents(object = srat_plot) <- "Name_Cluster"
+# DefaultAssay(srat_plot) <- "RNA"
 
 # plot --------------------------------------------------------------------
 for (gene_tmp in genes2plot) {
