@@ -45,8 +45,10 @@ cat("###########################################\n")
 BC <- srat@meta.data %>% rownames
 ## get original barcode
 srat@meta.data$original_barcode <- BC %>% strsplit("_") %>% lapply("[[",1) %>% unlist
+head(srat@meta.data$original_barcode)
 ## make combined id for the seurat meta data
-srat@meta.data$id_aliquot_barcode <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$original_barcode )
+srat@meta.data$id_aliquot_barcode <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$original_barcode)
+head(srat@meta.data$id_aliquot_barcode)
 ## make combined id for the barcode2celltype table
 barcode2celltype_df$id_aliquot_barcode <- paste0(barcode2celltype_df$orig.ident, "_", barcode2celltype_df$individual_barcode)
 ## map cell type shorter
