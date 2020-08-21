@@ -1,11 +1,14 @@
-# Yige Wu @WashU Feb 2020
+# Yige Wu @WashU Aug 2020
 ## for plotting the marker genes for integrated object, showing cell of origin
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-baseD = "~/Box/"
-setwd(baseD)
-source("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/ccRCC_snRNA_analysis/ccRCC_snRNA_shared.R")
+dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+setwd(dir_base)
+source("./ccRCC_snRNA_analysis/load_pkgs.R")
+source("./ccRCC_snRNA_analysis/functions.R")
+source("./ccRCC_snRNA_analysis/variables.R")
+source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -16,26 +19,22 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## set 10XMapping processing run id to input !0XMapping result later
 mut_mapping_run_id <- "20200219.v1"
-## input seurat processing info to input individual seurat object later
-seurat_summary <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/scRNA_auto/summary/ccRCC_snRNA_Downstream_Processing - Seurat_Preprocessing.20200207.v1.tsv", data.table = F)
-seurat_summary2process <- seurat_summary %>%
-  filter(Cellranger_reference_type == "pre-mRNA") %>%
-  filter(Proceed_for_downstream == "Yes") %>%
-  mutate(Path_seurat_object = paste0("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/scRNA_auto/outputs/", Aliquot, FACS, 
-                                     "/pf", `pre-filter.low.nCount`, "_fmin", low.nFeautre, "_fmax", high.nFeautre, "_cmin", low.nCount, "_cmax", high.nCount, "_mito_max", high.percent.mito, 
-                                     "/", Aliquot, FACS, "_processed.rds"))
-seurat_summary2process$Path_seurat_object
+## input the seurat object path
+paths_srat_df <- fread(input = "./Resources/Analysis_Results/recluster/recluster_cell_groups_in_individual_samples/recluster_nephron_epithelium/recluster_nephron_epithelium_cells_in_individual_samples/20200225.v1/Seurat_Object_Paths.Malignant_Nephron_Epithelium20200225.v1.tsv", data.table = F)
+## input metadata
+idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
 
 # plot  by sample --------------------------------------------------
-for (snRNA_aliquot_id_tmp in unique(seurat_summary2process$Aliquot)) {
-  file2write <- paste(dir_out, snRNA_aliquot_id_tmp, ".All_Mutation_Mapping.", run_id, ".png", sep="")
+for (snRNA_aliquot_id_tmp in unique(paths_srat_df$Aliquot)) {
+  id_aliquot_wu <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == snRNA_aliquot_id_tmp]
+  file2write <- paste(dir_out, id_aliquot_wu, ".All_Mutation_Mapping.", ".png", sep="")
   
   if (file.exists(file2write)) {
     next()
   }
   ## input seurat object
-  seurat_obj_path <- seurat_summary2process$Path_seurat_object[seurat_summary2process$Aliquot == snRNA_aliquot_id_tmp]
-  seurat_obj <- readRDS(file = seurat_obj_path)
+  path_srat_obj <- paths_srat_df$Path_seurat_object[paths_srat_df$Aliquot == snRNA_aliquot_id_tmp]
+  seurat_obj <- readRDS(file = path_srat_obj)
   
   ## get the coordinates for each cluster label
   p <- DimPlot(seurat_obj, reduction = "umap", label = T, label.size	= 5, repel = T)
@@ -45,7 +44,7 @@ for (snRNA_aliquot_id_tmp in unique(seurat_summary2process$Aliquot)) {
   umap_tab$barcode <- rownames(umap_tab)
   
   ## input barcodes with mapped varaint alleles and reference alleles
-  mutation_map_tab <- fread(input = paste0("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/snRNA_Processed_Data/10Xmapping/outputs/", 
+  mutation_map_tab <- fread(input = paste0("./Resources/snRNA_Processed_Data/10Xmapping/outputs/", 
                                            mut_mapping_run_id, "/",
                                            snRNA_aliquot_id_tmp, "/", 
                                            snRNA_aliquot_id_tmp, "_mapping_heatmap_0.txt"), data.table = F)
@@ -83,17 +82,14 @@ for (snRNA_aliquot_id_tmp in unique(seurat_summary2process$Aliquot)) {
   colors_read_type <- c("#E31A1C", "#33A02C", "grey70")
   names(colors_read_type) <- c("Var", "Ref", "NA")
   
-  ## get the case id for this aliquot to show in the title
-  case_id_tmp <- seurat_summary2process$Case[seurat_summary2process$Aliquot == snRNA_aliquot_id_tmp]
-  
   ## ggplot
   p <- ggplot()
   p <- p + geom_point(data = plot_data_df[plot_data_df$read_type != "Var",], mapping = aes(x = UMAP_1, y = UMAP_2, color=read_type), alpha = 0.5, size = 0.3)
   p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "Var",], mapping = aes(x = UMAP_1, y = UMAP_2, color=read_type), alpha = 0.8, size = 0.8)
   p <- p + scale_color_manual(values = colors_read_type)
-  p <- p + ggtitle(paste0("Case: ", case_id_tmp, "   Aliquot: ",  snRNA_aliquot_id_tmp), 
+  p <- p + ggtitle(paste0("Aliquot: ",  id_aliquot_wu), 
                    subtitle = paste0("Mapping of All Mutations"))
-  p <- p + geom_text_repel(data = label_data, mapping = aes(UMAP_1, UMAP_2, label = ident))
+  # p <- p + geom_text_repel(data = label_data, mapping = aes(UMAP_1, UMAP_2, label = ident))
   p <- p +
     theme_bw() +
     theme(panel.border = element_blank(), panel.grid.major = element_blank(),

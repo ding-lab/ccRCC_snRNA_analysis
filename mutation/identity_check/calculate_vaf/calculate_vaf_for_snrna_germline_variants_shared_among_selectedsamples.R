@@ -8,7 +8,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -16,7 +16,7 @@ dir.create(dir_out)
 
 # input dependencies -----------------------------------------------------
 ## input snRNA germline variants
-vcf_df <- fread(data.table = F, input = "./Resources/Analysis_Results/mutation/identity_check/intersect_germline_variants/intersect_snrna_germline_variants_for_snatac_samples/20200707.v1/Germline_Variants.snRNA.pickCaller.Shared_Variants.snATAC_Samples.20200707.v1.tsv")
+vcf_df <- fread(data.table = F, input = "./Resources/Analysis_Results/mutation/identity_check/intersect_germline_variants/intersect_snrna_germline_variants_for_selected_samples/20200820.v3/Germline_Variants.snRNA.pickCaller.Shared_Variants.Selected_Samples.20200820.v3.tsv")
 length(unique(vcf_df$ID_ALIQUOT))
 length(unique(vcf_df$ID_VARIANT))
 
@@ -59,7 +59,7 @@ vcf_df <- vcf_df %>%
   mutate(VAF = Alt_Count/Total_Count)
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "Germline_Variants.", "snRNA.", "pickCaller.", "Shared_Variants.", "VAF.", run_id, ".tsv")
+file2write <- paste0(dir_out, "Germline_Variants.", "snRNA.", "pickCaller.", "Shared_Variants.", "SelectedSamples.", "VAF.", run_id, ".tsv")
 write.table(x = vcf_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
 

@@ -36,12 +36,12 @@ plotdata_df <- plotdata_df %>%
 
 # plot by sample--------------------------------------------------------------------
 ## make color palette
-colors_sample <- RColorBrewer::brewer.pal(n = 5, name = "Dark2")
+colors_sample <- RColorBrewer::brewer.pal(n = 5, name = "Set1")
 names(colors_sample) <- unique(plotdata_df$Id_Aliquot_WU)
 p <- ggplot()
 p <- p + geom_point(data = plotdata_df, 
                     mapping = aes(x = UMAP_1, y = UMAP_2, color = Id_Aliquot_WU),
-                    alpha = 1, size = 0.05)
+                    alpha = 0.8, size = 0.05)
 p <- p + scale_color_manual(values = colors_sample)
 p <- p + guides(colour = guide_legend(override.aes = list(size=5)))
 p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),

@@ -15,9 +15,9 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies -----------------------------------------------------
-## input snRNA germline variants
-vcf_df <- fread(data.table = F, input = "./Resources/Analysis_Results/mutation/identity_check/intersect_germline_variants/intersect_snrna_germline_variants_for_snatac_samples/20200707.v1/Germline_Variants.snRNA.pickCaller.Shared_Variants.snATAC_Samples.20200707.v1.tsv")
-length(unique(vcf_df$ID_ALIQUOT))
+## input bulk germline variants
+vcf_df <- fread(data.table = F, input = "./Resources/Analysis_Results/mutation/identity_check/intersect_germline_variants/intersect_bulk_germline_variants_for_selectedsamples/20200820.v1/Germline_Variants.bulk.pickCaller.Shared_Variants.SelectedSamples.20200820.v1.tsv")
+length(unique(vcf_df$ID_Case))
 length(unique(vcf_df$ID_VARIANT))
 
 # get allelic depths for the alt alleles and total depth --------------------------
@@ -59,7 +59,7 @@ vcf_df <- vcf_df %>%
   mutate(VAF = Alt_Count/Total_Count)
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "Germline_Variants.", "snRNA.", "pickCaller.", "Shared_Variants.", "VAF.", run_id, ".tsv")
+file2write <- paste0(dir_out, "Germline_Variants.", "bulk.", "pickCaller.", "Shared_Variants.", "SelectedSamples.", "VAF.", run_id, ".tsv")
 write.table(x = vcf_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
 
