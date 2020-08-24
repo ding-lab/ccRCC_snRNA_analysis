@@ -50,7 +50,7 @@ print("Finish running ScoreJackStraw\n")
 # In this case PC1-9 are strongly significant
 file2write <- paste0(dir_out, "StromaReclustered.", "JackStrawPlot", ".png")
 png(file2write, width = 1000, height = 1000, res = 150)
-JackStrawPlot(pbmc, dims = 1:20)
+JackStrawPlot(srat, dims = 1:20)
 print("Finish running JackStrawPlot\n")
 dev.off()
 print("Finish writing JackStrawPlot\n")
