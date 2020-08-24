@@ -33,14 +33,16 @@ dir.create(dir_out)
 ## input the integrated data
 path_rds <- "./Resources/Analysis_Results/recluster/recluster_cell_groups_in_integrated_data/subset_and_recluster/subset_stroma_and_recluster_on_katmai/20200824.v1/Stroma.Merged.20200824.v1.RDS"
 srat <- readRDS(file = path_rds)
-print("Finish reading RDS file")
+print("Finish reading RDS file\n")
 
 # determine the statistical significance of PCA scores --------------------
 # Do 200 random samplings to find significant genes, each time randomly permute 1% of genes
 # This returns a 'p-value' for each gene in each PC, based on how likely the gene/PC score woud have been observed by chance
 # Note that in this case we get the same result with 200 or 1000 samplings, so we do 200 here for expediency
-srat=JackStraw(srat,num.replicate = 100,do.print = FALSE)
-srat <- ScoreJackStraw(srat, dims = 1:num_pc)
+srat <- JackStraw(object = srat, num.replicate = 100)
+print("Finish running JackStraw\n")
+srat <- ScoreJackStraw(object = srat, dims = 1:num_pc)
+print("Finish running ScoreJackStraw\n")
 
 # The jackStraw plot compares the distribution of P-values for each PC with a uniform distribution (dashed line)
 # 'Significant' PCs will have a strong enrichment of genes with low p-values (solid curve above dashed line)
@@ -48,11 +50,16 @@ srat <- ScoreJackStraw(srat, dims = 1:num_pc)
 file2write <- paste0(dir_out, "StromaReclustered.", "JackStrawPlot", ".png")
 png(file2write, width = 1000, height = 1000, res = 150)
 JackStrawPlot(pbmc, dims = 1:num_pc)
+print("Finish running JackStrawPlot\n")
 dev.off()
+print("Finish writing JackStrawPlot\n")
 
 # identify genes significantly associated with any PC ---------------------
 genes_sigpca = PCASigGenes(object = srat, pcs.use = 1:num_pc, pval.cut = 1e-5, max.per.pc = 200)
+print("Finish running PCASigGenes\n")
 file2write <- paste0(dir_out, "StromaReclustered.", "PCASigGenes", run_id, ".RDS")
 saveRDS(object = genes_sigpca, file = file2write, compress = T)
+print("Finish writing PCASigGenes\n")
+
 
 
