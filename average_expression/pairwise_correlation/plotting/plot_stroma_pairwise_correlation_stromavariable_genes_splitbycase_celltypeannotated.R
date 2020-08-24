@@ -46,7 +46,7 @@ rownames(plot_data_mat) <- plot_data_df$V1
 aliquot_celltype <- rownames(plot_data_mat)
 aliquot_ids <- str_split_fixed(string = aliquot_celltype, pattern = "_", n = 2)[,1]
 case_ids <- mapvalues(x = aliquot_ids, from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Case))
-aliquot_wu_ids <- mapvalues(x = aliquot_ids, from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Aliquot.snRNA.WU))
+ids_aliquot_wu <- mapvalues(x = aliquot_ids, from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Aliquot.snRNA.WU))
 ## get suffixes of the aliquot ids
 suffixes_aliquot_id <- str_split_fixed(string = ids_aliquot_wu, pattern = "-", n = 3)[,3]
 suffixes_aliquot_id
@@ -73,28 +73,33 @@ col_fun = colorRamp2(c(0, 0.5, 1), c("white", "yellow", "red"))
 ## make colors for the discrete ranges
 colors_numbercellrange_vec <- RColorBrewer::brewer.pal(n = 6, name = "PuBuGn")
 names(colors_numbercellrange_vec) <- sapply(X = seq(from = 1, to = 101, by = 20), FUN = number2rangetext)
+## make colors for the cell types
+colors_celltype <- stroma_colors
 
 # make row annotation -----------------------------------------------------
 barcod2celltype_df$Id_Case <- mapvalues(x = barcod2celltype_df$orig.ident, from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Case))
 barcod2celltype_df$Id_Aliquot_WU <- mapvalues(x = barcod2celltype_df$orig.ident, from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Aliquot.snRNA.WU))
 ## count the number of stroma cells
-number_stromacells_byaliquot <- barcod2celltype_df %>%
+number_cells_byaliquot <- barcod2celltype_df %>%
   filter(Cell_group.shorter == "Stroma") %>%
   select(Id_Aliquot_WU) %>%
   table() %>%
   data.frame() %>%
   rename(Id_Aliquot_WU = ".")
-
-frac_stromacelltype_byaliquot_long_df <- barcod2celltype_df %>%
+## count the % of different stroma cell types
+number_stromacelltype_byaliquot_long_df <- barcod2celltype_df %>%
   filter(Cell_group.shorter == "Stroma") %>%
   select(Id_Aliquot_WU, Cell_type.detailed) %>%
   table() %>%
   data.frame()
-frac_stromacelltype_byaliquot_long_df
+number_stromacelltype_byaliquot_wide_df <- dcast(data = number_stromacelltype_byaliquot_long_df, formula = Id_Aliquot_WU ~ Cell_type.detailed, value.var = "Freq")
+rownames(number_stromacelltype_byaliquot_wide_df) <- number_stromacelltype_byaliquot_wide_df$Id_Aliquot_WU
+number_stromacelltype_byaliquot_wide_df <- number_stromacelltype_byaliquot_wide_df[ids_aliquot_wu, -1]
+frac_stromacelltype_byaliquot_wide_df <- number_stromacelltype_byaliquot_wide_df/rowSums(number_stromacelltype_byaliquot_wide_df)
 ## map discrete ranges
-number_stromacells_byaliquot$text_range <- sapply(X = number_stromacells_byaliquot$Freq, FUN = number2rangetext)
-rownames(number_stromacells_byaliquot) <- number_stromacells_byaliquot$Id_Aliquot_WU
-number_stromacells_byaliquot <- number_stromacells_byaliquot[aliquot_wu_ids,]
+number_cells_byaliquot$text_range <- sapply(X = number_cells_byaliquot$Freq, FUN = number2rangetext)
+rownames(number_cells_byaliquot) <- number_cells_byaliquot$Id_Aliquot_WU
+number_cells_byaliquot <- number_cells_byaliquot[ids_aliquot_wu,]
 ## make row annotation
 row_anno = rowAnnotation(Sample_Type_Suffix = anno_simple(x = suffixes_aliquot_id,
                                                           col = colors_tumor_segments,
@@ -102,9 +107,11 @@ row_anno = rowAnnotation(Sample_Type_Suffix = anno_simple(x = suffixes_aliquot_i
                          Number_Cells = anno_simple(x = number_cells_byaliquot$text_range,
                                                     col = colors_numbercellrange_vec,
                                                     width = unit(7, "mm")),
+                         CellType_Fraction = anno_barplot(x = frac_stromacelltype_byaliquot_wide_df, width = unit(20, "mm"), gp = gpar(fill = colors_celltype)),
                          # Histologic_Type = anno_simple(x = omics_long_df$Histologic_Type,
                          #                               col = colors_hist_type,
                          #                               width = unit(1.5, "cm")),
+                         show_annotation_name = c(Number_Cells = F, Sample_Type_Suffix = F),
                          annotation_name_side = "top", annotation_name_gp = gpar(fontsize = 10))
 
 # make column annotation --------------------------------------------------
@@ -117,7 +124,7 @@ col_anno = HeatmapAnnotation(Sample_Type_Suffix = anno_simple(x = suffixes_aliqu
                              # Histologic_Type = anno_simple(x = omics_long_df$Histologic_Type,
                              #                               col = colors_hist_type,
                              #                               width = unit(1.5, "cm")),
-                             annotation_name_side = "right", annotation_name_gp = gpar(fontsize = 10))
+                             annotation_name_side = "left", annotation_name_gp = gpar(fontsize = 10))
 
 # plot heatmap body with white-yellow-red ------------------------------------------------------
 ## make heatmap
@@ -137,16 +144,17 @@ p <- Heatmap(matrix = plot_data_mat,
              border = "grey50",
              col = col_fun, 
              show_heatmap_legend = F)
-## make legend for heattmap body
-heatmap_lgd = Legend(col_fun = col_fun, 
-                     title = "Pearson's coeffcient\n(variably expressed genes\nwithin stroma cells)", 
-                     direction = "vertical")
 ## make legend for top annotation
 annotation_lgd = list(
-  heatmap_lgd,
+  Legend(col_fun = col_fun, 
+         title = "Pearson's coeffcient\n(variably expressed genes\nwithin stroma cells)", 
+         direction = "vertical"),
   Legend(title = "Number of stroma cells",
          labels = names(colors_numbercellrange_vec),
-         legend_gp = gpar(fill = colors_numbercellrange_vec)))
+         legend_gp = gpar(fill = colors_numbercellrange_vec)),
+  Legend(title = "Fraction of cell types",
+         labels = names(colors_celltype),
+         legend_gp = gpar(fill = colors_celltype)))
 ## save heatmap as png
 png(filename = paste0(dir_out, "avg_exp.stromacellvariable_genes.pearson_coef.heatmap", ".png"), 
     width = 3000, height = 2400, res = 150)
