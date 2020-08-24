@@ -57,7 +57,6 @@ srat <- subset(srat, idents = "Stroma")
 
 # extract data ------------------------------------------------------------
 data_mat <- srat[[assay_process]]@data[variable_genes_df$gene,]
-data_df[1:5, 1:5]
 
 # save output -------------------------------------------------------------
 file2write <- paste0(dir_out, "stromacells_rnaassay_normalizeddata_bycell_bystromavariablegenes.", run_id, ".tsv")
