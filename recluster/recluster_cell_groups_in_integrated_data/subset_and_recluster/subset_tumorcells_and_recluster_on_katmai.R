@@ -80,5 +80,6 @@ srat <- FindClusters(srat, resolution = resolution_findclusters)
 cat("###########################################\n")
 ## save output
 cat("Start saving the reclustered seurat object\n")
-saveRDS(object = srat, file = path_output, compress = T)
+file2write <- paste0(dir_out, "AllTumorCells.Merged.", run_id, ".RDS")
+saveRDS(object = srat, file = file2write, compress = T)
 cat("###########################################\n")
