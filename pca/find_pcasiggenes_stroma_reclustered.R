@@ -39,9 +39,10 @@ print("Finish reading RDS file\n")
 # Do 200 random samplings to find significant genes, each time randomly permute 1% of genes
 # This returns a 'p-value' for each gene in each PC, based on how likely the gene/PC score woud have been observed by chance
 # Note that in this case we get the same result with 200 or 1000 samplings, so we do 200 here for expediency
-srat <- JackStraw(object = srat, num.replicate = 100)
+srat <- JackStraw(object = srat, num.replicate = 100, dims = 20)
 print("Finish running JackStraw\n")
-srat <- ScoreJackStraw(object = srat, dims = 1:num_pc)
+## score the significance of the PCs
+srat <- ScoreJackStraw(object = srat, dims = 1:20)
 print("Finish running ScoreJackStraw\n")
 
 # The jackStraw plot compares the distribution of P-values for each PC with a uniform distribution (dashed line)
@@ -49,13 +50,13 @@ print("Finish running ScoreJackStraw\n")
 # In this case PC1-9 are strongly significant
 file2write <- paste0(dir_out, "StromaReclustered.", "JackStrawPlot", ".png")
 png(file2write, width = 1000, height = 1000, res = 150)
-JackStrawPlot(pbmc, dims = 1:num_pc)
+JackStrawPlot(pbmc, dims = 1:20)
 print("Finish running JackStrawPlot\n")
 dev.off()
 print("Finish writing JackStrawPlot\n")
 
 # identify genes significantly associated with any PC ---------------------
-genes_sigpca = PCASigGenes(object = srat, pcs.use = 1:num_pc, pval.cut = 1e-5, max.per.pc = 200)
+genes_sigpca = PCASigGenes(object = srat, pcs.use = 1:20, pval.cut = 1e-5, max.per.pc = 200)
 print("Finish running PCASigGenes\n")
 file2write <- paste0(dir_out, "StromaReclustered.", "PCASigGenes", run_id, ".RDS")
 saveRDS(object = genes_sigpca, file = file2write, compress = T)
