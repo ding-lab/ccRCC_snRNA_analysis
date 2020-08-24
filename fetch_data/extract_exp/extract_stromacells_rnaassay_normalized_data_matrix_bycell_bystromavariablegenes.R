@@ -47,7 +47,7 @@ cat(paste0("Will extract assay: ", assay_process, "\n"))
 
 # set ident and subset---------------------------------------------------------------
 barcode2celltype_df <- barcode2celltype_df %>%
-  mutate(id_bycellgroup_byaliquot = paste0(orig.ident, "_", Cell_group)) %>%
+  mutate(id_bycellgroup_byaliquot = paste0(orig.ident, "_", Cell_group.shorter)) %>%
   mutate(id_cell = paste0(orig.ident, "_", individual_barcode))
 srat@meta.data$individual_barcode <- str_split_fixed(string = rownames(srat@meta.data), pattern = "_", n = 2)[,1]
 srat@meta.data$id_cell <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$individual_barcode)
