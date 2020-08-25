@@ -57,7 +57,7 @@ print("Finish writing JackStrawPlot\n")
 
 # identify genes significantly associated with any PC ---------------------
 # genes_sigpca = PCASigGenes(object = srat, pcs.use = 1:20, pval.cut = 1e-5, max.per.pc = 200)
-genes_sigpca = PCASigGenes(object = srat, pcs.use = 1:17, pval.cut = 0.1, max.per.pc = 200)
+genes_sigpca = PCASigGenes(object = srat, pcs.use = 1:10, pval.cut = 0.1, max.per.pc = 200)
 
 print("Finish running PCASigGenes\n")
 file2write <- paste0(dir_out, "StromaReclustered.", "PCASigGenes", run_id, ".RDS")
