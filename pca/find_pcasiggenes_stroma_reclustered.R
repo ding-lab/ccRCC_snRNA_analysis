@@ -48,15 +48,17 @@ print("Finish running ScoreJackStraw\n")
 # The jackStraw plot compares the distribution of P-values for each PC with a uniform distribution (dashed line)
 # 'Significant' PCs will have a strong enrichment of genes with low p-values (solid curve above dashed line)
 # In this case PC1-9 are strongly significant
-file2write <- paste0(dir_out, "StromaReclustered.", "JackStrawPlot", ".png")
-png(file2write, width = 1000, height = 1000, res = 150)
+file2write <- paste0(dir_out, "StromaReclustered.", "JackStrawPlot", ".pdf")
+pdf(file2write, width = 12, height = 10, useDingbats = F)
 JackStrawPlot(srat, dims = 1:20)
 print("Finish running JackStrawPlot\n")
 dev.off()
 print("Finish writing JackStrawPlot\n")
 
 # identify genes significantly associated with any PC ---------------------
-genes_sigpca = PCASigGenes(object = srat, pcs.use = 1:20, pval.cut = 1e-5, max.per.pc = 200)
+# genes_sigpca = PCASigGenes(object = srat, pcs.use = 1:20, pval.cut = 1e-5, max.per.pc = 200)
+genes_sigpca = PCASigGenes(object = srat, pcs.use = 1:20, pval.cut = 0.1, max.per.pc = 200)
+
 print("Finish running PCASigGenes\n")
 file2write <- paste0(dir_out, "StromaReclustered.", "PCASigGenes", run_id, ".RDS")
 saveRDS(object = genes_sigpca, file = file2write, compress = T)
