@@ -20,6 +20,7 @@ path_this_script <- thisFile()
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
 # dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
+getwd()
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
@@ -32,7 +33,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 srat <- readRDS(file = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/recluster/recluster_cell_groups_in_integrated_data/subset_and_recluster/subset_tumorcells_and_recluster_on_katmai/20200824.v1/AllTumorCells.Merged.20200824.v1.RDS")
-print("Finish reading the RDS file!")
+print("Finish reading the RDS file!\n")
 
 # fetch data --------------------------------------------------------------
 umap_data <- Seurat::FetchData(object = srat, vars = c("orig.ident", "ident", "UMAP_1", "UMAP_2"))
@@ -41,5 +42,6 @@ umap_data$barcode <- rownames(umap_data)
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "AllTumorCells.Merged.Metadata.", run_id, ".tsv")
 write.table(x = umap_data, file = file2write, quote = F, sep = "\t", row.names = F)
+print("Finish writing the output!\n")
 
 
