@@ -20,7 +20,8 @@ path_this_script <- thisFile()
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
 # dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
-getwd()
+dir_tmp <- getwd()
+print(dir_tmp)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
