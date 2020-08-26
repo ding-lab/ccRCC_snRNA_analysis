@@ -33,7 +33,7 @@ dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-srat <- readRDS(file = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/recluster/recluster_cell_groups_in_integrated_data/subset_and_recluster/subset_tumorcells_and_recluster_on_katmai/20200824.v1/AllTumorCells.Merged.20200824.v1.RDS")
+srat <- readRDS(file = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/recluster/recluster_cell_groups_in_integrated_data/subset_and_recluster/subset_tumorcells_and_recluster_on_katmai/20200825.v1/AllTumorCells.Merged.20200825.v1.RDS")
 print("Finish reading the RDS file!\n")
 
 # fetch data --------------------------------------------------------------
