@@ -53,8 +53,10 @@ srat@meta.data$id_aliquot_barcode <- paste0(srat@meta.data$orig.ident, "_", srat
 head(srat@meta.data$id_aliquot_barcode)
 ## make combined id for the barcode2celltype table
 barcode2celltype_df$id_aliquot_barcode <- paste0(barcode2celltype_df$orig.ident, "_", barcode2celltype_df$individual_barcode)
+head(barcode2celltype_df$id_aliquot_barcode)
 ## map cell type shorter
-srat@meta.data$Cell_group.shorter <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$Cell_group.shorter))
+srat@meta.data$Cell_type.shorter <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$Cell_type.shorter))
+head(srat@meta.data$Cell_type.shorter)
 srat@meta.data$id_bycelltype_byaliquot <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$Cell_type.shorter)
 Idents(srat) <- "id_bycelltype_byaliquot" 
 
