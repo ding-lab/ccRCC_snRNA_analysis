@@ -32,21 +32,30 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
-path_rds <- "./Resources/Analysis_Results/integration/30_aliquot_integration/docker_run_integration/20200212.v3/30_aliquot_integration.20200212.v3.RDS"
+path_rds <- "./Resources/Analysis_Results/integration/31_aliquot_integration/31_aliquot_integration_without_anchoring/20200727.v1/31_aliquot_integration_without_anchoring.20200727.v1.RDS"
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 ## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_all_cells/20200720.v1/30AliquotIntegration.Barcode2CellType.TumorManualCluster.20200720.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200825.v1/31Aliquot.Barcode2CellType.20200825.v1.tsv", data.table = F)
 barcode2celltype_df <- as.data.frame(barcode2celltype_df)
 cat("finish reading the barcode-to-cell type table!\n")
 ## input id meta data
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200505.v1/meta_data.20200505.v1.tsv")
 cat("###########################################\n")
 
-# set ident ---------------------------------------------------------------
-barcode2celltype_df <- barcode2celltype_df %>%
-  mutate(id_bycelltype_byaliquot = paste0(orig.ident, "_", Cell_type.shorter))
-srat@meta.data$id_bycelltype_byaliquot <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_df$integrated_barcode, to = as.vector(barcode2celltype_df$id_bycelltype_byaliquot))
+# add cell type to the Seurat meta data---------------------------------------------
+BC <- srat@meta.data %>% rownames
+## get original barcode
+srat@meta.data$original_barcode <- BC %>% strsplit("_") %>% lapply("[[",1) %>% unlist
+head(srat@meta.data$original_barcode)
+## make combined id for the seurat meta data
+srat@meta.data$id_aliquot_barcode <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$original_barcode)
+head(srat@meta.data$id_aliquot_barcode)
+## make combined id for the barcode2celltype table
+barcode2celltype_df$id_aliquot_barcode <- paste0(barcode2celltype_df$orig.ident, "_", barcode2celltype_df$individual_barcode)
+## map cell type shorter
+srat@meta.data$Cell_group.shorter <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$Cell_group.shorter))
+srat@meta.data$id_bycelltype_byaliquot <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$Cell_type.shorter)
 Idents(srat) <- "id_bycelltype_byaliquot" 
 
 # run average expression --------------------------------------------------
@@ -55,7 +64,7 @@ print("Finish running AverageExpression!\n")
 cat("###########################################\n")
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "averageexpression_bycelltypeshorter_byaliquot.", "30_aliquot_integration.", run_id, ".tsv")
+file2write <- paste0(dir_out, "averageexpression_bycelltypeshorter_byaliquot.", "31_aliquot_integration.", run_id, ".tsv")
 write.table(aliquot.averages, file = file2write, quote = F, sep = "\t", row.names = T)
 cat("Finished saving the output\n")
 cat("###########################################\n")
