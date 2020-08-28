@@ -36,18 +36,16 @@ path_rds <- "./Resources/Analysis_Results/integration/31_aliquot_integration/31_
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 ## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200811.v1/31Aliquot.Barcode2CellType.20200811.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200825.v1/31Aliquot.Barcode2CellType.20200825.v1.tsv", data.table = F)
 barcode2celltype_df <- as.data.frame(barcode2celltype_df)
 cat("finish reading the barcode-to-cell type table!\n")
-## input id meta data
-idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200505.v1/meta_data.20200505.v1.tsv")
 ## spcify assay
 assay_process <- "SCT"
 cat(paste0("Assay: ", assay_process, "\n"))
 
 # set ident ---------------------------------------------------------------
 barcode2celltype_df <- barcode2celltype_df %>%
-  mutate(id_bycellgroup_byaliquot = paste0(orig.ident, "_", Cell_group)) %>%
+  mutate(id_bycellgroup_byaliquot = paste0(orig.ident, "_", Cell_group.detailed)) %>%
   mutate(id_cell = paste0(orig.ident, "_", individual_barcode))
 srat@meta.data$individual_barcode <- str_split_fixed(string = rownames(srat@meta.data), pattern = "_", n = 2)[,1]
 srat@meta.data$id_cell <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$individual_barcode)
@@ -60,7 +58,7 @@ print("Finish running AverageExpression!\n")
 cat("###########################################\n")
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "averageexpression_bycellgroup_byaliquot.", "31_aliquot_integration.", run_id, ".tsv")
+file2write <- paste0(dir_out, "averageexpression_", assay_process, "_bycellgroup_byaliquot.", "31_aliquot_integration.", run_id, ".tsv")
 write.table(aliquot.averages, file = file2write, quote = F, sep = "\t", row.names = T)
 cat("Finished saving the output\n")
 cat("###########################################\n")
