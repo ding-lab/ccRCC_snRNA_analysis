@@ -61,12 +61,12 @@ srat@meta.data$id_bycelltype_byaliquot <- paste0(srat@meta.data$orig.ident, "_",
 Idents(srat) <- "id_bycelltype_byaliquot" 
 
 # run average expression --------------------------------------------------
-aliquot.averages <- AverageExpression(srat)
+aliquot.averages <- AverageExpression(srat, assays = "SCT")
 print("Finish running AverageExpression!\n")
 cat("###########################################\n")
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "averageexpression_bycelltypeshorter_byaliquot.", "31_aliquot_integration.", run_id, ".tsv")
+file2write <- paste0(dir_out, "averageexpression_", "sct", "_bycelltypeshorter_byaliquot.", "31_aliquot_integration.", run_id, ".tsv")
 write.table(aliquot.averages, file = file2write, quote = F, sep = "\t", row.names = T)
 cat("Finished saving the output\n")
 cat("###########################################\n")
