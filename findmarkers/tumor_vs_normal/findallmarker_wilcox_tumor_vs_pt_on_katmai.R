@@ -56,7 +56,7 @@ group2_findmarkers <- "Proximal tubule"
 
 
 # subset to cases with snATAC data ----------------------------------------
-cases_snatac <- unique(idmetadata_df$Case[idmetadata_Df$snATAC_available == T])
+cases_snatac <- unique(idmetadata_df$Case[idmetadata_df$snATAC_available == T])
 cases_snatac
 aliquots_snatac <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Case %in% cases_snatac & idmetadata_df$snRNA_available == T]
 aliquots_snatac
