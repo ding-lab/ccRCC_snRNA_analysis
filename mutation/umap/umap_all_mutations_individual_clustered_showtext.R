@@ -19,10 +19,10 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## set 10XMapping processing run id to input !0XMapping result later
 mut_mapping_run_id <- "20200219.v1"
-## input 10xmapping result
-snRNA_mutation_df <- fread("./Resources/Analysis_Results/mutation/unite_10xmapping/20200303.v1/10XMapping.20200303.v1.tsv", data.table = F)
 ## input id meta data table
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
+## input 10xmapping result
+snRNA_mutation_df <- fread("./Resources/Analysis_Results/mutation/unite_10xmapping/20200303.v1/10XMapping.20200303.v1.tsv", data.table = F)
 ## input umap data
 umap_df <- fread(data.table = F, input = "./Resources/Analysis_Results/data_summary/fetch_data/fetch_data_by_individual_sample/20200717.v1/Barcode2MetaData.20200717.v1.tsv")
 
@@ -41,20 +41,21 @@ snRNA_mutation_df <- snRNA_mutation_df %>%
 umap_df <- umap_df %>%
   filter(aliquot != "CPT0000890002")
 
-
 # plot  by sample --------------------------------------------------
+# for (snRNA_aliquot_id_tmp in "CPT0001260013") {
 for (snRNA_aliquot_id_tmp in unique(umap_df$aliquot)) {
   aliquot_show <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == snRNA_aliquot_id_tmp]
-  file2write <- paste0(dir_out, aliquot_show, ".png")
+  dir_out_tmp <- paste0(dir_out, aliquot_show, "/")
+  dir.create(dir_out_tmp)
+  file2write <- paste0(dir_out_tmp, aliquot_show, ".png")
+  # if (file.exists(file2write)) {
+  #   next()
+  # }
   
-  if (file.exists(file2write)) {
-    next()
-  }
   ## input barcodes with mapped varaint alleles and reference alleles
   mutation_map_tab.var <- snRNA_mutation_df %>%
     filter(aliquot == snRNA_aliquot_id_tmp) %>%
     filter(Is_Silent == F) %>%
-    filter(gene_symbol %in% ccRCC_SMGs) %>%
     filter(allele_type == "Var")
   
   mutation_map_tab.ref <- snRNA_mutation_df %>%
@@ -75,10 +76,7 @@ for (snRNA_aliquot_id_tmp in unique(umap_df$aliquot)) {
   plot_data_df$read_type <- "NA"
   plot_data_df$read_type[plot_data_df$barcode %in% mutation_map_tab.ref$barcode] <- "Ref"
   plot_data_df$read_type[plot_data_df$barcode %in% mutation_map_tab.var$barcode] <- "Var"
-  
-  ### create cell text, distinguish variant allele and reference allele
-  plot_data_df <- plot_data_df %>%
-    mutate(cell_text = paste0(str_split_fixed(string = mutation, pattern = "-Var", n = 2)[,1], "(", value, ")"))
+  table(plot_data_df$read_type)
   
   ### order the data frame so that cells mapped with variant allele will come on top
   plot_data_df <- rbind(plot_data_df[plot_data_df$read_type == "NA",],
@@ -88,14 +86,14 @@ for (snRNA_aliquot_id_tmp in unique(umap_df$aliquot)) {
   ## make color palette for different read types
   colors_read_type <- c("#E31A1C", "#33A02C", "grey70")
   names(colors_read_type) <- c("Var", "Ref", "NA")
+  
   ## ggplot
   p <- ggplot()
   p <- p + geom_point(data = plot_data_df[plot_data_df$read_type != "Var",], mapping = aes(x = UMAP_1, y = UMAP_2, color=read_type), alpha = 0.5, size = 0.3)
-  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "Var",], mapping = aes(x = UMAP_1, y = UMAP_2, color=read_type), alpha = 0.8, size = 1)
+  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "Var",], mapping = aes(x = UMAP_1, y = UMAP_2, color=read_type), alpha = 0.8, size = 0.8)
   p <- p + scale_color_manual(values = colors_read_type)
-  p <- p + ggtitle(paste0("Mapping of Mutations in SMG genes in ",  aliquot_show))
-  # p <- p + geom_text_repel(data = label_data, mapping = aes(UMAP_1, UMAP_2, label = ident))
-  p <- p + geom_text_repel(data = plot_data_df[plot_data_df$cell_text != "(NA)",], mapping = aes(UMAP_1, UMAP_2, label = cell_text))
+  p <- p + ggtitle(paste0("Mapping of Mutations in ",  aliquot_show))
+  p <- p + geom_text_repel(data = plot_data_df[!is.na(plot_data_df$gene_symbol),], mapping = aes(UMAP_1, UMAP_2, label = gene_symbol))
   p <- p +
     theme_bw() +
     theme(panel.border = element_blank(), panel.grid.major = element_blank(),
@@ -110,4 +108,3 @@ for (snRNA_aliquot_id_tmp in unique(umap_df$aliquot)) {
   print(p)
   dev.off()
 }
-

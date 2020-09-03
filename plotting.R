@@ -23,9 +23,10 @@ colors_tumor_segments <- c("T1" = "#FF7F00", "T2" = "#C2A5CF", "T3"  = "#7B3294"
 
 # make color palette for major cell groups -----------------------------------
 # cellgroup_colors <- Polychrome::palette36.colors(n = 36)[3:6]
-cellgroup_colors <- RColorBrewer::brewer.pal(n = 4, name = "Dark2")[c(4,3,2,1)]
+cellgroup_colors <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[c(4, 2, 6, 3, 1)]
 cellgroup_colors <- c(cellgroup_colors, "grey50")
-names(cellgroup_colors) <- c("Tumor cells", "Immune",  "Stroma", "Normal epithelial cells", "Unknown")
+names(cellgroup_colors) <- c("Tumor cells", "Tumor-like epithelial cells", "Normal epithelial cells", "Immune",  "Stroma",  "Unknown")
+# swatch(cellgroup_colors)
 
 # make color palette for immune cell groups -----------------------------------
 immunecelltype1_colors <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[c(5,7,8)]

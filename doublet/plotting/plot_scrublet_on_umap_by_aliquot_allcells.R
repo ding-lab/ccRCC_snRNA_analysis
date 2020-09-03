@@ -1,4 +1,4 @@
-# Yige Wu @WashU Apr 2020
+# Yige Wu @WashU Set 2020
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -17,7 +17,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input cell type per barcode table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200828.v1/31Aliquot.Barcode2CellType.20200828.v1.tsv", data.table = F)
+barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20200902.v1/scrublet.run20200902_adj_cutoff.united_outputs.tsv", data.table = F)
 ## input UMAP info per barcode
 umap_df <- fread(input = "./Resources/Analysis_Results/data_summary/fetch_data/fetch_data_by_individual_sample//20200406.v1/individual_cluster_meta_data.20200406.v1.tsv", data.table = F)
 ## input id meta data table
@@ -26,19 +26,20 @@ idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sam
 # plot for cell group----------------------------------------------------------
 for (id_aliquot_tmp in unique(umap_df$aliquot)) {
   aliquot_show <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == id_aliquot_tmp]
-  
+  ## filter down to one sample
   plotdata_df <- umap_df %>%
     filter(aliquot == id_aliquot_tmp)
+  barcode2scrublet_aliquot_df <- barcode2scrublet_df %>%
+    filter(Aliquot == id_aliquot_tmp)
   plotdata_df <- merge(plotdata_df,
-                       barcode2celltype_df %>%
-                         select(individual_barcode, Cell_group.detailed),
-                       by.x = c("individual_barcode"), by.y = c("individual_barcode"), all.x = T)
+                       barcode2scrublet_aliquot_df,
+                       by.x = c("individual_barcode"), by.y = c("Barcodes"), all.x = T)
   
   p <- ggplot()
   p <- p + geom_point(data = plotdata_df, 
-                      mapping = aes(x = UMAP_1, y = UMAP_2, color = Cell_group.detailed),
+                      mapping = aes(x = UMAP_1, y = UMAP_2, color = predicted_doublet),
                       alpha = 1, size = 0.05)
-  p <- p + scale_color_manual(values = cellgroup_colors)
+  p <- p + scale_color_manual(values = c("TRUE" = "red", "FALSE" = "grey50"))
   p <- p + guides(colour = guide_legend(override.aes = list(size=5)))
   p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                  panel.background = element_blank(), axis.line = element_line(colour = "black"))
@@ -50,11 +51,11 @@ for (id_aliquot_tmp in unique(umap_df$aliquot)) {
   p <- p + theme(legend.position = "top")
   p
   file2write <- paste0(dir_out, aliquot_show, ".png")
-  png(filename = file2write, width = 800, height = 1000, res = 150)
+  png(filename = file2write, width = 800, height = 900, res = 150)
   print(p)
   dev.off()
-  file2write <- paste0(dir_out, aliquot_show, ".pdf")
-  pdf(file2write, width = 8, height = 9, useDingbats = F)
-  print(p)
-  dev.off()
+  # file2write <- paste0(dir_out, aliquot_show, ".pdf")
+  # pdf(file2write, width = 8, height = 9, useDingbats = F)
+  # print(p)
+  # dev.off()
 }

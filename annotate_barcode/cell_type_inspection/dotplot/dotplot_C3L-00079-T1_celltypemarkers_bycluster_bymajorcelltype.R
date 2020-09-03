@@ -17,7 +17,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input cell type per barcode table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200825.v1/31Aliquot.Barcode2CellType.20200825.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200828.v1/31Aliquot.Barcode2CellType.20200828.v1.tsv", data.table = F)
 ## input seurat paths
 paths_srat_df <- fread(data.table = F, input = "./Resources/Analysis_Results/data_summary/write_individual_srat_object_paths/20200717.v1/Seurat_Object_Paths.20200717.v1.tsv")
 ## input cell type markers
@@ -42,7 +42,7 @@ count_bycelltype_bycluster_df <- barcode2celltype_filtered_df %>%
   table() %>%
   data.frame() %>%
   mutate(Id_Cluster_CellType = paste0("C", id_seurat_cluster, "_", Cell_type.detailed)) %>%
-  mutate(Keep = (Freq >= 50))
+  mutate(Keep = (Freq >= 30))
 barcode2celltype_filtered_df <- barcode2celltype_filtered_df %>%
   mutate(Id_Cluster_CellType = paste0("C", id_seurat_cluster, "_", Cell_type.detailed))
 barcode2celltype_filtered_df$Keep <- mapvalues(x = barcode2celltype_filtered_df$Id_Cluster_CellType, from = count_bycelltype_bycluster_df$Id_Cluster_CellType, to = as.vector(count_bycelltype_bycluster_df$Keep))
