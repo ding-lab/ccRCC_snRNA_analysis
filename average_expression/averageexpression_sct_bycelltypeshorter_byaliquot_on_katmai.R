@@ -59,7 +59,8 @@ head(barcode2celltype_df$id_aliquot_barcode)
 ## map cell type shorter
 srat@meta.data$Cell_type.shorter <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$Cell_type.shorter))
 head(srat@meta.data$Cell_type.shorter)
-Idents(srat) <- "Cell_type.shorter" 
+srat@meta.data$id_bycelltype_byaliquot <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$Cell_type.shorter)
+Idents(srat) <- "id_bycelltype_byaliquot" 
 
 # run average expression --------------------------------------------------
 aliquot.averages <- AverageExpression(srat, assays = assay_process)

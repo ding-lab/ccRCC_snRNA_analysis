@@ -18,6 +18,7 @@ thisFile <- function() {
 path_this_script <- thisFile()
 ## set working directory
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
+# dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -38,6 +39,8 @@ print("Finish reading RDS file")
 barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200828.v1/31Aliquot.Barcode2CellType.20200828.v1.tsv", data.table = F)
 barcode2celltype_df <- as.data.frame(barcode2celltype_df)
 cat("finish reading the barcode-to-cell type table!\n")
+## input idemta data
+idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
 
 # set parameters for findmarkers ------------------------------------------
 logfc.threshold.run <- log(2)
@@ -50,6 +53,16 @@ cat("###########################################\n")
 ## specify cell groups to compare
 group1_findmarkers <- "Tumor cells"
 group2_findmarkers <- "Proximal tubule"
+
+
+# subset to cases with snATAC data ----------------------------------------
+cases_snatac <- unique(idmetadata_df$Case[idmetadata_Df$snATAC_available == T])
+cases_snatac
+aliquots_snatac <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Case %in% cases_snatac & idmetadata_df$snRNA_available == T]
+aliquots_snatac
+Idents(srat) <- "orig.ident"
+srat <- subset(srat, idents = aliquots_snatac)
+cat("finish subsetting the object!\n")
 
 # add cell type to the Seurat meta data---------------------------------------------
 BC <- srat@meta.data %>% rownames
