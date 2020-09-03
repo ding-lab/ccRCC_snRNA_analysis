@@ -69,15 +69,17 @@ BC <- srat@meta.data %>% rownames
 ## get original barcode
 srat@meta.data$original_barcode <- BC %>% strsplit("_") %>% lapply("[[",1) %>% unlist
 head(srat@meta.data$original_barcode)
+cat("finish adding the simple barcode!\n")
 ## make combined id for the seurat meta data
 srat@meta.data$id_aliquot_barcode <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$original_barcode)
 head(srat@meta.data$id_aliquot_barcode)
+cat("finish unique id for each barcode in the seurat object!\n")
 ## make combined id for the barcode2celltype table
 barcode2celltype_df$id_aliquot_barcode <- paste0(barcode2celltype_df$orig.ident, "_", barcode2celltype_df$individual_barcode)
 head(barcode2celltype_df$id_aliquot_barcode)
 ## map cell type shorter
-srat@meta.data$Cell_type.shorter <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$Cell_type.shorter))
-Idents(srat) <- "Cell_type.shorter" 
+srat@meta.data$Cell_type.detailed <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$Cell_type.detailed))
+Idents(srat) <- "Cell_type.detailed" 
 
 # run findallmarkers ------------------------------------------------------
 marker_roc_df <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = group1_findmarkers, ident.2 = group2_findmarkers, only.pos = F,
