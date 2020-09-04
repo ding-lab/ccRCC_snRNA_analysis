@@ -36,8 +36,7 @@ path_rds <- "./Resources/Analysis_Results/integration/31_aliquot_integration/31_
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 ## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200825.v1/31Aliquot.Barcode2CellType.20200825.v1.tsv", data.table = F)
-barcode2celltype_df <- as.data.frame(barcode2celltype_df)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200828.v1/31Aliquot.Barcode2CellType.20200828.v1.tsv", data.table = F)
 cat("finish reading the barcode-to-cell type table!\n")
 ## spcify assay
 assay_process <- "SCT"
@@ -47,12 +46,16 @@ cat(paste0("Assay: ", assay_process, "\n"))
 barcode2celltype_df <- barcode2celltype_df %>%
   mutate(id_cell = paste0(orig.ident, "_", individual_barcode))
 srat@meta.data$individual_barcode <- str_split_fixed(string = rownames(srat@meta.data), pattern = "_", n = 2)[,1]
+## check if the individual_barcode is mapped right
+srat@meta.data %>%
+  filter(orig.ident == "CPT0000890002")
 srat@meta.data$id_cell <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$individual_barcode)
 srat@meta.data$Cell_group.detailed <- mapvalues(x = srat@meta.data$id_cell, from = barcode2celltype_df$id_cell, to = as.vector(barcode2celltype_df$Cell_group.detailed))
+unique(srat@meta.data$Cell_group.detailed)
 Idents(srat) <- "Cell_group.detailed" 
 
 # run average expression --------------------------------------------------
-aliquot.averages <- AverageExpression(srat, assays = assay_process, use.scale = T)
+aliquot.averages <- AverageExpression(srat, assays = assay_process, slot = "scale.data")
 print("Finish running AverageExpression!\n")
 cat("###########################################\n")
 
