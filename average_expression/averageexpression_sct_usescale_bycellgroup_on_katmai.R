@@ -55,7 +55,6 @@ srat@meta.data$id_cell <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$
 srat@meta.data$Cell_group.detailed <- mapvalues(x = srat@meta.data$id_cell, from = barcode2celltype_df$id_cell, to = as.vector(barcode2celltype_df$Cell_group.detailed))
 unique(srat@meta.data$Cell_group.detailed)
 Idents(srat) <- "Cell_group.detailed" 
-stop("test")
 # run average expression --------------------------------------------------
 aliquot.averages <- AverageExpression(srat, assays = assay_process, slot = "scale.data")
 print("Finish running AverageExpression!\n")
