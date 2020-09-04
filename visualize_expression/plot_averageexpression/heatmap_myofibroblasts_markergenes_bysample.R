@@ -18,13 +18,13 @@ dir.create(dir_out)
 ## input the variable gene list
 genes_celltypemarker_df <- fread(input = "./Resources/Knowledge/Kidney_Markers/Gene2CellType_Tab.20200831.v1.tsv", data.table = F)
 ## input the average expression calculated (RNA)
-avg.exp.mat <- fread(input = "./Resources/Analysis_Results/average_expression/averageexpression_sct_bycelltypeshorter_byaliquot_on_katmai/20200828.v1/averageexpression_SCT_bycelltypeshorter_byaliquot.31_aliquot_integration.20200828.v1.tsv", data.table = F)
+avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/averageexpression_sct_bycelltypeshorter_byaliquot_on_katmai/20200828.v1/averageexpression_SCT_bycelltypeshorter_byaliquot.31_aliquot_integration.20200828.v1.tsv", data.table = F)
 
 # specify the genes to show -----------------------------------------------
 genes_plot <- genes_celltypemarker_df$Gene[genes_celltypemarker_df$Cell_Type_Group == "Stroma"]
 
 # format the column names to only aliquot id ------------------------------
-plot_data_df <- avg.exp.mat %>%
+plot_data_df <- avgexp_df %>%
   rename(gene = V1) %>%
   filter(gene %in% genes_plot)
 ## remove RNA from the column names
