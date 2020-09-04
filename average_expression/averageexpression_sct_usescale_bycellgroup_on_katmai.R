@@ -36,7 +36,7 @@ path_rds <- "./Resources/Analysis_Results/integration/31_aliquot_integration/31_
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 ## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200828.v1/31Aliquot.Barcode2CellType.20200828.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200904.v1/31Aliquot.Barcode2CellType.20200904.v1.tsv", data.table = F)
 cat("finish reading the barcode-to-cell type table!\n")
 ## spcify assay
 assay_process <- "SCT"
@@ -51,12 +51,12 @@ srat@meta.data %>% head()
 srat@meta.data[srat@meta.data$orig.ident == "CPT0000890002",] %>% head()
 nrow(srat@meta.data[srat@meta.data$orig.ident == "CPT0000890002",])
 nrow(barcode2celltype_df[barcode2celltype_df$orig.ident == "CPT0000890002",])
-stop("test")
 ## add cell id to the seurat meta data
 srat@meta.data$id_cell <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$individual_barcode)
 srat@meta.data$Cell_group.detailed <- mapvalues(x = srat@meta.data$id_cell, from = barcode2celltype_df$id_cell, to = as.vector(barcode2celltype_df$Cell_group.detailed))
 unique(srat@meta.data$Cell_group.detailed)
 Idents(srat) <- "Cell_group.detailed" 
+stop("test")
 # run average expression --------------------------------------------------
 aliquot.averages <- AverageExpression(srat, assays = assay_process, slot = "scale.data")
 print("Finish running AverageExpression!\n")

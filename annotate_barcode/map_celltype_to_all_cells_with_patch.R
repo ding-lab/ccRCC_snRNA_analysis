@@ -27,7 +27,7 @@ tumor_barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotat
 ## input barcode-to-cell-type table
 normal_epithelial_barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_normal_epithelial_cells/20200720.v1/normal_epithelial_reclustered.barcode2celltype.20200720.v1.tsv", data.table = F)
 ## input patch barcode2cell type table
-bc2celltype_patch_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_for_C3L-00088-N/20200720.v1/Barcode2CellType.C3L-00088-N.20200720.v1.tsv")
+bc2celltype_patch_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_for_C3L-00088-N/20200904.v1/Barcode2CellType.C3L-00088-N.20200904.v1.tsv")
 
 # get barcode2celltype from integrated data -------------------------------
 nrow(all_integrated_barcode2cluster_df)
@@ -107,7 +107,7 @@ table(barcode2celltype_df$Cell_type.shorter)
 
 # add patch ---------------------------------------------------------------
 barcode2celltype_df <- rbind(barcode2celltype_df, bc2celltype_patch_df)
-nrow(barcode2celltype_df) ## 138529
+nrow(barcode2celltype_df) ## 138547
 table(barcode2celltype_df$Cell_type.shorter)
 table(barcode2celltype_df$Cell_type.detailed)
 

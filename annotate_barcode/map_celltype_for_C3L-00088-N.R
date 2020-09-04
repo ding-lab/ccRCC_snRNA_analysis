@@ -25,13 +25,17 @@ srat <- readRDS(file = "./Resources/snRNA_Processed_Data/scRNA_auto/outputs/CPT0
 
 # map cell type to barcode ------------------------------------------------
 barcode2cluster_df <- srat@meta.data 
+nrow(barcode2cluster_df)
 barcode2cluster_df <- as.data.frame(barcode2cluster_df)
 barcode2cluster_df$individual_barcode <- rownames(barcode2cluster_df)
-barcode2cluster_df$seurat_clusters <- as.numeric(barcode2cluster_df$seurat_clusters)
+unique(barcode2cluster_df$seurat_clusters)
+barcode2cluster_df$seurat_clusters <- as.numeric(as.vector(barcode2cluster_df$seurat_clusters))
+unique(barcode2cluster_df$seurat_clusters)
 barcode2celltype_df <- merge(barcode2cluster_df, 
                              cluster2celltype_df %>%
                                filter(Aliquot == "CPT0000890002"), 
-                             by.x = c("orig.ident", "seurat_clusters"), by.y = c("Aliquot", "Cluster"))
+                             by.x = c("orig.ident", "seurat_clusters"), by.y = c("Aliquot", "Cluster"), all.x = T)
+unique(barcode2cluster_df$seurat_clusters)
 ## add cell type detailed
 barcode2celltype_df$Cell_type.detailed <- barcode2celltype_df$Most_Enriched_Cell_Type2
 barcode2celltype_df$Cell_type.detailed[barcode2celltype_df$Cell_type.detailed == ""] <- barcode2celltype_df$Most_Enriched_Cell_Type1[barcode2celltype_df$Cell_type.detailed == ""]
@@ -49,7 +53,7 @@ barcode2celltype_df <- barcode2celltype_df %>%
   select(orig.ident, individual_barcode, integrated_barcode, Most_Enriched_Cell_Group, Cell_type.shorter, Cell_type.detailed, Most_Enriched_Cell_Type1, Most_Enriched_Cell_Type2, Most_Enriched_Cell_Type3, Most_Enriched_Cell_Type4, Id_TumorManualCluster, Cell_group)
   
 # write output ------------------------------------------------------------
-nrow(barcode2celltype_df)
+nrow(barcode2celltype_df) # 1213
 file2write <- paste0(dir_out, "Barcode2CellType.", "C3L-00088-N.", run_id, ".tsv")
 write.table(x = barcode2celltype_df, file = file2write, quote = F, sep = "\t", row.names = F)
   
