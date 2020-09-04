@@ -50,16 +50,16 @@ srat@meta.data$individual_barcode <- str_split_fixed(string = rownames(srat@meta
 srat@meta.data %>% head()
 ## add cell id to the seurat meta data
 srat@meta.data$id_cell <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$individual_barcode)
-srat@meta.data$Cell_group.detailed <- mapvalues(x = srat@meta.data$id_cell, from = barcode2celltype_df$id_cell, to = as.vector(barcode2celltype_df$Cell_group.detailed))
-unique(srat@meta.data$Cell_group.detailed)
-Idents(srat) <- "Cell_group.detailed" 
+srat@meta.data$Cell_type.shorter <- mapvalues(x = srat@meta.data$id_cell, from = barcode2celltype_df$id_cell, to = as.vector(barcode2celltype_df$Cell_type.shorter))
+unique(srat@meta.data$Cell_type.shorter)
+Idents(srat) <- "Cell_type.shorter" 
 # run average expression --------------------------------------------------
 aliquot.averages <- AverageExpression(srat, assays = assay_process, slot = "scale.data")
 print("Finish running AverageExpression!\n")
 cat("###########################################\n")
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "averageexpression_", assay_process, "_bycellgroup.detailed.", "31_aliquot_integration.", run_id, ".tsv")
+file2write <- paste0(dir_out, "averageexpression_", assay_process, "_bycelltype.shorter.", "31_aliquot_integration.", run_id, ".tsv")
 write.table(aliquot.averages, file = file2write, quote = F, sep = "\t", row.names = T)
 cat("Finished saving the output\n")
 cat("###########################################\n")
