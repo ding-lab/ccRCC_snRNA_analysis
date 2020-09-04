@@ -48,9 +48,8 @@ barcode2celltype_df <- barcode2celltype_df %>%
 srat@meta.data$individual_barcode <- str_split_fixed(string = rownames(srat@meta.data), pattern = "_", n = 2)[,1]
 ## check if the individual_barcode is mapped right
 srat@meta.data %>% head()
-srat@meta.data[srat@meta.data$orig.ident == "CPT0000890002",] %>% head()
-nrow(srat@meta.data[srat@meta.data$orig.ident == "CPT0000890002",])
-nrow(barcode2celltype_df[barcode2celltype_df$orig.ident == "CPT0000890002",])
+srat@meta.data[srat@meta.data$orig.ident == "CPT0001500003",] %>% head()
+barcode2celltype_df[barcode2celltype_df$orig.ident == "CPT0001500003",] %>% head()
 ## add cell id to the seurat meta data
 srat@meta.data$id_cell <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$individual_barcode)
 srat@meta.data$Cell_group.detailed <- mapvalues(x = srat@meta.data$id_cell, from = barcode2celltype_df$id_cell, to = as.vector(barcode2celltype_df$Cell_group.detailed))

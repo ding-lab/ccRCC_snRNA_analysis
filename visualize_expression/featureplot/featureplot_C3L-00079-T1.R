@@ -36,7 +36,8 @@ srat@meta.data$Cell_type.shorter <- mapvalues(x = rownames(srat@meta.data), from
 srat@meta.data$Cell_group.detailed <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_aliquot_df$individual_barcode, to = as.vector(barcode2celltype_aliquot_df$Cell_group.detailed))
 
 # specify genes to plot ---------------------------------------------------
-genes_plot <- c("VHL", "VIM", "COL5A1", "MT2A", "CDH1", "POSTN", "UMOD")
+# genes_plot <- c("VHL", "VIM", "COL5A1", "MT2A", "CDH1", "POSTN", "UMOD")
+genes_plot <- c("FTH1", "BEST1")
 
 # plot by gene ------------------------------------------------------------
 for (gene_plot in genes_plot) {
