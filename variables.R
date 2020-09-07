@@ -10,6 +10,8 @@ ccRCC_SMGs <- c("VHL", "PBRM1", "BAP1", "TCEB1", "SETD2", "TP53", "PIK3CA", "MTO
                 "CCNB2",
                 "MSR1", "TXNIP", "BTNL3", "SLITRK6", "RHEB", "ARID1A", "NPNT", 
                 "FPGT", "MUDENG", "TET2", "MUC4", "MLLT10", "MSGN1", "KRT32", "M6PR", "RPL14", "GRB7", "CSMD3", "DNHD1", "NLRP12", "VMO1", "OR4C13", "KCNMA1", "LMAN2L", "ZNF536", "YIPF3")
+ccRCC_drivers <- c("VHL", "PBRM1", "BAP1", "TCEB1", "SETD2", "TP53", "PIK3CA", "MTOR", "KDM5C", "PTEN","TSC1")
+
 # Two examples
 # of cullin–RING ubiquitin ligase system molecular assemblies using CUL2 or CUL5 (left) and CUL3 (right) that interact with the BC-box protein–
 # Elongin C–Elongin B complex and BTB protein, respectively, to recruit substrate for ubiquitination and subsequent degradation. VHL and KEAP1 are examples of BC-box and BTB proteins, respectively, that recruit HIF and NRF2 proteins for ubiquitin-mediated degradation. 
