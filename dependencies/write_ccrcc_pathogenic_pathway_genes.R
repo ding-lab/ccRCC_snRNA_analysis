@@ -19,16 +19,7 @@ dir.create(dir_out)
 hif_tf_df <- fread(input = "./Resources/Analysis_Results/dependencies/write_hif_targets/20200428.v1/HIF_Target_Genes.20200428.v1.tsv", data.table = F)
 ## input protein protein interaction table
 ppi_df <- fread(data.table = F, input = "./Resources/Knowledge/PPI/protein_pair_table_v2.txt")
-## input MYC targets
-myc_tf_tab <- fread(input = "./Resources/Analysis_Results/dependencies/write_myc_targets/20200227.v1/MYC_Target_Genes.20200227.v1.tsv", data.table = F)
-## input NRF2 targets
-nrf2_tf_tab <- fread(input = "./Resources/Analysis_Results/dependencies/write_nrf2_targets/20200302.v1/NRF2_Target_Genes.20200302.v1.tsv", data.table = F)
-## input TP53 targets
-tp53_tf_tab <- fread(input = "./Resources/PPI/TF_interactions_TP53_manual.txt", data.table = F)
-## input SQSTM1 (5q gain) affected genes
-sqstm1_df <- data.frame(source_genesymbol = "SQSTM1",
-                        target_genesymbol = c("KEAP1", "NFE2L2", 
-                                              "TRAF6", "NFKB1", "MTOR"))
+load("./Resources/Knowledge/Gene_Lists//2015-08-01_Gene_Set.RData")
 
 # merge genes related to VHL deficiency----------------------------------------------------
 ## HIF dependent
@@ -70,9 +61,19 @@ genes_epigenetic_smgs_related_df <- rbind(ppi_df %>%
                                                      target_genefunction = "SMG",
                                                      relation_source2target = "self"))
 genes_epigenetic_smgs_related_df$pathway_name <- "Epigenetic machinary"
+
+# merge genes related to PI3K-MTOR pathway --------------------
+genes_pi3kmtor_df <- data.frame(source_genesymbol = NA,
+                                target_genesymbol = KEGG[["hsa04150\tmTOR signaling pathway"]],
+                                target_genefunction = NA,
+                                relation_source2target = NA,
+                                pathway_name = "PI3K-AKT-mTOR Pathway")
+
+
 # merge all pathways ------------------------------------------------------
 genes_df <- rbind(genes_vhl_hif_df,
-                  genes_epigenetic_smgs_related_df)
+                  genes_epigenetic_smgs_related_df,
+                  genes_pi3kmtor_df)
 
 # write table -------------------------------------------------------------
 write.table(x = genes_df, file = paste0(dir_out, "ccRCC_Pathogenic_Pathways_Genes.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)

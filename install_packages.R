@@ -142,3 +142,11 @@ if (!("TxDb.Hsapiens.UCSC.hg38.knownGene" %in% installed.packages()[,1])) {
 }
 
 
+# install OmnipathR -------------------------------------------------------
+## Last release in Bioconductor
+BiocManager::install("OmnipathR")
+## Development version with the lastest updates
+BiocManager::install(version='devel')
+
+
+
