@@ -17,51 +17,30 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the DEG  list
-genes_df <- fread(input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/filter_markers/filter_markers_wilcox_bygroup/20200904.v1/findallmarkers_wilcox_bycellgroup.pos.logfcthreshold0.1.minpct0.1.mindiffpct0.1.top50avg_logFC.tsv", data.table = F)
-## input the average expression calculated (RNA)
-avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/averageexpression_sct_usescale_bycelltypeshorter_on_katmai/20200904.v1/averageexpression_SCT_bycelltype.shorter.31_aliquot_integration.20200904.v1.tsv", data.table = F)
-## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200904.v1/31Aliquot.Barcode2CellType.20200904.v1.tsv", data.table = F)
+# genes_df <- fread(input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/filter_markers/filter_markers_wilcox_bygroup/20200904.v1/findallmarkers_wilcox_bycellgroup.pos.logfcthreshold0.1.minpct0.1.mindiffpct0.1.top50avg_logFC.tsv", data.table = F)
+genes_df <- fread(input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/filter_markers/filter_markers_wilcox_bygroup/20200908.v1/findallmarkers_wilcox_bycellgroup.pos.logfcthreshold0.1.minpct0.1.mindiffpct0.1.Top50avg_logFC.tsv", data.table = F)
+## input the average expression calculated (SCT)
+avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/format_expression/combine_avexp_sct_usescale_immunegroups_with_stroma_and_epithelium/20200908.v1/Combined.Average_Expression.SCT.UseScale.20200908.v1.tsv", data.table = F)
+## input cell type 2 cell group table
+celltype2cellgroup_df <- fread(data.table = F, input = "./Resources/Analysis_Results/average_expression/format_expression/combine_avexp_sct_usescale_immunegroups_with_stroma_and_epithelium/20200908.v1/Combined.CellTypes2CellGroup.20200908.v1.tsv")
 ## input gene annotation
-genes_anno_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_ccrcc_pathogenic_pathway_genes/20200907.v1/ccRCC_Pathogenic_Pathways_Genes.20200907.v1.tsv")
+genes2pathway_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_ccrcc_pathogenic_pathway_genes/20200908.v1/ccRCC_Pathogenic_Pathways_Genes.20200908.v1.tsv")
 ## input not scaled average expression
-avgexp_baseline_df <- fread(data.table = F, input = "./Resources/Analysis_Results/average_expression/format_avgexp_sct_usedata_bycelltypeshorter/20200907.v2/formated.averageexpression.SCT.slotdata.bycelltype.shorter.31_aliquot_integration.20200907.v2.tsv")
+avgexp_baseline_df <- fread(data.table = F, input = "./Resources/Analysis_Results/average_expression/format_expression/format_avgexp_sct_usedata_bycelltypeshorter/20200907.v2/formated.averageexpression.SCT.slotdata.bycelltype.shorter.31_aliquot_integration.20200907.v2.tsv")
 ## input gene to cell type enriched TFs
-gene2motifenrichedtf_anno_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/annotate_markers/annotate_degs_to_celltypespecific_tfs/20200908.v1/CellTypeDEG2CellTypeMotifEnrichedTFs.Annotation.20200908.v1.tsv")
+gene2motifenrichedtf_anno_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/annotate_markers/annotate_degs_to_celltypespecific_tfs/20200908.v2/CellTypeDEGTop502CellTypeMotifEnrichedTFs.Annotation.20200908.v2.tsv")
+gene2motifenrichedtf_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/annotate_markers/annotate_degs_to_celltypespecific_tfs/20200908.v2/CellTypeDEGTop502CellTypeMotifEnrichedTFs.20200908.v2.tsv")
 
 # specify the genes to show -----------------------------------------------
 genes2filter <- genes_df$row_name
 # genes2filter <- c(genes2filter, ccRCC_drivers)
 
-# calculate the cell counts and specify the cell types to show ------------
-cellcount_df <- barcode2celltype_df %>%
-  select(Cell_type.shorter) %>%
-  table() %>%
-  as.data.frame() %>%
-  rename(Cell_type.shorter = '.') %>%
-  mutate(Keep = (Freq >= 50 & !(Cell_type.shorter %in% c("Unknown", "Tumor-like cells")))) %>%
-  # mutate(Keep = (Freq >= 50 & Cell_type.shorter != "Unknown")) %>%
-  mutate(colname_celltype = gsub(x = Cell_type.shorter, pattern = " |\\+|\\/|\\-", replacement = "."))
-data_col_names.keep <- cellcount_df$colname_celltype[cellcount_df$Keep]
-data_col_names.keep
-celltype2cellgroup_df <- barcode2celltype_df %>%
-  select(Cell_type.shorter, Cell_group.shorter, Cell_group.detailed) %>%
-  unique() %>%
-  mutate(colname_celltype = gsub(x = Cell_type.shorter, pattern = " |\\+|\\/|\\-", replacement = "."))
-
 # format the column names to only aliquot id ------------------------------
 ## filtr the rows
 plot_data_df <- avgexp_df %>%
-  rename(gene = V1) %>%
   filter(gene %in% genes2filter)
-## remove teh prefix from the column names
-data_col_names <- colnames(plot_data_df)[-1]
-data_col_names.changed <- str_split_fixed(string = data_col_names, pattern = "\\.", n = 2)[,2]
-data_col_names.changed
-## rename the data frame
-colnames(plot_data_df) <- c("gene", data_col_names.changed)
 ## filter the columns and make data matrix
-plot_data_mat <- t(as.matrix(plot_data_df[, data_col_names.keep]))
+plot_data_mat <- t(as.matrix(plot_data_df[,-1]))
 ## add gene name
 colnames(plot_data_mat) <- plot_data_df$gene
 plot_data_mat %>% head()
@@ -95,13 +74,19 @@ colors_targetof_motifenrichedtfs
 # make row split for cell types ------------------------------------------
 vec_cellgroup <- mapvalues(x = celltypes_plot, from = celltype2cellgroup_df$colname_celltype, to = as.vector(celltype2cellgroup_df$Cell_group.shorter))
 vec_cellgroup
-factor_cellgroup <- factor(x = vec_cellgroup, levels = c("Nephron_Epithelium", "Stroma", "Immune"))
+vec_cellgroup[vec_cellgroup == "Nephron_Epithelium"] <- "Nephron\nEpithelium"
+factor_cellgroup <- factor(x = vec_cellgroup, levels = c("Nephron\nEpithelium", "Stroma", "Immune"))
+
+# make row labels for cell types ------------------------------------------
+vec_celltype_labels <- mapvalues(x = celltypes_plot, from = celltype2cellgroup_df$colname_celltype, to = as.vector(celltype2cellgroup_df$Cell_type))
+vec_celltype_labels
 
 # make annotation for the genes -------------------------------------------
 ## annotate the pathways
-vec_is_vhlhif <- as.character(genes_plot %in% genes_anno_df$target_genesymbol[genes_anno_df$pathway_name == "VHL-HIF"])
-vec_is_epigentic_smg_related <- as.character(genes_plot %in% genes_anno_df$target_genesymbol[genes_anno_df$pathway_name == "Epigenetic machinary"])
-vec_is_pi3kmtor <- as.character(genes_plot %in% genes_anno_df$target_genesymbol[genes_anno_df$pathway_name == "PI3K-AKT-mTOR Pathway"])
+vec_is_vhlhif <- as.character(genes_plot %in% genes2pathway_df$target_genesymbol[genes2pathway_df$pathway_name == "VHL-HIF"])
+vec_is_epigentic_smg_related <- as.character(genes_plot %in% genes2pathway_df$target_genesymbol[genes2pathway_df$pathway_name == "Epigenetic machinary"])
+vec_is_pi3kmtor <- as.character(genes_plot %in% genes2pathway_df$target_genesymbol[genes2pathway_df$pathway_name == "PI3K-AKT-mTOR Signaling"])
+vec_is_adhesion <- as.character(genes_plot %in% genes2pathway_df$target_genesymbol[genes2pathway_df$pathway_name == "Focal adhesion"])
 ## annotate the baseline expression
 avgexp_baseline_df <- avgexp_baseline_df %>%
   filter(gene %in% genes2filter)
@@ -115,16 +100,17 @@ names(vec_targetof_motifenrichedtfs) <- gene2motifenrichedtf_anno_df$target_gene
 vec_targetof_motifenrichedtfs <- vec_targetof_motifenrichedtfs[genes_plot]
 vec_targetof_motifenrichedtfs
 ## annotate genes to highlight
-idx_is_highlighted <- which((vec_is_vhlhif == "TRUE" | vec_is_epigentic_smg_related == "TRUE" | vec_is_pi3kmtor == "TRUE" | vec_targetof_motifenrichedtfs == "Stimulated Target of Cell-Type-Motif-Enriched TFs"))
+idx_is_highlighted <- which((vec_is_vhlhif == "TRUE" | vec_is_epigentic_smg_related == "TRUE" | vec_is_pi3kmtor == "TRUE" | vec_is_adhesion == "TRUE" | vec_targetof_motifenrichedtfs == "Stimulated Target of Cell-Type-Motif-Enriched TFs"))
 genes_highlighted <- genes_plot[idx_is_highlighted]
 ## make annotation object
-colanno_obj = HeatmapAnnotation(Baseline_Expression = anno_simple(x = vec_avgexp_baseline, col = col_baselineexp), 
+colanno_obj = HeatmapAnnotation(#Baseline_Expression = anno_simple(x = vec_avgexp_baseline, col = col_baselineexp), 
                                 VHL_HIF_Pathway = anno_simple(x = vec_is_vhlhif, col = colors_vhlhif),
                                 Epigenetic_machinary_related = anno_simple(x = vec_is_epigentic_smg_related, col = colors_vhlhif),
-                                PI3K_mTOR_Pathway = anno_simple(x = vec_is_pi3kmtor, col = colors_vhlhif),
-                                Is_Targetof_MotifEnrichedTFs_byCellGroup = anno_simple(x = vec_targetof_motifenrichedtfs, col = colors_targetof_motifenrichedtfs),
-                                link = anno_mark(at = idx_is_highlighted, labels = genes_highlighted, labels_gp = gpar(fontsize = 10), side = "bottom"),
-                                annotation_name_gp = gpar(fontsize = 10))
+                                PI3K_mTOR_Signaling = anno_simple(x = vec_is_pi3kmtor, col = colors_vhlhif),
+                                Focal_Adhesion = anno_simple(x = vec_is_adhesion, col = colors_vhlhif),
+                                Is_Targetof_MotifEnrichedTFs = anno_simple(x = vec_targetof_motifenrichedtfs, col = colors_targetof_motifenrichedtfs),
+                                link = anno_mark(at = idx_is_highlighted, labels = genes_highlighted, labels_gp = gpar(fontsize = 15), side = "bottom"),
+                                annotation_name_gp = gpar(fontsize = 15, fontface = "italic"))
 
 # Heatmap -----------------------------------------------------------------
 p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat, 
@@ -139,8 +125,10 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
              # show_column_dend = F, column_title_side = "top", column_title_rot = 90, column_title_gp = gpar(fontsize = 25, fontface = "bold"),
              col = col_fun, na_col = color_na,
              show_row_names = T, 
-             row_split = factor_cellgroup, cluster_row_slices = F, show_row_dend = F, row_title_rot = 0, row_title_gp = gpar(fontsize = 10),
-             show_column_names = T, column_names_gp = gpar(fontsize = 5), column_km = 6, column_km_repeats = 100, show_column_dend = F, 
+             row_split = factor_cellgroup, 
+             row_labels = vec_celltype_labels, row_names_gp = gpar(fontsize = 15, fontface = "bold"),
+             cluster_row_slices = F, show_row_dend = F, row_title_rot = 0, row_title_gp = gpar(fontsize = 20),
+             show_column_names = F, column_names_gp = gpar(fontsize = 5), column_km = 6, column_km_repeats = 100, show_column_dend = F, 
              bottom_annotation = colanno_obj, 
              show_heatmap_legend = F)
 p
@@ -149,9 +137,13 @@ png(filename = paste0(dir_out, "heatmap", ".png"),
     width = 2000, height = 1000, res = 150)
 draw(object = p)
 dev.off()
+## save heatmap as pdf
+pdf(paste0(dir_out, "heatmap", ".pdf"), 
+    width = 20, height = 6, useDingbats = F)
+draw(object = p)
+dev.off()
 
-
-# legend ------------------------------------------------------------------
+ # legend ------------------------------------------------------------------
 list_lgd = list(
   Legend(col_fun = col_fun, 
          title = "Scaled (across all cells) expression values\naveraged within each cell type", 

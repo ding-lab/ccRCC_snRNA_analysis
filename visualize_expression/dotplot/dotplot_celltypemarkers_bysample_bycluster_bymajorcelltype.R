@@ -25,7 +25,12 @@ gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_
 ## input id meta data table
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
 
-for (aliquot2process in unique(paths_srat_df$Aliquot)) {
+
+# make colors -------------------------------------------------------------
+# myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")))
+
+for (aliquot2process in "CPT0075140002") {
+# for (aliquot2process in unique(paths_srat_df$Aliquot)) {
   aliquot_show <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == aliquot2process]
   
   # input seurat object, and subset to cluster -----------------------------------------------------
@@ -45,7 +50,7 @@ for (aliquot2process in unique(paths_srat_df$Aliquot)) {
     table() %>%
     data.frame() %>%
     mutate(Id_Cluster_CellType = paste0("C", id_seurat_cluster, "_", Cell_type.detailed)) %>%
-    mutate(Keep = (Freq >= 30))
+    mutate(Keep = (Freq >= 10))
   barcode2celltype_filtered_df <- barcode2celltype_filtered_df %>%
     mutate(Id_Cluster_CellType = paste0("C", id_seurat_cluster, "_", Cell_type.detailed))
   barcode2celltype_filtered_df$Keep <- mapvalues(x = barcode2celltype_filtered_df$Id_Cluster_CellType, from = count_bycelltype_bycluster_df$Id_Cluster_CellType, to = as.vector(count_bycelltype_bycluster_df$Keep))
@@ -71,7 +76,6 @@ for (aliquot2process in unique(paths_srat_df$Aliquot)) {
   genes2plot_filtered <- c(genes2plot_filtered, 
                            as.vector(plot_matrix[(plot_matrix$features.plot %in% malignant_markers) & (rowSums(plot_matrix[,unique(as.vector(plot_data$id))] > 10) >= 1), "features.plot"]))
   genes2plot_filtered <- unique(genes2plot_filtered)
-  
   
   # plot scaled -------------------------------------------------------------
   p <- DotPlot(object = srat, features = genes2plot_filtered, col.min = 0)
@@ -102,7 +106,7 @@ for (aliquot2process in unique(paths_srat_df$Aliquot)) {
   dev.off()
   
   # plot not scaled -------------------------------------------------------------
-  p <- DotPlot(object = srat, features = genes2plot_filtered, col.max = 7, scale = F)
+  p <- DotPlot(object = srat, features = genes2plot_filtered, scale = F, col.min = 0, col.max = 2.5)
   p$data$gene_cell_type_group <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type_Group)
   p$data$gene_cell_type1 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type1)
   p$data$gene_cell_type2 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type2)
@@ -115,6 +119,7 @@ for (aliquot2process in unique(paths_srat_df$Aliquot)) {
   cat("Dotplot now\n")
   p <- p +scale_color_gradient2(midpoint=median(p$data$avg.exp, na.rm = T), low="blue", mid="white",
                                 high="red", space ="Lab" )
+  # p <- p + scale_colour_gradientn(colours = myPalette(100), limits=c(0, 2.5))
   p <- p  + RotatedAxis()
   p <- p + facet_grid(cell_group~gene_cell_type_group + gene_cell_type1 + gene_cell_type2 + gene_cell_type3 + gene_cell_type4, scales = "free", space = "free", drop = T)
   p <- p + theme(panel.spacing = unit(0, "lines"),
@@ -127,7 +132,8 @@ for (aliquot2process in unique(paths_srat_df$Aliquot)) {
                  strip.placement = "outside")
   p <- p + ggtitle(paste0(aliquot_show, " Expression of Cell Type Marker Genes"))
   file2write <- paste0(dir_out, aliquot_show, ".CellTypeMarkerExp.NotScaled.png")
-  png(file = file2write, width = 4500, height = 1000, res = 150)
+  # png(file = file2write, width = 4500, height = 1000, res = 150)
+  png(file = file2write, width = 4500, height = 2000, res = 150)
   print(p)
   dev.off()
 }

@@ -17,14 +17,17 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input the marker genes
 deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/findallmarker_wilcox_cellgroup_on_katmai/20200714.v2/findallmarkers_wilcox_bycellgroup.pos..logfcthreshold0.1.minpct0.1.mindiffpct0.1.tsv")
+## specify the top n degs
+n_top <- 200
 
 # get top 50 genes by avg_logFC ------------------------------------------------
 unique(deg_df$cluster)
 deg_filtered_df <- deg_df %>%
+  filter(p_val_adj < 0.05) %>%
   group_by(cluster) %>%
-  top_n(wt = avg_logFC, n = 50)
+  top_n(wt = avg_logFC, n = n_top)
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "findallmarkers_wilcox_bycellgroup.pos.logfcthreshold0.1.minpct0.1.mindiffpct0.1.top50avg_logFC",".tsv")
+file2write <- paste0(dir_out, "findallmarkers_wilcox_bycellgroup.pos.logfcthreshold0.1.minpct0.1.mindiffpct0.1.Top", n_top, "avg_logFC",".tsv")
 write.table(x = deg_filtered_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
