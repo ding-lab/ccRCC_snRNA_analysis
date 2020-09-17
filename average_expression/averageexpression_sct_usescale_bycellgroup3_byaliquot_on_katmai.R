@@ -36,7 +36,7 @@ path_rds <- "./Resources/Analysis_Results/integration/31_aliquot_integration/31_
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 ## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20200910.v2/31Aliquot.Barcode2CellType.20200910.v2.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20200917.v1/31Aliquot.Barcode2CellType.20200917.v1.tsv", data.table = F)
 barcode2celltype_df <- as.data.frame(barcode2celltype_df)
 cat("finish reading the barcode-to-cell type table!\n")
 ## spcify assay
