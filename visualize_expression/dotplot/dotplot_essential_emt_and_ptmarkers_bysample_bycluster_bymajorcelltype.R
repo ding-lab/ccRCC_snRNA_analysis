@@ -27,10 +27,10 @@ idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sam
 
 # specify thresholds ------------------------------------------------------
 ## filter for genes that are expressed in >25% of one cluster at least
-pct_thres <- 50
-avgexp_thres <- 1
+pct_thres <- 10
+avgexp_thres <- 0.1
 
-for (aliquot2process in "CPT0001260013") {
+for (aliquot2process in "CPT0079410004") {
 # for (aliquot2process in unique(paths_srat_df$Aliquot)) {
   aliquot_show <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == aliquot2process]
   

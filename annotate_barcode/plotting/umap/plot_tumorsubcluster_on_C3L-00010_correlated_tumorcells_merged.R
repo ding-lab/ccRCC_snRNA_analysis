@@ -36,14 +36,14 @@ plotdata_df <- plotdata_df %>%
 
 # plot by sample--------------------------------------------------------------------
 ## make color palette
-colors_sample <- RColorBrewer::brewer.pal(n = 5, name = "Set1")
+colors_sample <- RColorBrewer::brewer.pal(n = 5, name = "Set2")
 names(colors_sample) <- unique(plotdata_df$Id_Aliquot_WU)
 p <- ggplot()
 p <- p + geom_point(data = plotdata_df, 
                     mapping = aes(x = UMAP_1, y = UMAP_2, color = Id_Aliquot_WU),
-                    alpha = 0.8, size = 0.05)
+                    alpha = 0.8, size = 0.5)
 p <- p + scale_color_manual(values = colors_sample)
-p <- p + guides(colour = guide_legend(override.aes = list(size=5)))
+p <- p + guides(colour = guide_legend(override.aes = list(size=5), nrow=2,byrow=TRUE))
 p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                panel.background = element_blank(), axis.line = element_line(colour = "black"))
 p <- p + theme(axis.text.x=element_blank(),
@@ -72,12 +72,13 @@ plotdata_df$Reclustered_Cluster_Number <- factor(plotdata_df$ident)
 ## make color
 colors_reclustered_cluster <- c(RColorBrewer::brewer.pal(n = 8, name = "Dark2"), RColorBrewer::brewer.pal(n = 5, name = "Set1"))
 names(colors_reclustered_cluster) <- 0:12
+plotdata_df <- plotdata_df
 p <- ggplot()
 p <- p + geom_point(data = plotdata_df, 
                     mapping = aes(x = UMAP_1, y = UMAP_2, color = Reclustered_Cluster_Number),
-                    alpha = 1, size = 0.05)
+                    alpha = 1, size = 0.1)
 p <- p + scale_color_manual(values = colors_reclustered_cluster)
-p <- p + guides(colour = guide_legend(override.aes = list(size=5)))
+p <- p + guides(colour = guide_legend(override.aes = list(size=5), nrow=2,byrow=TRUE))
 p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                panel.background = element_blank(), axis.line = element_line(colour = "black"))
 p <- p + theme(axis.text.x=element_blank(),

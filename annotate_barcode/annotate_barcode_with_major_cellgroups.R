@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -17,7 +17,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200910.v1/31Aliquot.Barcode2CellType.20200910.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200917.v1/31Aliquot.Barcode2CellType.20200917.v1.tsv", data.table = F)
 
 # group detailed immune cell types into major immune cell groups ----------
 barcode2celltype_df <- barcode2celltype_df %>%

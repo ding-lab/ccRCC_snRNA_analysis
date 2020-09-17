@@ -36,6 +36,7 @@ srat <- readRDS(file = "../ccRCC_snATAC/Resources/snATAC_Processed_Data/4.Cell_t
 print("Finish reading the RDS file!")
 ## input the list of peaks
 peaks_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/unite_cellgroup4_da_peaks/20200915.v1/DA_peaks.chromvar.MergedObj.byCell_group4.20200915.v1.tsv")
+peaks_df <- fread(data.table = F, input = "../ccRCC_snATAC/Resources/snATAC_Processed_Data/Peak_Annotation/peaks_merged_obj_annotation.tsv")
 
 # get genomic regions to qeury --------------------------------------------
 regions_process <- unique(peaks_df$V1)
