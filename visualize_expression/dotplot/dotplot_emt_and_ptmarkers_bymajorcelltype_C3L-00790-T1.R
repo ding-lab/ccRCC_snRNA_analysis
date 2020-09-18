@@ -30,7 +30,7 @@ idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sam
 pct_thres <- 50
 avgexp_thres <- 1
 
-for (aliquot2process in "CPT0001260013") {
+for (aliquot2process in "CPT0065690004") {
   aliquot_show <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == aliquot2process]
   
   # input seurat object, and subset to cluster -----------------------------------------------------

@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -17,11 +17,11 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200917.v1/31Aliquot.Barcode2CellType.20200917.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200917.v2/31Aliquot.Barcode2CellType.20200917.v2.tsv", data.table = F)
 
 # group detailed immune cell types into major immune cell groups ----------
 barcode2celltype_df <- barcode2celltype_df %>%
-  mutate(Cell_group14 = ifelse(Cell_group.shorter == "Immune",
+  mutate(Cell_group15 = ifelse(Cell_group.shorter == "Immune",
                                     ifelse(Cell_type1 == "Myleoid lineage immune cells",
                                            ifelse(Cell_type3 == "Macrophages", 
                                                   "Macrophages",
@@ -40,29 +40,18 @@ barcode2celltype_df <- barcode2celltype_df %>%
                                                                 "B-cells", 
                                                                 "Immune others")))),
                                     Cell_type.shorter))
-table(barcode2celltype_df$Cell_group14)
-barcode2celltype_df %>%
-  filter(Cell_group.shorter == "Immune") %>%
-  select(Cell_type.detailed, Cell_group14) %>%
-  unique() %>%
-  arrange(Cell_group14)
-# barcode2celltype_df %>%
-#   filter(Cell_group.shorter == "Immune") %>%
-#   select(Cell_type.detailed, Cell_group14) %>%
-#   table() %>%
-#   as.data.frame() %>%
-#   filter(Freq > 0) %>%
-#   arrange(Cell_group14)
+table(barcode2celltype_df$Cell_group15)
 
 # rename other cell groups ------------------------------------------------
 barcode2celltype_df <- barcode2celltype_df %>%
   dplyr::rename(Cell_group3 = Cell_group.shorter) %>%
-  dplyr::rename(Cell_group4 = Cell_group.detailed)
+  dplyr::rename(Cell_group7 = Cell_group.detailed)
+table(barcode2celltype_df$Cell_group7)
+table(barcode2celltype_df$Cell_group3)
 
 # write output ------------------------------------------------------------
 ## final check up
 nrow(barcode2celltype_df) # 138547
-## 94846 tumor cells, 989 unknown cells, 213 tumor-like epithelial cells
 file2write <- paste0(dir_out, "31Aliquot.Barcode2CellType.", run_id, ".tsv")
 write.table(x = barcode2celltype_df, file = file2write, quote = F, sep = "\t", row.names = F)
 

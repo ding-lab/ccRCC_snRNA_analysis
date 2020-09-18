@@ -10,7 +10,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(dplyr)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -22,7 +22,7 @@ barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Resul
 ## input barcode to individual cluster id 
 barcode2metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/data_summary/fetch_data/fetch_data_by_individual_sample/20200717.v1/Barcode2MetaData.20200717.v1.tsv")
 ## input corrected cell type
-celltypecorrected_df <- readxl::read_excel(path = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Individual_AllClusters/Cells_BySampleByClusterByCellTypeShorter.Over50.20200917.xlsx", sheet = "Sheet1")
+celltypecorrected_df <- readxl::read_excel(path = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Individual_AllClusters/Cells_BySampleByClusterByCellTypeShorter.Over50.20200917.v2.xlsx", sheet = "Sheet1")
 
 # merge info -------------------------------------
 ## merge cell type with seurat cluster
