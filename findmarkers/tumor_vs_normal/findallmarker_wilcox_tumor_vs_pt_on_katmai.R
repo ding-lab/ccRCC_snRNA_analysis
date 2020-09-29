@@ -25,7 +25,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -98,5 +98,5 @@ marker_roc_df$row_name <- rownames(marker_roc_df)
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "findallmarkers_wilcox_tumorcells_vs_pt.", run_id, ".tsv")
 write.table(x = marker_roc_df, file = file2write, sep = "\t", quote = F, row.names = F)
-
+cat("finish writing the result!\n")
 
