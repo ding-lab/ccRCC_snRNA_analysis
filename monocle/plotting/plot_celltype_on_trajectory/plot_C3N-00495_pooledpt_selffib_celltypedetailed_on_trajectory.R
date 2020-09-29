@@ -19,16 +19,16 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input monocle object
-obj_monocle <- readRDS(file = "./Resources/snRNA_Processed_Data/Monocle/outputs/CellTypeVer.20200828.v1/C3L-00079_PooledPT_SelfFib_ByCellType/combined_subset_pseudotime_qval_1e-10.rds")
+obj_monocle <- readRDS(file = "./Resources/snRNA_Processed_Data/Monocle/outputs/CellTypeVer.20200917.v2/C3N-00495_PooledPT_SelfFib_ByCellType/combined_subset_pseudotime_qval_1e-10.rds")
 
 # process by case ---------------------------------------------------------
-celltype_vec <- as.vector(obj_monocle@phenoData@data$Cell_type.detailed)
-table(celltype_vec)
-celltype_vec[celltype_vec == "Tumor-like epithelial cells (mutation mapped)"] <- "Transitional cells"
-celltype_vec
-table(celltype_vec)
-obj_monocle@phenoData@data$Cell_type.detailed <- celltype_vec
-View(obj_monocle@phenoData@data)
+# celltype_vec <- as.vector(obj_monocle@phenoData@data$Cell_type.detailed)
+# table(celltype_vec)
+# celltype_vec[celltype_vec == "Tumor-like epithelial cells (mutation mapped)"] <- "Transitional cells"
+# celltype_vec
+# table(celltype_vec)
+# obj_monocle@phenoData@data$Cell_type.detailed <- celltype_vec
+# View(obj_monocle@phenoData@data)
 ## plot
 p <- plot_cell_trajectory(obj_monocle, color_by = "Cell_type.detailed",cell_size=0.3)
 # p <- p + ggtitle(paste0("Pseudotime Trajectory of the Cells from\n", id_run))

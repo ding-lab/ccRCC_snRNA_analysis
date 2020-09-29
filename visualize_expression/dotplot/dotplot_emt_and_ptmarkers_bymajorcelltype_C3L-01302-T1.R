@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 3
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -27,10 +27,10 @@ idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sam
 
 # specify thresholds ------------------------------------------------------
 ## filter for genes that are expressed in >25% of one cluster at least
-pct_thres <- 50
+pct_thres <- 20
 avgexp_thres <- 1
 
-for (aliquot2process in "CPT0001260013") {
+for (aliquot2process in "CPT0063630004") {
   aliquot_show <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == aliquot2process]
   
   # input seurat object, and subset to cluster -----------------------------------------------------
@@ -52,7 +52,7 @@ for (aliquot2process in "CPT0001260013") {
     filter(Freq > 0) %>%
     mutate(Id_Cluster_CellType = paste0("C", id_seurat_cluster, "_", Cell_group15)) %>%
     mutate(Keep = (Freq >= 30 & (Cell_group3 %in% c("Nephron_Epithelium") | Cell_group15 %in% c("Fibroblasts", "Myofibroblasts"))))
-  stop("")
+  
   barcode2celltype_filtered_df <- barcode2celltype_filtered_df %>%
     mutate(Id_Cluster_CellType = paste0("C", id_seurat_cluster, "_", Cell_group15))
   

@@ -21,8 +21,8 @@ deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarker
 ## input the peaks to TF motifs
 deg2tfgene_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/annotate_deg/annotate_tumor_vs_normal_degs_to_tf_by_snatac/20200916.v1/DEGs_with_DA_peaks.20200916.v1.tsv")
 
-# for (tfgene_tmp in c("HIF1A")) {
-for (tfgene_tmp in unique(deg2tfgene_df$source_genesymbol)) {
+for (tfgene_tmp in c("HIF1A", "NR3C1")) {
+# for (tfgene_tmp in unique(deg2tfgene_df$source_genesymbol)) {
   ## get the cell type and rank for the motif
   celltype_tmp <- deg2tfgene_df$Cell_type.filename[deg2tfgene_df$source_genesymbol == tfgene_tmp] %>% unique()
   
@@ -64,15 +64,15 @@ for (tfgene_tmp in unique(deg2tfgene_df$source_genesymbol)) {
                            mapping = aes(x = x_plot, y = y_plot, label = text_gene, color = known_tf_target), force = 4, fontface = "bold", segment.alpha = 0.5)
   p <- p + scale_color_manual(values = c("TRUE" = "red", "FALSE" = "black"))
   p <- p + theme_bw()
-  p <- p + ggtitle(subtitle = paste0("And differentially expressed between tumor vs normal pt cells (snRNA)"), 
-                   label = paste0("Genes with ", tfgene_tmp, " motif in the promoter region differentially\naccessible between tumor vs normal pt cells (snATAC)"))
+  # p <- p + ggtitle(subtitle = paste0("And differentially expressed between tumor vs normal pt cells (snRNA)"), 
+                   # label = paste0("Genes with ", tfgene_tmp, " motif in the promoter region differentially\naccessible between tumor vs normal pt cells (snATAC)"))
   p <- p + xlim(c(-3, 3))
   p <- p + ylim(c(0, y_top_area))
   p <- p + xlab("ln(Fold-Change) (tumor cells vs normal proximal tubule cells)")
   p <- p + ylab("-Log10(P-value-adjusted)")
   p <- p + theme(legend.position = "bottom")
   p
-  file2write <- paste0(dir_out_tmp, celltype_tmp, "_motif_rank", rank_motif_tmp, ".",  tfgene_tmp, ".png")
+  file2write <- paste0(dir_out_tmp, celltype_tmp, "_motif", ".",  tfgene_tmp, ".png")
   png(file2write, width = 800, height = 800, res = 150)
   print(p)
   dev.off()

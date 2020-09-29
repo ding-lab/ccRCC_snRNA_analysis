@@ -1,4 +1,4 @@
-# Yige Wu @WashU Aug 2020
+# Yige Wu @WashU Sep 2020
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -20,8 +20,6 @@ dir.create(dir_out)
 genes_df <- fread(input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/annotate_markers/annotate_cellgroup4_degs_with_da_promoter/20200916.v1/CellTypeDEGTop50.Annotation.20200916.v1.tsv", data.table = F)
 ## input the average expression calculated (SCT)
 avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/format_expression/format_avgexp_sct_usedata_bycellgroup/20200916.v2/formated.averageexpression.SCT.slotdata.bycellgroup.31_aliquot_integration.20200916.v2.tsv", data.table = F)
-## input cell type 2 cell group table
-celltype2cellgroup_df <- fread(data.table = F, input = "./Resources/Analysis_Results/average_expression/format_expression/combine_avexp_sct_usescale_immunegroups_with_stroma_and_epithelium/20200908.v1/Combined.CellTypes2CellGroup.20200908.v1.tsv")
 ## input gene annotation
 genes2pathway_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_ccrcc_pathogenic_pathway_genes/20200908.v1/ccRCC_Pathogenic_Pathways_Genes.20200908.v1.tsv")
 ## input not scaled average expression
@@ -73,10 +71,6 @@ colors_targetof_motifenrichedtfs
 
 # make row split for cell types ------------------------------------------
 factor_cellgroup <- factor(x = celltypes_plot, levels = c("Tumor.cells", "Normal.epithelial.cells", "Stroma", "Immune"))
-
-# make row labels for cell types ------------------------------------------
-vec_celltype_labels <- mapvalues(x = celltypes_plot, from = celltype2cellgroup_df$colname_celltype, to = as.vector(celltype2cellgroup_df$Cell_type))
-vec_celltype_labels
 
 # make column split for the genes -----------------------------------------
 vec_genegroup <- mapvalues(x = genes_plot, from = genes_df$gene, to = as.vector(genes_df$gene_group))

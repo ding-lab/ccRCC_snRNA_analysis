@@ -37,11 +37,11 @@ plot_data_df <- merge(plot_data_df,
                       specimen_clinical_df %>%
                         select(Sample, Histologic_Grade, Histologic_Type), 
                       by = c("Sample"), all.x = T)
-## sort
 plot_data_df <- plot_data_df %>%
   mutate(Aliquot_Suffix = str_split_fixed(string = Aliquot.snRNA.WU, pattern = "-", n = 3)[,3])
 # plot_data_df$Aliquot_Suffix
 # plot_data_df$Aliquot.snRNA.WU[order(match(plot_data_df$Aliquot_Suffix, c("T1", "T2", "T3", "N")))]
+plot_data_df$snATAC_available <- (plot_data_df$Case %in% id_metadata_df$Case[id_metadata_df$snATAC_available])
 
 # make data matrix for heatmap body ---------------------------------------
 ## reformat data frame to matrix

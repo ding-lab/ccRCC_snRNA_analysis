@@ -31,3 +31,8 @@ plot_data_df <- avgexp_df %>%
 plot_data_df <- plot_data_df %>%
   filter(cellgroup3 == "Nephron_Epithelium")
 plot_data_df$id_aliquot_wu <- mapvalues(x = plot_data_df$aliquot, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
+
+
+# write output ------------------------------------------------------------
+p
+

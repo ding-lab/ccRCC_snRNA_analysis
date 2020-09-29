@@ -1,6 +1,7 @@
 # Yige Wu @WashU Sep 2020
 ## reference: https://www.wikipathways.org/index.php/Pathway:WP4239#nogo2
 ## reference: https://www.nature.com/articles/s41580-018-0080-4
+## Ref: https://pubmed.ncbi.nlm.nih.gov/16567498/
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -47,7 +48,9 @@ genesymbol2entrezid_df <- getBM(attributes=c('entrezgene_id', 'hgnc_symbol'),
 emt_wikipathway_df$hgnc_symbol <- mapvalues(x = emt_wikipathway_df$gene, from = genesymbol2entrezid_df$entrezgene_id, to = as.vector(genesymbol2entrezid_df$hgnc_symbol))
 
 # manually add EMT genes ------------------------------------------------------------
-genes_emt_df <- data.frame(hgnc_symbol = c("VIM", "ITGA3", emt_wikipathway_df$hgnc_symbol),
+genes_emt_df <- data.frame(hgnc_symbol = c("VIM", "TWIST1", "ITGB1", "ITGB3", "MMP3", "SOX10", "GCS",
+                                           "ITGA3", 
+                                           emt_wikipathway_df$hgnc_symbol),
                            gene_function = "Mesenchymal",
                            gene_group = NA,
                            PMID = NA)
@@ -75,13 +78,19 @@ tmp[genes_emt_df$hgnc_symbol %in% c("CDH1", "ITGA4", "ITGB6", "OCLN", "DSP", "JU
 tmp[grepl(x = genes_emt_df$hgnc_symbol, pattern = "CLDN")] <- "Epithelial"
 tmp[genes_emt_df$hgnc_symbol %in% collagens_df$`Approved symbol`]  <- "Unknown"
 genes_emt_df$gene_function <- tmp
+## annnotate the gene function to epithelial
+tmp <- genes_emt_df$gene_group
+tmp[grepl(x = genes_emt_df$hgnc_symbol, pattern = "CLDN")] <- "Claudin"
+genes_emt_df$gene_group <- tmp
 ## annotate the key EMT genes
+## Ref: https://pubmed.ncbi.nlm.nih.gov/16567498/
 genes_emt_df <- genes_emt_df %>%
-  mutate(Key_EMT_Genes = ifelse(hgnc_symbol %in% c("VIM", "CDH2", "FN1", "ITGB1", "ITGB3", "MMP9", "MMP2", "MMP15",
-                                                   "CDH1", "CLDN10", "ITGA4", "ITGB6", "OCLN"), 
+  mutate(Key_Mesenchymal_Genes = ifelse(hgnc_symbol %in% c("VIM", "CDH2", "FOXC2", "SNAI1", "SNAI2", "TWIST1", "FN1", "ITGB1", "ITGB3", "MMP2", "MMP3", "MMP9", "SOX10", "GCS"), 
                                 TRUE, 
-                                FALSE))
-
+                                FALSE)) %>%
+mutate(Key_Epithelial_Genes = ifelse(hgnc_symbol %in% c("CDH1", "DSP", "ITGA4", "ITGB6", "OCLN"), 
+                              TRUE, 
+                              FALSE))
 genes_emt_df <- unique(genes_emt_df)
 
 # write ouputs ------------------------------------------------------------

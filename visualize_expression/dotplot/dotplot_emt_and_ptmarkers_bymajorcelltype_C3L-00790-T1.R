@@ -17,7 +17,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input cell type per barcode table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20200910.v2/31Aliquot.Barcode2CellType.20200910.v2.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20200917.v2/31Aliquot.Barcode2CellType.20200917.v2.tsv", data.table = F)
 ## input seurat paths
 paths_srat_df <- fread(data.table = F, input = "./Resources/Analysis_Results/data_summary/write_individual_srat_object_paths/20200717.v1/Seurat_Object_Paths.20200717.v1.tsv")
 ## input cell type markers
@@ -27,7 +27,7 @@ idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sam
 
 # specify thresholds ------------------------------------------------------
 ## filter for genes that are expressed in >25% of one cluster at least
-pct_thres <- 50
+pct_thres <- 25
 avgexp_thres <- 1
 
 for (aliquot2process in "CPT0065690004") {
@@ -46,22 +46,22 @@ for (aliquot2process in "CPT0065690004") {
   table(barcode2celltype_filtered_df$id_seurat_cluster)
   table(srat@meta.data$seurat_clusters)
   count_bycelltype_bycluster_df <- barcode2celltype_filtered_df %>%
-    select(Cell_group3, Cell_group14, id_seurat_cluster) %>%
+    select(Cell_group3, Cell_group15, id_seurat_cluster) %>%
     table() %>%
     data.frame() %>%
     filter(Freq > 0) %>%
-    mutate(Id_Cluster_CellType = paste0("C", id_seurat_cluster, "_", Cell_group14)) %>%
-    mutate(Keep = (Freq >= 30 & (Cell_group3 %in% c("Nephron_Epithelium") | Cell_group14 %in% c("Fibroblasts", "Myofibroblasts"))))
+    mutate(Id_Cluster_CellType = paste0("C", id_seurat_cluster, "_", Cell_group15)) %>%
+    mutate(Keep = (Freq >= 30 & (Cell_group3 %in% c("Nephron_Epithelium") | Cell_group15 %in% c("Fibroblasts", "Myofibroblasts"))))
   
   barcode2celltype_filtered_df <- barcode2celltype_filtered_df %>%
-    mutate(Id_Cluster_CellType = paste0("C", id_seurat_cluster, "_", Cell_group14))
+    mutate(Id_Cluster_CellType = paste0("C", id_seurat_cluster, "_", Cell_group15))
   
   barcode2celltype_filtered_df$Keep <- mapvalues(x = barcode2celltype_filtered_df$Id_Cluster_CellType, from = count_bycelltype_bycluster_df$Id_Cluster_CellType, to = as.vector(count_bycelltype_bycluster_df$Keep))
   ## subset seurat object
   srat <- subset(srat, cells = barcode2celltype_filtered_df$individual_barcode[barcode2celltype_filtered_df$Keep == "TRUE"])
   dim(srat)
-  srat@meta.data$Cell_group14 <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_filtered_df$individual_barcode, to = barcode2celltype_filtered_df$Cell_group14)
-  Idents(srat) <- "Cell_group14"
+  srat@meta.data$Cell_group15 <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_filtered_df$individual_barcode, to = barcode2celltype_filtered_df$Cell_group15)
+  Idents(srat) <- "Cell_group15"
   
   # prepare data ------------------------------------------------------------
   ## get the genes within the cell type marker table
@@ -79,31 +79,6 @@ for (aliquot2process in "CPT0065690004") {
   ## intersect
   genes2plot_filtered <- intersect(unique(genes_exp_filtered), unique(genes_pct_filtered))
   
-  # plot scaled -------------------------------------------------------------
-  p <- DotPlot(object = srat, features = genes2plot_filtered, col.min = 0)
-  p$data$gene_group1 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Gene_Group1)
-  p$data$gene_group2 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Gene_Group2)
-  p$data$cell_type <- str_split_fixed(string = p$data$id, pattern = "_", n = 2)[,2]
-  p$data$cluster <- str_split_fixed(string = p$data$id, pattern = "_", n = 2)[,1]
-  p$data$cell_group <- plyr::mapvalues(p$data$cell_type, from = barcode2celltype_filtered_df$Cell_group14, to = barcode2celltype_filtered_df$Cell_group3)
-  cat("###########################################\n")
-  cat("Dotplot now\n")
-  p <- p  + RotatedAxis()
-  p <- p + facet_grid(cell_group~gene_group1 + gene_group2, scales = "free", space = "free", drop = T)
-  p <- p + theme(panel.spacing = unit(0, "lines"),
-                 strip.background = element_blank(),
-                 panel.border = element_rect(colour = "black"),
-                 panel.grid.major = element_line(colour = "grey80"),
-                 strip.text.x = element_text(angle = 0, vjust = 0.5),
-                 strip.text.y = element_text(angle = 0, vjust = 0.5),
-                 axis.text.x = element_text(size = 15, face = "bold"),
-                 strip.placement = "outside")
-  p <- p + ggtitle(paste0(aliquot_show, " Expression of Cell Type Marker Genes"))
-  file2write <- paste0(dir_out, aliquot_show, ".CellTypeMarkerExp.Scaled.png")
-  png(file = file2write, width = 3000, height = 600, res = 150)
-  print(p)
-  dev.off()
-  
   # plot not scaled -------------------------------------------------------------
   plotdata_df <- expdata_df %>%
     filter(features.plot %in% genes2plot_filtered)
@@ -118,12 +93,8 @@ for (aliquot2process in "CPT0065690004") {
   
   p <- ggplot()
   p <- p + geom_point(data = plotdata_df, mapping = aes(x = features.plot, y = id, color = expvalue_plot, size = pct.exp), shape = 16)
-  # p <- p + scale_fill_continuous(type = "viridis")
-  p <- p + scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(n = 9, name = "Spectral")[1:5]))
-  p <- p + scale_size_continuous(range = c(0, 8), name="% Expressed")
-  # p <- p +scale_color_gradient2(midpoint=median(plotdata_df$avg.exp, na.rm = T), low="blue", mid="white",
-                                # high="red", space ="Lab" )
-  # p <- p + scale_colour_gradientn(colours = myPalette(100), limits=c(0, 2.5))
+  p <- p + scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(n = 9, name = "Spectral")[1:5]), guide = guide_legend(direction = "horizontal"))
+  p <- p + scale_size_continuous(range = c(0, 8), name="% Expressed", guide = guide_legend(direction = "horizontal"))
   p <- p + facet_grid(.~gene_group2, scales = "free", space = "free", drop = T)
   p <- p + theme(axis.text.x = element_text(angle = 90, face = "bold", size = 10))
   p <- p + theme(axis.text.y = element_text( face = "bold", size = 12))
@@ -135,13 +106,9 @@ for (aliquot2process in "CPT0065690004") {
   p <- p + theme(axis.title = element_blank())
   p <- p + ggtitle(paste0(aliquot_show, " Expression of Cell Type Marker Genes"))
   p <- p + labs(colour = "Expression value")
+  p <- p + theme(legend.position = "bottom")
   file2write <- paste0(dir_out, aliquot_show, ".CellTypeMarkerExp.NotScaled.png")
-  png(file = file2write, width = 1000, height = 500, res = 150)
-  print(p)
-  dev.off()
-  
-  file2write <- paste0(dir_out, aliquot_show, ".CellTypeMarkerExp.NotScaled.legend.png")
-  png(file = file2write, width = 1000, height = 1000, res = 150)
+  png(file = file2write, width = 1000, height = 600, res = 150)
   print(p)
   dev.off()
 }

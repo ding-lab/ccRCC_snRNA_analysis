@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 3
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -27,10 +27,10 @@ idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sam
 
 # specify thresholds ------------------------------------------------------
 ## filter for genes that are expressed in >25% of one cluster at least
-pct_thres <- 50
+pct_thres <- 20
 avgexp_thres <- 1
 
-for (aliquot2process in "CPT0001260013") {
+for (aliquot2process in "CPT0078510004") {
   aliquot_show <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == aliquot2process]
   
   # input seurat object, and subset to cluster -----------------------------------------------------
@@ -52,7 +52,7 @@ for (aliquot2process in "CPT0001260013") {
     filter(Freq > 0) %>%
     mutate(Id_Cluster_CellType = paste0("C", id_seurat_cluster, "_", Cell_group15)) %>%
     mutate(Keep = (Freq >= 30 & (Cell_group3 %in% c("Nephron_Epithelium") | Cell_group15 %in% c("Fibroblasts", "Myofibroblasts"))))
-  stop("")
+  
   barcode2celltype_filtered_df <- barcode2celltype_filtered_df %>%
     mutate(Id_Cluster_CellType = paste0("C", id_seurat_cluster, "_", Cell_group15))
   
@@ -90,7 +90,6 @@ for (aliquot2process in "CPT0001260013") {
   plotdata_df$gene_group2 <- paste0(plyr::mapvalues(plotdata_df$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Gene_Group2), 
                                     "\n",
                                     "Markers")
-  
   p <- ggplot()
   p <- p + geom_point(data = plotdata_df, mapping = aes(x = features.plot, y = id, color = expvalue_plot, size = pct.exp), shape = 16)
   p <- p + scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(n = 9, name = "Spectral")[1:5]), guide = guide_legend(direction = "horizontal", nrow = 2, byrow = T))
@@ -102,7 +101,8 @@ for (aliquot2process in "CPT0001260013") {
                  panel.border = element_rect(color = "black", fill = NA, size = 0.5),
                  panel.background = element_blank())
   p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5), 
-                 strip.text.x = element_text(angle = 90, vjust = 0.5, size = 12, face = "bold"), strip.text.y = element_text(angle = 0, vjust = 0.5))
+                 strip.text.x = element_text(angle = 90, vjust = 0.5, size = 12, face = "bold"), 
+                 strip.text.y = element_text(angle = 0, vjust = 0.5))
   p <- p + theme(axis.title = element_blank())
   p <- p + ggtitle(paste0(aliquot_show, " Expression of Cell Type Marker Genes"))
   p <- p + labs(colour = "Expression value")

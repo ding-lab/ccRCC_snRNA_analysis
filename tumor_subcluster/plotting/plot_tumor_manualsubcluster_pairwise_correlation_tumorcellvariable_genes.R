@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -33,6 +33,7 @@ specimen_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Resu
 ## reformat data frame to matrix
 plot_data_df <- pearson_coef.tumorcellvariable_genes.df
 plot_data_mat <- as.matrix(plot_data_df[,-1])
+dim(plot_data_mat)
 plot_data_mat %>% head()
 ## add row names
 rownames(plot_data_mat) <- plot_data_df$V1
