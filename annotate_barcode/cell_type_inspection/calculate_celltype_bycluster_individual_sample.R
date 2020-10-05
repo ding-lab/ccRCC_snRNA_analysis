@@ -29,10 +29,15 @@ summary_bycelltypeshorter_df <- barcode_info_merged_df %>%
   select(aliquot, seurat_cluster_id, Cell_type.shorter) %>%
   table() %>%
   as.data.frame() %>%
-  filter(Freq >= 50) %>%
+  filter(Freq > 0) %>%
   arrange(aliquot, seurat_cluster_id, desc(Freq))
 
+summary_bycelltypeshorter_filtered <- summary_bycelltypeshorter_df %>%
+  filter(Freq >= 50)
+
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "Cells_BySampleByClusterByCellTypeShorter.Over50.", run_id, ".tsv")
+file2write <- paste0(dir_out, "Cells_BySampleByClusterByCellTypeShorter.", run_id, ".tsv")
 write.table(x = summary_bycelltypeshorter_df, file = file2write, quote = F, sep = "\t", row.names = F)
+file2write <- paste0(dir_out, "Cells_BySampleByClusterByCellTypeShorter.Over50.", run_id, ".tsv")
+write.table(x = summary_bycelltypeshorter_filtered, file = file2write, quote = F, sep = "\t", row.names = F)
 

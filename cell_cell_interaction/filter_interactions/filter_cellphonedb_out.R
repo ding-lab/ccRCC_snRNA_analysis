@@ -39,9 +39,11 @@ cellphone_filtered_df <- cellphone_filtered_df %>%
 ## cannot find the interaction in the innateDB
 # VEGFA_GRIN2B
 ## cannot find any literature supporting this nor the I2D database
+# AXL_IL15RA
+## the original paper is retrated: https://pubmed.ncbi.nlm.nih.gov/16308569/
 cellphone_filtered_df <- cellphone_filtered_df %>%
   filter(!(interacting_pair %in% c("FGFR2_EPHA4", "FGFR3_EPHA4", "FGFR4_EPHA4", "FGFR1_FGFR2") & as.vector(Cell_type1) != as.vector(Cell_type2))) %>%
-  filter(!(interacting_pair %in% c("LGALS9_MET", "VEGFA_GRIN2B")))
+  filter(!(interacting_pair %in% c("LGALS9_MET", "VEGFA_GRIN2B", "AXL_IL15RA")))
 
 
 # write output ------------------------------------------------------------

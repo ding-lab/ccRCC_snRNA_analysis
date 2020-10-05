@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -21,27 +21,39 @@ summary_df <- fread(data.table = F, input = "./Resources/Analysis_Results/cell_c
 
 # specify pairs to filter -------------------------------------------------
 paired_cellgroups.general_process <- "Tumor&Stroma"
-summary_filtered_df <- summary_df %>%
+summary_filtered_df1 <- summary_df %>%
   filter(paired_cellgroups.general == paired_cellgroups.general_process) %>%
   filter(rank_byinteraction_acrosscelltypes == 1) %>%
   filter(rank_genesource_acrosscelltypes == 1 & rank_genetarget_acrosscelltypes == 1) %>%
   filter(!(interacting_pair %in% c("TNC_aVb6 complex", "PVR_NECTIN3", "FGF7_FGFR4"))) %>%
   mutate(paired_celltypes_group = paste0("Tumor&",ifelse(Cell_type.source == "Tumor cells", Cell_type.target, Cell_type.source))) %>%
   arrange(desc(avg_sig_mean), number_sig_cases)
+paired_cellgroups.general_process <- "Stroma&Stroma"
+summary_filtered_df2 <- summary_df %>%
+  filter(paired_cellgroups.general == paired_cellgroups.general_process) %>%
+  filter(rank_byinteraction_acrosscelltypes == 1) %>%
+  filter(rank_genesource_acrosscelltypes == 1 & rank_genetarget_acrosscelltypes == 1) %>%
+  filter(!is.na(gene.source.druggable) | !is.na(gene.target.druggable)) %>%
+  filter(!is_integrin) %>%
+  filter(!(interacting_pair %in% c("PlexinA2_complex1_SEMA3A", "PlexinA1_complex1_SEMA6D", "ACVR_1B2A receptor_INHBA", "EPOR_KITLG", "FGFR1_FGF7", "FGF1_FGFR1"))) %>%
+  mutate(paired_celltypes_group = ifelse(Cell_type.target == "Endothelial cells", paste0("Endothelial cells", "&", Cell_type.source), paste0(Cell_type.source, "&", Cell_type.target))) %>%
+  arrange(desc(avg_sig_mean), number_sig_cases)
+summary_filtered_df <- rbind(summary_filtered_df1, summary_filtered_df2)
+summary_filtered_df <- summary_filtered_df %>%
+  arrange(desc(avg_sig_mean))
 interacting_pairs_process <- summary_filtered_df$interacting_pair
 interacting_pairs_process
 length(interacting_pairs_process)
+paired_celltypes_process <- summary_filtered_df$paired_celltypes
 
 # make data matrix for the heatmap body -------------------------------------------
 plot_data_df <- summary_df %>%
   filter(interacting_pair %in% interacting_pairs_process) %>%
-  filter(paired_cellgroups.general == paired_cellgroups.general_process)
+  filter(paired_celltypes %in% paired_celltypes_process)
 plot_data_wide_df <- dcast(data = plot_data_df, formula = interacting_pair ~ celltypes.source2target, value.var = "avg_sig_mean")
 plot_data_mat <- as.matrix(plot_data_wide_df[, -1])
 rownames(plot_data_mat) <- plot_data_wide_df$interacting_pair
 plot_data_mat <- plot_data_mat[interacting_pairs_process,]
-## make non-AN values that are not 1 as 0 as
-# plot_data_mat[!is.na(plot_data_mat) & plot_data_mat != 1] <- 0
 plot_data_mat[is.na(plot_data_mat)] <- -1
 
 # get ids -----------------------------------------------------------------
@@ -61,11 +73,7 @@ summary(as.vector(plot_data_mat[plot_data_mat != -1]))
 colors_heatmapbody <- colorRamp2(c(-1, 0, 2, 4, 6, 8, 10, 12, 14, 16), 
                                  c(color_na, brewer.pal(n = 9, name = "YlOrRd")))
 colors_heatmapbody_legand <- colorRamp2(c(0, 2, 4, 6, 8, 10, 12, 14, 16), 
-                                 c(brewer.pal(n = 9, name = "YlOrRd")))
-# colors_heatmapbody = colorRamp2(c(-1, 
-#                                   0, 
-#                                   1), 
-#                                 c("black", "white", color_red))
+                                        c(brewer.pal(n = 9, name = "YlOrRd")))
 ## cell type colors
 colors_celltype <- RColorBrewer::brewer.pal(n = 4, name = "Set1")
 names(colors_celltype) <- c("Tumor cells", "Endothelial cells", "Myofibroblasts", "Fibroblasts")
@@ -97,44 +105,42 @@ pathway_vec[gene_source_vec %in% c("BMP6")] <- "TGFb"
 pathway_vec[gene_target_vec %in% summary_filtered_df$gene.target[summary_filtered_df$is_integrin]] <- "Integrin"
 ## make interaction direciton
 # make annotation object
-rowanno_obj1 <- rowAnnotation(Celltype_ligand = anno_simple(x = vector(mode = "numeric", length = length(celltype_source_vec)), 
-                                                            gp = gpar(fill = "white"),
-                                                            pch = 21, pt_gp = gpar(fill = colors_celltype[celltype_source_vec])),
-                              Gene_source = anno_text(x = gene_source_vec, gp = gpar(fontface = "bold", fontsize = 15)),
-                              Celltype_receptor = anno_simple(x = vector(mode = "numeric", length = length(celltype_target_vec)), 
-                                                              gp = gpar(fill = "white"),
-                                                              pch = 21, pt_gp = gpar(fill = colors_celltype[celltype_target_vec])),
-                              Gene_target = anno_text(x = gene_target_vec, gp = gpar(fontface = "bold", fontsize = 15)),
-                              # Pathway = anno_text(x = pathway_vec, gp = gpar(fill = colors_pathway[pathway_vec])),
-                              annotation_name_side = "top")
+rowanno_obj1 <- rowAnnotation(
+  # Celltype_ligand = anno_simple(x = vector(mode = "numeric", length = length(celltype_source_vec)), 
+  #                               gp = gpar(fill = "white"),
+  #                               pch = 21, pt_gp = gpar(fill = colors_celltype[celltype_source_vec])),
+  Gene_source = anno_text(x = gene_source_vec, gp = gpar(fontface = "bold", fontsize = 15)),
+  # Celltype_receptor = anno_simple(x = vector(mode = "numeric", length = length(celltype_target_vec)), 
+  #                                 gp = gpar(fill = "white"),
+  #                                 pch = 21, pt_gp = gpar(fill = colors_celltype[celltype_target_vec])),
+  Gene_target = anno_text(x = gene_target_vec, gp = gpar(fontface = "bold", fontsize = 15)),
+  # Pathway = anno_text(x = pathway_vec, gp = gpar(fill = colors_pathway[pathway_vec])),
+  annotation_name_side = "top")
 rowanno_obj2 <- rowAnnotation(Number_samples = anno_barplot(x = number_sig_samples_vec, width = unit(x = 2, "cm")),
                               annotation_name_side = "bottom")
 
 
 # make column annotation -----------------------------------------------------
-paired_cellgroups_detailed <- mapvalues(x = celltypes.source2target_plot, from = summary_filtered_df$celltypes.source2target, to = as.vector(summary_filtered_df$paired_celltypes_group)) 
-col_celltypes.source_vec <- mapvalues(x = celltypes.source2target_plot, from = summary_filtered_df$celltypes.source2target, to = as.vector(summary_filtered_df$Cell_type.source))
-col_celltypes.target_vec <- mapvalues(x = celltypes.source2target_plot, from = summary_filtered_df$celltypes.source2target, to = as.vector(summary_filtered_df$Cell_type.target))
+paired_cellgroups_detailed <- mapvalues(x = celltypes.source2target_plot, from = summary_df$celltypes.source2target, to = as.vector(summary_df$paired_celltypes_group)) 
+col_celltypes.source_vec <- mapvalues(x = celltypes.source2target_plot, from = summary_df$celltypes.source2target, to = as.vector(summary_df$Cell_type.source))
+col_celltypes.target_vec <- mapvalues(x = celltypes.source2target_plot, from = summary_df$celltypes.source2target, to = as.vector(summary_df$Cell_type.target))
 ## get direction
-direction_pch_vec <- ifelse(col_celltypes.source_vec == "Tumor cells", 25, 24)
-## get the non-tumor cell types
-nontumor_celltypes_col_vec <- col_celltypes.target_vec
-nontumor_celltypes_col_vec[nontumor_celltypes_col_vec == "Tumor cells"] <- col_celltypes.source_vec[nontumor_celltypes_col_vec == "Tumor cells"]
-colanno_obj <- HeatmapAnnotation(Celltype_tumor = anno_simple(x = vector(mode = "numeric", length = length(col_celltypes.source_vec)), 
-                                                              gp = gpar(fill = "white"), height = unit(10, "mm"), 
-                                                              pch = 21, pt_size = unit(10, "mm"), pt_gp = gpar(fill = colors_celltype["Tumor cells"])), 
+direction_pch_vec <- 25
+colanno_obj <- HeatmapAnnotation(Celltype1 = anno_simple(x = vector(mode = "numeric", length = length(col_celltypes.source_vec)), 
+                                                         gp = gpar(fill = "white"), height = unit(10, "mm"), 
+                                                         pch = 21, pt_size = unit(10, "mm"), pt_gp = gpar(fill = colors_celltype[col_celltypes.source_vec])), 
                                  Direction = anno_simple(x = vector(mode = "numeric", length = length(col_celltypes.source_vec)), 
                                                          gp = gpar(fill = "white"), height = unit(8, "mm"), 
                                                          pch = direction_pch_vec, pt_size = unit(8, "mm"), pt_gp = gpar(fill = "black")),
-                                 Celltype_nontumor = anno_simple(x = vector(mode = "numeric", length = length(col_celltypes.source_vec)), 
-                                                              gp = gpar(fill = "white"), height = unit(10, "mm"), 
-                                                              pch = 21, pt_size = unit(10, "mm"), pt_gp = gpar(fill = colors_celltype[nontumor_celltypes_col_vec])),
+                                 Celltype2 = anno_simple(x = vector(mode = "numeric", length = length(col_celltypes.source_vec)), 
+                                                         gp = gpar(fill = "white"), height = unit(10, "mm"), 
+                                                         pch = 21, pt_size = unit(10, "mm"), pt_gp = gpar(fill = colors_celltype[col_celltypes.target_vec])),
                                  annotation_name_side = "right")
 
 # plot hetamp body --------------------------------------------------------
 p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              col = colors_heatmapbody,
-                             width = unit(nrow(plot_data_mat)/1.5, "cm"), height = unit(ncol(plot_data_mat), "cm"),
+                             width = unit(nrow(plot_data_mat)/2, "cm"), height = unit(ncol(plot_data_mat), "cm"),
                              # border = "black", 
                              ## row parameters
                              # row_names_side = "left",
@@ -175,13 +181,13 @@ list_lgd = list(
          grid_width = unit(1, "cm")))
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "stroma_tumor_interactions.", ".png")
+file2write <- paste0(dir_out, "interactions", ".png")
 png(file2write, width = 1000, height = 1100, res = 150)
 draw(object = p, 
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
 dev.off()
 
-file2write <- paste0(dir_out, "stroma_tumor_interactions.", ".pdf")
+file2write <- paste0(dir_out, "interactions", ".pdf")
 pdf(file2write, width = 6.5, height = 7)
 draw(object = p, 
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)

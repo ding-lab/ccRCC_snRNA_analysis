@@ -19,11 +19,20 @@ dir.create(dir_out)
 ## input summary for cell-cell interactin
 summary_df <- fread(data.table = F, input = "./Resources/Analysis_Results/cell_cell_interaction/summarize_interactions/rank_across_celltypes_by_pair_by_avgsigmean/20200925.v3/cellphonedb.summary_across_celltypes_by_pair.min5.tsv")
 
+# correct -----------------------------------------------------------------
+summary_df$celltypes.source2target[summary_df$interacting_pair == "HLA-G_LILRB2"] <- "Tumor cells->Macrophages"
+summary_df$gene.source[summary_df$interacting_pair == "HLA-G_LILRB2"] <- "HLA-G"
+summary_df$gene.target[summary_df$interacting_pair == "HLA-G_LILRB2"] <- "LILRB2"
+summary_df$Cell_group.source[summary_df$interacting_pair == "HLA-G_LILRB2"] <- "Tumor cells"
+
+
 # specify pairs to filter -------------------------------------------------
 paired_cellgroups.general_process <- "Tumor&Immune"
 summary_filtered_df <- summary_df %>%
   filter(paired_cellgroups.general == paired_cellgroups.general_process) %>%
   filter(rank_byinteraction_acrosscelltypes == 1) %>%
+  filter(!(Cell_type.source %in% c("Mixed myeloid/lymphoid")) & !(Cell_type.target %in% c("Mixed myeloid/lymphoid"))) %>%
+  filter(!(interacting_pair %in% c("AXL_IL15RA"))) %>%
   mutate(paired_celltypes_group = paste0("Tumor&",ifelse(Cell_type.source == "Tumor cells", Cell_type.target, Cell_type.source))) %>%
   arrange(desc(avg_sig_mean), number_sig_cases)
 interacting_pairs_process <- summary_filtered_df$interacting_pair
@@ -93,15 +102,16 @@ interaction_direction_vec <- mapvalues(x = interacting_pair_plot, from = summary
 interaction_direction_text <- ifelse(interaction_direction_vec == "TRUE", "->", "&")
 ## make interaction direciton
 # make annotation object
-rowanno_obj1 <- rowAnnotation(Celltype_ligand = anno_simple(x = vector(mode = "numeric", length = length(celltype_source_vec)), 
-                                                            gp = gpar(fill = "white"),
-                                                            pch = 21, pt_gp = gpar(fill = colors_celltype[celltype_source_vec])),
-                              Gene_source = anno_text(x = gene_source_vec, gp = gpar(color = "black")),
-                              Celltype_receptor = anno_simple(x = vector(mode = "numeric", length = length(celltype_target_vec)), 
-                                                              gp = gpar(fill = "white"),
-                                                              pch = 21, pt_gp = gpar(fill = colors_celltype[celltype_target_vec])),
-                              Gene_target = anno_text(x = gene_target_vec),
-                              annotation_name_side = "top")
+rowanno_obj1 <- rowAnnotation(
+  # Celltype_ligand = anno_simple(x = vector(mode = "numeric", length = length(celltype_source_vec)), 
+  #                               gp = gpar(fill = "white"),
+  #                               pch = 21, pt_gp = gpar(fill = colors_celltype[celltype_source_vec])),
+  Gene_source = anno_text(x = gene_source_vec, gp = gpar(color = "black")),
+  # Celltype_receptor = anno_simple(x = vector(mode = "numeric", length = length(celltype_target_vec)), 
+  #                                 gp = gpar(fill = "white"),
+  #                                 pch = 21, pt_gp = gpar(fill = colors_celltype[celltype_target_vec])),
+  Gene_target = anno_text(x = gene_target_vec),
+  annotation_name_side = "top")
 rowanno_obj2 <- rowAnnotation(Number_samples_significant = anno_barplot(x = number_sig_samples_vec, width = unit(x = 3, "cm")),
                               annotation_name_side = "top")
 
@@ -114,16 +124,34 @@ nontumor_celltypes_col_vec[nontumor_celltypes_col_vec == "Tumor cells"] <- col_c
 ## get direction
 direction_pch_vec <- ifelse(col_celltypes.source_vec == "Tumor cells", 25, 24)
 ## make column annotation object
-colanno_obj <- HeatmapAnnotation(Celltype_tumor = anno_simple(x = vector(mode = "numeric", length = length(col_celltypes.source_vec)), 
-                                                              gp = gpar(fill = "white"), height = unit(6, "mm"), 
-                                                              pch = 21, pt_size = unit(6, "mm"), pt_gp = gpar(fill = colors_celltype["Tumor cells"])), 
+colanno_obj <- HeatmapAnnotation(Celltype1 = anno_simple(x = vector(mode = "numeric", length = length(col_celltypes.source_vec)), 
+                                                         gp = gpar(fill = "white"), height = unit(6, "mm"), 
+                                                         pch = 21, pt_size = unit(6, "mm"), pt_gp = gpar(fill = colors_celltype["Tumor cells"])), 
                                  Direction = anno_simple(x = vector(mode = "numeric", length = length(col_celltypes.source_vec)), 
                                                          gp = gpar(fill = "white"), height = unit(5, "mm"), 
                                                          pch = direction_pch_vec, pt_size = unit(5, "mm"), pt_gp = gpar(fill = "black")),
-                                 Celltype_nontumor = anno_simple(x = vector(mode = "numeric", length = length(col_celltypes.source_vec)), 
-                                                                 gp = gpar(fill = "white"), height = unit(6, "mm"), 
-                                                                 pch = 21, pt_size = unit(6, "mm"), pt_gp = gpar(fill = colors_celltype[nontumor_celltypes_col_vec])),
+                                 Celltype2 = anno_simple(x = vector(mode = "numeric", length = length(col_celltypes.source_vec)), 
+                                                         gp = gpar(fill = "white"), height = unit(6, "mm"), 
+                                                         pch = 21, pt_size = unit(6, "mm"), pt_gp = gpar(fill = colors_celltype[nontumor_celltypes_col_vec])),
                                  annotation_name_side = "left")
+
+
+# make column split -------------------------------------------------------
+nontumor_celltypes_col_vec
+col_split_vector <- mapvalues(x = nontumor_celltypes_col_vec, 
+                              from = c("Macrophages", "Macrophages proliferating", "TRM",
+                                       "B-cells", "Plasma",
+                                       "CD4 CTL",
+                                       "NK cells strong", "NK cells weak",
+                                       "cDC",
+                                       "CD4/CD8 proliferating"),
+                              to = c("Macrophages", "Macrophages", "Macrophages", 
+                                     "B-cells", "B-cells",
+                                     "CD4 T-cells",
+                                     "NK cells", "NK cells",
+                                     "DC",
+                                     "CD4/CD8 proliferating"))
+col_split_vector
 
 # plot hetamp body --------------------------------------------------------
 p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
@@ -134,9 +162,10 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              left_annotation = rowanno_obj1, right_annotation = rowanno_obj2,
                              show_row_names = F,
                              ## column parameters
-                             column_split = nontumor_celltypes_col_vec,
+                             column_split = col_split_vector,
                              top_annotation = colanno_obj, show_column_names = F,
-                             column_names_side = "top", column_title = NULL,
+                             column_names_side = "top", column_title_rot = 90,
+                             # column_title = NULL,
                              show_column_dend = F,
                              show_heatmap_legend = F)
 p
@@ -158,7 +187,7 @@ list_lgd = list(
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "immune_tumor_interactions.", ".png")
-png(file2write, width = 2000, height = 1600, res = 150)
+png(file2write, width = 1700, height = 1600, res = 150)
 draw(object = p, 
      annotation_legend_side = "left", annotation_legend_list = list_lgd)
 dev.off()

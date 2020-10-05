@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -21,17 +21,12 @@ protein_tab <- fread("~/Box/Ding_Lab/Projects_Current/CPTAC/PGDAC/ccRCC_discover
 ## input bulk meta data for the entire set
 bulk_meta_tab <- fread("~/Box/Ding_Lab/Projects_Current/CPTAC/PGDAC/ccRCC_discovery_manuscript/ccRCC_expression_matrices/cptac-metadata.csv")
 ## input the peaks to TF motifs
-deg2tfgene_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/annotate_deg/annotate_tumor_vs_normal_degs_to_tf_by_snatac/20200916.v1/DEGs_with_DA_peaks.20200916.v1.tsv")
+emt_genes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/combine_pt_with_emt_markers_all/20200920.v1/Kidney_Specific_EMT_Genes.20200920.v1.tsv")
+## input the id meta data
+
 
 # get genes to plot -------------------------------------------------------
-# genes_plot <- c("VEGFA", "VEGFC", "FLT1", "KDR", "FLT4",
-#                 "COL4A3", "ITGB1", "ITGA11", "ITGA10",
-#                 "EPNA1", "EPHA7",
-#                 "ANGPT2", "TEK",
-#                 "PDGFD", "PDGFRB",
-#                 "SEMA3A", "NRP1",
-#                 "FGF1", "FGFR2")
-genes_plot <- c("VEGFA", "VEGFC", "FLT1", "KDR", "FLT4")
+genes_plot <- emt_genes_df$Gene[emt_genes_df$Gene_Group2 == "Mesenchymal"]
 
 # make ids to plot --------------------------------------------------------
 # get the aliquot IDs for bulk corresponding to the snRNA aliquots --------
@@ -86,7 +81,7 @@ p <- Heatmap(mat2plot, col = heatmapbody_col_fun,
              column_split = sampletypes,
              cluster_columns = T, show_column_dend = F, 
              column_title_gp = gpar(fontsize = 18),
-             show_column_names = F, 
+             show_column_names = T, 
              show_heatmap_legend = F)
 
 annotation_lgd = list(
@@ -103,7 +98,7 @@ draw(object = p,
      annotation_legend_side = "bottom", annotation_legend_list = annotation_lgd)
 dev.off()
 file2write <- paste0(dir_out, "Heatmap_by_sample.",".png")
-png(file2write, width = 1000, height = 350, res = 150)
+png(file2write, width = 1000, height = 1000, res = 150)
 draw(object = p, 
      annotation_legend_side = "bottom", annotation_legend_list = annotation_lgd)
 dev.off()

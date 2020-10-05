@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -74,6 +74,12 @@ cellphone_new_df$gene.source[cellphone_new_df$interacting_pair == "EGFR_HBEGF"] 
 cellphone_new_df$gene.target[cellphone_new_df$interacting_pair == "EGFR_HBEGF"] <- "EGFR"
 cellphone_new_df$receptor.source[cellphone_new_df$interacting_pair == "EGFR_HBEGF"] <- F
 cellphone_new_df$is_ligand_receptor[cellphone_new_df$interacting_pair == "EGFR_HBEGF"] <- T
+# HLA-G_LILRB2
+## ref: https://www.genecards.org/cgi-bin/carddisp.pl?gene=LILRB2
+cellphone_new_df$gene.source[cellphone_new_df$interacting_pair == "HLA-G_LILRB2"] <- "HLA-G"
+cellphone_new_df$gene.target[cellphone_new_df$interacting_pair == "HLA-G_LILRB2"] <- "LILRB2"
+cellphone_new_df$receptor.source[cellphone_new_df$interacting_pair == "HLA-G_LILRB2"] <- F
+cellphone_new_df$is_ligand_receptor[cellphone_new_df$interacting_pair == "HLA-G_LILRB2"] <- T
 cellphone_new_df <- cellphone_new_df %>%
   mutate(interaction.source2target = ifelse(is_ligand_receptor, 
                                             paste0(gene.source, "->", gene.target),

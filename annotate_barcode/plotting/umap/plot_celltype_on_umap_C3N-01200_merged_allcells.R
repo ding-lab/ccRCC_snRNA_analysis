@@ -18,7 +18,8 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input cell type per barcode table
 # barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200910.v1/31Aliquot.Barcode2CellType.20200910.v1.tsv", data.table = F)
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20200917.v2/31Aliquot.Barcode2CellType.20200917.v2.tsv", data.table = F)
+# barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20200917.v2/31Aliquot.Barcode2CellType.20200917.v2.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20201002.v1/31Aliquot.Barcode2CellType.20201002.v1.tsv", data.table = F)
 ## input UMAP info per barcode
 umap_df <- fread(input = "./Resources/Analysis_Results/data_summary/fetch_data/fetch_data_by_individual_sample//20200406.v1/individual_cluster_meta_data.20200406.v1.tsv", data.table = F)
 ## input id meta data table
@@ -34,10 +35,9 @@ plotdata_df <- umap_df %>%
   mutate(individual_barcode = str_split_fixed(string = barcode_integrated, pattern = "_", n = 3)[,1])
 plotdata_df <- merge(plotdata_df,
                      barcode2celltype_df %>%
-                       select(individual_barcode, Cell_group7),
-                     by.x = c("individual_barcode"), by.y = c("individual_barcode"), all.x = T)
-plotdata_df <- plotdata_df %>%
-  mutate(Cell_group = Cell_group7)
+                       mutate(Cell_group = Cell_group.detailed) %>%
+                       select(orig.ident, individual_barcode, Cell_group),
+                     by.x = c("orig.ident", "individual_barcode"), by.y = c("orig.ident", "individual_barcode"), all.x = T)
 p <- ggplot()
 p <- p + geom_point(data = plotdata_df, 
                     mapping = aes(x = UMAP_1, y = UMAP_2, color = Cell_group),
