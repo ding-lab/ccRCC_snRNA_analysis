@@ -36,8 +36,7 @@ srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 
 # fetch data  ----------------------------------------------------
-metadata_df <- srat@meta.data
-metadata_df$normal_integrated_barcode <- rownames(metadata_df)
+metadata_df <- FetchData(object = srat, vars = c("orig.ident", "UMAP_1", "UMAP_2", "original_barcode"))
 
 ## get the genes within the cell type marker table
 ## save plot

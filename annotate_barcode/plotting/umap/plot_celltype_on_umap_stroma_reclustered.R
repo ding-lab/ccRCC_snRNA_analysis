@@ -17,30 +17,26 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input cell type per barcode table
-# barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200910.v1/31Aliquot.Barcode2CellType.20200910.v1.tsv", data.table = F)
-# barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20200917.v2/31Aliquot.Barcode2CellType.20200917.v2.tsv", data.table = F)
 barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20201002.v1/31Aliquot.Barcode2CellType.20201002.v1.tsv", data.table = F)
-## input id meta data table
-idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
+## input UMAP info per barcode
+umap_df <- fread(input = "./Resources/Analysis_Results/recluster/recluster_cell_groups_in_integrated_data/fetch_data/fetch_data_stroma_reclustered/20201005.v1/stroma_reclustered.metadata.20201005.v1.tsv", data.table = F)
 
-# input seurat object, and get umap info -----------------------------------------------------
-srat <- readRDS(file = "./Resources/snRNA_Processed_Data/Merged_Seurat_Objects/C3N-01200.Tumor_Segments.Merged.20200319.v1.RDS")
-umap_df <- FetchData(object = srat, vars = c("orig.ident", "UMAP_1", "UMAP_2"))
-umap_df$barcode_integrated <- rownames(umap_df)
-# plot for cell group----------------------------------------------------------
-aliquot_show <- "C3N-01200 Merged "
+# make data frame for plotting---------------------------------------------------------
 plotdata_df <- umap_df %>%
-  mutate(individual_barcode = str_split_fixed(string = barcode_integrated, pattern = "_", n = 3)[,1])
+  select(orig.ident, original_barcode, UMAP_1, UMAP_2)
 plotdata_df <- merge(plotdata_df,
                      barcode2celltype_df %>%
-                       mutate(Cell_group = Cell_group.detailed) %>%
-                       select(orig.ident, individual_barcode, Cell_group),
-                     by.x = c("orig.ident", "individual_barcode"), by.y = c("orig.ident", "individual_barcode"), all.x = T)
+                       mutate(Cell_type = Cell_type.detailed) %>%
+                       select(orig.ident, individual_barcode, Cell_type),
+                     by.x = c("orig.ident", "original_barcode"), by.y = c("orig.ident", "individual_barcode"), all.x = T)
+
+
+# plot --------------------------------------------------------------------
 p <- ggplot()
 p <- p + geom_point(data = plotdata_df, 
-                    mapping = aes(x = UMAP_1, y = UMAP_2, color = Cell_group),
+                    mapping = aes(x = UMAP_1, y = UMAP_2, color = Cell_type),
                     alpha = 1, size = 0.05)
-p <- p + scale_color_manual(values = cellgroup_colors)
+p <- p + scale_color_manual(values = stroma_colors)
 p <- p + guides(colour = guide_legend(override.aes = list(size=3)))
 p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                panel.background = element_blank(), axis.line = element_line(colour = "black"))
@@ -48,8 +44,9 @@ p <- p + theme(axis.text.x=element_blank(),
                axis.ticks.x=element_blank())
 p <- p + theme(axis.text.y=element_blank(),
                axis.ticks.y=element_blank())
-p <- p + ggtitle(label = paste0(aliquot_show, "Cell Type"))
 p
+
+# write output ------------------------------------------------------------
 file2write <- paste0(dir_out, aliquot_show, ".png")
 png(filename = file2write, width = 1200, height = 1000, res = 150)
 print(p)

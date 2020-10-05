@@ -109,11 +109,16 @@ rowanno_obj1 <- rowAnnotation(
   # Celltype_ligand = anno_simple(x = vector(mode = "numeric", length = length(celltype_source_vec)), 
   #                               gp = gpar(fill = "white"),
   #                               pch = 21, pt_gp = gpar(fill = colors_celltype[celltype_source_vec])),
-  Gene_source = anno_text(x = gene_source_vec, gp = gpar(fontface = "bold", fontsize = 15)),
+  Gene_source = anno_text(x = gene_source_vec, gp = gpar(fontface = "italic", fontsize = 15, border = "black"), 
+                          location = 0.5,
+                          just = "center"),
   # Celltype_receptor = anno_simple(x = vector(mode = "numeric", length = length(celltype_target_vec)), 
   #                                 gp = gpar(fill = "white"),
   #                                 pch = 21, pt_gp = gpar(fill = colors_celltype[celltype_target_vec])),
-  Gene_target = anno_text(x = gene_target_vec, gp = gpar(fontface = "bold", fontsize = 15)),
+  Gene_target = anno_text(x = gene_target_vec, 
+                          gp = gpar(fontface = "italic", fontsize = 15, border = "black"), 
+                          location = 0.5,
+                          just = "center"),
   # Pathway = anno_text(x = pathway_vec, gp = gpar(fill = colors_pathway[pathway_vec])),
   annotation_name_side = "top")
 rowanno_obj2 <- rowAnnotation(Number_samples = anno_barplot(x = number_sig_samples_vec, width = unit(x = 2, "cm")),
@@ -126,13 +131,14 @@ col_celltypes.source_vec <- mapvalues(x = celltypes.source2target_plot, from = s
 col_celltypes.target_vec <- mapvalues(x = celltypes.source2target_plot, from = summary_df$celltypes.source2target, to = as.vector(summary_df$Cell_type.target))
 ## get direction
 direction_pch_vec <- 25
-colanno_obj <- HeatmapAnnotation(Celltype1 = anno_simple(x = vector(mode = "numeric", length = length(col_celltypes.source_vec)), 
+colanno_obj <- HeatmapAnnotation(Celltype.Ligand = anno_simple(x = vector(mode = "numeric", length = length(col_celltypes.source_vec)), 
                                                          gp = gpar(fill = "white"), height = unit(10, "mm"), 
+                                                         border = F,
                                                          pch = 21, pt_size = unit(10, "mm"), pt_gp = gpar(fill = colors_celltype[col_celltypes.source_vec])), 
                                  Direction = anno_simple(x = vector(mode = "numeric", length = length(col_celltypes.source_vec)), 
                                                          gp = gpar(fill = "white"), height = unit(8, "mm"), 
                                                          pch = direction_pch_vec, pt_size = unit(8, "mm"), pt_gp = gpar(fill = "black")),
-                                 Celltype2 = anno_simple(x = vector(mode = "numeric", length = length(col_celltypes.source_vec)), 
+                                 Celltype.Receptor = anno_simple(x = vector(mode = "numeric", length = length(col_celltypes.source_vec)), 
                                                          gp = gpar(fill = "white"), height = unit(10, "mm"), 
                                                          pch = 21, pt_size = unit(10, "mm"), pt_gp = gpar(fill = colors_celltype[col_celltypes.target_vec])),
                                  annotation_name_side = "right")
@@ -160,8 +166,8 @@ p
 # make legend list --------------------------------------------------------
 list_lgd = list(
   Legend(col_fun = colors_heatmapbody_legand, 
-         title = "Interaction strength score", 
-         labels_gp = gpar(fontsize=12), title_gp = gpar(fontsize = 15),
+         title = "Interaction strength\nscore", 
+         labels_gp = gpar(fontsize=12), title_gp = gpar(fontsize = 12),
          # legend_width = unit(4, "cm"),
          # legend_height = unit(3, "cm"),
          direction = "vertical"),
@@ -174,22 +180,22 @@ list_lgd = list(
          # legend_height = unit(3, "cm"),
          direction = "vertical"),
   Legend(labels = names(colors_celltype),
-         title = "Cell_type",
+         title = "Cell type",
          legend_gp = gpar(fill = colors_celltype), 
-         labels_gp = gpar(fontsize=12), title_gp = gpar(fontsize = 15),
-         grid_height = unit(1, "cm"),
-         grid_width = unit(1, "cm")))
+         labels_gp = gpar(fontsize=12), title_gp = gpar(fontsize = 12),
+         grid_height = unit(0.75, "cm"),
+         grid_width = unit(0.75, "cm")))
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "interactions", ".png")
-png(file2write, width = 1000, height = 1100, res = 150)
+png(file2write, width = 1500, height = 1100, res = 150)
 draw(object = p, 
-     annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
+     annotation_legend_side = "left", annotation_legend_list = list_lgd)
 dev.off()
 
 file2write <- paste0(dir_out, "interactions", ".pdf")
-pdf(file2write, width = 6.5, height = 7)
+pdf(file2write, width = 8, height = 7)
 draw(object = p, 
-     annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
+     annotation_legend_side = "left", annotation_legend_list = list_lgd)
 dev.off()
 
