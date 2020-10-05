@@ -26,12 +26,13 @@ plotdata_df <- umap_df %>%
   select(orig.ident, original_barcode, UMAP_1, UMAP_2)
 plotdata_df <- merge(plotdata_df,
                      barcode2celltype_df %>%
-                       mutate(Cell_type = Cell_type.detailed) %>%
+                       mutate(Cell_type = Cell_type.shorter) %>%
                        select(orig.ident, individual_barcode, Cell_type),
                      by.x = c("orig.ident", "original_barcode"), by.y = c("orig.ident", "individual_barcode"), all.x = T)
 
 
 # plot --------------------------------------------------------------------
+unique(plotdata_df$Cell_type)
 p <- ggplot()
 p <- p + geom_point(data = plotdata_df, 
                     mapping = aes(x = UMAP_1, y = UMAP_2, color = Cell_type),

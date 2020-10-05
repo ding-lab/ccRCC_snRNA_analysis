@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -154,5 +154,10 @@ file2write <- paste0(dir_out, "heatmap", ".pdf")
 pdf(file2write, width = 4, height = 6)
 draw(object = p, 
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
+dev.off()
+## save with no legend
+file2write <- paste0(dir_out, "heatmap.nolegend", ".pdf")
+pdf(file2write, width = 4, height = 5)
+draw(object = p)
 dev.off()
 

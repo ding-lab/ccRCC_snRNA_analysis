@@ -179,4 +179,10 @@ pdf(file2write, width = 6, height = 7)
 draw(object = p, 
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
 dev.off()
+## save with no legend
+file2write <- paste0(dir_out, "heatmap.nolegend", ".pdf")
+pdf(file2write, width = 6, height = 6)
+draw(object = p)
+dev.off()
+
 
