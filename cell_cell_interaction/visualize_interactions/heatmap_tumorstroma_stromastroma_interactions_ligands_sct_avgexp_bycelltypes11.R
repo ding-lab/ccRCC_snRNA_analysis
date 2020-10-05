@@ -109,10 +109,9 @@ rownames(avg_bulkrna_df) <- avg_bulkrna_df$Gene
 mean_rna_tumor <- avg_bulkrna_df[genes_plot, "Mean_tumor"]; mean_rna_tumor
 mean_rna_normal <- avg_bulkrna_df[genes_plot, "Mean_Normal"]; mean_rna_normal
 ## make row annotation object
-rowanno_obj <- rowAnnotation(Avg_Bulk_mRNA = anno_simple(x = cbind(mean_rna_tumor,mean_rna_normal), col = colors_bulkrna, width = unit(x = 1, "cm")),
-                             Avg_Bulk_Protein = anno_simple(x = cbind(mean_protein_tumor, mean_protein_normal), col = colors_bulkpro, width = unit(x = 1, "cm")),
-                             annotation_name_side = "top", border = T)
-
+rowanno_obj <- rowAnnotation(Avg_Bulk_mRNA = anno_simple(x = cbind(mean_rna_tumor,mean_rna_normal), col = colors_bulkrna, width = unit(x = 1, "cm"), border = T),
+                             Avg_Bulk_Protein = anno_simple(x = cbind(mean_protein_tumor, mean_protein_normal), col = colors_bulkpro, width = unit(x = 1, "cm"), border = T),
+                             annotation_name_side = "top", gap = unit(0.1, "cm"))
 
 # plot heatmap body -----------------------------------------------------------------
 p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat, 
@@ -145,18 +144,18 @@ list_lgd = list(
          direction = "horizontal"))
 
 ## save heatmap as png
-png(filename = paste0(dir_out, "heatmap", ".png"), 
+png(filename = paste0(dir_out, "ligand", ".png"), 
     width = 600, height = 900, res = 150)
 draw(object = p, 
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
 dev.off()
-file2write <- paste0(dir_out, "heatmap", ".pdf")
+file2write <- paste0(dir_out, "ligand", ".pdf")
 pdf(file2write, width = 4, height = 6)
 draw(object = p, 
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
 dev.off()
 ## save with no legend
-file2write <- paste0(dir_out, "heatmap.nolegend", ".pdf")
+file2write <- paste0(dir_out, "ligand.nolegend", ".pdf")
 pdf(file2write, width = 4, height = 5)
 draw(object = p)
 dev.off()

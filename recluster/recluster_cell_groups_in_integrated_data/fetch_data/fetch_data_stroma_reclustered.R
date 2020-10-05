@@ -31,7 +31,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
-path_rds <- "./Resources/Analysis_Results/recluster/recluster_cell_groups_in_integrated_data/subset_and_recluster/subset_stroma_and_recluster_on_katmai/20200824.v1/Stroma.Merged.20200824.v1.RDS"
+path_rds <- "./Resources/Analysis_Results/recluster/recluster_cell_groups_in_integrated_data/subset_and_recluster/subset_stroma_and_recluster_on_katmai/20201005.v1/Stroma.Merged.20201005.v1.RDS"
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 
