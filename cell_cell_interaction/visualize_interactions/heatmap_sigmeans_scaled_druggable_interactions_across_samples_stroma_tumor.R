@@ -121,7 +121,7 @@ rowanno_obj1 <- rowAnnotation(Celltype_ligand = anno_simple(x = vector(mode = "n
                                                               pch = 21, pt_gp = gpar(fill = colors_celltype[celltype_target_vec])),
                               Gene_target = anno_text(x = gene_target_vec, gp = gpar(fontface = "italic", fontsize = 15)),
                               # Pathway = anno_text(x = pathway_vec, gp = gpar(fill = colors_pathway[pathway_vec])),
-                              annotation_name_side = "top")
+                              annotation_name_side = "bottom")
 
 # make row split ----------------------------------------------------------
 therapy_category_vec <- mapvalues(x = interaction_celltypes, from = summary_df$pair_cell.types, to = as.vector(summary_df$therapy_category))
@@ -175,7 +175,7 @@ draw(object = p,
 dev.off()
 
 file2write <- paste0(dir_out, "druggable_interactions", ".pdf")
-pdf(file2write, width = 6.2, height = 5)
+pdf(file2write, width = 6.4, height = 4.8, useDingbats = F)
 draw(object = p, 
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
 dev.off()

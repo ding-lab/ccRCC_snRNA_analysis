@@ -25,7 +25,8 @@ umap_df <- fread(input = "./Resources/Analysis_Results/data_summary/fetch_data/f
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
 
 # plot for cell group----------------------------------------------------------
-for (id_aliquot_tmp in c("CPT0075130004", "CPT0075140002", "CPT0075120002")) {
+for (id_aliquot_tmp in c("CPT0001260013")) {
+# for (id_aliquot_tmp in c("CPT0075130004", "CPT0075140002", "CPT0075120002")) {
 # for (id_aliquot_tmp in unique(umap_df$aliquot)) {
   aliquot_show <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == id_aliquot_tmp]
   
@@ -61,17 +62,18 @@ for (id_aliquot_tmp in c("CPT0075130004", "CPT0075140002", "CPT0075120002")) {
   p <- ggplot()
   p <- p + geom_point(data = plotdata_df, 
                       mapping = aes(x = UMAP_1, y = UMAP_2, color = Cell_group),
-                      alpha = 1, size = 0.05)
+                      alpha = 1, size = 0.5)
   p <- p + scale_color_manual(values = cellgroup_colors[unique(plotdata_df$Cell_group)])
-  p <- p + guides(colour = guide_legend(override.aes = list(size=5), ncol = ceiling(x = length(unique(plotdata_df$Cell_group))/2), byrow = T))
+  p <- p + guides(colour = guide_legend(override.aes = list(size=5), nrow = ceiling(length(colors_cellgroup_tmp)/4), byrow = T))
   p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                  panel.background = element_blank(), axis.line = element_line(colour = "black"))
   p <- p + theme(axis.text.x=element_blank(),
                  axis.ticks.x=element_blank())
   p <- p + theme(axis.text.y=element_blank(),
                  axis.ticks.y=element_blank())
-  p <- p + ggtitle(label = paste0(aliquot_show, " Cell Type"))
-  p <- p + theme(legend.position = "top")
+  p <- p + theme(axis.title = element_text(size = 20))
+  p <- p + theme(legend.position = "bottom", legend.text = element_text(size = 20), legend.title = element_text(size = 25))
+  p
   file2write <- paste0(dir_out, aliquot_show, ".pdf")
   pdf(file2write, width = 8, height = 9, useDingbats = F)
   print(p)

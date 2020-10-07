@@ -130,4 +130,48 @@ for (snRNA_aliquot_id_tmp in "CPT0001260013") {
   png(file2write, width = 800, height = 900, res = 150)
   print(p)
   dev.off()
+  
+  ## ggplot
+  p <- ggplot()
+  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "NA",], mapping = aes(x = UMAP_1, y = UMAP_2), alpha = 0.5, size = 0.3, color = colors_read_type["others"])
+  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "Var" & !(plot_data_df$gene_symbol %in% ccRCC_SMGs),], mapping = aes(x = UMAP_1, y = UMAP_2), alpha = 0.5, size = 0.8, color = colors_read_type["cells with the variant read(s)"])
+  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "Var" & (plot_data_df$gene_symbol %in% ccRCC_SMGs),], mapping = aes(x = UMAP_1, y = UMAP_2), alpha = 0.8, size = 0.8, color = colors_read_type["cells with the variant read(s)"])
+  p <- p + geom_text_repel(data = plot_data_df[!is.na(plot_data_df$gene_symbol),], 
+                           mapping = aes(UMAP_1, UMAP_2, label = gene_symbol, colour = Driver_Gene_Mutation, size = Driver_Gene_Mutation), fontface = "italic")
+  p <- p + scale_color_manual(values = c("TRUE" = "black", "FALSE" = "grey50"))
+  p <- p + scale_size_manual(values = c("TRUE" = 10, "FALSE" = 6))
+  p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                 panel.background = element_blank(), axis.line = element_line(colour = "black"))
+  p <- p + theme(axis.text.x=element_blank(),
+                 axis.ticks.x=element_blank())
+  p <- p + theme(axis.text.y=element_blank(),
+                 axis.ticks.y=element_blank())
+  p <- p + theme(axis.title = element_text(size = 20))
+  p <- p + theme(legend.position = "none")
+  p
+  file2write <- paste0(dir_out, aliquot_show, ".mut.nolgend.pdf")
+  pdf(file2write, width = 8, height = 8, useDingbats = F)
+  print(p)
+  dev.off()
+  
+  p <- ggplot()
+  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "NA",], mapping = aes(x = UMAP_1, y = UMAP_2, color = read_type_text), alpha = 0.5, size = 0.3)
+  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "Var",], mapping = aes(x = UMAP_1, y = UMAP_2, color = read_type_text), alpha = 0.5, size = 0.8)
+  p <- p + scale_color_manual(values = colors_read_type)
+  p <- p +
+    theme_bw() +
+    theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank())
+  p <- p + labs(colour = "")
+  p <- p + guides(colour = guide_legend(override.aes = list(size=5)))
+  p <- p + ggplot2::theme(axis.line=element_blank(),axis.text.x=element_blank(),
+                          axis.text.y=element_blank(),axis.ticks=element_blank(),
+                          axis.title.x=element_blank(),
+                          axis.title.y=element_blank())
+  p <- p + theme(legend.position = "bottom", legend.text = element_text(size = 20), legend.title = element_text(size = 25))
+  p
+  file2write <- paste0(dir_out, aliquot_show, ".mut.lgend.pdf")
+  pdf(file2write, width = 8, height = 8, useDingbats = F)
+  print(p)
+  dev.off()
 }

@@ -80,15 +80,16 @@ for (id_aliquot_tmp in c("CPT0001260013")) {
                       mapping = aes(x = UMAP_1, y = UMAP_2, color = Cell_group),
                       alpha = 1, size = 0.2)
   p <- p + scale_color_manual(values = colors_cellgroup_tmp)
-  p <- p + guides(colour = guide_legend(override.aes = list(size=3, fontsize = 20), nrow = ceiling(length(colors_cellgroup_tmp)/5), byrow = T))
+  p <- p + guides(colour = guide_legend(override.aes = list(size=5), nrow = ceiling(length(colors_cellgroup_tmp)/4), byrow = T))
   p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                  panel.background = element_blank(), axis.line = element_line(colour = "black"))
   p <- p + theme(axis.text.x=element_blank(),
                  axis.ticks.x=element_blank())
   p <- p + theme(axis.text.y=element_blank(),
                  axis.ticks.y=element_blank())
-  p <- p + ggtitle(label = paste0(aliquot_show, " Cell Types"))
-  p <- p + theme(legend.position = "bottom")
+  p <- p + theme(axis.title = element_text(size = 20))
+  # p <- p + ggtitle(label = paste0(aliquot_show, " Cell Types"))
+  p <- p + theme(legend.position = "bottom", legend.text = element_text(size = 20), legend.title = element_text(size = 25))
   p
   file2write <- paste0(dir_out, aliquot_show, ".pdf")
   pdf(file2write, width = 8, height = 9, useDingbats = F)

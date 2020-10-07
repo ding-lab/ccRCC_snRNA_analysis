@@ -38,7 +38,7 @@ plot_data_df$Id_Aliquot_WU <- mapvalues(x = plot_data_df$Id_Aliquot, from = idme
 ## order by frequency
 plot_data_df <- plot_data_df %>%
   arrange(Freq)
-plot_data_df$plot_x <- factor(x = plot_data_df$Id_Aliquot_WU, levels = plot_data_df$Id_Aliquot_WU)
+plot_data_df$plot_x <- factor(x = plot_data_df$Id_Aliquot_WU, levels = rev(plot_data_df$Id_Aliquot_WU))
 
 # plot wide version --------------------------------------------------------------------
 p <- ggplot()
@@ -50,7 +50,7 @@ p <- p + theme(axis.title.x = element_blank())
 p <- p + theme(axis.text.y = element_text(size = 15),
                axis.text.x = element_text(angle = 90, vjust = 0.1))
 p
-pdf2write <- paste0(dir_out, "NumberOfManualTumorSubclusters.wide", run_id, ".pdf")
+pdf2write <- paste0(dir_out, "NumberOfManualTumorSubclusters.wide", ".pdf")
 pdf(file = pdf2write, width = 8, height = 5)
 print(p)
 dev.off()
@@ -61,12 +61,15 @@ p <- ggplot()
 p <- p + geom_bar(data = plot_data_df, mapping = aes(x = plot_x, y = Freq), stat = "identity")
 p <- p + coord_flip()
 p <- p + ylab("Number of Tumor Subclusters")
-p <- p + theme_bw()
+p <- p + scale_y_continuous(position = "right")
 p <- p + theme(axis.title.y = element_blank())
-p <- p + theme(axis.text.x = element_text(size = 15))
+p <- p + theme(axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 12))
+p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+p <- p + theme(axis.line = element_line(colour = "black"), axis.ticks.y = element_blank())
 p
-pdf2write <- paste0(dir_out, "NumberOfManualTumorSubclusters.long", run_id, ".pdf")
-pdf(file = pdf2write, width = 4, height = 8)
+pdf2write <- paste0(dir_out, "NumberOfManualTumorSubclusters.long",".pdf")
+pdf(file = pdf2write, width = 4, height = 6, useDingbats = F)
 print(p)
 dev.off()
 

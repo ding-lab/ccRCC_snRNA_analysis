@@ -90,7 +90,8 @@ case_profile_df$Mut.VHL <- factor(x = case_profile_df$Mut.VHL, levels = c("Mutat
 case_profile_df <- case_profile_df %>%
   arrange(Histologic_Type, Mut.VHL, Freq)
 ## order case ids
-factor_case_ids <- factor(x = case_ids, levels = case_profile_df$case_ids)
+ids_case_uniq_ordered <- case_profile_df$case_ids
+factor_case_ids <- factor(x = case_ids, levels = ids_case_uniq_ordered)
 
 # process CNV data --------------------------------------------------------
 ## add aliquot.wu
@@ -137,44 +138,56 @@ swatch(colors_clustername)
 ## sort omics
 omics_long_df <- omics_df[ids_aliquot_wu,]
 ## create left row annotation
-row_left_anno = rowAnnotation(Sample_Type_Suffix = anno_simple(x = suffixes_aliquot_id, col = colors_tumor_segments,
-                                                               width = unit(1.5, "cm")),
-                              Cluster_Name = anno_simple(x = names_cluster_suffix, col = colors_clustername,
-                                                         width = unit(1.5, "cm")),
-                              Histologic_Type = anno_simple(x = omics_long_df$Histologic_Type,
-                                                            col = colors_hist_type,
-                                                            width = unit(1.5, "cm")), 
-                              annotation_name_side = "bottom", annotation_name_gp = gpar(fontsize = 20))
-
+# row_anno_obj1 = rowAnnotation(Sample_Type_Suffix = anno_simple(x = suffixes_aliquot_id, col = colors_tumor_segments,
+#                                                                width = unit(1.5, "cm")),
+#                               Cluster_Name = anno_simple(x = names_cluster_suffix, col = colors_clustername,
+#                                                          width = unit(1.5, "cm")),
+#                               Histologic_Type = anno_simple(x = omics_long_df$Histologic_Type,
+#                                                             col = colors_hist_type,
+#                                                             width = unit(1.5, "cm")), 
+#                               annotation_name_side = "bottom", annotation_name_gp = gpar(fontsize = 20))
+row_anno_obj2 <- rowAnnotation(foo = anno_block(gp = gpar(fill = "white", color = "black"),
+                                                    labels = ids_case_uniq_ordered, labels_rot = 0,
+                                                    labels_gp = gpar(col = "black", fontsize = 80)))
 # make top column annotation -------------------------------------------
-col_anno = HeatmapAnnotation(Sample_Type_Suffix = anno_simple(x = suffixes_aliquot_id, col = colors_tumor_segments,
-                                                                  height = unit(1.5, "cm")),
-                                 Cluster_Name = anno_simple(x = names_cluster_suffix, col = colors_clustername,
-                                                            height = unit(1.5, "cm")),
-                             Histologic_Type = anno_simple(x = omics_long_df$Histologic_Type,
-                                                           col = colors_hist_type,
-                                                           height = unit(1.5, "cm")))
+# col_anno_obj1 = HeatmapAnnotation(Sample_Type_Suffix = anno_simple(x = suffixes_aliquot_id, col = colors_tumor_segments,
+#                                                                   height = unit(1.5, "cm")),
+#                                  Cluster_Name = anno_simple(x = names_cluster_suffix, col = colors_clustername,
+#                                                             height = unit(1.5, "cm")),
+#                              Histologic_Type = anno_simple(x = omics_long_df$Histologic_Type,
+#                                                            col = colors_hist_type,
+#                                                            height = unit(1.5, "cm")))
+col_anno_obj2 <- HeatmapAnnotation(foo = anno_block(gp = gpar(fill = "white", color = "black"),
+                                                    labels = ids_case_uniq_ordered, labels_rot = 90,
+                                                    labels_gp = gpar(col = "black", fontsize = 80)))
 
 # plot pearson pairwise correlation for variably expressed genes within tumor cells ------------------------------------------------------
 ## make heatmap
 p <- Heatmap(matrix = plot_data_mat,
              width = unit(nrow(plot_data_mat), "cm"), height = unit(ncol(plot_data_mat), "cm"),
              col = col_fun, 
+             ## row
              row_split = factor_case_ids, cluster_row_slices = F,
-             show_row_dend = F, row_title_rot = 0, row_title_gp = gpar(fontsize = 40, fontface = "bold"),
+             row_title = NULL,
+             # row_title_rot = 0, row_title_gp = gpar(fontsize = 80),
+             show_row_dend = F, 
              row_gap = unit(0, "mm"),
-             column_split = factor_case_ids, cluster_column_slices = F, column_title_side = "bottom",
-             show_column_dend = F, column_title_rot = 90, column_title_gp = gpar(fontsize = 40, fontface = "bold"),
+             left_annotation = row_anno_obj2,
+             # left_annotation = row_anno_obj1,
+             ## column
+             column_split = factor_case_ids, cluster_column_slices = F, 
+             column_title = NULL,
+             # column_title_side = "bottom", column_title_rot = 90, column_title_gp = gpar(fontsize = 80),
+             show_column_dend = F, 
              column_gap = unit(0, "mm"),
+             top_annotation = col_anno_obj2,
+             # bottom_annotation= col_anno_obj1,
              border = "grey50",
-             bottom_annotation= col_anno,
-             left_annotation = row_left_anno,
-             # right_annotation = row_right_anno,
              show_row_names = F,
              show_column_names = F,
              show_heatmap_legend = F)
 ## save heatmap
-file2write <- paste0(dir_out, "Heatmap", ".pdf")
+file2write <- paste0(dir_out, "Pariwise_Correlation", ".pdf")
 pdf(file2write,
     width = 50, height = 50)
 draw(object = p)

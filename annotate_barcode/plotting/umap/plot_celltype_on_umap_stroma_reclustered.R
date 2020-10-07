@@ -31,24 +31,34 @@ plotdata_df <- merge(plotdata_df,
                      by.x = c("orig.ident", "original_barcode"), by.y = c("orig.ident", "individual_barcode"), all.x = T)
 
 
-# plot --------------------------------------------------------------------
+# make colors -------------------------------------------------------------
 unique(plotdata_df$Cell_type)
+colors_celltype <- RColorBrewer::brewer.pal(n = 3, name = "Dark2")
+names(colors_celltype) <- unique(plotdata_df$Cell_type)
+
+# plot --------------------------------------------------------------------
 p <- ggplot()
 p <- p + geom_point(data = plotdata_df, 
                     mapping = aes(x = UMAP_1, y = UMAP_2, color = Cell_type),
                     alpha = 1, size = 0.05)
-p <- p + scale_color_manual(values = stroma_colors)
-p <- p + guides(colour = guide_legend(override.aes = list(size=3)))
+p <- p + scale_color_manual(values = colors_celltype)
+p <- p + guides(colour = guide_legend(override.aes = list(size=5, fontsize = 20)))
 p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                panel.background = element_blank(), axis.line = element_line(colour = "black"))
 p <- p + theme(axis.text.x=element_blank(),
                axis.ticks.x=element_blank())
 p <- p + theme(axis.text.y=element_blank(),
                axis.ticks.y=element_blank())
+p <- p + theme(legend.position = "bottom")
 p
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, aliquot_show, ".png")
-png(filename = file2write, width = 1200, height = 1000, res = 150)
+file2write <- paste0(dir_out, "stroma_umap", ".png")
+png(filename = file2write, width = 1000, height = 1050, res = 150)
 print(p)
 dev.off()
+file2write <- paste0(dir_out, "stroma_umap", ".pdf")
+pdf(file2write, width = 6, height = 6.25, useDingbats = F)
+print(p)
+dev.off()
+

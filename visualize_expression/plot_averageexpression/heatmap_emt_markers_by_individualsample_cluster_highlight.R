@@ -7,7 +7,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 4
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -123,7 +123,7 @@ summary(scores_epithelial)
 color_yellow <- RColorBrewer::brewer.pal(n = 9, name = "YlGnBu")[1]
 color_blue2 <- RColorBrewer::brewer.pal(n = 9, name = "YlGnBu")[9]
 colors_scores_epithelial = colorRamp2(c(-1, 0, 1), 
-                                       c(color_yellow, "white", color_blue2))
+                                       c(color_blue2, "white", color_yellow))
 
 # get column ids ----------------------------------------------------------
 columnnames_plot <- colnames(plot_data_mat)
@@ -153,7 +153,7 @@ column_order_vec <- order(scores_mesenchymal, decreasing = T)
 p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat, 
                              col = colors_heatmapbody,
                              na_col = color_na, border = "black",
-                             show_row_names = T, row_names_gp = gpar(fontsize = 15, fontface = "bold"),
+                             show_row_names = T, row_names_gp = gpar(fontsize = 15, fontface = "italic"),
                              row_split = row_split_factor,
                              row_title_rot = 0, row_title_gp = gpar(fontsize = 20, fontface = "bold"),
                              # row_labels = factor_cellgroup,
@@ -190,6 +190,11 @@ list_lgd = list(
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "EMT_Genes_by_tumorcluster", ".png")
 png(file2write, width = 3000, height = 1200, res = 150)
+draw(object = p, 
+     annotation_legend_side = "top", annotation_legend_list = list_lgd)
+dev.off()
+file2write <- paste0(dir_out, "EMT_Genes_by_tumorcluster", ".pdf")
+pdf(file2write, width = 20, height = 9, useDingbats = F)
 draw(object = p, 
      annotation_legend_side = "top", annotation_legend_list = list_lgd)
 dev.off()
