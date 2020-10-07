@@ -26,7 +26,8 @@ print("Finish reading RDS file")
 clusterids_tumorlike <- 7
 clusterids_tumorcells <- c(10, 4, 1, 0, 6)
 ## parameters for the findmarkers
-logfc.threshold.run <- log(2)
+# logfc.threshold.run <- log(2)
+logfc.threshold.run <- 0
 min.pct.run <- 0.1
 min.diff.pct.run <- 0.1
 ## spcify assay

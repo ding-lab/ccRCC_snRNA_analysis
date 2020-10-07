@@ -78,6 +78,8 @@ for (snRNA_aliquot_id_tmp in "CPT0001260013") {
   
   ## add a column for drive genes
   plot_data_df <- plot_data_df %>%
+    mutate(mutation_cat = ifelse(gene_symbol %in% ccRCC_drivers, "SMG",
+                                 ifelse(gene_symbol == "C8orf76", "Shared", "Others"))) %>%
     mutate(Driver_Gene_Mutation = ifelse(gene_symbol %in% ccRCC_drivers, "TRUE", "FALSE")) %>%
     mutate(read_type_text = ifelse(read_type == "NA", "others", "cells with the variant read(s)"))
   ## make color palette for different read types
@@ -86,9 +88,9 @@ for (snRNA_aliquot_id_tmp in "CPT0001260013") {
   
   ## ggplot
   p <- ggplot()
-  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "NA",], mapping = aes(x = UMAP_1, y = UMAP_2), alpha = 0.5, size = 0.3, color = colors_read_type["others"])
+  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "NA",], mapping = aes(x = UMAP_1, y = UMAP_2), alpha = 0.8, size = 0.5, color = colors_read_type["others"])
   p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "Var" & !(plot_data_df$gene_symbol %in% ccRCC_SMGs),], mapping = aes(x = UMAP_1, y = UMAP_2), alpha = 0.5, size = 0.8, color = colors_read_type["cells with the variant read(s)"])
-  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "Var" & (plot_data_df$gene_symbol %in% ccRCC_SMGs),], mapping = aes(x = UMAP_1, y = UMAP_2), alpha = 0.8, size = 0.8, color = colors_read_type["cells with the variant read(s)"])
+  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "Var" & (plot_data_df$gene_symbol %in% ccRCC_SMGs),], mapping = aes(x = UMAP_1, y = UMAP_2), alpha = 0.8, size = 1, color = colors_read_type["cells with the variant read(s)"])
   p <- p + ggtitle(paste0("Mapping of Mutations in ",  aliquot_show))
   p <- p + geom_text_repel(data = plot_data_df[!is.na(plot_data_df$gene_symbol),], 
                            mapping = aes(UMAP_1, UMAP_2, label = gene_symbol, colour = Driver_Gene_Mutation, size = Driver_Gene_Mutation))
@@ -133,13 +135,17 @@ for (snRNA_aliquot_id_tmp in "CPT0001260013") {
   
   ## ggplot
   p <- ggplot()
-  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "NA",], mapping = aes(x = UMAP_1, y = UMAP_2), alpha = 0.5, size = 0.3, color = colors_read_type["others"])
-  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "Var" & !(plot_data_df$gene_symbol %in% ccRCC_SMGs),], mapping = aes(x = UMAP_1, y = UMAP_2), alpha = 0.5, size = 0.8, color = colors_read_type["cells with the variant read(s)"])
-  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "Var" & (plot_data_df$gene_symbol %in% ccRCC_SMGs),], mapping = aes(x = UMAP_1, y = UMAP_2), alpha = 0.8, size = 0.8, color = colors_read_type["cells with the variant read(s)"])
-  p <- p + geom_text_repel(data = plot_data_df[!is.na(plot_data_df$gene_symbol),], 
-                           mapping = aes(UMAP_1, UMAP_2, label = gene_symbol, colour = Driver_Gene_Mutation, size = Driver_Gene_Mutation), fontface = "italic")
-  p <- p + scale_color_manual(values = c("TRUE" = "black", "FALSE" = "grey50"))
-  p <- p + scale_size_manual(values = c("TRUE" = 10, "FALSE" = 6))
+  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "NA",], mapping = aes(x = UMAP_1, y = UMAP_2), alpha = 0.8, size = 0.5, color = colors_read_type["others"])
+  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "Var" & !(plot_data_df$gene_symbol %in% ccRCC_SMGs),], mapping = aes(x = UMAP_1, y = UMAP_2), 
+                      alpha = 1, size = 2, color = colors_read_type["cells with the variant read(s)"])
+  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "Var" & (plot_data_df$gene_symbol %in% ccRCC_SMGs),], mapping = aes(x = UMAP_1, y = UMAP_2), 
+                      alpha = 1, size = 2.5, color = colors_read_type["cells with the variant read(s)"])
+  # p <- p + geom_text_repel(data = plot_data_df[!is.na(plot_data_df$gene_symbol),], 
+  #                          mapping = aes(UMAP_1, UMAP_2, label = gene_symbol, colour = mutation_cat, size = Driver_Gene_Mutation), fontface = "italic")
+  p <- p + geom_text_repel(data = plot_data_df[!is.na(plot_data_df$gene_symbol) & plot_data_df$mutation_cat %in% c("SMG", "Shared"),], 
+                           mapping = aes(UMAP_1, UMAP_2, label = gene_symbol, colour = mutation_cat, size = Driver_Gene_Mutation), fontface = "italic", force = 2)
+  p <- p + scale_color_manual(values = c("SMG" = "black", "Shared" = "black", "FALSE" = "grey50"))
+  p <- p + scale_size_manual(values = c("TRUE" = 10, "FALSE" = 7))
   p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                  panel.background = element_blank(), axis.line = element_line(colour = "black"))
   p <- p + theme(axis.text.x=element_blank(),
