@@ -24,6 +24,8 @@ pearson_coef.tumorcellvariable_genes.df <- fread(input = "./Resources/Analysis_R
 bulk_sn_omicsprofile_df <- fread(input = "./Resources/Analysis_Results/data_summary/merge_bulk_sn_profiles/20200512.v1/bulk_sn_omics_profile.20200512.v1.tsv", data.table = F)
 ## input clinical info
 specimen_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/extract_specimen_clinical_data/20200717.v1/snRNA_ccRCC_Specimen_Clinicl_Data.20200717.v1.tsv")
+## input ITH score
+ith_score_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_ith_score/20201019.v1/Mean_Pairwise_Corrleation_TumorSubclusters_By_Case.20201019.v1.tsv")
 
 # make data matrix for heatmap body ---------------------------------------
 ## reformat data frame to matrix
@@ -88,34 +90,9 @@ case_profile_df <- case_profile_df %>%
 ## order case ids
 ids_case_uniq_ordered <- case_profile_df$case_ids
 factor_case_ids <- factor(x = case_ids, levels = ids_case_uniq_ordered)
-
-# process CNV data --------------------------------------------------------
-## add aliquot.wu
-cnv_df$aliquot.wu <- mapvalues(x = cnv_df$aliquot, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
-cnv_df$case <- mapvalues(x = plot_data_df$aliquot, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Case))
-## add cytoband and expected cna type
-cnv_df$gene_cytoband <- mapvalues(x = cnv_df$gene_symbol, from = knowncnvgenes_df$Gene_Symbol, to = as.vector(knowncnvgenes_df$Cytoband))
-cnv_df$gene_expected_state <- mapvalues(x = cnv_df$gene_symbol, from = knowncnvgenes_df$Gene_Symbol, to = as.vector(knowncnvgenes_df$CNV_Type))
-cnv_df <- cnv_df %>%
-  mutate(id_aliquot_cluster = paste0(aliquot.wu, "_C", (tumor_subcluster + 1)))
-cnv_plot_df <- cnv_df %>%
-  filter(cna_3state == gene_expected_state) %>%
-  select(id_aliquot_cluster, gene_symbol, Fraction)
-## annotate NA data
-cnv_na_df <- cnv_df %>%
-  select(id_aliquot_cluster, gene_symbol) %>%
-  table() %>%
-  as.data.frame() %>%
-  filter(Freq == 0) %>%
-  mutate(Fraction = 2) %>%
-  select(id_aliquot_cluster, gene_symbol, Fraction)
-cnv_plot_df <- rbind(cnv_plot_df, cnv_na_df)
-## make it wide
-cnv_wide_df <- dcast(data = cnv_plot_df, formula = id_aliquot_cluster ~ gene_symbol, value.var = "Fraction", fill = 0)
-cnv_wide_df[which(x = cnv_wide_df == 2,arr.ind = T)] <- NA
-## sort by the order of ids in the plot data matrix
-rownames(cnv_wide_df) <- cnv_wide_df$id_aliquot_cluster
-cnv_wide_df <- cnv_wide_df[names_tumorsubclusters,]
+## get ITH scores
+ith_scores_vec <- mapvalues(x = case_ids, from = ith_score_df$id_case1, to = as.vector(ith_score_df$ith_score))
+ith_scores_vec <- as.numeric(ith_scores_vec)
 
 # specify colors ----------------------------------------------------------
 ## specify color for NA values
@@ -128,7 +105,10 @@ col_fun = colorRamp2(c(0, 0.5, 1), c("white", "yellow", "red"))
 unique(names_cluster_suffix)
 colors_clustername <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")
 names(colors_clustername) <- paste0("C", 1:8)
-swatch(colors_clustername)
+# swatch(colors_clustername)
+## make colors for ITH score
+summary(ith_scores_vec)
+colors_ith_score <- colorRamp2(breaks = seq(0, 0.45, 0.05), colors = c("white", brewer.pal(n = 9, name = "YlGn")))
 
 # make row annotation -------------------------------------------
 ## sort omics
@@ -137,29 +117,17 @@ omics_long_df <- omics_df[ids_aliquot_wu,]
 row_anno_obj1 = rowAnnotation(foo = anno_block(gp = gpar(fill = "white", color = "black"),
                                                labels = ids_case_uniq_ordered, labels_rot = 0,
                                                labels_gp = gpar(col = "black", fontsize = 80)),
-                              Sample_Type_Suffix = anno_simple(x = suffixes_aliquot_id, col = colors_tumor_segments,
-                                                               width = unit(1.5, "cm")),
-                              # Cluster_Name = anno_simple(x = names_cluster_suffix, col = colors_clustername,
-                              #                            width = unit(1.5, "cm")),
-                              # Histologic_Type = anno_simple(x = omics_long_df$Histologic_Type,
-                              #                               col = colors_hist_type,
-                              #                               width = unit(1.5, "cm")),
+                              # Sample_Type_Suffix = anno_simple(x = suffixes_aliquot_id, col = colors_tumor_segments,
+                              #                                  width = unit(2.5, "cm")),
                               annotation_name_side = "top", annotation_name_gp = gpar(fontsize = 20))
-row_anno_obj2 <- rowAnnotation(foo = anno_block(gp = gpar(fill = "white", color = "black"),
-                                                    labels = ids_case_uniq_ordered, labels_rot = 0,
-                                                    labels_gp = gpar(col = "black", fontsize = 80)))
+
+
 # make top column annotation -------------------------------------------
 col_anno_obj1 = HeatmapAnnotation(Sample_Type_Suffix = anno_simple(x = suffixes_aliquot_id, col = colors_tumor_segments,
-                                                                  height = unit(1.5, "cm")),
-                             #     Cluster_Name = anno_simple(x = names_cluster_suffix, col = colors_clustername,
-                             #                                height = unit(1.5, "cm")),
-                             # Histologic_Type = anno_simple(x = omics_long_df$Histologic_Type,
-                             #                               col = colors_hist_type,
-                             #                               height = unit(1.5, "cm")),
-                             annotation_name_side = "left", annotation_name_gp = gpar(fontsize = 20))
-col_anno_obj2 <- HeatmapAnnotation(foo = anno_block(gp = gpar(fill = "white", color = "black"),
-                                                    labels = ids_case_uniq_ordered, labels_rot = 90,
-                                                    labels_gp = gpar(col = "black", fontsize = 80)))
+                                                                   height = unit(2.5, "cm")),
+                                  ITH_Score = anno_simple(x = ith_scores_vec, col = colors_ith_score,
+                                                          height = unit(2.5, "cm")),
+                                  annotation_name_side = "left", annotation_name_gp = gpar(fontsize = 20))
 
 # plot pearson pairwise correlation for variably expressed genes within tumor cells ------------------------------------------------------
 ## save heatmap
@@ -198,10 +166,14 @@ dev.off()
 ## make horizontal legend
 list_lgd = list(
   Legend(col_fun = col_fun, 
-         title = "Pearson's coeffcient\n(variably expressed genes\nwithin tumor cells)", 
+         title = "Pearson's coeffcient", 
          legend_width = unit(4, "cm"),
          direction = "horizontal"),
-  Legend(title = "Tumor Segment No.",
+  Legend(col_fun = colors_ith_score, 
+         title = "Intratumor heterogeneity\nscore by patient", 
+         legend_width = unit(4, "cm"),
+         direction = "horizontal"),
+  Legend(title = "Tumor segment No.",
          labels = c("Tumor#1(T1)", "Tumor#2(T2)", "Tumor#3(T3)"),
          legend_gp = gpar(fill = colors_tumor_segments[c("T1", "T2", "T3")])),
   Legend(title = "Tumor Subcluster No.",

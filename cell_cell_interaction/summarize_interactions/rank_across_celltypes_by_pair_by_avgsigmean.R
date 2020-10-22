@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 3
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -17,7 +17,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input cellphonedb output
-cellphone_sum_by_paircelltypes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/cell_cell_interaction/summarize_interactions/summarize_across_samples_by_pair_and_celltypes/20200925.v2/cellphonedb.summary_across_samples_by_pair.20200925.v2.tsv")
+cellphone_sum_by_paircelltypes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/cell_cell_interaction/summarize_interactions/summarize_across_samples_by_pair_and_celltypes/20201012.v1/cellphonedb.summary_across_samples_by_pair.20201012.v1.tsv")
 
 # specify the least number of significant samples -------------------------
 min_number_sig_cases <- 5

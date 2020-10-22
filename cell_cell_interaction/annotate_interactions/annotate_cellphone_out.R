@@ -17,7 +17,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input cellphonedb output
-cellphone_df <- fread(data.table = F, input = "./Resources/Analysis_Results/cell_cell_interaction/filter_interactions/filter_cellphonedb_out/20200925.v1/cell.phone.res.total.run20200818.filtered.txt")
+cellphone_df <- fread(data.table = F, input = "./Resources/Analysis_Results/cell_cell_interaction/filter_interactions/filter_cellphonedb_out/20201012.v1/cell.phone.res.total.run20200818.filtered.txt")
 ## input cell type annotation
 barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20200917.v2/31Aliquot.Barcode2CellType.20200917.v2.tsv")
 
@@ -49,6 +49,10 @@ cellphone_df$gene_b <- sapply(X = cellphone_df$interacting_pair, FUN = function(
   }
 })
 
+# correct for all pairs involving particular genes ------------------------
+cellphone_df$receptor_a[cellphone_df$gene_a %in% c("EFNB1", "EFNB2", "EFNB4", "EFNB6")] <- F
+cellphone_df$receptor_b[cellphone_df$gene_b %in% c("EFNB1", "EFNB2", "EFNB4", "EFNB6")] <- F
+
 # annotate receptor gene and ligand gene ----------------------------------
 cellphone_df$receptor_b[cellphone_df$is_integrin] <- T
 cellphone_new_df <- cellphone_df %>%
@@ -58,16 +62,25 @@ cellphone_new_df <- cellphone_df %>%
   mutate(receptor.source = ifelse(gene.source == gene_a, receptor_a, receptor_b)) %>%
   mutate(receptor.target = ifelse(gene.target == gene_a, receptor_a, receptor_b))
 
-# correct source gene and target gene -------------------------------------
+# correct for particular pair of source gene and target gene -------------------------------------
 # ERBB3_NRG1
 ## ref: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4712818/
 ## ref: Here, we demonstrate neuregulin 1 (NRG1) expression and secretion by human decidual stromal cells. Stimulation of human primary trophoblasts with exogenous NRG1 induced phosphorylation of ErbB2, ErbB3 and related downstream effectors. Co-immunoprecipitation experiments confirmed the formation of ErbB2–ErbB3 dimers upon ligand engagement. Along this line, receptor knockdown and ErbB3 neutralization strongly diminished NRG1-dependent activation of the signalling complex.
 cellphone_new_df$gene.source[cellphone_new_df$interacting_pair == "ERBB3_NRG1"] <- "NRG1"
 cellphone_new_df$gene.target[cellphone_new_df$interacting_pair == "ERBB3_NRG1"] <- "ERBB3"
 cellphone_new_df$is_ligand_receptor[cellphone_new_df$interacting_pair == "ERBB3_NRG1"] <- T
+# NRG1_LGR4
 cellphone_new_df$gene.source[cellphone_new_df$interacting_pair == "NRG1_LGR4"] <- "NRG1"
 cellphone_new_df$gene.target[cellphone_new_df$interacting_pair == "NRG1_LGR4"] <- "LGR4"
 cellphone_new_df$is_ligand_receptor[cellphone_new_df$interacting_pair == "NRG1_LGR4"] <- T
+# EGFR_NRG1
+cellphone_new_df$gene.source[cellphone_new_df$interacting_pair == "EGFR_NRG1"] <- "NRG1"
+cellphone_new_df$gene.target[cellphone_new_df$interacting_pair == "EGFR_NRG1"] <- "EGFR"
+cellphone_new_df$is_ligand_receptor[cellphone_new_df$interacting_pair == "EGFR_NRG1"] <- T
+# NRG1_ERBB4
+cellphone_new_df$gene.source[cellphone_new_df$interacting_pair == "NRG1_ERBB4"] <- "NRG1"
+cellphone_new_df$gene.target[cellphone_new_df$interacting_pair == "NRG1_ERBB4"] <- "ERBB4"
+cellphone_new_df$is_ligand_receptor[cellphone_new_df$interacting_pair == "NRG1_ERBB4"] <- T
 # EGFR_HBEGF
 ## ref: https://www.genecards.org/cgi-bin/carddisp.pl?gene=HBEGF
 cellphone_new_df$gene.source[cellphone_new_df$interacting_pair == "EGFR_HBEGF"] <- "HBEGF"
@@ -80,6 +93,13 @@ cellphone_new_df$gene.source[cellphone_new_df$interacting_pair == "HLA-G_LILRB2"
 cellphone_new_df$gene.target[cellphone_new_df$interacting_pair == "HLA-G_LILRB2"] <- "LILRB2"
 cellphone_new_df$receptor.source[cellphone_new_df$interacting_pair == "HLA-G_LILRB2"] <- F
 cellphone_new_df$is_ligand_receptor[cellphone_new_df$interacting_pair == "HLA-G_LILRB2"] <- T
+## FGFR1_NCAM1
+## Ref: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2806277/
+cellphone_new_df$gene.source[cellphone_new_df$interacting_pair == "FGFR1_NCAM1"] <- "NCAM1"
+cellphone_new_df$gene.target[cellphone_new_df$interacting_pair == "FGFR1_NCAM1"] <- "FGFR1"
+cellphone_new_df$receptor.source[cellphone_new_df$interacting_pair == "FGFR1_NCAM1"] <- F
+cellphone_new_df$is_ligand_receptor[cellphone_new_df$interacting_pair == "FGFR1_NCAM1"] <- T
+## make groups
 cellphone_new_df <- cellphone_new_df %>%
   mutate(interaction.source2target = ifelse(is_ligand_receptor, 
                                             paste0(gene.source, "->", gene.target),

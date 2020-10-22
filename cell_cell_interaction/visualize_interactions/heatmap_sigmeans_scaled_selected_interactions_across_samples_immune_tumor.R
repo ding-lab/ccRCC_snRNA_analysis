@@ -28,27 +28,8 @@ specimen_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Resu
 
 # specify pairs to filter -------------------------------------------------
 ## get genes to filter
-paired_cellgroups.general_process <- "Tumor&Stroma"
-summary_filtered_df1 <- summary_df %>%
-  filter(paired_cellgroups.general == paired_cellgroups.general_process) %>%
-  filter(rank_byinteraction_acrosscelltypes == 1) %>%
-  filter(rank_genesource_acrosscelltypes == 1 & rank_genetarget_acrosscelltypes == 1) %>%
-  filter(!(interacting_pair %in% c("TNC_aVb6 complex", "PVR_NECTIN3", "FGF7_FGFR4"))) %>%
-  mutate(paired_celltypes_group = paste0("Tumor&",ifelse(Cell_type.source == "Tumor cells", Cell_type.target, Cell_type.source))) %>%
-  arrange(desc(avg_sig_mean), number_sig_cases)
-paired_cellgroups.general_process <- "Stroma&Stroma"
-summary_filtered_df2 <- summary_df %>%
-  filter(paired_cellgroups.general == paired_cellgroups.general_process) %>%
-  filter(rank_byinteraction_acrosscelltypes == 1) %>%
-  filter(rank_genesource_acrosscelltypes == 1 & rank_genetarget_acrosscelltypes == 1) %>%
-  filter(!is.na(gene.source.druggable) | !is.na(gene.target.druggable)) %>%
-  filter(!is_integrin) %>%
-  filter(!(interacting_pair %in% c("PlexinA2_complex1_SEMA3A", "PlexinA1_complex1_SEMA6D", "ACVR_1B2A receptor_INHBA", "EPOR_KITLG", "FGFR1_FGF7", "FGF1_FGFR1"))) %>%
-  mutate(paired_celltypes_group = ifelse(Cell_type.target == "Endothelial cells", paste0("Endothelial cells", "&", Cell_type.source), paste0(Cell_type.source, "&", Cell_type.target))) %>%
-  arrange(desc(avg_sig_mean), number_sig_cases)
-summary_filtered_df <- rbind(summary_filtered_df1, summary_filtered_df2)
-summary_filtered_df <- summary_filtered_df %>%
-  filter(interacting_pair %in% c("VEGFA_FLT1", "VEGFA_KDR", "FLT4_VEGFC", "ANGPT2_TEK", "TEK_ANGPT1", "PDGFRB_PDGFD")) %>%
+summary_filtered_df <- summary_df %>%
+  filter(pair_cell.types %in% c("IGF1_IGF1R.Macrophages|Tumor cells", "EGFR_HBEGF.Tumor cells|Macrophages", "MET_HGF.Tumor cells|Macrophages", "EGFR_TGFA.Tumor cells|Macrophages")) %>%
   arrange(desc(avg_sig_mean))
 interacting_pairs_process <- summary_filtered_df$interacting_pair
 interacting_pairs_process

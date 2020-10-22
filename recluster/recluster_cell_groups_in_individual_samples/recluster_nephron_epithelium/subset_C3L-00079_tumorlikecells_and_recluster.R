@@ -1,4 +1,5 @@
 # Yige Wu @WashU Sep 2020
+## reclustering transitional cells and other tumor cells
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -32,6 +33,7 @@ cat("###########################################\n")
 barcode2celltype_filtered_df <- barcode2celltype_df %>%
   filter(orig.ident == "CPT0001260013") %>%
   filter(Cell_group.detailed %in% cellgroup2process)
+table(barcode2celltype_filtered_df$Cell_type.shorter)
 nrow(barcode2celltype_filtered_df)
 ## subset
 srat <- subset(srat, cells = barcode2celltype_filtered_df$individual_barcode)

@@ -33,9 +33,12 @@ plot_data_df <- merge(integrated_umap_df,
                         mutate(Cell_group = Cell_group7) %>%
                         select(integrated_barcode, Cell_group),
                       by.x = c("barcode"), by.y = c("integrated_barcode"), all.x = T)
+plot_data_df$Cell_group[plot_data_df$Cell_group == "Tumor-like cells"] <- "Tumor cells"
+plot_data_df$Cell_group[plot_data_df$Cell_group == "Transitional cells"] <- "Tumor cells"
+plot_data_df$Cell_group[plot_data_df$Cell_group == "Normal-like cells"] <- "Normal epithelial cells"
 unique(plot_data_df$Cell_group)
 p <- ggplot()
-p <- p + geom_point(data = plot_data_df, 
+p <- p + geom_point_rast(data = plot_data_df, 
                     mapping = aes(x = UMAP_1, y = UMAP_2, color = Cell_group),
                     alpha = 1, size = 0.05, shape = 16)
 p <- p + scale_color_manual(values = cellgroup_colors)

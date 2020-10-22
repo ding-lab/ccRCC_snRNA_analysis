@@ -95,17 +95,13 @@ colors_hist_grade <- c("NAT" = "white", "G1" = "#ffffcc", "G2" = "#addd8e", "G3"
 ## make colors for histogical type
 colors_hist_type <- c("Normal Adjacent Tissue" = "#66c2a5", "Clear cell renal cell carcinoma" = "#fc8d62", "non-Clear cell renal cell carcinoma" = "#8da0cb")
 ## top column annotation object
-top_col_anno = HeatmapAnnotation(#Sample_Type_Suffix = anno_text(aliquot_id_suffix, 
-                                                                # location = 0.5, just = "center",
-                                                                # # gp = gpar(fill = uniq_case_colors[case_ids], col = "white", border = "black"),
-                                                                # gp = gpar(col = "black"), rot = 0,
-                                                                # height = unit(5, "mm"), 
-                                                                # width = max_text_width(case_ids)*1.2),
-                                 Histologic_Type = anno_simple(x = top_col_anno_df$Histologic_Type,
+top_col_anno = HeatmapAnnotation(Histologic_Type = anno_simple(x = top_col_anno_df$Histologic_Type,
                                                                gp = gpar(color = "black"), 
+                                                               simple_anno_size = unit(4, "mm"), 
                                                                col = colors_hist_type),
                                  Histologic_Grade = anno_simple(x = top_col_anno_df$Histologic_Grade,
                                                                 gp = gpar(color = "black"), 
+                                                                simple_anno_size = unit(4, "mm"), 
                                                                 col = colors_hist_grade),
                                  snRNA_Seq = anno_simple(x = as.character(top_col_anno_df$snRNA_available),
                                                          simple_anno_size = unit(4, "mm"), 
@@ -113,43 +109,43 @@ top_col_anno = HeatmapAnnotation(#Sample_Type_Suffix = anno_text(aliquot_id_suff
                                  snATAC_Seq = anno_simple(x = as.character(top_col_anno_df$snATAC_available),
                                                           simple_anno_size = unit(4, "mm"), 
                                                           gp = gpar(color = "black"), col = colors_sn_data),
-                                 Mut.VHL = anno_simple(x = ifelse(is.na(top_col_anno_df$Mut.VHL), NA, 
-                                                                  ifelse(!(top_col_anno_df$Mut.VHL == "None" | top_col_anno_df$Mut.VHL == "Silent"), 
-                                                                         ifelse(top_col_anno_df$Is_discovery_set, "Mutated (WES)", "Mutated (Mapped the Mutation of T1 to snRNA Reads)"), "None")),
-                                                       gp = gpar(color = "black"),
-                                                       simple_anno_size = unit(3, "mm"),
-                                                       col = c("Mutated (WES)" = "#e7298a", "Mutated (Mapped the Mutation of T1 to snRNA Reads)" = "#c994c7", "None" = "white")),
                                  Methyl.VHL = anno_simple(x = top_col_anno_df$Methyl.VHL, 
                                                           gp = gpar(color = "black"),
                                                           simple_anno_size = unit(4, "mm"),
                                                           col = methyl_color_fun),
+                                 Mut.VHL = anno_simple(x = ifelse(is.na(top_col_anno_df$Mut.VHL), NA, 
+                                                                  ifelse(!(top_col_anno_df$Mut.VHL == "None" | top_col_anno_df$Mut.VHL == "Silent"), 
+                                                                         ifelse(top_col_anno_df$Is_discovery_set, "Mutated (WES)", "Mutated (Mapped the Mutation of T1 to snRNA Reads)"), "None")),
+                                                       gp = gpar(color = "black"),
+                                                       simple_anno_size = unit(4, "mm"),
+                                                       col = c("Mutated (WES)" = "#e7298a", "Mutated (Mapped the Mutation of T1 to snRNA Reads)" = "#c994c7", "None" = "white")),
                                  Mut.PBRM1 = anno_simple(x = ifelse(is.na(top_col_anno_df$Mut.PBRM1), NA, 
                                                                     ifelse(!(top_col_anno_df$Mut.PBRM1 == "None" | top_col_anno_df$Mut.PBRM1 == "Silent"), 
                                                                            ifelse(top_col_anno_df$Is_discovery_set, "Mutated (WES)", "Mutated (Mapped the Mutation of T1 to snRNA Reads)"), "None")),
                                                          gp = gpar(color = "black"),
-                                                         simple_anno_size = unit(3, "mm"),
+                                                         simple_anno_size = unit(4, "mm"),
                                                          col = c("Mutated (WES)" = "#e7298a", "Mutated (Mapped the Mutation of T1 to snRNA Reads)" = "#c994c7", "None" = "white")),
                                  Mut.BAP1 = anno_simple(x = ifelse(is.na(top_col_anno_df$Mut.BAP1), NA, 
                                                                    ifelse(!(top_col_anno_df$Mut.BAP1 == "None" | top_col_anno_df$Mut.BAP1 == "Silent"), 
                                                                           ifelse(top_col_anno_df$Is_discovery_set, "Mutated (WES)", "Mutated (Mapped the Mutation of T1 to snRNA Reads)"), "None")),
                                                         gp = gpar(color = "black"),
-                                                        simple_anno_size = unit(3, "mm"),
+                                                        simple_anno_size = unit(4, "mm"),
                                                         col = c("Mutated (WES)" = "#e7298a", "Mutated (Mapped the Mutation of T1 to snRNA Reads)" = "#c994c7", "None" = "white")),
                                  Mut.SETD2 = anno_simple(x = as.character(!(top_col_anno_df$Mut.SETD2 == "None" | top_col_anno_df$Mut.SETD2 == "Silent")),
                                                          gp = gpar(color = "black"),
-                                                         simple_anno_size = unit(3, "mm"),
+                                                         simple_anno_size = unit(4, "mm"),
                                                          col = c("TRUE" = "#e7298a", "FALSE" = "white")),
                                  Mut.KDM5C = anno_simple(x = as.character(!(top_col_anno_df$Mut.KDM5C == "None" | top_col_anno_df$Mut.KDM5C == "Silent")),
                                                          gp = gpar(color = "black"),
-                                                         simple_anno_size = unit(3, "mm"),
+                                                         simple_anno_size = unit(4, "mm"),
                                                          col = c("TRUE" = "#e7298a", "FALSE" = "white")),
                                  Mut.PTEN = anno_simple(x = as.character(!(top_col_anno_df$Mut.PTEN == "None" | top_col_anno_df$Mut.PTEN == "Silent")),
                                                         gp = gpar(color = "black"),
-                                                        simple_anno_size = unit(3, "mm"),
+                                                        simple_anno_size = unit(4, "mm"),
                                                         col = c("TRUE" = "#e7298a", "FALSE" = "white")),
                                  Mut.TSC1 = anno_simple(x = as.character(!(top_col_anno_df$Mut.TSC1 == "None" | top_col_anno_df$Mut.TSC1 == "Silent")),
                                                         gp = gpar(color = "black"),
-                                                        simple_anno_size = unit(3, "mm"),
+                                                        simple_anno_size = unit(4, "mm"),
                                                         col = c("TRUE" = "#e7298a", "FALSE" = "white")),
                                  CN.bulk.3p = anno_simple(x = top_col_anno_df$CN.bulk.3p,
                                                           gp = gpar(color = "black"),
@@ -166,7 +162,8 @@ top_col_anno = HeatmapAnnotation(#Sample_Type_Suffix = anno_text(aliquot_id_suff
                                  CN.bulk.14q = anno_simple(x = top_col_anno_df$CN.bulk.14q,
                                                            gp = gpar(color = "black"),
                                                            simple_anno_size = unit(4, "mm"), 
-                                                           col = cnv_state_colors))
+                                                           col = cnv_state_colors),
+                                 annotation_name_side = "left")
 
 
 # make column split -------------------------------------------------------
@@ -178,7 +175,7 @@ case_sorted_df <- plot_data_df %>%
   mutate(Is_Mut.BAP1 = (Mut.BAP1 == "None")) %>%
   mutate(Is_Mut.SETD2 = (Mut.SETD2 == "None")) %>%
   mutate(Is_Mut.KDM5C = (Mut.KDM5C == "None")) %>%
-  arrange(Histologic_Type, Is_Mut.VHL, Is_Mut.PBRM1, Is_Mut.BAP1, Is_Mut.SETD2, Is_Mut.KDM5C)
+  arrange(Histologic_Type, Is_Mut.VHL, Is_Mut.PBRM1, Is_Mut.BAP1, Is_Mut.SETD2, Is_Mut.KDM5C, snATAC_available)
 
 ## make factor
 col_split_factor <- factor(x = case_ids, levels = case_sorted_df$Case)
@@ -187,44 +184,51 @@ col_split_factor <- factor(x = case_ids, levels = case_sorted_df$Case)
 ## make heatmap
 color_na <- "grey50"
 p <- Heatmap(matrix = plot_data_mat,
+             na_col = color_na,
+             ## column
              column_split = col_split_factor,
              column_order = order(match(plot_data_df$Aliquot_Suffix, c("T1", "T2", "T3", "N"))),
-             column_title_gp = gpar(frontsize = 12), column_title_rot = 90,
+             column_title_gp = gpar(fontsize = 8), column_title_rot = 90,
              # bottom_annotation = bottom_col_anno, 
              top_annotation = top_col_anno,
-             na_col = color_na,
+             column_gap = unit(x = 0, units = "mm"),
+             ## row
              show_heatmap_legend = F)
 p
 ## make legend for top annotation
 annotation_lgd = list(
-  Legend(labels = names(colors_hist_type),
+  Legend(labels = names(colors_hist_type)[-1],
          title = "Histologic Type",
-         legend_gp = gpar(fill = colors_hist_type)),
-  Legend(labels = names(colors_hist_grade),
-         title = "Histologic Grade",
-         legend_gp = gpar(fill = colors_hist_grade)),
-  Legend(labels = c("Mutated (WES)", "Mutated (Mapped the Mutation of T1 to snRNA Reads)", "None", "No Data"),
+         legend_gp = gpar(fill = colors_hist_type[-1])),
+  Legend(labels = names(colors_hist_grade)[-1],
+         title = "Histologic Grade", nrow = 2,
+         legend_gp = gpar(fill = colors_hist_grade)[-1]),
+  Legend(title = "Data availability", nrow = 1,
+         labels = c("Available", "None"),
+         legend_gp = gpar(fill = colors_sn_data)),
+  Legend(labels = c("Mutated (WES)", 
+                    "None"),
          title = "Somatic Mutation Status",
-         legend_gp = gpar(fill = c("#e7298a", "#c994c7", "white", color_na))),
+         legend_gp = gpar(fill = c("#e7298a", "white"))),
   Legend(col_fun = methyl_color_fun,
-         title = "Bulk VHL Promoter Methylation",
-         # direction = "horizontal", 
-         legend_width = unit(30, "mm")),
-  Legend(labels = c(names(cnv_state_colors), "No Data"), 
-         title = "Bulk WGS CNV", 
-         legend_gp = gpar(fill = c(cnv_state_colors, color_na))))
+         title = "Bulk VHL Promoter\nMethylation",
+         direction = "horizontal",
+         legend_width = unit(40, "mm")),
+  Legend(labels = c(names(cnv_state_colors)), 
+         title = "Bulk WGS CNV", nrow = 1,
+         legend_gp = gpar(fill = c(cnv_state_colors))))
+# ## save heatmap as png
+# png(filename = paste0(dir_out, "data_availability",".png"), 
+#     width = 1600, height = 1600, res = 150)
+# ### combine heatmap and heatmap legend
+# draw(object = p, 
+#      annotation_legend_side = "right", annotation_legend_list = annotation_lgd)
+# dev.off()
 ## save heatmap as pdf
-pdf(paste0(dir_out, "data_availability.", run_id, ".pdf"), 
-    width = 12, height = 9)
+pdf(paste0(dir_out, "data_availability", ".pdf"), 
+    width = 9, height = 4)
 ### combine heatmap and heatmap legend
 draw(object = p, 
-     annotation_legend_side = "bottom", annotation_legend_list = annotation_lgd)
-dev.off()
-## save heatmap as png
-png(filename = paste0(dir_out, "data_availability.", run_id, ".png"), 
-    width = 1600, height = 1600, res = 150)
-### combine heatmap and heatmap legend
-draw(object = p, 
-     annotation_legend_side = "bottom", annotation_legend_list = annotation_lgd)
+     annotation_legend_side = "right", annotation_legend_list = annotation_lgd)
 dev.off()
 

@@ -41,10 +41,15 @@ cellphone_filtered_df <- cellphone_filtered_df %>%
 ## cannot find any literature supporting this nor the I2D database
 # AXL_IL15RA
 ## the original paper is retrated: https://pubmed.ncbi.nlm.nih.gov/16308569/
+# GFR2_CD83
+## the interactions is inferred by Affinity Capture-MS, not sure
+## https://thebiogrid.org/108554/summary/homo-sapiens/fgfr2.html
+# FGFR2_XPR1
+## the interactions is inferred by Affinity Capture-MS, not sure
+## https://thebiogrid.org/108554/summary/homo-sapiens/fgfr2.html
 cellphone_filtered_df <- cellphone_filtered_df %>%
   filter(!(interacting_pair %in% c("FGFR2_EPHA4", "FGFR3_EPHA4", "FGFR4_EPHA4", "FGFR1_FGFR2") & as.vector(Cell_type1) != as.vector(Cell_type2))) %>%
-  filter(!(interacting_pair %in% c("LGALS9_MET", "VEGFA_GRIN2B", "AXL_IL15RA")))
-
+  filter(!(interacting_pair %in% c("LGALS9_MET", "VEGFA_GRIN2B", "AXL_IL15RA", "FGFR2_CD83", "FGFR2_XPR1")))
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "cell.phone.res.total.run20200818.filtered.txt")

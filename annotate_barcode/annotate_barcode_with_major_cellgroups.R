@@ -21,7 +21,7 @@ barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barc
 
 # group detailed immune cell types into major immune cell groups ----------
 barcode2celltype_df <- barcode2celltype_df %>%
-  mutate(Cell_group15 = ifelse(Cell_group.shorter == "Immune",
+  mutate(Cell_group13 = ifelse(Cell_group.shorter == "Immune",
                                     ifelse(Cell_type1 == "Myleoid lineage immune cells",
                                            ifelse(Cell_type3 == "Macrophages", 
                                                   "Macrophages",
@@ -40,7 +40,9 @@ barcode2celltype_df <- barcode2celltype_df %>%
                                                                 "B-cells", 
                                                                 "Immune others")))),
                                     Cell_type.shorter))
-table(barcode2celltype_df$Cell_group15)
+barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("Transitional cells", "Tumor-like cells")] <- "Tumor cells"
+barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("Normal-like cells")] <- "Normal epithelial cells"
+table(barcode2celltype_df$Cell_group13)
 
 # rename other cell groups ------------------------------------------------
 barcode2celltype_df <- barcode2celltype_df %>%

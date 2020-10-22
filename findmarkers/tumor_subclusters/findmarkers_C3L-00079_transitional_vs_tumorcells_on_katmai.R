@@ -57,4 +57,5 @@ degs_df$row_name <- rownames(degs_df)
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "findmarkers_wilcox_tumorlikecells_vs_tumorcells", ".logfcthreshold", logfc.threshold.run, ".minpct", min.pct.run, ".mindiffpct", min.diff.pct.run, ".tsv")
 write.table(x = degs_df, file = file2write, sep = "\t", quote = F, row.names = F)
+cat(paste0("Finished writing the output", "\n"))
 

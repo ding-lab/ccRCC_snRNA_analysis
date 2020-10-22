@@ -34,11 +34,12 @@ for (id_aliquot_tmp in c("CPT0001260013")) {
     filter(aliquot == id_aliquot_tmp)
   plotdata_df <- merge(plotdata_df,
                        barcode2celltype_df %>%
-                         filter(orig.ident == id_aliquot_tmp) %>%
-                         select(individual_barcode, Cell_group.detailed),
+                         dplyr::filter(orig.ident == id_aliquot_tmp) %>%
+                         dplyr::select(individual_barcode, Cell_group.detailed),
                        by.x = c("individual_barcode"), by.y = c("individual_barcode"), all.x = T)
   plotdata_df <- plotdata_df %>%
-    rename(Cell_group = Cell_group.detailed)
+    dplyr::rename(Cell_group = Cell_group.detailed)
+  plotdata_df$Cell_group[plotdata_df$Cell_group == "Normal epithelial cells"] <- "Transitional cells"
   p <- ggplot()
   p <- p + geom_point(data = plotdata_df, 
                       mapping = aes(x = UMAP_1, y = UMAP_2, color = Cell_group),
@@ -64,13 +65,16 @@ for (id_aliquot_tmp in c("CPT0001260013")) {
                       mapping = aes(x = UMAP_1, y = UMAP_2, color = Cell_group),
                       alpha = 1, size = 0.5)
   p <- p + scale_color_manual(values = cellgroup_colors[unique(plotdata_df$Cell_group)])
-  p <- p + guides(colour = guide_legend(override.aes = list(size=5), nrow = ceiling(length(colors_cellgroup_tmp)/4), byrow = T))
+  p <- p + guides(colour = guide_legend(override.aes = list(size=8), nrow = ceiling(length(cellgroup_colors[unique(plotdata_df$Cell_group)])/2), byrow = T))
   p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                  panel.background = element_blank(), axis.line = element_line(colour = "black"))
   p <- p + theme(axis.text.x=element_blank(),
                  axis.ticks.x=element_blank())
   p <- p + theme(axis.text.y=element_blank(),
                  axis.ticks.y=element_blank())
+  p <- p + theme(axis.line=element_blank(),
+                 axis.title.x=element_blank(),
+                 axis.title.y=element_blank())
   p <- p + theme(axis.title = element_text(size = 20))
   p <- p + theme(legend.position = "bottom", legend.text = element_text(size = 20), legend.title = element_text(size = 25))
   p
