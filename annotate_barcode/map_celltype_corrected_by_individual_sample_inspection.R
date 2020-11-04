@@ -1,5 +1,6 @@
 # Yige Wu @WashU Aug 2020
 ## make barcode to cell type mapping table for cell types changed based on individual sample inspection
+## 2020-10-27 new cell type correction table and the input table has added Alla's immune cell types from Oct-12
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -18,11 +19,11 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the integrated-data-based barcode to cell type table
-barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_all_cells_with_patch/20200904.v1/31AliquotIntegration.Barcode2CellType.TumorManualCluster.20200904.v1.tsv")
+barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_all_cells_with_patch/20201027.v1/31AliquotIntegration.Barcode2CellType.TumorManualCluster.20201027.v1.tsv")
 ## input barcode to individual cluster id 
 barcode2metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/data_summary/fetch_data/fetch_data_by_individual_sample/20200717.v1/Barcode2MetaData.20200717.v1.tsv")
 ## input corrected cell type
-celltypecorrected_df <- readxl::read_excel(path = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Individual_AllClusters/Cells_BySampleByClusterByCellTypeShorter.Over50.20201002.xlsx", sheet = "Sheet1")
+celltypecorrected_df <- readxl::read_excel(path = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Individual_AllClusters/Cells_BySampleByClusterByCellTypeShorter.Over50.20201027.xlsx", sheet = "Sheet1")
 
 # merge info -------------------------------------
 ## merge cell type with seurat cluster

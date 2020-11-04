@@ -1,5 +1,4 @@
-# Yige Wu @WashU Feb 2020
-## for plotting the fraction of immune/stroma/tumor cells/normal epithelial cells
+# Yige Wu @WashU Oct 2020
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -23,8 +22,8 @@ barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Resul
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
 
 # specify Cell group to plot ----------------------------------------------
-var_cellgroup <- "Cell_group13"
-colors_cellgroup <- colors_cellgroup13
+var_cellgroup <- "Cell_group7"
+table(barcode2celltype_df[, var_cellgroup])
 
 # make data for plotting --------------------------------------------------
 barcode2celltype_df$Aliquot_WU <- mapvalues(x = barcode2celltype_df$orig.ident, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
@@ -39,7 +38,7 @@ num_barcodes <- barcode2celltype_df %>%
 frac_barcodes_by_cellgroup$Num_Barcodes_ByAliquot <- mapvalues(x = frac_barcodes_by_cellgroup$Aliquot_WU, from = num_barcodes$Aliquot_WU, to = as.vector(num_barcodes$Num_Barcodes_ByAliquot))
 frac_barcodes_by_cellgroup$Num_Barcodes_ByAliquot <- as.numeric(frac_barcodes_by_cellgroup$Num_Barcodes_ByAliquot)
 frac_barcodes_by_cellgroup <- frac_barcodes_by_cellgroup %>%
-  dplyr::mutate(Frac_Barcodes_ByAliquotCellGroup = Num_Barcodes_ByAliquotCellGroup/Num_Barcodes_ByAliquot)
+  dplyr::mutate(Frac_CellGroupBarcodes_ByAliquot = Num_Barcodes_ByAliquotCellGroup/Num_Barcodes_ByAliquot)
 ## make data frame
 plot_df <- frac_barcodes_by_cellgroup %>%
   mutate(Aliquot_Suffix = str_split_fixed(string = Aliquot_WU, pattern = "-", n = 3)[,3])
@@ -47,42 +46,6 @@ plot_df <- frac_barcodes_by_cellgroup %>%
 plot_df$Sample_Type <- mapvalues(x = plot_df$Aliquot_WU, from = idmetadata_df$Aliquot.snRNA.WU, to = idmetadata_df$Sample_Type)
 plot_df$Case <- mapvalues(x = plot_df$Aliquot_WU, from = idmetadata_df$Aliquot.snRNA.WU, to = idmetadata_df$Case)
 
-# sort cases by sample numbers and then normal epithelial cells--------------------------------------------------------------
-case_sorted_df <- idmetadata_df %>%
-  filter(snRNA_available) %>%
-  select(Case) %>%
-  table() %>%
-  as.data.frame() %>%
-  rename(Case = '.')
-frac_normalepithelialcells_by_case <- plot_df %>%
-  filter(Cell_group == "Normal epithelial cells") %>%
-  group_by(Case) %>%
-  summarise(Fraction_NormalEpiCell = sum(Frac_Barcodes_ByAliquotCellGroup))
-case_sorted_df <- merge(case_sorted_df, frac_normalepithelialcells_by_case, by = c("Case"), all.x = T)
-case_sorted_df$Fraction_NormalEpiCell[is.na(case_sorted_df$Fraction_NormalEpiCell)] <- 0
-case_sorted_df <- case_sorted_df %>%
-  arrange(Freq, Fraction_NormalEpiCell)
-## sort
-plot_df$Case <- factor(x = plot_df$Case, levels = case_sorted_df$Case)
-
-# plot data frame ---------------------------------------------------------
-p <- ggplot()
-p <- p + geom_col(data = plot_df, mapping = aes(x = Aliquot_WU, y = Frac_Barcodes_ByAliquotCellGroup, fill = Cell_group), position = "stack")
-p <- p + facet_grid(.~ Case, scales = "free", space = "free", drop = T)
-p <- p + scale_fill_manual(values = colors_cellgroup)
-p <- p + xlab("T1-T3: Tumor Segments;\nN: Adjacent Normal Tissue;") + ylab("Fraction of Cell Group")
-p <- p + theme(strip.text.x = element_text(angle = 90, face = "bold"),
-               strip.background = element_rect(color = "black", fill = "white"))
-p <- p + scale_x_discrete(breaks = plot_df$Aliquot_WU, labels = plot_df$Aliquot_Suffix)
-p <- p + theme(axis.text.x = element_text(size = 9, angle = 0, vjust = 0.5))
-p <- p + theme(panel.spacing = unit(0, "lines"),
-               panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-               panel.background = element_blank(), axis.line = element_line(colour = "black"),
-               panel.border = element_rect(color = "black", fill = NA, size = 1))
-p <- p + theme(legend.position = "bottom")
-p
-file2write <- paste0(dir_out, "Cell_Group_Composition.", run_id, ".pdf")
-pdf(file2write, width = 12, height = 5)
-print(p)
-dev.off()
-
+# write output ------------------------------------------------------------
+file2write <- paste0(dir_out, "CellGroupBarcodes_Number_and_Fraction_per_Sample", run_id, '.tsv')
+write.table(x = plot_df, file = file2write, quote = F, row.names = F, sep = "\t")

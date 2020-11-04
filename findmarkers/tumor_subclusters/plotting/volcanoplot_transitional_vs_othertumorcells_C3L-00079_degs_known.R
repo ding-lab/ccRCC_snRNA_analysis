@@ -70,7 +70,7 @@ p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene)),
 # p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & avg_logFC <= 0),
 #                          mapping = aes(x = avg_logFC, y = y_capped, label = text_gene), color = "black", force = 2)
 p <- p + theme_bw()
-p <- p + ggtitle(label = paste0("C3L-00079 ", "VIM-high transitional cells vs tumor cells"))
+# p <- p + ggtitle(label = paste0("C3L-00079 ", "VIM-high transitional cells vs tumor cells"))
 # p <- p + xlim(c(-3, 3))
 p <- p + xlab("log2(Fold-Change) (transitional cells vs tumor cells)")
 p <- p + ylab("-Log10(P-value-adjusted)")
@@ -83,4 +83,8 @@ png(file2write, width = 800, height = 600, res = 150)
 print(p)
 dev.off()
 
+file2write <- paste0(dir_out, "volcano.", "pdf")
+pdf(file2write, width = 6, height = 5, useDingbats = F)
+print(p)
+dev.off()
 

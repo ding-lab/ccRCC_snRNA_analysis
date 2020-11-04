@@ -17,17 +17,17 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input TF integrations
-tf_tab <- fread(input = "./Resources/Knowledge/PPI/TF_interactions.txt", data.table = F)
+tf_df <- fread(input = "./Resources/Knowledge/PPI/Transcriptional/omnipathdb.transcriptional.20200908.txt", data.table = F)
 
 # filter ------------------------------------
-hif_tf_tab <- tf_tab %>%
+hif_tf_df <- tf_df %>%
   filter(source_genesymbol %in% c("HIF1A", "EPAS1")) %>%
-  select(source_genesymbol, target_genesymbol) %>%
+  select(source_genesymbol, target_genesymbol,) %>%
   mutate(target_genefunction = NA)
 
 # add some canonical targets from literature ------------------------------
 ## ref1: https://www.nature.com/articles/nrc3183
-hif_targets_manual1 <- readxl::read_excel(path = "./Resources/PPI/HIF_target_genes.xlsx", sheet = "Sheet1")
+hif_targets_manual1 <- readxl::read_excel(path = "./Resources/Knowledge/PPI/HIF_target_genes.xlsx", sheet = "Sheet1")
 colnames(hif_targets_manual1)
 hif_targets_manual1 <- hif_targets_manual1 %>%
   mutate(target_genesymbol = str_split_fixed(string = `Gene (protein)`, pattern = "\\s", n = 2)[,1])
@@ -41,7 +41,15 @@ hif_targets_manual12merge <- hif_targets_manual12merge %>%
 ## add Function
 hif_targets_manual12merge$target_genefunction <- mapvalues(x = hif_targets_manual12merge$target_genesymbol, from = hif_targets_manual1$target_genesymbol, to = as.vector(hif_targets_manual1$Function))
 ## merge
-hif_targets <- rbind(hif_tf_tab, hif_targets_manual12merge)
+hif_targets <- rbind(hif_tf_df, hif_targets_manual12merge)
+
+
+# remove duplicates -------------------------------------------------------
+hif_targets  <- hif_targets %>%
+  mutate(source_target_genesymbols = paste0(source_genesymbol, "_",  target_genesymbol)) %>%
+  arrange(source_target_genesymbols, target_genefunction)
+
+hif_targets <- hif_targets[!duplicated(hif_targets$source_target_genesymbols),]
 
 # add and correction gene functions ---------------------------------------
 hif_targets$target_genefunction[hif_targets$target_genesymbol %in% c("VEGFA", "VEGFB", 
@@ -63,6 +71,8 @@ hif_targets$target_genefunction[hif_targets$target_genesymbol %in% c("MET", "EGF
 ## ID2: https://www.sciencedirect.com/science/article/pii/S2211383515000817
 hif_targets$target_genefunction[hif_targets$target_genesymbol %in% c("CA9", "CA12")] <- "pH homeostasis"
 hif_targets <- unique(hif_targets)
+hif_targets <- hif_targets %>%
+  select(-source_target_genesymbols)
 
 # write table -------------------------------------------------------------
 write.table(x = hif_targets, file = paste0(dir_out, "HIF_Target_Genes.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)

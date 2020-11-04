@@ -18,7 +18,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------
 ## input barcodes to cell type
-barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20201021.v1/31Aliquot.Barcode2CellType.20201021.v1.tsv")
+barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20201027.v1/31Aliquot.Barcode2CellType.20201027.v1.tsv")
 ## input id meta data
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
 

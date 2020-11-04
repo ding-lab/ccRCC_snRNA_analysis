@@ -21,22 +21,19 @@ filenames_vcf <- filenames_vcf[grepl(x = filenames_vcf, pattern = "vcf")]
 filenames_vcf
 ## input id meta data
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
-## input snRNA samples to intersect
-# ids_aliquot2process <- c("CPT0001220012", "CPT0014450005", "CPT0019130004", "CPT0010110013", "CPT0010100001")
-ids_aliquot2process <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available]
-ids_aliquot2process
 
 # input vcf file and process ----------------------------------------------
-vcf_merged_df <- NULL
-variants_intersect <- NULL
+vcf_united_list <- list()
 for (filename_vcf in filenames_vcf) {
   ## get aliquot id
-  ## get aliquot id
   id_aliquot <- str_split_fixed(string = filename_vcf, pattern = "\\.", n = 3)[,1]
-  id_aliquot
-  if (!(id_aliquot %in% ids_aliquot2process)) {
+  ## get easy id
+  easyid <-  idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == id_aliquot]
+
+  if (!(easyid %in% c("C3N-01200-T1", "C3N-01200-T2", "C3N-01200-T3", "C3N-01200-N"))) {
     next()
   }
+  ## get the path to the VCF file
   path_vcf <- paste0(dir_vcf, filename_vcf)
   vcf_df <- fread(data.table = F, skip = "#CHROM", input = path_vcf)
   if (nrow(vcf_df) == 0) {
@@ -45,25 +42,11 @@ for (filename_vcf in filenames_vcf) {
 
   ## rename last column and add aliquot id
   vcf_df <- vcf_df %>%
-    rename("GENOTYPE" = id_aliquot) %>%
     rename('CHROM' = '#CHROM') %>%
-    mutate(ID_ALIQUOT = id_aliquot) %>%
     mutate(ID_VARIANT = paste0("chr", CHROM, "_", POS, "_", REF, "_", ALT))
-  vcf_merged_df <- rbind(vcf_merged_df, vcf_df)
-  ## merge variants
-  if (!is.null(variants_intersect)) {
-    variants_intersect <- intersect(variants_intersect, vcf_df$ID_VARIANT)
-  } else {
-    variants_intersect <- vcf_df$ID_VARIANT
-  }
+  vcf_united_list[[easyid]] <- vcf_df$ID_VARIANT
 }
-length(variants_intersect)
-
-# filter down to only shared variants -------------------------------------
-vcf_shared_df <- vcf_merged_df %>%
-  filter(ID_VARIANT %in% variants_intersect)
-nrow(vcf_shared_df)
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "Germline_Variants.", "snRNA.", "pickCaller.", "Shared_Variants.", "Selected_Samples.", run_id, ".tsv")
-write.table(x = vcf_shared_df, file = file2write, quote = F, sep = "\t", row.names = F)
+file2write <- paste0(dir_out, "Germline_Variants.", "snRNA.", "pickCaller.", "C3N-01200.", "List.", run_id, ".RDS")
+saveRDS(object = vcf_united_list, file = file2write, compress = T)

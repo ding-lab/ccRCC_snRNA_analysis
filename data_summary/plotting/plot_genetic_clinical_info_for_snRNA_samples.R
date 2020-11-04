@@ -1,4 +1,4 @@
- # Yige Wu @WashU March 2020
+# Yige Wu @WashU March 2020
 ## running on local
 
 # set up libraries and output directory -----------------------------------
@@ -95,7 +95,13 @@ colors_hist_grade <- c("NAT" = "white", "G1" = "#ffffcc", "G2" = "#addd8e", "G3"
 ## make colors for histogical type
 colors_hist_type <- c("Normal Adjacent Tissue" = "#66c2a5", "Clear cell renal cell carcinoma" = "#fc8d62", "non-Clear cell renal cell carcinoma" = "#8da0cb")
 ## top column annotation object
-top_col_anno = HeatmapAnnotation(Histologic_Type = anno_simple(x = top_col_anno_df$Histologic_Type,
+top_col_anno = HeatmapAnnotation(snRNA_Seq = anno_simple(x = as.character(top_col_anno_df$snRNA_available),
+                                                         simple_anno_size = unit(4, "mm"), 
+                                                         gp = gpar(color = "black"), col = colors_sn_data),
+                                 snATAC_Seq = anno_simple(x = as.character(top_col_anno_df$snATAC_available),
+                                                          simple_anno_size = unit(4, "mm"), 
+                                                          gp = gpar(color = "black"), col = colors_sn_data),
+                                 Histologic_Type = anno_simple(x = top_col_anno_df$Histologic_Type,
                                                                gp = gpar(color = "black"), 
                                                                simple_anno_size = unit(4, "mm"), 
                                                                col = colors_hist_type),
@@ -103,12 +109,6 @@ top_col_anno = HeatmapAnnotation(Histologic_Type = anno_simple(x = top_col_anno_
                                                                 gp = gpar(color = "black"), 
                                                                 simple_anno_size = unit(4, "mm"), 
                                                                 col = colors_hist_grade),
-                                 snRNA_Seq = anno_simple(x = as.character(top_col_anno_df$snRNA_available),
-                                                         simple_anno_size = unit(4, "mm"), 
-                                                         gp = gpar(color = "black"), col = colors_sn_data),
-                                 snATAC_Seq = anno_simple(x = as.character(top_col_anno_df$snATAC_available),
-                                                          simple_anno_size = unit(4, "mm"), 
-                                                          gp = gpar(color = "black"), col = colors_sn_data),
                                  Methyl.VHL = anno_simple(x = top_col_anno_df$Methyl.VHL, 
                                                           gp = gpar(color = "black"),
                                                           simple_anno_size = unit(4, "mm"),
@@ -197,26 +197,26 @@ p <- Heatmap(matrix = plot_data_mat,
 p
 ## make legend for top annotation
 annotation_lgd = list(
-  Legend(labels = names(colors_hist_type)[-1],
-         title = "Histologic Type",
-         legend_gp = gpar(fill = colors_hist_type[-1])),
-  Legend(labels = names(colors_hist_grade)[-1],
-         title = "Histologic Grade", nrow = 2,
-         legend_gp = gpar(fill = colors_hist_grade)[-1]),
   Legend(title = "Data availability", nrow = 1,
          labels = c("Available", "None"),
-         legend_gp = gpar(fill = colors_sn_data)),
+         legend_gp = gpar(fill = colors_sn_data), border = "black"),
+  Legend(labels = names(colors_hist_type)[-1],
+         title = "Histologic Type",
+         legend_gp = gpar(fill = colors_hist_type[-1]), border = "black"),
+  Legend(labels = names(colors_hist_grade)[-1],
+         title = "Histologic Grade (T1)", nrow = 2,
+         legend_gp = gpar(fill = colors_hist_grade[-1]), border = "black"),
   Legend(labels = c("Mutated (WES)", 
                     "None"),
          title = "Somatic Mutation Status",
-         legend_gp = gpar(fill = c("#e7298a", "white"))),
+         legend_gp = gpar(fill = c("#e7298a", "white")), border = "black"),
   Legend(col_fun = methyl_color_fun,
-         title = "Bulk VHL Promoter\nMethylation",
+         title = "Bulk VHL Promoter Methylation",
          direction = "horizontal",
          legend_width = unit(40, "mm")),
   Legend(labels = c(names(cnv_state_colors)), 
          title = "Bulk WGS CNV", nrow = 1,
-         legend_gp = gpar(fill = c(cnv_state_colors))))
+         legend_gp = gpar(fill = c(cnv_state_colors)), border = "black"))
 # ## save heatmap as png
 # png(filename = paste0(dir_out, "data_availability",".png"), 
 #     width = 1600, height = 1600, res = 150)

@@ -85,10 +85,10 @@ genes_emt_df$gene_group <- tmp
 ## annotate the key EMT genes
 ## Ref: https://pubmed.ncbi.nlm.nih.gov/16567498/
 genes_emt_df <- genes_emt_df %>%
-  mutate(Key_Mesenchymal_Genes = ifelse(hgnc_symbol %in% c("VIM", "CDH2", "FOXC2", "SNAI1", "SNAI2", "TWIST1", "FN1", "ITGB1", "ITGB3", "MMP2", "MMP3", "MMP9", "SOX10", "GCS"), 
+  mutate(Key_Mesenchymal_Genes = ifelse(hgnc_symbol %in% c("VIM", "CDH2", "FOXC2", "SNAI1", "SNAI2", "TWIST1", "FN1", "ITGA4", "ITGB6", "MMP2", "MMP3", "MMP9", "SOX10", "GSC"), 
                                 TRUE, 
                                 FALSE)) %>%
-mutate(Key_Epithelial_Genes = ifelse(hgnc_symbol %in% c("CDH1", "DSP", "ITGA4", "ITGB6", "OCLN"), 
+mutate(Key_Epithelial_Genes = ifelse(hgnc_symbol %in% c("CDH1", "DSP", "OCLN"), 
                               TRUE, 
                               FALSE))
 genes_emt_df <- unique(genes_emt_df)

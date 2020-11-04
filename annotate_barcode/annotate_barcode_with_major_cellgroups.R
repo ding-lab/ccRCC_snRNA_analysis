@@ -1,4 +1,5 @@
 # Yige Wu @WashU Aug 2020
+## 2020-10-27 new cell type correction, the cell type1 is no longer reliable
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -17,32 +18,47 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20201002.v1/31Aliquot.Barcode2CellType.20201002.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20201027.v1/31Aliquot.Barcode2CellType.20201027.v1.tsv", data.table = F)
 
 # group detailed immune cell types into major immune cell groups ----------
-barcode2celltype_df <- barcode2celltype_df %>%
-  mutate(Cell_group13 = ifelse(Cell_group.shorter == "Immune",
-                                    ifelse(Cell_type1 == "Myleoid lineage immune cells",
-                                           ifelse(Cell_type3 == "Macrophages", 
-                                                  "Macrophages",
-                                                  ifelse(Cell_type3 == "DC", 
-                                                         "DC",
-                                                         "Immune others")),
-                                           ifelse(Cell_type2 == "NK cells",
-                                                  "NK cells",
-                                                  ifelse(Cell_type2 == "T-cells",
-                                                         ifelse(Cell_type3 == "CD4+ T-cells",
-                                                               "CD4+ T-cells",
-                                                               ifelse(Cell_type3 == "CD8+ T-cells", 
-                                                                      "CD8+ T-cells", 
-                                                                      "Immune others")),
-                                                         ifelse(Cell_type2 == "B-cells", 
-                                                                "B-cells", 
-                                                                "Immune others")))),
-                                    Cell_type.shorter))
+table(barcode2celltype_df$Cell_type.shorter)
+# barcode2celltype_df <- barcode2celltype_df %>%
+#   mutate(Cell_group13 = ifelse(Cell_group.shorter == "Immune",
+#                                     ifelse(Cell_type1 == "Myleoid lineage immune cells",
+#                                            ifelse(Cell_type3 == "Macrophages", 
+#                                                   "Macrophages",
+#                                                   ifelse(Cell_type3 == "DC", 
+#                                                          "DC",
+#                                                          "Immune others")),
+#                                            ifelse(Cell_type2 == "NK cells",
+#                                                   "NK cells",
+#                                                   ifelse(Cell_type2 == "T-cells",
+#                                                          ifelse(Cell_type3 == "CD4+ T-cells",
+#                                                                "CD4+ T-cells",
+#                                                                ifelse(Cell_type3 == "CD8+ T-cells", 
+#                                                                       "CD8+ T-cells", 
+#                                                                       "Immune others")),
+#                                                          ifelse(Cell_type2 == "B-cells", 
+#                                                                 "B-cells", 
+#                                                                 "Immune others")))),
+#                                     Cell_type.shorter))
+barcode2celltype_df$Cell_group13 <- barcode2celltype_df$Cell_type.shorter
+barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("Macrophages", "Macrophages proliferating", "TRM")] <- "Macrophages"
+barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("B-cells", "Plasma")] <- "B-cells"
+barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("CD4 CTL", "CD4 T-cells", "CD4 T-cells activated", "CD4 T-cells naive", "Tregs")] <- "CD4+ T-cells"
+barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("CD8 CTL", "CD8 CTL exhausted", "CD8 T-cells preexhausted")] <- "CD8+ T-cells"
+barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("cDC", "pDC")] <- "DC"
+barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("NK cells strong", "NK cells weak")] <- "NK cells"
+barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("Basophils", "CD4/CD8 proliferating", "Mixed myeloid/lymphoid")] <- "Immune others"
+
 barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("Transitional cells", "Tumor-like cells")] <- "Tumor cells"
 barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("Normal-like cells")] <- "Normal epithelial cells"
 table(barcode2celltype_df$Cell_group13)
+
+# make a new group for the transitional cells -----------------------------
+barcode2celltype_df <- barcode2celltype_df %>%
+  mutate(Cell_group14_w_transitional = ifelse(Cell_type.shorter == "Transitional cells", "Transitional cells", Cell_group13))
+table(barcode2celltype_df$Cell_group14_w_transitional)
 
 # rename other cell groups ------------------------------------------------
 barcode2celltype_df <- barcode2celltype_df %>%

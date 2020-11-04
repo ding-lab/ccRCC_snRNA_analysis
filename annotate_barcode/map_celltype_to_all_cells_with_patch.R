@@ -1,5 +1,6 @@
 # Yige Wu @WashU Apr 2020
 ## make barcode to cell type mapping table for the integrated dataset
+## 2020-10-27 added Alla's latest immune cell types
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -21,7 +22,9 @@ all_integrated_barcode2cluster_df <- fread(input = "./Resources/Analysis_Results
 ## input cluster to cell type mapping table for all clusters in the integrated dataset
 all_integrated_cluster2celltype_df <- fread(input = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Integration_AllClusters/integration.allcluster2celltype.20200213.v3.tsv")
 ## input Alla's immune cell type assignment
-immune_barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_immune_cells/20200626.v1/Barcode2ImmuneCellType.20200626.v1.tsv")
+### should be 33004
+# immune_barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_immune_cells/20200626.v1/Barcode2ImmuneCellType.20200626.v1.tsv")
+immune_barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_to_immune_cells_with_patch/20201027.v1/Barcode2ImmuneCellType.20201027.v1.tsv")
 ## input tumor subclustering cell type assignment: 93277 cells
 tumor_barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_barcode_with_manual_tumorsubcluster_id/20200616.v1/Barcode2TumorSubclusterId.20200616.v1.tsv", data.table = F)
 ## input barcode-to-cell-type table
