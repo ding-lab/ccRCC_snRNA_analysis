@@ -39,7 +39,7 @@ srat_paths <- srat_paths %>%
 ## input the cell to cell type table
 barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20201027.v1/31Aliquot.Barcode2CellType.20201027.v1.tsv", data.table = F)
 ## input samples whose cell type has been corrected
-aliquots2process_df <- readxl::read_excel(path = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Individual_AllClusters/Cells_BySampleByClusterByCellTypeShorter.Over50.20201027.xlsx", sheet = "Sheet1")
+aliquots2process_df <- fread(data.table = F, input = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Individual_AllClusters/Cells_BySampleByClusterByCellTypeShorter.Over50.20201027.txt")
 ### specify aliquots to process
 aliquots2process <- unique(aliquots2process_df$aliquot[aliquots2process_df$Cell_type.shorter.original == "Tumor cells" | aliquots2process_df$Cell_group.detailed == "Tumor cells"])
 aliquots2process
