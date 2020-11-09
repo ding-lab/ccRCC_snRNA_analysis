@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -20,6 +20,7 @@ dir.create(dir_out)
 emtgenes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_emt_genes/20200915.v1/EMT_Genes.20200915.v1.tsv")
 ## input cell type markers
 gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_Markers/Gene2CellType_Tab.20200911.v1.tsv")
+# gene2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/combine_pt_with_emt_markers_all/20200920.v1/Kidney_Specific_EMT_Genes.20200920.v1.tsv")
 
 # filter deg --------------------------------------------------------------
 # ## input degs
@@ -39,8 +40,9 @@ deg_df$Cell_Type1 <- mapvalues(x = deg_df$Gene, from = gene2celltype_df$Gene, to
 plot_data_df <- deg_df %>%
   # dplyr::rename(genesymbol = row_name) %>%
   dplyr::rename(genesymbol = Gene) %>%
-  mutate(Log10p_val_adj = -log10(x = p_val_adj)) %>%
-  mutate(x_plot = avg_logFC) %>%
+  mutate(Log10p_val_adj = -log10(x = p_val_adj))  %>%
+  mutate(avg_log2FC = avg_logFC/log(2)) %>%
+  mutate(x_plot = avg_log2FC) %>%
   mutate(text_gene = ifelse((genesymbol %in% genes_filter) & p_val_adj < 0.05 & ((gene_function == "Mesenchymal" & x_plot > 0) | (Cell_Type1 %in% c("Proximal tubule") & x_plot < 0)), genesymbol, NA))
 ## cap y axis
 y_cap <- max(plot_data_df$Log10p_val_adj[!is.infinite(plot_data_df$Log10p_val_adj)])
@@ -67,14 +69,18 @@ p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot 
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot < 0),
                          mapping = aes(x = x_plot, y = y_plot, label = text_gene), color = "black", force = 2, alpha = 0.8, fontface = "bold", xlim = c(NA, -1))
 p <- p + theme_bw()
-p <- p + ggtitle(label = paste0("C3N-01200 ", "VIM-high transitional cells vs tumor cells"))
-p <- p + xlab("ln(Fold-Change) (transitional cells vs tumor cells)")
+# p <- p + ggtitle(label = paste0("C3N-01200 ", "VIM-high transitional cells vs tumor cells"))
+p <- p + xlab("log2(Fold-Change) (transitional cells vs tumor cells)")
 p <- p + ylab("-Log10(P-value-adjusted)")
 p
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "volcano.", "png")
 png(file2write, width = 800, height = 700, res = 150)
+print(p)
+dev.off()
+file2write <- paste0(dir_out, "volcano.", "pdf")
+pdf(file2write, width = 6, height = 5, useDingbats = F)
 print(p)
 dev.off()
 

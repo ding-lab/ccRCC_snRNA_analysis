@@ -27,4 +27,8 @@ file2write <- paste0(dir_out, "dotplot.png")
 png(file2write, width = 1200, height = 800, res = 150)
 print(p)
 dev.off()
+file2write <- paste0(dir_out, "dotplot.pdf")
+pdf(file2write, width = 8, height = 4, useDingbats = F)
+print(p)
+dev.off()
 

@@ -93,8 +93,10 @@ hl_data_df <- plot_data_df %>%
   summarize(Fraction_maxdiff = (max(Fraction) - min(Fraction)), x1 = id_aliquot_cluster[which.min(Fraction)], x2 = id_aliquot_cluster[which.max(Fraction)]) %>%
   filter(Fraction_maxdiff >= 0.75)
 plot_data_comb_df <- merge(plot_data_df, hl_data_df, by.x = c("id_aliquot_cluster", "gene_symbol", "aliquot.wu"), by.y = c("x1", "gene_symbol", "aliquot.wu"), all.x = T)
+table(plot_data_comb_df$gene_cytoband)
+plot_data_comb_df$gene_cytoband <- factor(x = plot_data_comb_df$gene_cytoband, levels = unique(knowncnvgenes_df$Cytoband))
 
-# plot expected CNVs--------------------------------------------------------------------
+# plot expected CNVs wide--------------------------------------------------------------------
 p <- ggplot(data = plot_data_comb_df)
 p <- p + geom_point(mapping = aes(y = gene_symbol, 
                                   x = id_aliquot_cluster, 
@@ -118,12 +120,7 @@ p <- p + theme(axis.text.x = element_text(size = 10, angle = 90, hjust = 0.5),
 p <- p + theme(panel.spacing = unit(0, "lines"))
 p <- p + theme(strip.text.y = element_text(angle = 0),
                strip.text.x = element_text(angle = 90))
-# p
-# save output -------------------------------------------------------------
-## save plot as an object
-# file2write <- paste0(dir_out, "bubbleplot_cnv_fraction.", run_id, ".RDS")
-# saveRDS(object = p, file = file2write, compress = T)
-## save plot
+
 pdf(paste0(dir_out, "Fraction_of_Tumorcells_with_Expected_CNA_by_Gene", ".", "By_Tumor_Subcluster", ".pdf"), 
     width = 20, height = 6)
 print(p)
@@ -131,6 +128,43 @@ dev.off()
 
 png(file = paste0(dir_out, "Fraction_of_Tumorcells_with_Expected_CNA_by_Gene", ".", "By_Tumor_Subcluster", ".png"), 
     width = 3000, height = 1000, res = 150)
+print(p)
+dev.off()
+
+# plot expected CNVs long--------------------------------------------------------------------
+p <- ggplot(data = plot_data_comb_df)
+p <- p + geom_point(mapping = aes(x = gene_symbol, 
+                                  y = id_aliquot_cluster, 
+                                  size = Fraction, 
+                                  fill = cna_3state, 
+                                  color = Fraction_Range,
+                                  shape = Data_detected),
+                    alpha = 0.8)
+p <- p + scale_shape_manual(values = c("TRUE" = 22, "FALSE" = 4))
+p <- p + scale_fill_manual(values = c("Gain" = "red", "Loss" = "blue", "NA" = "#000000"))
+p <- p + scale_color_manual(values = c(">50%" = "#000000", "<=50%" = "#FFFFFF", "NA" = "#000000"))
+# p <- p + geom_segment(aes(y = id_aliquot_cluster, x = gene_symbol, xend = x2, yend = gene_symbol), arrow = arrow(length = unit(0.2,"cm")))
+p <- p + facet_grid(aliquot.wu~gene_cytoband,
+                    scales = "free", space = "free", shrink = T) # , switch = "y"
+p <- p + scale_y_discrete(breaks=plot_data_df$id_aliquot_cluster,
+                          labels=plot_data_df$name_tumorsubcluster)
+p <- p + theme_bw()
+p <- p + theme(axis.title = element_blank())
+p <- p + theme(axis.text.x = element_text(size = 12, angle = 90, vjust = 0, hjust = 0.5),
+               axis.text.y = element_text(size = 12, face = "bold"))
+p <- p + theme(panel.spacing = unit(0, "lines"))
+p <- p + theme(strip.text.x = element_text(angle = 90),
+               strip.text.y = element_text(angle = 0, size = 12, face = "bold"),
+               strip.background = element_rect(color="black", fill="white"))
+p <- p + theme(legend.position = "left")
+
+pdf(paste0(dir_out, "Fraction_of_Tumorcells_with_Expected_CNA_by_Gene", ".", "By_Tumor_Subcluster", ".", "long", ".pdf"), 
+    width = 8, height = 20)
+print(p)
+dev.off()
+
+png(file = paste0(dir_out, "Fraction_of_Tumorcells_with_Expected_CNA_by_Gene", ".", "By_Tumor_Subcluster", ".", "long",  ".png"), 
+    width = 1000, height = 3000, res = 150)
 print(p)
 dev.off()
 

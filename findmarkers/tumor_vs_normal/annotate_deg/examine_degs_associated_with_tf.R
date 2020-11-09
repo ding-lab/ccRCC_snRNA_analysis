@@ -18,7 +18,7 @@ dir.create(dir_out)
 ## input known TF relationship
 tf2target_df <- fread(data.table = F, input = "./Resources/Knowledge/PPI/Transcriptional/omnipathdb.transcriptional.20200908.txt")
 
-# filter by DEGs and TFs ----------------------------------------------------------
+# filter by DEGs and TFs up in tumor cells----------------------------------------------------------
 tf2target_filtered_df <- tf2target_df %>%
   filter(source_genesymbol %in% c("RELA", "REL", "NFKB1", "NFKB2", "MXI1", "NFIC", "NFIA", "HSF2", "TP73", "NR3C2", "HIF1A")) %>%
   filter(target_genesymbol %in% c("PFKP", "GATM", "PVT1", "ERGIC1", "NDRG1", "LINC00887", "PLIN2", "PAM", 
@@ -38,4 +38,10 @@ tf2target_filtered_df <- tf2target_df %>%
                                   "PLCB1")) %>%
   arrange(target_genesymbol)
 
+# filter by DEGs and TFs up in normal PT cells----------------------------------------------------------
+tf2target_filtered_df <- tf2target_df %>%
+  filter(source_genesymbol %in% c("HNF4G", "HNF4A", "JUNB", "JUN", "JUND", "FOS", "FOSB", "BATF", "FOSL1", "FOSL2")) %>%
+  filter(target_genesymbol %in% c("SLC47A2", "ACSF2", "MAGI1", "ASS1", "SLC22A12", "PAQR5", "SLC7A7", "GPHN", 
+                                  "PLXNB1", "IGFBP2", "SLC5A2", "CNTN4")) %>%
+  arrange(target_genesymbol)
 

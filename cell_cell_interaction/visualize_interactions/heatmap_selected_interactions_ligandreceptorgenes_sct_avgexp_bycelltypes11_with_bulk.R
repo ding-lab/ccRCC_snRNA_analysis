@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -22,6 +22,10 @@ summary_df <- fread(data.table = F, input = "./Resources/Analysis_Results/cell_c
 avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/format_expression/combine_avexp_sct_usescale_immunegroups_with_stroma_and_epithelium/20200908.v1/Combined.Average_Expression.SCT.UseScale.20200908.v1.tsv", data.table = F)
 ## input celltypes-to-cellgroups
 celltypes2cellgroup_df <- fread(data.table = F, input = "./Resources/Analysis_Results/average_expression/format_expression/combine_avexp_sct_usescale_immunegroups_with_stroma_and_epithelium/20200908.v1/Combined.CellTypes2CellGroup.20200908.v1.tsv")
+## input bulk average protein expression
+avg_bulkpro_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/expression/Tumor_normal_bulk_Protein.txt")
+## input bulk average rna expression
+avg_bulkrna_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/expression/Tumor_normal_bulk_RNA.txt")
 
 # specify pairs to filter -------------------------------------------------
 summary_filtered_df <- summary_df %>%
@@ -82,14 +86,29 @@ colors_bulkrna <- colorRamp2(c(-0.75,
 col_cellgroups_vec <- mapvalues(x = celltypes_plot, from = celltypes2cellgroup_df$colname_celltype, to = as.vector(celltypes2cellgroup_df$Cell_group.shorter))
 col_cellgroups_factor <- factor(x = col_cellgroups_vec, levels = c("Nephron_Epithelium", "Stroma", "Immune"))
 
+# make row annotation -----------------------------------------------------
+## make vector for averaged bulk protein
+rownames(avg_bulkpro_df) <- avg_bulkpro_df$Gene
+mean_protein_tumor <- avg_bulkpro_df[genes_plot, "Mean_tumor"]; mean_protein_tumor
+mean_protein_normal <- avg_bulkpro_df[genes_plot, "Mean_Normal"]; mean_protein_normal
+## make vector for averaged bulk rna
+rownames(avg_bulkrna_df) <- avg_bulkrna_df$Gene
+mean_rna_tumor <- avg_bulkrna_df[genes_plot, "Mean_tumor"]; mean_rna_tumor
+mean_rna_normal <- avg_bulkrna_df[genes_plot, "Mean_Normal"]; mean_rna_normal
+## make row annotation object
+rowanno_obj <- rowAnnotation(Avg_Bulk_mRNA = anno_simple(x = cbind(mean_rna_tumor,mean_rna_normal), col = colors_bulkrna, width = unit(x = 1, "cm"), border = T),
+                             Avg_Bulk_Protein = anno_simple(x = cbind(mean_protein_tumor, mean_protein_normal), col = colors_bulkpro, width = unit(x = 1, "cm"), border = T),
+                             annotation_name_side = "top", gap = unit(0.1, "cm"))
+
 # plot heatmap body -----------------------------------------------------------------
 p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat, 
                              col = colors_heatmapbody, na_col = color_na, border = "black",
                              ## row
                              show_row_names = T, row_names_side = "left", row_names_gp = gpar(fontface = "italic", fontsize = 15),
                              show_row_dend = F, cluster_rows = T,
+                             right_annotation = rowanno_obj,
                              ## column
-                             show_column_names = T, column_names_side = "bottom",
+                             show_column_names = T, column_names_side = "top",
                              column_names_gp = gpar(fontsize = 15),
                              show_column_dend = F, 
                              column_split = col_cellgroups_factor, cluster_column_slices = F, cluster_columns = F,
@@ -101,22 +120,30 @@ list_lgd = list(
   Legend(title = "Scaled snRNA expression", title_gp = gpar(fontsize = 12),
          col_fun = colors_heatmapbody, 
          legend_width = unit(3, "cm"),
+         direction = "horizontal"),
+  Legend(title = "Bulk mRNA z-score", title_gp = gpar(fontsize = 12),
+         col_fun = colors_bulkrna, 
+         legend_width = unit(3, "cm"),
+         direction = "horizontal"),
+  Legend(title = "Bulk protein z-score", title_gp = gpar(fontsize = 12),
+         col_fun = colors_bulkpro, 
+         legend_width = unit(3, "cm"),
          direction = "horizontal"))
 
 ## save heatmap as png
-png(filename = paste0(dir_out, "ligandreceptorgenes", ".png"), 
+png(filename = paste0(dir_out, "ligand", ".png"), 
     width = 600, height = 900, res = 150)
 draw(object = p, 
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
 dev.off()
-file2write <- paste0(dir_out, "ligandreceptorgenes", ".pdf")
-pdf(file2write, width = 3.5, height = 6)
+file2write <- paste0(dir_out, "ligand", ".pdf")
+pdf(file2write, width = 4, height = 6)
 draw(object = p, 
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
 dev.off()
 ## save with no legend
-file2write <- paste0(dir_out, "ligandreceptorgenes.nolegend", ".pdf")
-pdf(file2write, width = 3, height = 5)
+file2write <- paste0(dir_out, "ligand.nolegend", ".pdf")
+pdf(file2write, width = 4, height = 5)
 draw(object = p)
 dev.off()
 

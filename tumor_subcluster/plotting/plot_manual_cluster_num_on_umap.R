@@ -29,6 +29,12 @@ idmetadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_me
 barcode2manualsubcluster_df <- merge(barcode2manualsubcluster_df, barcode2umap_df,
                                      by.x = c("orig.ident", "individual_barcode"),
                                      by.y = c("orig.ident", "barcode"), all.x = T)
+## make different output files
+dir_out_png <- paste0(dir_out, "png", "/")
+dir.create(dir_out_png)
+dir_out_pdf <- paste0(dir_out, "pdf", "/")
+dir.create(dir_out_pdf)
+
 for (aliquot_tmp in unique(barcode2manualsubcluster_df$orig.ident)) {
   plot_data_df <- barcode2manualsubcluster_df %>%
     filter(orig.ident == aliquot_tmp) %>%
@@ -47,7 +53,6 @@ for (aliquot_tmp in unique(barcode2manualsubcluster_df$orig.ident)) {
   ## make plot
   p <- ggplot()
   p <- p + geom_point(data = plot_data_df, mapping = aes(x = UMAP_1, y = UMAP_2, color = Name_TumorCluster), shape = 16, alpha = 0.8, size = 0.5)
-  p <- p + ggtitle(label = paste0(aliquot_wu_tmp, " Tumor-Cell-Only Clustering"))
   p <- p + scale_color_manual(values = uniq_cluster_colors, na.translate = T)
   p <- p + theme_bw()
   p <- p + guides(colour = guide_legend(override.aes = list(size=3)))
@@ -61,8 +66,13 @@ for (aliquot_tmp in unique(barcode2manualsubcluster_df$orig.ident)) {
   p <- p + theme(plot.title = element_text(size = 18))
   p
   ## save plot
-  png2write <- paste0(dir_out, aliquot_wu_tmp, ".TumorCellOnlyClustering.", run_id, ".png")
+  png2write <- paste0(dir_out_png, aliquot_wu_tmp, ".TumorCellOnlyClustering.", ".png")
   png(filename = png2write, width = 900, height = 1000, res = 150)
+  print(p)
+  dev.off()
+  
+  file2write <- paste0(dir_out_pdf, aliquot_wu_tmp, ".TumorCellOnlyClustering.", ".pdf")
+  pdf(file2write, width = 5, height = 5.5, useDingbats = F)
   print(p)
   dev.off()
 }

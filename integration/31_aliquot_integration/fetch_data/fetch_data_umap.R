@@ -40,6 +40,7 @@ umap_data <- Seurat::FetchData(object = srat, vars = c("orig.ident", "ident", "U
 umap_data$barcode_31integration <- rownames(umap_data)
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "31_aliquot_integratio.", ".umap_data.tsv")
+file2write <- paste0(dir_out, "31_aliquot_integration.", "umap_data.tsv")
 write.table(x = umap_data, file = file2write, quote = F, row.names = F, sep = "\t")
+print("Finish writing output")
 

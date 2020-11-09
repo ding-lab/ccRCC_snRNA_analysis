@@ -3,10 +3,12 @@
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-baseD = "~/Box/"
-setwd(baseD)
-source("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/ccRCC_snRNA_analysis/ccRCC_snRNA_shared.R")
-source("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/ccRCC_snRNA_analysis/aes.R")
+dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+setwd(dir_base)
+source("./ccRCC_snRNA_analysis/load_pkgs.R")
+source("./ccRCC_snRNA_analysis/functions.R")
+source("./ccRCC_snRNA_analysis/variables.R")
+source("./ccRCC_snRNA_analysis/plotting.R")
 library(ggpubr)
 ## set run id
 version_tmp <- 1
@@ -17,7 +19,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input merged tumor content from bulk and snRNA
-merged_tumorcontent_df <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/bulk/tumor_content/merge_tumor_content_from_bulk_and_snRNA/20200316.v1/Perc_Tumor_Content_from_snRNA_and_bulkRNA.20200316.v1.tsv", data.table = F)
+merged_tumorcontent_df <- fread(input = "./Resources/Analysis_Results/bulk/tumor_content/merge_tumor_content_from_bulk_and_snRNA/20200316.v1/Perc_Tumor_Content_from_snRNA_and_bulkRNA.20200316.v1.tsv", data.table = F)
 
 
 # make plot data ----------------------------------------------------------
@@ -42,8 +44,12 @@ p <- p + ylab("Tumor Content Estimated from Bulk RNA Data")
 p
 
 # save scatterplot --------------------------------------------------------
-plot_path <- paste0(dir_out, "scatterplot_tumor_content_from_bulk_and_snRNA.", run_id, ".png")
-png(filename = plot_path, width = 800, height = 800, res = 150)
+file2write <- paste0(dir_out, "scatterplot_tumor_content_from_bulk_and_snRNA.",".png")
+png(file2write, width = 800, height = 800, res = 150)
+print(p)
+dev.off()
+file2write <- paste0(dir_out, "scatterplot_tumor_content_from_bulk_and_snRNA",  ".pdf")
+pdf(file2write, width = 5, height = 5, useDingbats = F)
 print(p)
 dev.off()
 

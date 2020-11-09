@@ -32,3 +32,8 @@ png(file2write, width = 1200, height = 1000, res = 150)
 print(p)
 dev.off()
 
+file2write <- paste0(dir_out, "gene_concept_netowrk.pdf")
+pdf(file2write, width = 8, height = 6, useDingbats = F)
+print(p)
+dev.off()
+
