@@ -52,6 +52,6 @@ for (aliquot_tmp in srat_paths_df$Aliquot.snRNA.WU) {
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "MetaData_TumorCellOnlyReclustered.", run_id, ".tsv")
 write.table(x = barcode_metadata_df, file = file2write, sep = '\t', quote = F, row.names = F)
-
+print("Finished!")
   
   
