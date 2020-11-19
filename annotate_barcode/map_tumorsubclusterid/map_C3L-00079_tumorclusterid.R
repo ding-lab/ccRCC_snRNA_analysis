@@ -48,7 +48,7 @@ barcodeinfo_merged_df <- merge(x = barcodeinfo_all_df, y = sratcluster2manualclu
 table(barcodeinfo_merged_df[, c("seurat_clusters", "id_manual_cluster")])
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "TumorCellReclustered.BarcodeInfo.", run_id, "tsv")
+file2write <- paste0(dir_out, "TumorCellReclustered.BarcodeInfo.", run_id, ".tsv")
 write.table(x = barcodeinfo_merged_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
 

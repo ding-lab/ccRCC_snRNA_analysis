@@ -35,10 +35,10 @@ y_bottom <- -log10(0.05)
 x_pos <- 1
 x_neg <- -1
 ## colors
-color_red_deep <- RColorBrewer::brewer.pal(n = 6, name = "Paired")[6]
-color_red_pale <- RColorBrewer::brewer.pal(n = 6, name = "Paired")[5]
-color_blue_deep <- RColorBrewer::brewer.pal(n = 6, name = "Paired")[2]
-color_blue_pale <- RColorBrewer::brewer.pal(n = 6, name = "Paired")[1]
+color_right_deep <- RColorBrewer::brewer.pal(n = 12, name = "Paired")[12]
+color_right_pale <- RColorBrewer::brewer.pal(n = 7, name = "Set2")[7]
+color_left_deep <- RColorBrewer::brewer.pal(n = 6, name = "Dark2")[4]
+color_left_pale <- RColorBrewer::brewer.pal(n = 6, name = "Set2")[4]
 
 # make data for plotting --------------------------------------------------
 plot_data_df <- deg_df %>%
@@ -52,27 +52,28 @@ plot_data_df <- plot_data_df %>%
   mutate(y_plot = ifelse(Log10p_val_adj >= y_cap, y_cap, Log10p_val_adj)) %>%
   mutate(text_gene = ifelse((y_plot >= y_bottom) & ((genesymbol %in% genes_mesenchymal) & (x_plot >= x_pos)) | ((genesymbol %in% genes_epithelal) & (x_plot <= x_neg)), genesymbol, NA))
 
-genes_mesenchymal
-
 # plot all markers--------------------------------------------------------------------
 ## plot
 p <- ggplot()
 p <- p + geom_vline(xintercept = x_pos, linetype = 2)
 p <- p + geom_vline(xintercept = x_neg, linetype = 2)
 p <- p + geom_point(data = subset(plot_data_df, y_plot < y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = "grey70")
-p <- p + geom_point(data = subset(plot_data_df, x_plot < x_pos & x_plot > 0 & y_plot >= y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = color_red_pale)
-p <- p + geom_point(data = subset(plot_data_df, x_plot >= x_pos & y_plot >= y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = color_red_deep)
-p <- p + geom_point(data = subset(plot_data_df, x_plot > x_neg & x_plot < 0 & y_plot >= y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = color_blue_pale)
-p <- p + geom_point(data = subset(plot_data_df, x_plot <= x_neg & y_plot >= y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = color_blue_deep)
+p <- p + geom_point(data = subset(plot_data_df, x_plot < x_pos & x_plot > 0 & y_plot >= y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = color_right_pale)
+p <- p + geom_point(data = subset(plot_data_df, x_plot >= x_pos & y_plot >= y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = color_right_deep)
+p <- p + geom_point(data = subset(plot_data_df, x_plot > x_neg & x_plot < 0 & y_plot >= y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = color_left_pale)
+p <- p + geom_point(data = subset(plot_data_df, x_plot <= x_neg & y_plot >= y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = color_left_deep)
 # p <- p + scale_color_manual(values = c("FDR<0.05 (up)" = "red", "FDR<0.05 (down)" = "blue", "FDR<0.05" = "black", "FDR>=0.05" = "grey80"))
-p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene)),
-                         mapping = aes(x = x_plot, y = y_plot, label = text_gene), color = "black", force = 4, fontface = "bold", segment.alpha = 0.5)
-# p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & avg_logFC <= 0),
-#                          mapping = aes(x = avg_logFC, y = y_capped, label = text_gene), color = "black", force = 2)
+# p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene)),
+#                          mapping = aes(x = x_plot, y = y_plot, label = text_gene), color = "black", force = 4, fontface = "bold", segment.alpha = 0.5)
+p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot > 0),
+                         mapping = aes(x = x_plot, y = y_plot, label = text_gene), color = "black", force = 4, fontface = "italic", segment.alpha = 0.5, size = 6)
+p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot < 0),
+                         mapping = aes(x = x_plot, y = y_plot, label = text_gene), color = "black", force = 4, fontface = "italic", segment.alpha = 0.5)
+
 p <- p + theme_bw()
 # p <- p + ggtitle(label = paste0("C3L-00079 ", "VIM-high transitional cells vs tumor cells"))
 # p <- p + xlim(c(-3, 3))
-p <- p + xlab("log2(Fold-Change) (transitional cells vs tumor cells)")
+p <- p + xlab("log2(Fold-Change)")
 p <- p + ylab("-Log10(P-value-adjusted)")
 p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                panel.background = element_blank())

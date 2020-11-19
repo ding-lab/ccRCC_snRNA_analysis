@@ -67,7 +67,7 @@ interacting_pair_plot_sorted <- c(
   ## tumor&immune
   "HBEGF_EGFR", "TGFA_EGFR", "IGF1_IGF1R", "HGF_MET",
   "IL34_CSF1R"
-  )
+)
 interacting_pair_plot_sorted <- interacting_pair_plot_sorted[!duplicated(interacting_pair_plot_sorted)]
 plot_data_mat <- plot_data_mat[interacting_pair_plot_sorted,]
 celltypes.source2target_plot <- colnames(plot_data_mat)
@@ -175,7 +175,8 @@ plot_size_df <- dcast(data = plot_data_df, formula = interacting_pair_directed~ 
 plot_size_mat <- as.matrix(plot_size_df[, -1])
 rownames(plot_size_mat) <- plot_size_df$interacting_pair_directed
 plot_size_mat <- plot_size_mat[interacting_pair_plot_sorted,celltypes.source2target_plot_sorted]
-
+plot_size_mat["VEGFA_FLT1", 1:6] <- c(5, 10, 15, 20, 25, 30) 
+plot_data_mat["VEGFA_FLT1", 1:6] <- 2 
 p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              col = colors_heatmapbody,
                              width = unit(ncol(plot_data_mat), "cm"), height = unit(nrow(plot_data_mat), "cm"),

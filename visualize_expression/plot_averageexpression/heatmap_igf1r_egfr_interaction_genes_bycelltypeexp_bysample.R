@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -39,7 +39,7 @@ colnames(strength_sort_df) <- strength_filtered_df$pair_cell.types
 strength_sort_df$number_sig <- rowSums(!is.na(strength_sort_df))
 strength_sort_df$Easy_id <- colnames(strength_filtered_df)[-1]
 strength_sort_df <- strength_sort_df %>%
-  arrange(number_sig, desc(`IGF1_IGF1R.Macrophages|Tumor cells`), `EGFR_HBEGF.Tumor cells|Macrophages`)
+  arrange(desc(number_sig), desc(`IGF1_IGF1R.Macrophages|Tumor cells`), `EGFR_HBEGF.Tumor cells|Macrophages`)
 ## get sorted easy ids
 easyids_sorted <- strength_sort_df$Easy_id
 
@@ -57,17 +57,22 @@ colname_mapping_df <- colname_mapping_df %>%
   mutate(aliquot = str_split_fixed(string = aliquot_celltype, pattern = "_", n = 2)[,1]) %>%
   mutate(celltype = str_split_fixed(string = aliquot_celltype, pattern = "_", n = 2)[,2]) %>%
   arrange(celltype, aliquot)
-rownames(colname_mapping_df) <- colname_mapping_df$sct.aliquot_celltype
+### map sample type
+colname_mapping_df$Sample_Type <- mapvalues(x = colname_mapping_df$aliquot, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Sample_Type))
+colname_mapping_filtered_df <- colname_mapping_df %>%
+  filter(Sample_Type == "Tumor")
+rownames(colname_mapping_filtered_df) <- colname_mapping_filtered_df$sct.aliquot_celltype
+
 ### get ordered column names by cell type  
-colnames_celltype1 <- colname_mapping_df$sct.aliquot_celltype[colname_mapping_df$celltype == celltype1];colnames_celltype1 <- as.vector(colnames_celltype1); 
-colnames_celltype2 <- colname_mapping_df$sct.aliquot_celltype[colname_mapping_df$celltype == celltype2];colnames_celltype2 <- as.vector(colnames_celltype2); colnames_celltype2
+colnames_celltype1 <- colname_mapping_filtered_df$sct.aliquot_celltype[colname_mapping_filtered_df$celltype == celltype1];colnames_celltype1 <- as.vector(colnames_celltype1); 
+colnames_celltype2 <- colname_mapping_filtered_df$sct.aliquot_celltype[colname_mapping_filtered_df$celltype == celltype2];colnames_celltype2 <- as.vector(colnames_celltype2); colnames_celltype2
 ### get different ids
-aliquot_1diff2 <- setdiff(colname_mapping_df$aliquot[colname_mapping_df$celltype == celltype1], 
-                          colname_mapping_df$aliquot[colname_mapping_df$celltype == celltype2])
-aliquot_2diff1 <- setdiff(colname_mapping_df$aliquot[colname_mapping_df$celltype == celltype2], 
-                          colname_mapping_df$aliquot[colname_mapping_df$celltype == celltype1])
-plot_data_df1 <- plot_data_df[genes_celltype1, colnames_celltype1]; colnames(plot_data_df1) <- colname_mapping_df[colnames_celltype1, "aliquot"]
-plot_data_df2 <- plot_data_df[genes_celltype2, colnames_celltype2]; colnames(plot_data_df2) <- colname_mapping_df[colnames_celltype2, "aliquot"]
+aliquot_1diff2 <- setdiff(colname_mapping_filtered_df$aliquot[colname_mapping_filtered_df$celltype == celltype1], 
+                          colname_mapping_filtered_df$aliquot[colname_mapping_filtered_df$celltype == celltype2])
+aliquot_2diff1 <- setdiff(colname_mapping_filtered_df$aliquot[colname_mapping_filtered_df$celltype == celltype2], 
+                          colname_mapping_filtered_df$aliquot[colname_mapping_filtered_df$celltype == celltype1])
+plot_data_df1 <- plot_data_df[genes_celltype1, colnames_celltype1]; colnames(plot_data_df1) <- colname_mapping_filtered_df[colnames_celltype1, "aliquot"]
+plot_data_df2 <- plot_data_df[genes_celltype2, colnames_celltype2]; colnames(plot_data_df2) <- colname_mapping_filtered_df[colnames_celltype2, "aliquot"]
 
 if (length(aliquot_1diff2) > 0) {
   plot_data_df2[, aliquot_1diff2] <- NA
@@ -91,7 +96,7 @@ plot_data_mat <- plot_data_mat[, easyids_sorted[easyids_sorted %in% easyids_col]
 
 # specify colors ----------------------------------------------------------
 ## specify color for NA values
-color_na <- "grey50"
+color_na <- "white"
 ## make color function for heatmap body colors
 color_blue <- RColorBrewer::brewer.pal(n = 3, name = "Set1")[2]
 color_red <- RColorBrewer::brewer.pal(n = 3, name = "Set1")[1]
@@ -108,19 +113,20 @@ igf_igf1r_interaction_vec <- strength_sort_df$`IGF1_IGF1R.Macrophages|Tumor cell
 hbegf_egfr_interaction_vec <- strength_sort_df$`EGFR_HBEGF.Tumor cells|Macrophages`[strength_sort_df$Easy_id %in% easyids_col]
 
 colanno_obj = HeatmapAnnotation(
-  IGF1_IGF1R_Interaction = anno_simple(x = igf_igf1r_interaction_vec, col = colors_interaction),
-  HBEGF_EGFR_Interaction = anno_simple(x = hbegf_egfr_interaction_vec, col = colors_interaction),
+  IGF1_IGF1R_Interaction = anno_simple(x = igf_igf1r_interaction_vec, col = colors_interaction, na_col = color_na),
+  HBEGF_EGFR_Interaction = anno_simple(x = hbegf_egfr_interaction_vec, col = colors_interaction, na_col = color_na),
   annotation_name_gp = gpar(fontsize = 15, fontface = "italic"), annotation_name_side = "left")
 
 
 # Heatmap -----------------------------------------------------------------
 p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat, 
-                             col = colors_heatmapbody, na_col = color_na, border = "black",
+                             col = colors_heatmapbody, na_col = color_na, border = "grey70",
                              ## column
                              cluster_columns = F, 
                              top_annotation = colanno_obj,
                              ## row
-                             cluster_rows = F, row_names_side = "left",
+                             cluster_rows = F, row_names_side = "left", row_names_gp = gpar(fontface = "italic", fontsize = 18), show_column_names = F,
+                             ## others
                              show_heatmap_legend = F)
 p
 
@@ -128,13 +134,13 @@ p
 list_lgd = list(
   Legend(col_fun = colors_interaction, 
          title = "Interaction strength", 
-         title_gp = gpar(fontsize = 10, fontface = "bold"),
+         title_gp = gpar(fontsize = 15, fontface = "bold"),
          legend_width = unit(4, "cm"),
          legend_height = unit(3, "cm"),
          direction = "horizontal"),
   Legend(col_fun = colors_heatmapbody, 
-         title = "Average expression", 
-         title_gp = gpar(fontsize = 10, fontface = "bold"),
+         title = "snRNA expression", 
+         title_gp = gpar(fontsize = 15, fontface = "bold"),
          legend_width = unit(4, "cm"),
          legend_height = unit(3, "cm"),
          direction = "horizontal"))
@@ -147,7 +153,7 @@ draw(object = p,
 dev.off()
 
 file2write <- paste0(dir_out, "interactions", ".pdf")
-pdf(file2write, width = 10, height = 3.75, useDingbats = F)
+pdf(file2write, width = 10, height = 2.5, useDingbats = F)
 draw(object = p, 
      annotation_legend_side = "top", annotation_legend_list = list_lgd)
 dev.off()

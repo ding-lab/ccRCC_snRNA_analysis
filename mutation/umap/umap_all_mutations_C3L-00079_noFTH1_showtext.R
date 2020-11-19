@@ -10,6 +10,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
+library(ggrastr)
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -135,10 +136,10 @@ for (snRNA_aliquot_id_tmp in "CPT0001260013") {
   
   ## ggplot
   p <- ggplot()
-  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "NA",], mapping = aes(x = UMAP_1, y = UMAP_2), alpha = 0.8, size = 0.5, color = colors_read_type["others"])
-  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "Var" & !(plot_data_df$gene_symbol %in% ccRCC_SMGs),], mapping = aes(x = UMAP_1, y = UMAP_2), 
+  p <- p + geom_point_rast(data = plot_data_df[plot_data_df$read_type == "NA",], mapping = aes(x = UMAP_1, y = UMAP_2), alpha = 0.8, size = 0.5, color = colors_read_type["others"])
+  p <- p + geom_point_rast(data = plot_data_df[plot_data_df$read_type == "Var" & !(plot_data_df$gene_symbol %in% ccRCC_SMGs),], mapping = aes(x = UMAP_1, y = UMAP_2), 
                       alpha = 1, size = 2, color = colors_read_type["cells with the variant read(s)"])
-  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "Var" & (plot_data_df$gene_symbol %in% ccRCC_SMGs),], mapping = aes(x = UMAP_1, y = UMAP_2), 
+  p <- p + geom_point_rast(data = plot_data_df[plot_data_df$read_type == "Var" & (plot_data_df$gene_symbol %in% ccRCC_SMGs),], mapping = aes(x = UMAP_1, y = UMAP_2), 
                       alpha = 1, size = 2.5, color = colors_read_type["cells with the variant read(s)"])
   # p <- p + geom_text_repel(data = plot_data_df[!is.na(plot_data_df$gene_symbol),], 
   #                          mapping = aes(UMAP_1, UMAP_2, label = gene_symbol, colour = mutation_cat, size = Driver_Gene_Mutation), fontface = "italic")
@@ -161,8 +162,8 @@ for (snRNA_aliquot_id_tmp in "CPT0001260013") {
   dev.off()
   
   p <- ggplot()
-  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "NA",], mapping = aes(x = UMAP_1, y = UMAP_2, color = read_type_text), alpha = 0.5, size = 0.3)
-  p <- p + geom_point(data = plot_data_df[plot_data_df$read_type == "Var",], mapping = aes(x = UMAP_1, y = UMAP_2, color = read_type_text), alpha = 0.5, size = 0.8)
+  p <- p + geom_point_rast(data = plot_data_df[plot_data_df$read_type == "NA",], mapping = aes(x = UMAP_1, y = UMAP_2, color = read_type_text), alpha = 0.5, size = 0.3)
+  p <- p + geom_point_rast(data = plot_data_df[plot_data_df$read_type == "Var",], mapping = aes(x = UMAP_1, y = UMAP_2, color = read_type_text), alpha = 0.5, size = 0.8)
   p <- p + scale_color_manual(values = colors_read_type)
   p <- p +
     theme_bw() +

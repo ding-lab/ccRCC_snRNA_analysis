@@ -125,7 +125,8 @@ color_green <- RColorBrewer::brewer.pal(n = 9, name = "Set1")[3]
 colors_scores_epithelial = colorRamp2(c(-1, 0, 1), 
                                        c(color_green, "white", color_brown))
 ## colors for EMT group
-colors_emtgroups <- c("High" = color_red, "Low" = color_blue)
+colors_emtgroups <- c("black", "white")
+names(colors_emtgroups) <- c("High", "Low")
 # get column ids ----------------------------------------------------------
 columnnames_plot <- colnames(plot_data_mat)
 ids_aliquot_wu <- str_split_fixed(string = columnnames_plot, pattern = "_", n = 3)[,1]; ids_aliquot_wu
@@ -146,7 +147,7 @@ emt_group_vec <- (scores_mesenchymal >= quantile(x = scores_mesenchymal, probs =
 emt_group_vec <- ifelse(emt_group_vec, "High", "Low")
 ## make column annotation object
 colanno_obj = HeatmapAnnotation(link = anno_mark(at = index_highlight, labels = texts_highlight, labels_gp = gpar(fontsize = 15), side = "top"),
-                                EMTPotential = anno_simple(x = emt_group_vec, col = colors_emtgroups[emt_group_vec], height = unit(0.5, "cm")),
+                                EMTPotential = anno_simple(x = emt_group_vec, col = colors_emtgroups[emt_group_vec], height = unit(1, "cm")),
                                 MesenchymalScore = anno_simple(x = scores_mesenchymal, col = colors_scores_mesenchymal, height = unit(0.75, "cm")),
                                 EpithelialScore = anno_simple(x = scores_epithelial, col = colors_scores_epithelial, height = unit(0.75, "cm")),
                                 annotation_name_gp = gpar(fontsize = 20, fontface = "bold"), annotation_name_side = "left")
@@ -173,6 +174,10 @@ p
 
 # make legend list --------------------------------------------------------
 list_lgd = list(
+  Legend(title = "EMT potential per tumor cluster", 
+         title_gp = gpar(fontsize = 20),
+         labels = c("High", "Low"), legend_gp = gpar(fill = colors_emtgroups[c("High", "Low")]),
+         labels_gp =  gpar(fontsize = 20), border = "black", direction = "horizontal", nrow = 1),
   Legend(col_fun = colors_heatmapbody, 
          title = "snRNA expression", 
          title_gp = gpar(fontsize = 20),

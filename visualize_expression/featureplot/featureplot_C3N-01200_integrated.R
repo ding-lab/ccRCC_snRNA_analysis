@@ -24,8 +24,11 @@ paths_srat_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dat
 barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200828.v1/31Aliquot.Barcode2CellType.20200828.v1.tsv", data.table = F)
 ## input id meta data table
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
-## specify the aliquot id
-aliquot2process <- "CPT0075120002"
+## input cell type markers
+gene2celltype_df <- data.frame(Gene = c("MRC1", "CD163", "MSR1",
+                                        "CD86", "FCGR3A", "TLR2", "SRSF10", "SIGLEC1"),
+                               Gene_Group = c(rep(x = "M2", 3), rep(x = "M1", 5)))
+aliquot2process <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Case == "C3N-01200"]
 
 # input seurat object, and subset to cluster -----------------------------------------------------
 ## input srat object
@@ -36,16 +39,17 @@ barcode2celltype_aliquot_df <- barcode2celltype_df %>%
   filter(orig.ident == aliquot2process)
 srat@meta.data$Cell_type.shorter <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_aliquot_df$individual_barcode, to = as.vector(barcode2celltype_aliquot_df$Cell_type.shorter))
 srat@meta.data$Cell_group.detailed <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_aliquot_df$individual_barcode, to = as.vector(barcode2celltype_aliquot_df$Cell_group.detailed))
+srat@meta.data$easy_id <- mapvalues(x = srat@meta.data$orig.ident, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
 
 # specify genes to plot ---------------------------------------------------
-genes_plot <- c("VHL", "VIM", "COL5A1", "MT2A", "CDH1", "POSTN", "UMOD")
+genes_plot <- gene2celltype_df$Gene
 
 # plot by gene ------------------------------------------------------------
 for (gene_plot in genes_plot) {
-  p <- FeaturePlot(object = srat, features = gene_plot, order = T, min.cutoff = "q1", max.cutoff = "q99", cols = c("yellow", "red"))
+  p <- FeaturePlot(object = srat, features = gene_plot, order = T, min.cutoff = "q1", max.cutoff = "q99", cols = c("yellow", "red"), split.by = "easy_id")
   ## write output
   file2write <- paste0(dir_out, gene_plot, ".png")
-  png(file2write, width = 1000, height = 1000, res = 150)
+  png(file2write, width = 2400, height = 800, res = 150)
   print(p)
   dev.off()
 }

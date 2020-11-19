@@ -5,6 +5,7 @@ packages = c(
   "ggplot2",
   "ggrepel",
   "ComplexHeatmap",
+  "ggrastr",
   "circlize",
   "RColorBrewer",
   "ggthemes",
@@ -36,9 +37,9 @@ colors_cellgroup13 <- c("#E7298A", "#1B9E77", "#7570B3","#000000", "#E69F00", "#
 names(colors_cellgroup13) <- c("Tumor cells", "Normal epithelial cells", "Immune others", "B-cells", "CD4+ T-cells", "CD8+ T-cells", "Macrophages", "DC", "NK cells","Endothelial cells", "Myofibroblasts", "Fibroblasts","Unknown")
 swatch(colors_cellgroup13)
 
-# make color palette for immune cell groups -----------------------------------
-immunecelltype1_colors <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[c(5,7,8)]
-names(immunecelltype1_colors) <- c("Myleoid lineage immune cells", "Lymphoid lineage immune cells",  "Mixed myeloid/lymphoid lineage immune cells")
+# make color palette for 14 cell groups with transitional cells-----------------------------------
+colors_cellgroup14 <- c(colors_cellgroup13, cellgroup_colors["Transitional cells"])
+colors_cellgroup14
 
 # make color palette for detailed cell types -----------------------------------
 normal_epithelial_colors <- Polychrome::palette36.colors(n = 36)[7:12]
@@ -54,16 +55,7 @@ names(stroma_colors) <- c("Endothelial cells",
                           "Fibroblasts",
                           "Myofibroblasts")
 swatch(stroma_colors)
-immune_lymphoid_colors <- colorblind_pal()(8)
-# immune_lymphoid_colors <- Polychrome::palette36.colors(n = 36)[c(28, 14:20)]
-names(immune_lymphoid_colors) <- c("B-cells", 
-                                   "Plasma cells", 
-                                   "CD4/CD8 proliferating", 
-                                   "CD4+ T-cells",
-                                   "Tregs", 
-                                   "CD8+ T-cells activated", 
-                                   "CD8+ T-cells exhausted",
-                                   "NK cells")
+
 # swatch(immune_lymphoid_colors)
 immune_myeloid_colors <- Polychrome::palette36.colors(n = 36)[c(13:18)]
 names(immune_myeloid_colors) <- c("Basophils", 
@@ -72,7 +64,7 @@ names(immune_myeloid_colors) <- c("Basophils",
                                  "Macrophages M2b", 
                                  "pDC",
                                  "TRM")
-# swatch(immune_myeloid_colors)
+swatch(immune_myeloid_colors)
 immune_mixed_color <- immunecelltype1_colors["Myleoid lineage immune cells"]; names(immune_mixed_color) <- "Mixed myeloid/lymphoid"
 immune_colors <- c(immune_lymphoid_colors, immune_myeloid_colors, immune_mixed_color)
 tumor_unknown_colors <- cellgroup_colors[c("Tumor cells", "Unknown", "Normal epithelial cells")]
