@@ -41,7 +41,7 @@ for (aliquot_tmp in srat_paths_df$Aliquot.snRNA.WU) {
   srat <- readRDS(file = srat_path)
   
   ## extract current meta data
-  barcode_metadata_tmp <- srat@meta.data
+  barcode_metadata_tmp <- FetchData(object = srat, vars = c("UMAP_1", "UMAP_2", "orig.ident", "seurat_clusters"))
   barcode_metadata_tmp$barcode_tumorcellreclustered <- rownames(barcode_metadata_tmp)
   barcode_metadata_tmp$easy_id <- aliquot_tmp
   
