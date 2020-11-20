@@ -23,22 +23,21 @@ cartocolors_df <- rcartocolor::cartocolors
 colors_tumor_segments <- c("T1" = "#FF7F00", "T2" = "#C2A5CF", "T3"  = "#7B3294", "N" = "#008837")
 
 # make color palette for major cell groups -----------------------------------
-# cellgroup_colors <- Polychrome::palette36.colors(n = 36)[3:6]
-cellgroup_colors <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[c(4, 1, 3, 6, 5)]
-cellgroup_colors <- c(cellgroup_colors, "grey50", brewer.pal(n = 12, name = "Paired")[c(5,12)])
-names(cellgroup_colors) <- c("Tumor cells", "Normal epithelial cells", "Immune",  "Stroma", "Normal-like cells",  
-                             "Unknown", 
-                             "Tumor-like cells", "Transitional cells")
-swatch(cellgroup_colors)
+colors_cellgroup5 <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[c(4, 1, 3, 6)]
+colors_cellgroup5 <- c(colors_cellgroup5, "grey50")
+names(colors_cellgroup5) <- c("Tumor cells", "Normal epithelial cells", "Immune",  "Stroma",
+                              "Unknown")
+# swatch(colors_cellgroup5)
 
 # make color palette for 13 cell groups -----------------------------------
-colors_cellgroup13 <- c(brewer.pal(n = 8, name = "Dark2")[c(4, 1, 3)], colorblind_pal()(8)[c(1, 2, 3, 5, 6, 7, 8)], brewer.pal(n = 12, name = "Paired")[c(3, 5)], "grey50")
+# colors_cellgroup13 <- c(RColorBrewer::brewer.pal(n = 8, name = "Dark2")[c(4, 1, 3)], ggthemes::colorblind_pal()(8)[c(1, 2, 3, 5, 6, 7, 8)], RColorBrewer::brewer.pal(n = 12, name = "Paired")[c(3, 5)], "grey50")
 colors_cellgroup13 <- c("#E7298A", "#1B9E77", "#7570B3","#000000", "#E69F00", "#56B4E9", "#F0E442", "#0072B2", "#D55E00","#CC79A7", "#B2DF8A", "#FB9A99","grey50")
 names(colors_cellgroup13) <- c("Tumor cells", "Normal epithelial cells", "Immune others", "B-cells", "CD4+ T-cells", "CD8+ T-cells", "Macrophages", "DC", "NK cells","Endothelial cells", "Myofibroblasts", "Fibroblasts","Unknown")
-swatch(colors_cellgroup13)
+# swatch(colors_cellgroup13)
 
 # make color palette for 14 cell groups with transitional cells-----------------------------------
-colors_cellgroup14 <- c(colors_cellgroup13, cellgroup_colors["Transitional cells"])
+colors_cellgroup14 <- c(colors_cellgroup13, RColorBrewer::brewer.pal(n = 12, name = "Paired")[c(12)])
+names(colors_cellgroup14) <- c(names(colors_cellgroup13), "Transitional cells")
 colors_cellgroup14
 
 # make color palette for detailed cell types -----------------------------------

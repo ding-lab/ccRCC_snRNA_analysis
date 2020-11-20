@@ -61,5 +61,4 @@ for (aliquot_tmp in unique(barcode2umap_df$easy_id)) {
   pdf(file2write, width = 5, height = 5.5, useDingbats = F)
   print(p)
   dev.off()
-  stop("test")
 }

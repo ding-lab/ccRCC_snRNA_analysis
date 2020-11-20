@@ -37,7 +37,7 @@ path_rds <- "./Resources/Analysis_Results/integration/31_aliquot_integration/31_
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 ## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20200917.v2/31Aliquot.Barcode2CellType.20200917.v2.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20201119.v1/31Aliquot.Barcode2CellType.20201119.v1.tsv", data.table = F)
 barcode2celltype_df <- as.data.frame(barcode2celltype_df)
 cat("finish reading the barcode-to-cell type table!\n")
 ## input idemta data
@@ -56,12 +56,10 @@ group1_findmarkers <- "Tumor cells"
 group2_findmarkers <- "Proximal tubule cells from NATs"
 
 # subset to cases with snATAC data ----------------------------------------
-# cases_snatac <- unique(idmetadata_df$Case[idmetadata_df$snATAC_available == T])
-# cases_snatac
-# aliquots_snatac <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Case %in% cases_snatac & idmetadata_df$snRNA_available == T]
-aliquots_snatac <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available == T & idmetadata_df$snATAC_available == T & idmetadata_df$Aliquot.snRNA.WU != "C3N-01200-T1"]
+easyids_snatac <- c("C3L-00416-T2", "C3L-01313-T1", "C3N-01200-T1", "C3L-00088-N", "C3N-01200-N")
+aliquots_snatac <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Aliquot.snRNA.WU %in% easyids_snatac]
 aliquots_snatac
-aliquots_snatac_nat <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available == T & idmetadata_df$snATAC_available == T & idmetadata_df$Sample_Type == "Normal"]
+aliquots_snatac_nat <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Aliquot.snRNA.WU %in% easyids_snatac & idmetadata_df$Sample_Type == "Normal"]
 aliquots_snatac_nat
 Idents(srat) <- "orig.ident"
 srat <- subset(srat, idents = aliquots_snatac)
@@ -81,7 +79,7 @@ cat("finish unique id for each barcode in the seurat object!\n")
 barcode2celltype_df <- barcode2celltype_df %>%
   filter(orig.ident %in% aliquots_snatac) %>%
   mutate(id_aliquot_barcode = paste0(orig.ident, "_", individual_barcode)) %>%
-  mutate(group_findmarkers = ifelse(Cell_type.detailed == "Tumor cells", 
+  mutate(group_findmarkers = ifelse(Cell_type.shorter == "Tumor cells", 
                                     "Tumor cells", 
                                     ifelse(Cell_type.detailed == "Proximal tubule" & orig.ident %in% aliquots_snatac_nat, "Proximal tubule cells from NATs", "Others")))
 head(barcode2celltype_df$id_aliquot_barcode)
