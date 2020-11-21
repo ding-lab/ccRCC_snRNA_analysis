@@ -40,37 +40,6 @@ colors_cellgroup14 <- c(colors_cellgroup13, RColorBrewer::brewer.pal(n = 12, nam
 names(colors_cellgroup14) <- c(names(colors_cellgroup13), "Transitional cells")
 colors_cellgroup14
 
-# make color palette for detailed cell types -----------------------------------
-normal_epithelial_colors <- Polychrome::palette36.colors(n = 36)[7:12]
-names(normal_epithelial_colors) <- c("Distal convoluted tubule",
-                                     "Intercalated cells",
-                                     "Principle cells",
-                                     "Loop of Henle", 
-                                     "Podocytes", 
-                                     "Proximal tubule")
-# swatch(normal_epithelial_colors)
-stroma_colors <- Polychrome::palette36.colors(n = 36)[c(23, 24, 27)]
-names(stroma_colors) <- c("Endothelial cells",
-                          "Fibroblasts",
-                          "Myofibroblasts")
-swatch(stroma_colors)
-
-# swatch(immune_lymphoid_colors)
-immune_myeloid_colors <- Polychrome::palette36.colors(n = 36)[c(13:18)]
-names(immune_myeloid_colors) <- c("Basophils", 
-                                 "cDC", 
-                                 "Macrophages", 
-                                 "Macrophages M2b", 
-                                 "pDC",
-                                 "TRM")
-swatch(immune_myeloid_colors)
-immune_mixed_color <- immunecelltype1_colors["Myleoid lineage immune cells"]; names(immune_mixed_color) <- "Mixed myeloid/lymphoid"
-immune_colors <- c(immune_lymphoid_colors, immune_myeloid_colors, immune_mixed_color)
-tumor_unknown_colors <- cellgroup_colors[c("Tumor cells", "Unknown", "Normal epithelial cells")]
-names(tumor_unknown_colors) <- c("Tumor cells", "Unknown", "Normal epithelial cells")
-celltype_shorter_colors <- c(tumor_unknown_colors, stroma_colors, normal_epithelial_colors, immune_colors)
-# save(cellgroup_colors, celltype_shorter_colors, file = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Figures/r_colorpalette.RData")
-
 # make color palette for variant class ------------------------------------
 # rcartocolor::display_carto_all()
 cartocolors_temps <- cartocolors_df[cartocolors_df$Name == "Temps", "n7"][[1]]

@@ -2,6 +2,7 @@
 ## make barcode to cell type mapping table for cell types changed based on individual sample inspection
 ## 2020-10-27 new cell type correction table and the input table has added Alla's immune cell types from Oct-12
 ## 2020-11-19 corrected a bunch of fibroblasts and myofibroblasts cell type for snATAC datasets
+## 2020-11-21 corrected fibroblasts and myofibroblasts cell type for all samples, switched to map the cell type detailed
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -24,7 +25,8 @@ barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Resul
 ## input barcode to individual cluster id 
 barcode2metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/fetch_data/fetch_data_by_individual_sample/20200717.v1/Barcode2MetaData.20200717.v1.tsv")
 ## input corrected cell type
-celltypecorrected_df <- readxl::read_excel(path = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Individual_AllClusters/Cells_BySampleByClusterByCellTypeShorter.Over50.20201119.xlsx", sheet = "Sheet1")
+# celltypecorrected_df <- readxl::read_excel(path = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Individual_AllClusters/Cells_BySampleByClusterByCellTypeShorter.Over50.20201119.xlsx", sheet = "Sheet1")
+celltypecorrected_df <- readxl::read_excel(path = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Individual_AllClusters/Cells_BySampleByClusterByCellTypeShorter.Over50.20201121.xlsx", sheet = "Sheet1")
 
 # merge info -------------------------------------
 ## merge cell type with seurat cluster
@@ -46,10 +48,10 @@ merged_df <- merged_df %>%
          Cell_type1, Cell_type2, Cell_type3, Cell_type4, 
          Id_TumorManualCluster, Id_SeuratCluster,
          individual_barcode, integrated_barcode) %>%
-  dplyr::mutate(Id_Mapping_Cells = paste0(orig.ident, "_", Id_SeuratCluster, "_", Cell_type.shorter))
+  dplyr::mutate(Id_Mapping_Cells = paste0(orig.ident, "_", Id_SeuratCluster, "_", Cell_type.detailed))
 ## add mapping id to the corrected cell type map
 celltypecorrected_df <- celltypecorrected_df %>%
-  dplyr::mutate(Id_Mapping_Cells = paste0(aliquot, "_", seurat_cluster_id, "_", Cell_type.shorter.original))
+  dplyr::mutate(Id_Mapping_Cells = paste0(aliquot, "_", seurat_cluster_id, "_", Cell_type.detailed.original))
 celltypecorrected_df$Cell_type1[is.na(celltypecorrected_df$Cell_type1)] <- ""
 ## correct cell type
 ### Cell_type.shorter
@@ -66,6 +68,7 @@ merged_df$Cell_type.detailed <- temp
 table(merged_df$Cell_type.detailed)
 ### Cell_group.shorter
 temp <- mapvalues(x = merged_df$Id_Mapping_Cells, from = celltypecorrected_df$Id_Mapping_Cells, to = as.vector(celltypecorrected_df$Cell_group.shorter))
+temp <- as.vector(temp)
 idx_kepp <- (temp == merged_df$Id_Mapping_Cells)
 temp[idx_kepp] <- merged_df$Cell_group.shorter[idx_kepp]
 merged_df$Cell_group.shorter <- temp

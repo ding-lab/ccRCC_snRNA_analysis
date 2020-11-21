@@ -1,6 +1,7 @@
 # Yige Wu @WashU Aug 2020
 ## 2020-10-27 new cell type correction, the cell type1 is no longer reliable
 ## 2020-11-19 corrected a bunch of fibroblasts and myofibroblasts cell type for snATAC datasets
+## 2020-11-21 corrected fibroblasts and myofibroblasts cell type for all samples, switched to map the cell type detailed
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -19,7 +20,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20201119.v1/31Aliquot.Barcode2CellType.20201119.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_celltype_corrected_by_individual_sample_inspection/20201121.v1/31Aliquot.Barcode2CellType.20201121.v1.tsv", data.table = F)
 
 # group detailed immune cell types into major immune cell groups ----------
 table(barcode2celltype_df$Cell_type.shorter)
