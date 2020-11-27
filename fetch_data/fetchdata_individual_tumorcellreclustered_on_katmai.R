@@ -31,7 +31,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input seurat object paths
-srat_paths_df <- fread(data.table = F, input = "./Data_Freezes/V1/snRNA/Tumor_Cell_Reclustered/Paths_TumorCellOnlyReclustered_SeuratObject.20201119.v1.tsv")
+srat_paths_df <- fread(data.table = F, input = "./Data_Freezes/V1/snRNA/Tumor_Cell_Reclustered/Paths_TumorCellOnlyReclustered_SeuratObject.20201127.v1.tsv")
 
 # process by each aliquot ----------------------------------------------------
 barcode_metadata_df <- NULL
