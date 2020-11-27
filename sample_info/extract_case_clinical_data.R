@@ -57,8 +57,8 @@ clinical_tab <- clinical_sup_df %>%
   select(Case, Gender, Age, Race, 
          Tumor_Stage_Pathological, Primary_Tumor_Pathologic_Stage,
          Sarcomatoid_Features,
-         BaseLine_Metastasis_Sites, 
-         # Baseline_Comments, Baseline_IHC, 
+         BaseLine_Metastasis_Sites, Baseline_IHC, 
+         # Baseline_Comments, 
          Outcome_of_Initial_Treatment, 
          Followup_Period, Outcome_at_Followup_Completion, Followup_Cause_of_Death, Followup_New_Tumor_Event, 
          Adjuvant_Radiation, Adjuvant_Pharmaceutical_Therapy, Adjuvant_immunological_Therapy) %>%

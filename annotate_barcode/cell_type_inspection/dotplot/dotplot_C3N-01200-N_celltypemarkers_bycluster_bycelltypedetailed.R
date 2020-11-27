@@ -18,7 +18,9 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input cell type per barcode table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20201027.v1/31Aliquot.Barcode2CellType.20201027.v1.tsv", data.table = F)
+# barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20201027.v1/31Aliquot.Barcode2CellType.20201027.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20201121.v1/31Aliquot.Barcode2CellType.20201121.v1.tsv", data.table = F)
+
 ## input seurat paths
 paths_srat_df <- fread(data.table = F, input = "./Resources/Analysis_Results/data_summary/write_individual_srat_object_paths/20200717.v1/Seurat_Object_Paths.20200717.v1.tsv")
 ## input cell type markers

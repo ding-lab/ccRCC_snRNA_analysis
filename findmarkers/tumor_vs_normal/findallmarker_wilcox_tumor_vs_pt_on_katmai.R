@@ -25,7 +25,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -56,12 +56,10 @@ group1_findmarkers <- "Tumor cells"
 group2_findmarkers <- "Proximal tubule cells from NATs"
 
 # subset to cases with snATAC data ----------------------------------------
-# cases_snatac <- unique(idmetadata_df$Case[idmetadata_df$snATAC_available == T])
-# cases_snatac
-# aliquots_snatac <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Case %in% cases_snatac & idmetadata_df$snRNA_available == T]
-aliquots_snatac <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available == T & idmetadata_df$snATAC_available == T & idmetadata_df$Aliquot.snRNA.WU != "C3N-01200-T1"]
+easyids_snatac <- c("C3L-00416-T2", "C3L-01313-T1", "C3N-01200-T1", "C3L-00088-N", "C3N-01200-N")
+aliquots_snatac <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Aliquot.snRNA.WU %in% easyids_snatac]
 aliquots_snatac
-aliquots_snatac_nat <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available == T & idmetadata_df$snATAC_available == T & idmetadata_df$Sample_Type == "Normal"]
+aliquots_snatac_nat <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Aliquot.snRNA.WU %in% easyids_snatac & idmetadata_df$Sample_Type == "Normal"]
 aliquots_snatac_nat
 Idents(srat) <- "orig.ident"
 srat <- subset(srat, idents = aliquots_snatac)
