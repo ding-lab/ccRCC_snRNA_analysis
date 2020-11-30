@@ -25,7 +25,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -90,10 +90,10 @@ for (aliquot_tumor_tmp in aliquots_snatac_tumor) {
                                       "Tumor cells", 
                                       ifelse(Cell_type.detailed == "Proximal tubule" & orig.ident %in% aliquots_snatac_nat, "Proximal tubule cells from NATs", "Others")))
   ## map group label
-  srat@meta.data$group_findmarkers <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$group_findmarkers))
+  srat@meta.data$group_findmarkers <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$group_findmarkers), warn_missing = F)
   cat("finish adding group labels\n")
   
-  table(srat@meta.data$group_findmarkers)
+  print(table(srat@meta.data$group_findmarkers))
   Idents(srat) <- "group_findmarkers" 
   ## run findmarkers
   deg_df <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = group1_findmarkers, ident.2 = group2_findmarkers, only.pos = F,
@@ -101,6 +101,8 @@ for (aliquot_tumor_tmp in aliquots_snatac_tumor) {
   deg_df$genesymbol_deg <- rownames(deg_df)
   deg_df$easyid_tumor <- easyid_tumor_tmp
   deg_df$aliquot_tumor <- aliquot_tumor_tmp
+  deg_df$cellnumber_tumorcells <- length(which(srat@meta.data$group_findmarkers == group1_findmarkers))
+  deg_df$cellnumber_ptcells <- length(which(srat@meta.data$group_findmarkers == group2_findmarkers))
   
   ## combine with the super tale
   degs_combined_df <- rbind(degs_combined_df, deg_df)
