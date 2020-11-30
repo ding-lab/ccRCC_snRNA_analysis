@@ -76,28 +76,31 @@ cat("finish adding the simple barcode!\n")
 ## make combined id for the seurat meta data
 srat@meta.data$id_aliquot_barcode <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$original_barcode)
 head(srat@meta.data$id_aliquot_barcode)
-cat("finish unique id for each barcode in the seurat object!\n")
+cat("finish adding unique id for each barcode in the seurat object!\n")
 
 # run findallmarkers by tumor------------------------------------------------------
 degs_combined_df <- NULL
-for (aliquot_tumor in aliquots_snatac_tumor) {
+for (aliquot_tumor_tmp in aliquots_snatac_tumor) {
+  easyid_tumor_tmp <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == aliquot_tumor_tmp]
+  cat(paste0("Processing ", easyid_tumor_tmp, "\n"))
   ## make combined id for the barcode2celltype table
   barcode2celltype_df <- barcode2celltype_df %>%
-    filter(orig.ident %in% c(aliquot_tumor, aliquots_snatac_nat)) %>%
     mutate(id_aliquot_barcode = paste0(orig.ident, "_", individual_barcode)) %>%
-    mutate(group_findmarkers = ifelse(Cell_group5 == "Tumor cells" & orig.ident == aliquot_tumor, 
+    mutate(group_findmarkers = ifelse(Cell_group5 == "Tumor cells" & orig.ident == aliquot_tumor_tmp, 
                                       "Tumor cells", 
                                       ifelse(Cell_type.detailed == "Proximal tubule" & orig.ident %in% aliquots_snatac_nat, "Proximal tubule cells from NATs", "Others")))
-  head(barcode2celltype_df$id_aliquot_barcode)
   ## map group label
   srat@meta.data$group_findmarkers <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$group_findmarkers))
+  cat("finish adding group labels\n")
+  
+  table(srat@meta.data$group_findmarkers)
   Idents(srat) <- "group_findmarkers" 
   ## run findmarkers
   deg_df <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = group1_findmarkers, ident.2 = group2_findmarkers, only.pos = F,
                                min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
   deg_df$genesymbol_deg <- rownames(deg_df)
-  deg_df$easyid_tumor <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == aliquot_tumor]
-  deg_df$aliquot_tumor <- aliquot_tumor
+  deg_df$easyid_tumor <- easyid_tumor_tmp
+  deg_df$aliquot_tumor <- aliquot_tumor_tmp
   
   ## combine with the super tale
   degs_combined_df <- rbind(degs_combined_df, deg_df)
