@@ -2,6 +2,7 @@
 ## 2020-10-27 new cell type correction, the cell type1 is no longer reliable
 ## 2020-11-19 corrected a bunch of fibroblasts and myofibroblasts cell type for snATAC datasets
 ## 2020-11-21 corrected fibroblasts and myofibroblasts cell type for all samples, switched to map the cell type detailed
+## 2020-11-30 added a new group with detailed epithelial cell types
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -24,26 +25,6 @@ barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barc
 
 # group detailed immune cell types into major immune cell groups ----------
 table(barcode2celltype_df$Cell_type.shorter)
-# barcode2celltype_df <- barcode2celltype_df %>%
-#   mutate(Cell_group13 = ifelse(Cell_group.shorter == "Immune",
-#                                     ifelse(Cell_type1 == "Myleoid lineage immune cells",
-#                                            ifelse(Cell_type3 == "Macrophages", 
-#                                                   "Macrophages",
-#                                                   ifelse(Cell_type3 == "DC", 
-#                                                          "DC",
-#                                                          "Immune others")),
-#                                            ifelse(Cell_type2 == "NK cells",
-#                                                   "NK cells",
-#                                                   ifelse(Cell_type2 == "T-cells",
-#                                                          ifelse(Cell_type3 == "CD4+ T-cells",
-#                                                                "CD4+ T-cells",
-#                                                                ifelse(Cell_type3 == "CD8+ T-cells", 
-#                                                                       "CD8+ T-cells", 
-#                                                                       "Immune others")),
-#                                                          ifelse(Cell_type2 == "B-cells", 
-#                                                                 "B-cells", 
-#                                                                 "Immune others")))),
-#                                     Cell_type.shorter))
 barcode2celltype_df$Cell_group13 <- barcode2celltype_df$Cell_type.shorter
 barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("Macrophages", "Macrophages proliferating", "TRM")] <- "Macrophages"
 barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("B-cells", "Plasma")] <- "B-cells"
@@ -51,16 +32,20 @@ barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("CD4 CT
 barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("CD8 CTL", "CD8 CTL exhausted", "CD8 T-cells preexhausted")] <- "CD8+ T-cells"
 barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("cDC", "pDC")] <- "DC"
 barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("NK cells strong", "NK cells weak")] <- "NK cells"
-barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("Basophils", "CD4/CD8 proliferating", "Mixed myeloid/lymphoid")] <- "Immune others"
-
-barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("Transitional cells", "Tumor-like cells")] <- "Tumor cells"
+barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("Basophils", "CD4/CD8 proliferating", "Mixed myeloid/lymphoid", "Mast cells")] <- "Immune others"
+barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("Transitional cells", "Tumor-like cells", "EMT tumor cells")] <- "Tumor cells"
 barcode2celltype_df$Cell_group13[barcode2celltype_df$Cell_group13 %in% c("Normal-like cells")] <- "Normal epithelial cells"
 table(barcode2celltype_df$Cell_group13)
 
 # make a new group for the transitional cells -----------------------------
 barcode2celltype_df <- barcode2celltype_df %>%
-  mutate(Cell_group14_w_transitional = ifelse(Cell_type.shorter == "Transitional cells", "Transitional cells", Cell_group13))
+  mutate(Cell_group14_w_transitional = ifelse(Cell_type.shorter == "EMT tumor cells", "EMT tumor cells", Cell_group13))
 table(barcode2celltype_df$Cell_group14_w_transitional)
+
+# make a new group for the transitional cells -----------------------------
+barcode2celltype_df <- barcode2celltype_df %>%
+  mutate(Cell_group_w_epithelialcelltypes = ifelse(Cell_type.shorter == "Normal epithelial cells", Cell_type.detailed, Cell_group13))
+table(barcode2celltype_df$Cell_group_w_epithelialcelltypes)
 
 # rename other cell groups ------------------------------------------------
 barcode2celltype_df <- barcode2celltype_df %>%
