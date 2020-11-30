@@ -18,7 +18,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input barcode2UMAP
-barcode2umap_df <- fread(data.table = F, input = "./Resources/Analysis_Results/fetch_data/fetchdata_individual_tumorcellreclustered_on_katmai/20201119.v1/MetaData_TumorCellOnlyReclustered.20201119.v1.tsv")
+barcode2umap_df <- fread(data.table = F, input = "./Resources/Analysis_Results/fetch_data/fetchdata_individual_tumorcellreclustered_on_katmai/20201127.v1/MetaData_TumorCellOnlyReclustered.20201127.v1.tsv")
 
 # plot by each aliquot ----------------------------------------------------
 ## make different output files
