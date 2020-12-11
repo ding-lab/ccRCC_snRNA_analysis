@@ -19,7 +19,8 @@ dir.create(dir_out)
 ## input id meta data
 idmetadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv", data.table = F)
 ## input the spearman pairwise correlation result
-pearson_coef.tumorcellvariable_genes.df <- fread(input = "./Resources/Analysis_Results/integration/30_aliquot_integration/pairwise_correlation/calculate_tumor_manualsubcluster_pairwise_correlation_tumorcellvariable_genes/20200721.v1/avg_exp_by_tumorsubluster.tumorcellvaraible_genes.pearson_coef20200721.v1.tsv", data.table = F)
+# pearson_coef.tumorcellvariable_genes.df <- fread(input = "./Resources/Analysis_Results/integration/30_aliquot_integration/pairwise_correlation/calculate_tumor_manualsubcluster_pairwise_correlation_tumorcellvariable_genes/20200721.v1/avg_exp_by_tumorsubluster.tumorcellvaraible_genes.pearson_coef20200721.v1.tsv", data.table = F)
+pearson_coef.tumorcellvariable_genes.df <- fread(input = "./Resources/Analysis_Results/pairwise_correlation/calculate_tumor_manualsubcluster_pairwise_correlation_tumorcellvariable_genes/20201201.v1/avg_exp_by_tumorsubluster.tumorcellvaraible_genes.pearson_coef20201201.v1.tsv", data.table = F)
 
 # make data matrix for heatmap body ---------------------------------------
 ## reformat data frame to matrix
@@ -66,9 +67,6 @@ id_metadata_filtered_df <- idmetadata_df %>%
   filter(Case %in% unique(c(ids_case_plot_row_uniq, ids_case_plot_column_uniq)))
 
 # sort case ids -----------------------------------------------------------
-## order case ids
-factor_ids_case <- factor(x = ids_case, levels = clustercount_by_case$ids_case)
-
 # specify colors ----------------------------------------------------------
 ## specify color for NA values
 color_na <- "grey50"
@@ -77,7 +75,7 @@ colors_hist_type <- c("Clear cell renal cell carcinoma" = "#fc8d62", "non-Clear 
 ## make color function for heatmap body colors
 col_fun = colorRamp2(c(0, 0.5, 1), c("white", "yellow", "red"))
 ## make color for the cluster name suffix
-unique(names_cluster_suffix)
+# unique(names_cluster_suffix)
 colors_clustername <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")
 names(colors_clustername) <- paste0("C", 1:8)
 swatch(colors_clustername)
@@ -85,12 +83,7 @@ swatch(colors_clustername)
 # make row annotation -------------------------------------------
 ## sort omics
 ## create left row annotation
-row_anno = rowAnnotation(Sample_Type_Suffix = anno_text(x = suffixes_aliquot_id_plot_row, 
-                                                        location = 0.5, just = "center",
-                                                        gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_tumor_segments[suffixes_aliquot_id_plot_row]), 
-                                                        width = unit(1, "cm"),
-                                                        rot = 0),
-                         Cluster_Name = anno_text(x = names_cluster_suffix_plot_row, 
+row_anno = rowAnnotation(Cluster_Name = anno_text(x = names_cluster_suffix_plot_row, 
                                                   location = 0.5, just = "center",
                                                   gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_clustername[names_cluster_suffix_plot_row]), 
                                                   width = unit(1, "cm"),
@@ -99,12 +92,7 @@ row_anno = rowAnnotation(Sample_Type_Suffix = anno_text(x = suffixes_aliquot_id_
 
 # make column annotation -------------------------------------------
 ## do not show T1 for samples with only one segments
-col_anno = HeatmapAnnotation(Sample_Type_Suffix = anno_text(x = suffixes_aliquot_id_plot_column, 
-                                                            location = 0.5, just = "center",
-                                                            gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_tumor_segments[suffixes_aliquot_id_plot_column]), 
-                                                            height = unit(1, "cm"),
-                                                            rot = 0),
-                             Cluster_Name = anno_text(x = names_cluster_suffix_plot_column, 
+col_anno = HeatmapAnnotation(Cluster_Name = anno_text(x = names_cluster_suffix_plot_column, 
                                                       location = 0.5, just = "center",
                                                       gp = gpar(col = "black", fontsize = 15, fontface = "bold", fill = colors_clustername[names_cluster_suffix_plot_row]), 
                                                       height = unit(1, "cm"),
@@ -133,3 +121,4 @@ pdf(file2write,
     width = 7, height = 7)
 draw(object = p)
 dev.off()
+

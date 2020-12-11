@@ -14,7 +14,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the average expression calculated (SCT)
-avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/averageexpression_tumorcellsubset_sct_usedata_by_manualtumorcluster_on_katmai/20201130.v1/AverageExpression_ByManualTumorSubcluster.20201130.v1.tsv", data.table = F)
+avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/averageexpression_tumorcellsubset_sct_usescaledata_by_manualtumorcluster_on_katmai/20201130.v1/AverageExpression_ByManualTumorSubcluster.20201130.v1.tsv", data.table = F)
 
 # specify genes to filter -------------------------------------------------
 ## input kidney-specific EMT genes
@@ -50,12 +50,12 @@ sd_bygene_df <- sd_bygene_df %>%
   arrange(desc(SD))
 genes_plot_mesenchymal <- head(as.vector(sd_bygene_df$gene[sd_bygene_df$Gene_Group2 == "Mesenchymal"]), n = 5)
 genes_plot_mesenchymal
-# [1] "FN1"   "CDH2"  "VIM"   "ITGB1" "FOXC2"
+# [1] "FN1"   "CDH2"  "VIM"   "FOXC2" "ITGB1"
 sd_bygene_epithelial_df <- sd_bygene_df %>%
   filter(Gene_Group2 %in% c("Proximal tubule")) %>%
   arrange(desc(SD))
 genes_plot_epithelial <- head(x = as.vector(sd_bygene_epithelial_df$gene), n = 5)
-# [1] "CUBN"    "LRP2"    "SLC17A3" "GPX3"    "GATM"
+# [1] "GPX3"    "SLC17A3" "SLC13A1" "SLC5A12" "CUBN" 
 genes_plot <- c(genes_plot_mesenchymal, genes_plot_epithelial)
 plot_data_mat <- plot_data_mat[genes_plot,]
 
@@ -93,4 +93,5 @@ file2write <- paste0(dir_out, "EMT_scores_by_manual_tumorcluster.", run_id, ".ts
 write.table(x = emtscores_df, file = file2write, sep = "\t", row.names = F, quote = F)
 file2write <- paste0(dir_out, "EMT_scores_genes.", run_id, ".tsv")
 write.table(x = sd_bygene_df, file = file2write, sep = "\t", row.names = F, quote = F)
+## save thresholds
 

@@ -10,7 +10,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -52,6 +52,23 @@ plot_data_mat %>% head()
 case_ids <- plot_data_df$Case
 aliquot_wu_ids <- plot_data_df$Aliquot.snRNA.WU
 
+
+# make colors -------------------------------------------------------------
+## make colors for data availability
+colors_bulk_data <- c(RColorBrewer::brewer.pal(n = 8, name = "Set1")[5], "white"); names(colors_bulk_data) <- c("TRUE", "FALSE")
+colors_sn_data <- c(RColorBrewer::brewer.pal(n = 8, name = "Set1")[4], "white"); names(colors_sn_data) <- c("TRUE", "FALSE")
+## make colors for histologic grade
+colors_hist_grade <- c("NAT" = "white", "G1" = "#ffffcc", "G2" = "#addd8e", "G3" = "#31a354", "G4" = "#006837")
+## make colors for histogical type
+colors_hist_type <- c("Normal Adjacent Tissue" = "#66c2a5", "Clear cell renal cell carcinoma" = "#fc8d62", "non-Clear cell renal cell carcinoma" = "#8da0cb")
+## top column annotation object
+color_gridline = "grey90"
+### make color for tumor purity
+tumorpurity_color_fun <-  colorRamp2(c(0, 0.5, 1),c("white", "yellow", "red"))
+## make colors for cnv state
+colors_cnvstate <- c("#e41a1c", "#377eb8", "grey80")
+names(colors_cnvstate)  <- c("gain", "loss", "neutral")
+
 # make top column annotation --------------------------------------------------
 top_col_anno_df <- plot_data_df 
 # rownames(top_col_anno_df) <- as.vector(plot_data_df$Aliquot.snRNA)
@@ -81,89 +98,81 @@ methyl_color_fun <- colorRamp2(c(quantile(top_col_anno_df$Methyl.VHL, 0.1, na.rm
                                  quantile(top_col_anno_df$Methyl.VHL, 0.5, na.rm=T), 
                                  quantile(top_col_anno_df$Methyl.VHL, 0.9, na.rm=T)),
                                c("#018571", "white", "#a6611a"))
-### make color for tumor purity
-tumorpurity_color_fun <-  colorRamp2(c(0, 0.5, 1),c("white", "yellow", "red"))
 ### make text for translocations
 Translocation.t3_other_text <- top_col_anno_df$Translocation.t3_other
 Translocation.t3_other_text[is.na(Translocation.t3_other_text)] <- ""
 Translocation.t3_other_text[Translocation.t3_other_text == "None"] <- ""
-## make colors for data availability
-colors_bulk_data <- c(RColorBrewer::brewer.pal(n = 8, name = "Set1")[5], "white"); names(colors_bulk_data) <- c("TRUE", "FALSE")
-colors_sn_data <- c(RColorBrewer::brewer.pal(n = 8, name = "Set1")[4], "white"); names(colors_sn_data) <- c("TRUE", "FALSE")
-## make colors for histologic grade
-colors_hist_grade <- c("NAT" = "white", "G1" = "#ffffcc", "G2" = "#addd8e", "G3" = "#31a354", "G4" = "#006837")
-## make colors for histogical type
-colors_hist_type <- c("Normal Adjacent Tissue" = "#66c2a5", "Clear cell renal cell carcinoma" = "#fc8d62", "non-Clear cell renal cell carcinoma" = "#8da0cb")
-## top column annotation object
-top_col_anno = HeatmapAnnotation(snRNA_Seq = anno_simple(x = as.character(top_col_anno_df$snRNA_available),
-                                                         simple_anno_size = unit(4, "mm"), 
-                                                         gp = gpar(color = "black"), col = colors_sn_data),
-                                 snATAC_Seq = anno_simple(x = as.character(top_col_anno_df$snATAC_available),
-                                                          simple_anno_size = unit(4, "mm"), 
-                                                          gp = gpar(color = "black"), col = colors_sn_data),
+top_col_anno = HeatmapAnnotation(snRNA_Availability = anno_simple(x = as.character(top_col_anno_df$snRNA_available),
+                                                         simple_anno_size = unit(3, "mm"),
+                                                         gp = gpar(col = color_gridline), col = colors_sn_data),
+                                 snATAC_Availability = anno_simple(x = as.character(top_col_anno_df$snATAC_available),
+                                                          simple_anno_size = unit(3, "mm"), 
+                                                          gp = gpar(col = color_gridline),  col = colors_sn_data),
                                  Histologic_Type = anno_simple(x = top_col_anno_df$Histologic_Type,
-                                                               gp = gpar(color = "black"), 
-                                                               simple_anno_size = unit(4, "mm"), 
+                                                               gp = gpar(col = color_gridline), 
+                                                               simple_anno_size = unit(3, "mm"), 
                                                                col = colors_hist_type),
                                  Histologic_Grade = anno_simple(x = top_col_anno_df$Histologic_Grade,
-                                                                gp = gpar(color = "black"), 
-                                                                simple_anno_size = unit(4, "mm"), 
+                                                                gp = gpar(col = color_gridline),  
+                                                                simple_anno_size = unit(3, "mm"), 
                                                                 col = colors_hist_grade),
-                                 Methyl.VHL = anno_simple(x = top_col_anno_df$Methyl.VHL, 
-                                                          gp = gpar(color = "black"),
-                                                          simple_anno_size = unit(4, "mm"),
+                                 gap1 = anno_empty(border = F, height = unit(0.5, "mm")),
+                                 VHL_Methylation = anno_simple(x = top_col_anno_df$Methyl.VHL, 
+                                                          gp = gpar(col = color_gridline), 
+                                                          simple_anno_size = unit(3, "mm"),
                                                           col = methyl_color_fun),
-                                 Mut.VHL = anno_simple(x = ifelse(is.na(top_col_anno_df$Mut.VHL), NA, 
+                                 VHL = anno_simple(x = ifelse(is.na(top_col_anno_df$Mut.VHL), NA, 
                                                                   ifelse(!(top_col_anno_df$Mut.VHL == "None" | top_col_anno_df$Mut.VHL == "Silent"), 
                                                                          ifelse(top_col_anno_df$Is_discovery_set, "Mutated (WES)", "Mutated (Mapped the Mutation of T1 to snRNA Reads)"), "None")),
-                                                       gp = gpar(color = "black"),
-                                                       simple_anno_size = unit(4, "mm"),
+                                                       gp = gpar(col = color_gridline), 
+                                                       simple_anno_size = unit(3, "mm"),
                                                        col = c("Mutated (WES)" = "#e7298a", "Mutated (Mapped the Mutation of T1 to snRNA Reads)" = "#c994c7", "None" = "white")),
-                                 Mut.PBRM1 = anno_simple(x = ifelse(is.na(top_col_anno_df$Mut.PBRM1), NA, 
+                                 PBRM1 = anno_simple(x = ifelse(is.na(top_col_anno_df$Mut.PBRM1), NA, 
                                                                     ifelse(!(top_col_anno_df$Mut.PBRM1 == "None" | top_col_anno_df$Mut.PBRM1 == "Silent"), 
                                                                            ifelse(top_col_anno_df$Is_discovery_set, "Mutated (WES)", "Mutated (Mapped the Mutation of T1 to snRNA Reads)"), "None")),
-                                                         gp = gpar(color = "black"),
-                                                         simple_anno_size = unit(4, "mm"),
+                                                         gp = gpar(col = color_gridline), 
+                                                         simple_anno_size = unit(3, "mm"),
                                                          col = c("Mutated (WES)" = "#e7298a", "Mutated (Mapped the Mutation of T1 to snRNA Reads)" = "#c994c7", "None" = "white")),
-                                 Mut.BAP1 = anno_simple(x = ifelse(is.na(top_col_anno_df$Mut.BAP1), NA, 
+                                 BAP1 = anno_simple(x = ifelse(is.na(top_col_anno_df$Mut.BAP1), NA, 
                                                                    ifelse(!(top_col_anno_df$Mut.BAP1 == "None" | top_col_anno_df$Mut.BAP1 == "Silent"), 
                                                                           ifelse(top_col_anno_df$Is_discovery_set, "Mutated (WES)", "Mutated (Mapped the Mutation of T1 to snRNA Reads)"), "None")),
-                                                        gp = gpar(color = "black"),
-                                                        simple_anno_size = unit(4, "mm"),
+                                                        gp = gpar(col = color_gridline), 
+                                                        simple_anno_size = unit(3, "mm"),
                                                         col = c("Mutated (WES)" = "#e7298a", "Mutated (Mapped the Mutation of T1 to snRNA Reads)" = "#c994c7", "None" = "white")),
-                                 Mut.SETD2 = anno_simple(x = as.character(!(top_col_anno_df$Mut.SETD2 == "None" | top_col_anno_df$Mut.SETD2 == "Silent")),
-                                                         gp = gpar(color = "black"),
-                                                         simple_anno_size = unit(4, "mm"),
+                                 SETD2 = anno_simple(x = as.character(!(top_col_anno_df$Mut.SETD2 == "None" | top_col_anno_df$Mut.SETD2 == "Silent")),
+                                                         gp = gpar(col = color_gridline), 
+                                                         simple_anno_size = unit(3, "mm"),
                                                          col = c("TRUE" = "#e7298a", "FALSE" = "white")),
-                                 Mut.KDM5C = anno_simple(x = as.character(!(top_col_anno_df$Mut.KDM5C == "None" | top_col_anno_df$Mut.KDM5C == "Silent")),
-                                                         gp = gpar(color = "black"),
-                                                         simple_anno_size = unit(4, "mm"),
+                                 KDM5C = anno_simple(x = as.character(!(top_col_anno_df$Mut.KDM5C == "None" | top_col_anno_df$Mut.KDM5C == "Silent")),
+                                                         gp = gpar(col = color_gridline), 
+                                                         simple_anno_size = unit(3, "mm"),
                                                          col = c("TRUE" = "#e7298a", "FALSE" = "white")),
-                                 Mut.PTEN = anno_simple(x = as.character(!(top_col_anno_df$Mut.PTEN == "None" | top_col_anno_df$Mut.PTEN == "Silent")),
-                                                        gp = gpar(color = "black"),
-                                                        simple_anno_size = unit(4, "mm"),
+                                 PTEN = anno_simple(x = as.character(!(top_col_anno_df$Mut.PTEN == "None" | top_col_anno_df$Mut.PTEN == "Silent")),
+                                                        gp = gpar(col = color_gridline), 
+                                                        simple_anno_size = unit(3, "mm"),
                                                         col = c("TRUE" = "#e7298a", "FALSE" = "white")),
-                                 Mut.TSC1 = anno_simple(x = as.character(!(top_col_anno_df$Mut.TSC1 == "None" | top_col_anno_df$Mut.TSC1 == "Silent")),
-                                                        gp = gpar(color = "black"),
-                                                        simple_anno_size = unit(4, "mm"),
+                                 TSC1 = anno_simple(x = as.character(!(top_col_anno_df$Mut.TSC1 == "None" | top_col_anno_df$Mut.TSC1 == "Silent")),
+                                                        gp = gpar(col = color_gridline), 
+                                                        simple_anno_size = unit(3, "mm"),
                                                         col = c("TRUE" = "#e7298a", "FALSE" = "white")),
-                                 CN.bulk.3p = anno_simple(x = top_col_anno_df$CN.bulk.3p,
-                                                          gp = gpar(color = "black"),
-                                                          simple_anno_size = unit(4, "mm"), 
-                                                          col = cnv_state_colors),
+                                 gap2 = anno_empty(border = F, height = unit(0.5, "mm")),
+                                 CN.3p = anno_simple(x = top_col_anno_df$CN.bulk.3p,
+                                                          gp = gpar(col = color_gridline), 
+                                                          simple_anno_size = unit(3, "mm"), 
+                                                          col = colors_cnvstate),
                                  # CN.sn.3p_loss.fraction = anno_simple(top_col_anno_df$CN.sn.3p_loss.fraction,
                                  #                          simple_anno_size = unit(2, "mm")),
-                                 CN.bulk.5q = anno_simple(x = top_col_anno_df$CN.bulk.5q,
-                                                          gp = gpar(color = "black"),
-                                                          simple_anno_size = unit(4, "mm"), 
-                                                          col = cnv_state_colors),
+                                 CN.5q = anno_simple(x = top_col_anno_df$CN.bulk.5q,
+                                                          gp = gpar(col = color_gridline), 
+                                                          simple_anno_size = unit(3, "mm"), 
+                                                          col = colors_cnvstate),
                                  # CN.sn.5q_gain.fraction = anno_barplot(x = top_col_anno_df$CN.sn.5q_gain.fraction, 
                                  #                                       height = unit(5, "mm")),
-                                 CN.bulk.14q = anno_simple(x = top_col_anno_df$CN.bulk.14q,
-                                                           gp = gpar(color = "black"),
-                                                           simple_anno_size = unit(4, "mm"), 
-                                                           col = cnv_state_colors),
-                                 annotation_name_side = "left")
+                                 CN.14q = anno_simple(x = top_col_anno_df$CN.bulk.14q,
+                                                           gp = gpar(col = color_gridline), 
+                                                           simple_anno_size = unit(3, "mm"), 
+                                                           col = colors_cnvstate),
+                                 annotation_name_side = "left", annotation_name_gp = gpar(fontsize = 9))
 
 
 # make column split -------------------------------------------------------
@@ -188,7 +197,7 @@ p <- Heatmap(matrix = plot_data_mat,
              ## column
              column_split = col_split_factor,
              column_order = order(match(plot_data_df$Aliquot_Suffix, c("T1", "T2", "T3", "N"))),
-             column_title_gp = gpar(fontsize = 8), column_title_rot = 90,
+             column_title_gp = gpar(fontsize = 9), column_title_rot = 90,
              # bottom_annotation = bottom_col_anno, 
              top_annotation = top_col_anno,
              column_gap = unit(x = 0, units = "mm"),
@@ -197,26 +206,23 @@ p <- Heatmap(matrix = plot_data_mat,
 p
 ## make legend for top annotation
 annotation_lgd = list(
-  Legend(title = "Data availability", nrow = 1,
-         labels = c("Available", "None"),
-         legend_gp = gpar(fill = colors_sn_data), border = "black"),
-  Legend(labels = names(colors_hist_type)[-1],
-         title = "Histologic Type",
-         legend_gp = gpar(fill = colors_hist_type[-1]), border = "black"),
-  Legend(labels = names(colors_hist_grade)[-1],
-         title = "Histologic Grade (T1)", nrow = 2,
-         legend_gp = gpar(fill = colors_hist_grade[-1]), border = "black"),
-  Legend(labels = c("Mutated (WES)", 
-                    "None"),
-         title = "Somatic Mutation Status",
-         legend_gp = gpar(fill = c("#e7298a", "white")), border = "black"),
-  Legend(col_fun = methyl_color_fun,
-         title = "Bulk VHL Promoter Methylation",
+  Legend(labels = c("Clear-cell RCC", "Non-clear-cell RCC"), labels_gp = gpar(fontsize = 9),
+         title = "Histologic Type", title_gp = gpar(fontsize = 9),
+         legend_gp = gpar(fill = colors_hist_type[-1]), border = color_gridline),
+  Legend(labels = names(colors_hist_grade)[-1], labels_gp = gpar(fontsize = 9),
+         title = "Histologic Grade (T1)", nrow = 2, title_gp = gpar(fontsize = 9),
+         legend_gp = gpar(fill = colors_hist_grade[-1]), border = color_gridline),
+  Legend(col_fun = methyl_color_fun, labels_gp = gpar(fontsize = 9),
+         title = "VHL Promoter Methylation", title_gp = gpar(fontsize = 9),
          direction = "horizontal",
-         legend_width = unit(40, "mm")),
-  Legend(labels = c(names(cnv_state_colors)), 
-         title = "Bulk WGS CNV", nrow = 1,
-         legend_gp = gpar(fill = c(cnv_state_colors)), border = "black"))
+         legend_width = unit(30, "mm")),
+  Legend(labels = c("Mutated (WES)", 
+                    "None"), labels_gp = gpar(fontsize = 9),
+         title = "Somatic Mutation Status", title_gp = gpar(fontsize = 9),
+         legend_gp = gpar(fill = c("#e7298a", "white")), border = color_gridline),
+  Legend(labels = c("Gain", "Loss", "Neutral"), labels_gp = gpar(fontsize = 9),
+         title = "Bulk WGS CNV", nrow = 2, title_gp = gpar(fontsize = 9),
+         legend_gp = gpar(fill = colors_cnvstate), border = color_gridline))
 # ## save heatmap as png
 # png(filename = paste0(dir_out, "data_availability",".png"), 
 #     width = 1600, height = 1600, res = 150)
@@ -226,7 +232,7 @@ annotation_lgd = list(
 # dev.off()
 ## save heatmap as pdf
 pdf(paste0(dir_out, "data_availability", ".pdf"), 
-    width = 9, height = 4)
+    width = 6, height = 3.5)
 ### combine heatmap and heatmap legend
 draw(object = p, 
      annotation_legend_side = "right", annotation_legend_list = annotation_lgd)

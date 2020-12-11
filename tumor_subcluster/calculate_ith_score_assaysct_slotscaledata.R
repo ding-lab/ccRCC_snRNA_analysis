@@ -18,7 +18,7 @@ dir.create(dir_out)
 ## input id meta data
 idmetadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv", data.table = F)
 ## input the spearman pairwise correlation result
-pearson_coef.tumorcellvariable_genes.df <- fread(input = "./Resources/Analysis_Results/pairwise_correlation/calculate_tumor_manualsubcluster_pairwise_correlation_tumorcellvariable_genes/20201201.v1/avg_exp_by_tumorsubluster.tumorcellvaraible_genes.pearson_coef20201201.v1.tsv", data.table = F)
+pearson_coef.tumorcellvariable_genes.df <- fread(input = "./Resources/Analysis_Results/pairwise_correlation/calculate_tumor_manualsubcluster_pairwise_correlation_tumorcellvariable_genes_sct_scaledata/20201201.v1/avg_exp_by_tumorsubluster.tumorcellvaraible_genes.pearson_coef20201201.v1.tsv", data.table = F)
 
 # get ids -----------------------------------------------------------------
 ids_tumorsubcluster <- pearson_coef.tumorcellvariable_genes.df$V1

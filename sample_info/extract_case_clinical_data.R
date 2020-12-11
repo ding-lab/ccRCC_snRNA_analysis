@@ -1,5 +1,4 @@
 # Yige Wu @ WashU 2020 Jul
-## annotate the CPTAC3 ccRCC discovery set cases with mutation status
 
 # set up libraries and output directory -----------------------------------
 ## set working directory

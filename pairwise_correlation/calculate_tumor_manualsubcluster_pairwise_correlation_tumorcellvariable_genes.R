@@ -20,7 +20,7 @@ dir.create(dir_out)
 ## input the variable gene list
 variable_genes_df <- fread(input = "./Resources/Analysis_Results/integration/30_aliquot_integration/findvariablefeatures/findvariablefeatures_tumor_cells/20200310.v1/findvariablefeatures_tumor_cells.20200310.v1.tsv", data.table = F)
 ## input the average expression calculated (RNA)
-avg.exp.mat <- fread(input = "./Resources/Analysis_Results/integration/30_aliquot_integration/averageexpression/averageexpression_tumor_cells_by_manual_subcluster/20200325.v1/averageexpression_tumor_cells_by_manual_subcluster.20200325.v1.tsv", data.table = F)
+avg.exp.mat <- fread(input = "./Resources/Analysis_Results/average_expression/averageexpression_tumorcellsubset_sct_usedata_by_manualtumorcluster_on_katmai/20201130.v1/AverageExpression_ByManualTumorSubcluster.20201130.v1.tsv", data.table = F)
 avg.exp.mat <- avg.exp.mat %>%
   rename(gene = V1)
 
@@ -30,7 +30,8 @@ data_col_names.changed <- str_split_fixed(string = data_col_names, pattern = "\\
 ## rename the data frame
 colnames(avg.exp.mat) <- c("gene", data_col_names.changed)
 ## remove the subcluster without NA as manual subcluster id
-data_col_names.filtered <- data_col_names.changed[!grepl(pattern = "MCNA", x = data_col_names.changed)]
+data_col_names.filtered <- data_col_names.changed[!grepl(pattern = "CNA", x = data_col_names.changed)]
+data_col_names.filtered <- data_col_names.filtered[data_col_names.filtered != "Non.tumor"]; length(data_col_names.filtered) # [1] 134
 avg.exp.mat <- avg.exp.mat[, c("gene", data_col_names.filtered)]
 
 # filter down to only variably expressed genes------------------------------------------------------------------

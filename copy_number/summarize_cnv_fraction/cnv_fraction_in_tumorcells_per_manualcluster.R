@@ -8,6 +8,7 @@ setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
+library(dplyr)
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -24,7 +25,7 @@ dir_infercnv_run <- paste0(dir_infercnv_output, infercnv_run_id, "/")
 aliquots2process <- list.files(dir_infercnv_run)
 aliquots2process <- aliquots2process[grepl(pattern = "CPT", x = aliquots2process)]
 ## input barcode to cell type info
-barcode2cluster_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_barcode_with_manual_tumorsubcluster_id/20200616.v1/Barcode2TumorSubclusterId.20200616.v1.tsv", data.table = F)
+barcode2cluster_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_tumorsubclusterid/map_barcode_with_manual_tumorsubcluster_id/20201130.v1/Barcode2TumorSubclusterId.20201130.v1.tsv", data.table = F)
 ## input known CNV genes
 knowncnvgenes_df <- readxl::read_xlsx(path = "./Resources/Knowledge/Known_Genetic_Alterations/Known_CNV.20200528.v1.xlsx", sheet = "Genes")
 
@@ -35,13 +36,13 @@ for (aliquot_tmp in aliquots2process) {
   cnv_state_obs_mat <- fread(input = paste0(dir_infercnv_run, aliquot_tmp, "/infercnv.14_HMM_predHMMi6.rand_trees.hmm_mode-subclusters.Pnorm_0.5.repr_intensities.observations.txt"), data.table = F)
   cnv_state_ref_mat <- fread(input = paste0(dir_infercnv_run, aliquot_tmp, "/infercnv.14_HMM_predHMMi6.rand_trees.hmm_mode-subclusters.Pnorm_0.5.repr_intensities.references.txt"), data.table = F)
   
-  ## filter cnv results to only selected genes
+  ## dplyr::filter cnv results to only selected genes
   cnv_state_obs_mat <- cnv_state_obs_mat %>%
-    rename(gene_symbol = V1) %>%
-    filter(gene_symbol %in% knowncnvgenes_df$Gene_Symbol)
+    dplyr::rename(gene_symbol = V1) %>%
+    dplyr::filter(gene_symbol %in% knowncnvgenes_df$Gene_Symbol)
   cnv_state_ref_mat <- cnv_state_ref_mat %>%
-    rename(gene_symbol = V1) %>%
-    filter(gene_symbol %in% knowncnvgenes_df$Gene_Symbol)
+    dplyr::rename(gene_symbol = V1) %>%
+    dplyr::filter(gene_symbol %in% knowncnvgenes_df$Gene_Symbol)
   
   ## melt wide data frame to long data frame
   cnv_state_obs_mat.m <- melt(cnv_state_obs_mat, id.vars = c("gene_symbol"))
@@ -52,24 +53,26 @@ for (aliquot_tmp in aliquots2process) {
   
   ## get the barcodes for this aliquot
   aliquot_barcode2cluster_df <- barcode2cluster_df %>%
-    filter(orig.ident == aliquot_tmp)
+    dplyr::filter(orig.ident == aliquot_tmp) %>%
+    dplyr::mutate(Id_TumorManualCluster = Cluster_Name) %>%
+    dplyr::mutate(individual_barcode = barcode)
   
-  ## rename columns and filter down to only maligant nephron epithlium cells
+  ## dplyr::rename columns and dplyr::filter down to only maligant nephron epithlium cells
   cnv_state_mat.m <- cnv_state_mat.m %>%
-    rename(cna_state = value) %>%
-    rename(barcode = variable) %>%
-    filter(barcode %in% aliquot_barcode2cluster_df$individual_barcode)
+    dplyr::rename(cna_state = value) %>%
+    dplyr::rename(barcode = variable) %>%
+    dplyr::filter(barcode %in% aliquot_barcode2cluster_df$individual_barcode)
   ## map barcode to tumor subcluster
   colnames(barcode2cluster_df)
   cnv_state_mat.m$tumor_subcluster <- mapvalues(x = cnv_state_mat.m$barcode, from = aliquot_barcode2cluster_df$individual_barcode, to = aliquot_barcode2cluster_df$Id_TumorManualCluster)
   
   ## count number of cells with different cnv state per gene
   cnv_state_count <- cnv_state_mat.m %>%
-    select(gene_symbol, tumor_subcluster, cna_state) %>%
+    dplyr::select(gene_symbol, tumor_subcluster, cna_state) %>%
     table() %>%
     as.data.frame() %>%
-    filter(Freq > 0) %>%
-    mutate(aliquot = aliquot_tmp)
+    dplyr::filter(Freq > 0) %>%
+    dplyr::mutate(aliquot = aliquot_tmp)
   
   ## summarize the detected values for each gene
   cnv_nonna_count <- cnv_state_count %>%
@@ -98,7 +101,7 @@ tmp$Fraction <- tmp$Freq/(tmp$num_cells_nonna)
 tmp$cna_state <- as.numeric(as.vector(tmp$cna_state))
 ## annotate cells with expected cnv state
 cnv_3state_count_aliquots <- tmp %>%
-  mutate(cna_3state = ifelse(cna_state %in% c(1.5, 2, 3), "Gain", ifelse(cna_state %in% c(0, 0.5), "Loss", "Neutral"))) %>%
+  dplyr::mutate(cna_3state = ifelse(cna_state %in% c(1.5, 2, 3), "Gain", ifelse(cna_state %in% c(0, 0.5), "Loss", "Neutral"))) %>%
   group_by(aliquot, tumor_subcluster, gene_symbol, cna_3state) %>%
   summarise(Fraction = sum(Fraction, na.rm = T))
 ## write

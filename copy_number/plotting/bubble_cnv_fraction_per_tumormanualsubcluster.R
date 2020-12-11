@@ -20,7 +20,7 @@ dir.create(dir_out)
 ## load meta data
 idmetadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200505.v1/meta_data.20200505.v1.tsv", data.table = F)
 ## load CNV fraction in tumor cells
-cnv_3state_count_aliquots <- fread("./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/cnv_fraction_in_tumorcells_per_manualcluster/20200622.v1/fraction_of_tumorcells_with_cnv_by_gene_by_3state.per_manualsubcluster.20200622.v1.tsv", data.table = F)
+cnv_3state_count_aliquots <- fread("./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/cnv_fraction_in_tumorcells_per_manualcluster/20201207.v1/fraction_of_tumorcells_with_cnv_by_gene_by_3state.per_manualsubcluster.20201207.v1.tsv", data.table = F)
 ## input known CNV genes
 knowncnvgenes_df <- readxl::read_xlsx(path = "./Resources/Knowledge/Known_Genetic_Alterations/Known_CNV.20200528.v1.xlsx", sheet = "Genes")
 
@@ -29,14 +29,15 @@ knowncnvgenes_df <- readxl::read_xlsx(path = "./Resources/Knowledge/Known_Geneti
 cnv_3state_count_aliquots$aliquot.wu <- mapvalues(x = cnv_3state_count_aliquots$aliquot, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
 plot_data_df <- cnv_3state_count_aliquots
 plot_data_df$case <- mapvalues(x = plot_data_df$aliquot, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Case))
-plot_data_df$aliquot_cnv_type <- mapvalues(x = plot_data_df$aliquot.wu, from = cnvtype_aliquot_df$aliquot.wu, to = as.vector(cnvtype_aliquot_df$CNV_ITH_Type))
 
 ## add cytoband and expected cna type
 plot_data_df$gene_cytoband <- mapvalues(x = plot_data_df$gene_symbol, from = knowncnvgenes_df$Gene_Symbol, to = as.vector(knowncnvgenes_df$Cytoband))
 plot_data_df$gene_expected_state <- mapvalues(x = plot_data_df$gene_symbol, from = knowncnvgenes_df$Gene_Symbol, to = as.vector(knowncnvgenes_df$CNV_Type))
 plot_data_df <- plot_data_df %>%
-  mutate(id_aliquot_cluster = paste0(aliquot.wu, "_C", (tumor_subcluster + 1)))
-
+  mutate(id_aliquot_cluster = tumor_subcluster) %>%
+  mutate(name_tumorsubcluster = str_split_fixed(string = id_aliquot_cluster, pattern = "_", n = 2)[,2]) %>%
+  filter(name_tumorsubcluster != "CNA")
+  
 ## get the data with only expected CNV state
 plot_data_cc_df <- plot_data_df %>%
   filter(gene_expected_state == cna_3state) 
@@ -47,7 +48,6 @@ plot_data_cc_df <- plot_data_cc_df %>%
   filter(gene_symbol %in% genes_filtered) %>%
   mutate(Fraction_Range = ifelse(Fraction < 0.5, "<=50%", ">50%")) %>%
   mutate(aliquot.wu = str_split_fixed(string = id_aliquot_cluster, pattern = "_", n = 2)[,1]) %>%
-  mutate(name_tumorsubcluster = str_split_fixed(string = id_aliquot_cluster, pattern = "_", n = 2)[,2]) %>%
   mutate(Data_detected = T) %>%
   select(id_aliquot_cluster, gene_symbol, Fraction, name_tumorsubcluster, cna_3state, Fraction_Range, Data_detected, aliquot.wu, gene_cytoband)
   
@@ -122,12 +122,12 @@ p <- p + theme(strip.text.y = element_text(angle = 0),
                strip.text.x = element_text(angle = 90))
 
 pdf(paste0(dir_out, "Fraction_of_Tumorcells_with_Expected_CNA_by_Gene", ".", "By_Tumor_Subcluster", ".pdf"), 
-    width = 20, height = 6)
+    width = 23, height = 6)
 print(p)
 dev.off()
 
 png(file = paste0(dir_out, "Fraction_of_Tumorcells_with_Expected_CNA_by_Gene", ".", "By_Tumor_Subcluster", ".png"), 
-    width = 3000, height = 1000, res = 150)
+    width = 3500, height = 1000, res = 150)
 print(p)
 dev.off()
 
