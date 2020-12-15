@@ -1,4 +1,4 @@
-# Yige Wu @WashU Oct 2020
+# Yige Wu @WashU Dec 2020
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -10,7 +10,7 @@ source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 library(ggpubr)
 ## set run id
-version_tmp <- 1
+version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -18,34 +18,38 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input clinical data
-specimen_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/extract_specimen_clinical_data/20200717.v1/snRNA_ccRCC_Specimen_Clinicl_Data.20200717.v1.tsv")
+case_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/extract_case_clinical_data/20201125.v1/snRNA_ccRCC_Clinicl_Table.20201125.v1.tsv")
+## input id meta data
+idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
 ## input cell type fraction
-cellgroupfrac_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/count_fraction/count_celltypeshorter_fraction_per_sample/20201203.v1/CellGroupBarcodes_Number_and_Fraction_per_Sample20201203.v1.tsv")
-
+cellgroupfrac_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/count_fraction/count_celltypedetailed_fraction_per_sample/20201213.v1/CellGroupBarcodes_Number_and_Fraction_per_Sample20201213.v1.tsv")
 
 # set plotting parameters -------------------------------------------------
 symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), symbols = c("****", "***", "**", "*", "ns"))
-pos <- position_jitter(width = 0.2, seed = 1)
-my_comparisons <- list(c("G1/2", "G3"),c("G3", "G4"),c("G1/2", "G4"))
+pos <- position_jitter(width = 0.2, seed = 1.5)
+my_comparisons <- list(c("Stage I/II", "Stage III"), c("Stage I/II", "Stage IV"), c("Stage III", "Stage IV"))
 
 # plot by cell group ------------------------------------------------------
 table(cellgroupfrac_df$Cell_group)
 cellgroup_tmp <- "CD8 CTL exhausted"
-cellgroup_tmp <- "Mast cells"
-
+cellgroup_tmp <- "CD4 T-cells activated"
+cellgroup_tmp <- "Macrohpages CD204/CD109+"
+cellgroup_tmp <- "Macrophages proliferating MKI67+"
+cellgroup_tmp <- "Macrophages CD204+"
 for (cellgroup_tmp in unique(cellgroupfrac_df$Cell_group)) {
   ## make plot data
-  plot_data_df <- specimen_clinical_df %>%
+  plot_data_df <- idmetadata_df %>%
     filter(Sample_Type == "Tumor") %>%
     filter(snRNA_available == TRUE) %>%
-    select(Aliquot.snRNA.WU, Histologic_Grade)
+    select(Case, Aliquot.snRNA.WU)
+  plot_data_df$Tumor_Stage_Pathological <- mapvalues(x = plot_data_df$Case, from = case_clinical_df$Case, to = as.vector(case_clinical_df$Tumor_Stage_Pathological))
   plot_data_df <- merge(x = plot_data_df,
                         y = cellgroupfrac_df %>%
                           filter(Cell_group == cellgroup_tmp) %>%
                           select(Aliquot_WU, Frac_CellGroupBarcodes_ByAliquot),
                         by.x = c("Aliquot.snRNA.WU"), by.y = c("Aliquot_WU"), all.x = T)
   plot_data_df <- plot_data_df %>%
-    mutate(x_plot = ifelse(Histologic_Grade %in% c("G1", "G2"), "G1/2", Histologic_Grade)) %>%
+    mutate(x_plot = ifelse(Tumor_Stage_Pathological %in% c("Stage I", "Stage II"), "Stage I/II", Tumor_Stage_Pathological)) %>%
     mutate(y_plot = ifelse(is.na(Frac_CellGroupBarcodes_ByAliquot), 0, Frac_CellGroupBarcodes_ByAliquot))
   ## plot
   p = ggplot(plot_data_df, aes(x=x_plot, y=y_plot))

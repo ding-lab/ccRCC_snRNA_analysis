@@ -26,13 +26,14 @@ cellgroupfrac_df <- fread(data.table = F, input = "./Resources/Analysis_Results/
 
 # set plotting parameters -------------------------------------------------
 symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), symbols = c("****", "***", "**", "*", "ns"))
-pos <- position_jitter(width = 0.2, seed = 1)
-my_comparisons <- list(c("Stage I/II", "Stage III"), c("Stage I/II"))
+pos <- position_jitter(width = 0.25, seed = 2)
+my_comparisons <- list(c("Stage I/II", "Stage III"), c("Stage I/II", "Stage IV"), c("Stage III", "Stage IV"))
 
 # plot by cell group ------------------------------------------------------
 table(cellgroupfrac_df$Cell_group)
 cellgroup_tmp <- "CD8 CTL exhausted"
-for (cellgroup_tmp in unique(cellgroupfrac_df$Cell_group)) {
+for (cellgroup_tmp in "Macrophages proliferating") {
+# for (cellgroup_tmp in unique(cellgroupfrac_df$Cell_group)) {
   ## make plot data
   plot_data_df <- idmetadata_df %>%
     filter(Sample_Type == "Tumor") %>%
@@ -45,21 +46,31 @@ for (cellgroup_tmp in unique(cellgroupfrac_df$Cell_group)) {
                           select(Aliquot_WU, Frac_CellGroupBarcodes_ByAliquot),
                         by.x = c("Aliquot.snRNA.WU"), by.y = c("Aliquot_WU"), all.x = T)
   plot_data_df <- plot_data_df %>%
-    mutate(x_plot = ifelse(Tumor_Stage_Pathological %in% c("Stage I", "Stage II", "Stage I/II", Tumor_Stage_Pathological))) %>%
+    mutate(x_plot = ifelse(Tumor_Stage_Pathological %in% c("Stage I", "Stage II"), "Stage I/II", Tumor_Stage_Pathological)) %>%
     mutate(y_plot = ifelse(is.na(Frac_CellGroupBarcodes_ByAliquot), 0, Frac_CellGroupBarcodes_ByAliquot))
   ## plot
   p = ggplot(plot_data_df, aes(x=x_plot, y=y_plot))
-  p = p + geom_violin(aes(fill = x_plot),  color = NA, alpha = 1)
-  p = p + geom_boxplot(width=.1)
-  p = p + geom_point(color = "black", fill = "black", shape = 16, position = pos, stroke = 0, alpha = 0.6, size = 1)
+  p = p + geom_violin(aes(fill = x_plot),  color = NA, alpha = 0.6)
+  p = p + geom_boxplot(width=.1, )
+  p = p + geom_point(color = "black", fill = "black", shape = 16, position = pos, stroke = 0, alpha = 0.8, size = 2)
   p = p + stat_compare_means(data = plot_data_df, 
                              mapping = aes(x = x_plot, y = y_plot, label = ..p.signif..), comparisons = my_comparisons,
                              symnum.args = symnum.args,
                              hide.ns = F, method = "wilcox.test")
   p <- p + theme(legend.position = "none")
   p <- p + theme(axis.title = element_blank())
+  p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                 panel.background = element_blank(), axis.line = element_line(colour = "black"))
+  p <- p + theme(axis.text.x=element_text(size = 12, colour = "black"),
+                 axis.ticks.x=element_blank())
+  p <- p + theme(axis.text.y=element_text(size = 12, colour = "black"))
   file2write <- paste0(dir_out, gsub(x = cellgroup_tmp, pattern = "\\/", replacement = "_"), ".png")
   png(file2write, width = 600, height = 600, res = 150)
+  print(p)
+  dev.off()
+  
+  file2write <- paste0(dir_out, gsub(x = cellgroup_tmp, pattern = "\\/", replacement = "_"), ".pdf")
+  pdf(file2write, width = 3.5, height = 2.5, useDingbats = F)
   print(p)
   dev.off()
 }

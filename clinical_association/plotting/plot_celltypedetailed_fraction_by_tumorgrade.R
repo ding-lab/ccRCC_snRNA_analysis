@@ -20,7 +20,7 @@ dir.create(dir_out)
 ## input clinical data
 specimen_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/extract_specimen_clinical_data/20200717.v1/snRNA_ccRCC_Specimen_Clinicl_Data.20200717.v1.tsv")
 ## input cell type fraction
-cellgroupfrac_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/count_fraction/count_celltypeshorter_fraction_per_sample/20201203.v1/CellGroupBarcodes_Number_and_Fraction_per_Sample20201203.v1.tsv")
+cellgroupfrac_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/count_fraction/count_celltypedetailed_fraction_per_sample/20201213.v1/CellGroupBarcodes_Number_and_Fraction_per_Sample20201213.v1.tsv")
 
 
 # set plotting parameters -------------------------------------------------
