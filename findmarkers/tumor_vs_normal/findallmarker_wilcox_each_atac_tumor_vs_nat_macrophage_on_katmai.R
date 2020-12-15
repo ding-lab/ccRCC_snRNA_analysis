@@ -89,7 +89,7 @@ for (aliquot_tumor_tmp in aliquots_snatac_tumor) {
     mutate(id_aliquot_barcode = paste0(orig.ident, "_", individual_barcode)) %>%
     mutate(group_findmarkers = ifelse(Cell_group13 == "Macrophages" & orig.ident == aliquot_tumor_tmp, 
                                       "Macrophages_Tumor", 
-                                      ifelse(Cell_type.detailed == "Macrophages" & orig.ident %in% aliquots_snatac_nat, "Macrophages_NAT", "Others")))
+                                      ifelse(Cell_group13 == "Macrophages" & orig.ident %in% aliquots_snatac_nat, "Macrophages_NAT", "Others")))
   
   ## map group label
   srat@meta.data$group_findmarkers <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$group_findmarkers), warn_missing = F)
