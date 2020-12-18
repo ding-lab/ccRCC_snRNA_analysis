@@ -17,7 +17,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the average expression calculated (SCT)
-avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/averageexpression_sct_usescale_bycellgroup_w_epithelialcelltypes_byaliquot_on_katmai/20201130.v1/avgexp.SCT.bycellgroup_w_epithelialcelltypes.byaliquot.20201130.v1.tsv", data.table = F)
+avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/averageexpression_sct_slotdata_bycellgroup_w_epithelialcelltypes_byaliquot_on_katmai/20201218.v1/avgexp.SCT.bycellgroup_w_epithelialcelltypes.byaliquot.20201218.v1.tsv", data.table = F)
 ## input id meta data
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
 
@@ -42,7 +42,7 @@ plot_data_long_df <- plot_data_long_df %>%
 
 # make barplot ------------------------------------------------------------
 p <- ggplot()
-p <- p + geom_bar(data = plot_data_long_df, mapping = aes(x = easy_id, y = value))
+p <- p + geom_col(data = plot_data_long_df, mapping = aes(x = easy_id, y = value))
 p
 
 

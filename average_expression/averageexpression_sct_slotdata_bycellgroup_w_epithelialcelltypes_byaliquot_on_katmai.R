@@ -53,7 +53,7 @@ srat@meta.data$id_bycellgroup_byaliquot <- mapvalues(x = srat@meta.data$id_cell,
 Idents(srat) <- "id_bycellgroup_byaliquot" 
 
 # run average expression --------------------------------------------------
-aliquot.averages <- AverageExpression(srat, assays = assay_process, slot = "scale.data")
+aliquot.averages <- AverageExpression(srat, assays = assay_process, slot = "data")
 print("Finish running AverageExpression!\n")
 cat("###########################################\n")
 
