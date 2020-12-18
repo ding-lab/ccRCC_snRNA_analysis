@@ -74,7 +74,8 @@ genes_emt_df$PMID[genes_emt_df$hgnc_symbol %in% c("VIM")] <- "10792488, 15897741
 genes_emt_df$PMID[genes_emt_df$hgnc_symbol %in% c("ITGA3")] <- "10792488, 23786209"
 ## annnotate the gene function to epithelial
 tmp <- genes_emt_df$gene_function
-tmp[genes_emt_df$hgnc_symbol %in% c("CDH1", "ITGA4", "ITGB6", "OCLN", "DSP", "JUP", "PKP1", "PKP2", "CRB3", "MPP5", "TJP1")]  <- "Epithelial"
+### Epithelial cells are normally held together by lateral cell–cell junctions (tight junctions, adherens junctions, gap junctions and desmosomes). They exhibit apical–basal polarity and interact with the underlying basement membrane via hemidesmosomes and α6β4 integrins.
+tmp[genes_emt_df$hgnc_symbol %in% c("CDH1", "ITGA6", "ITGB4", "OCLN", "DSP", "JUP", "PKP1", "PKP2", "CRB3", "MPP5", "TJP1")]  <- "Epithelial"
 tmp[grepl(x = genes_emt_df$hgnc_symbol, pattern = "CLDN")] <- "Epithelial"
 tmp[genes_emt_df$hgnc_symbol %in% collagens_df$`Approved symbol`]  <- "Unknown"
 genes_emt_df$gene_function <- tmp

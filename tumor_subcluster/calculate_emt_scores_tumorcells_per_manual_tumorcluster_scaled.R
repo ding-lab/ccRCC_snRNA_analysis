@@ -19,6 +19,7 @@ avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/aver
 # specify genes to filter -------------------------------------------------
 ## input kidney-specific EMT genes
 emt_genes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/combine_pt_with_emt_markers_all/20200920.v1/Kidney_Specific_EMT_Genes.20200920.v1.tsv")
+
 ## add name for the marker groups
 emt_genes_df <- emt_genes_df %>%
   mutate(Text_Gene_Group = ifelse(Gene_Group2 == "Tumor cells", 

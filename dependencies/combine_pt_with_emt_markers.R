@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(dplyr)
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -17,7 +17,8 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_Markers/Gene2CellType_Tab.20200911.v1.tsv")
-emtgenes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_emt_genes/20200911.v1/EMT_Genes.20200911.v1.tsv")
+# emtgenes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_emt_genes/20200911.v1/EMT_Genes.20200911.v1.tsv")
+emtgenes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_emt_genes/20201026.v1/EMT_Genes.20201026.v1.tsv")
 ## input essential tumor cell markers (tumor + PT markers)
 tumorgenes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/filter_markers/filter_tumor_pt_markers_bycelltypedegs/20200920.v2/Essential_Tumor_Cell_Markers.tsv")
 
@@ -26,7 +27,7 @@ tumorgenes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/fin
 ## prepare EMT genes
 emtgenes_2combine_df <- emtgenes_df %>%
   dplyr::mutate(Gene_Group1 = "EMT_Genes") %>%
-  dplyr::filter(Key_EMT_Genes) %>%
+  filter(Key_Mesenchymal_Genes | Key_Epithelial_Genes) %>%
   # dplyr::filter(is.na(gene_group) | (!is.na(gene_group) & gene_group != "Collagen")) %>%
   dplyr::rename(Gene = hgnc_symbol) %>%
   dplyr::rename(Gene_Group2 = gene_function) %>%
