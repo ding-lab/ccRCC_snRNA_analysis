@@ -25,7 +25,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -37,10 +37,10 @@ path_rds <- "./Resources/Analysis_Results/integration/31_aliquot_integration/31_
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 ## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20201121.v1/31Aliquot.Barcode2CellType.20201121.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_32aliquots/20210308.v1/32Aliquot.Barcode2CellType.20210308.v1.tsv", data.table = F)
 cat("finish reading the barcode-to-cell type table!\n")
 ## input idemta data
-idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
+idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210305.v1/meta_data.20210305.v1.tsv")
 
 # set parameters for findmarkers ------------------------------------------
 logfc.threshold.run <- 0
@@ -55,8 +55,7 @@ group1_findmarkers <- "Tumor cells"
 group2_findmarkers <- "Proximal tubule cells from NATs"
 
 # subset to cases with snATAC data ----------------------------------------
-easyids_snatac <- c("C3N-00733-T1", "C3L-00610-T1", "C3L-01313-T1", "C3L-00416-T2", "C3L-01287-T1", "C3L-00917-T1", "C3L-00088-T1", "C3N-01200-T1", "C3L-00088-T2", "C3L-00079-T1", "C3L-00448-T1",
-                    "C3L-00088-N", "C3N-01200-N")
+easyids_snatac <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$snATAC_used]
 aliquots_snatac <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Aliquot.snRNA.WU %in% easyids_snatac]
 aliquots_snatac
 aliquots_snatac_nat <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Aliquot.snRNA.WU %in% easyids_snatac & idmetadata_df$Sample_Type == "Normal"]
@@ -109,7 +108,7 @@ for (aliquot_tumor_tmp in aliquots_snatac_tumor) {
 }
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "findallmarkers_wilcox_each_snatac_tumor_vs_pt.", run_id, ".tsv")
+file2write <- paste0(dir_out, "findallmarkers_wilcox_each_snatac_tumorcell_vs_pt.", run_id, ".tsv")
 write.table(x = degs_combined_df, file = file2write, sep = "\t", quote = F, row.names = F)
 cat("finish writing the result!\n")
 
