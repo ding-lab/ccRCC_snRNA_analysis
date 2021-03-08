@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 3
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -18,7 +18,7 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 summary_df <- fread(data.table = F, input = "./Resources/Analysis_Results/cell_cell_interaction/summarize_interactions/rank_across_celltypes_by_pair_by_avgsigmean/20201012.v1/cellphonedb.summary_across_celltypes_by_pair.min5.tsv")
 ## input filtered summary data
-interactions_filtered_df <- fread(data.table = F, input = "./Data Freezes/V1/snRNA/Cell_Cell_Interactions/Values_by_sample_mean_expr_of_curated_interactions_top3ct_stroma_immune_20200818_seen_5+_grouped_by_Inter.group_strongest_in_given_pair.txt")
+interactions_filtered_df <- fread(data.table = F, input = "./Data_Freezes/V1/snRNA/Cell_Cell_Interactions/Values_by_sample_mean_expr_of_curated_interactions_top3ct_stroma_immune_20200818_seen_5+_grouped_by_Inter.group_strongest_in_given_pair.txt")
 ## input cell-cell interaction values by case
 cellphone_df <- fread(data.table = F, input = "./Resources/Analysis_Results/cell_cell_interaction/other/scale_pair_cell_types_vs_sample_sig_mean/20200924.v1/cellphonedb.pair_cell.types_vs_sample.sig_mean.tsv")
 # cellphone_df <- fread(data.table = F, input = "./Resources/Analysis_Results/cell_cell_interaction/filter_interactions/filter_cellphonedb_out/20201012.v1/cell.phone.res.total.run20200818.filtered.txt")
@@ -32,7 +32,7 @@ specimen_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Resu
 summary_filtered_df <- summary_df %>%
   mutate(interacting_pair_directed = paste0(gene.source, "_", gene.target)) %>%
   filter(interacting_pair_directed %in% c("VEGFA_FLT1", "VEGFB_FLT1", 'VEGFA_KDR')) %>%
-  filter(pair_cell.types %in% interactions_filtered_df$pair_cell.types) %>%
+  filter(pair_cell.types %in% interactions_filtered_df$pair_cell.types[interactions_filtered_df$Inter.group != "Immune:Stroma"]) %>%
   # filter(pair_cell.types %in% interactions_filtered_df$pair_cell.types | celltypes.source2target %in% c("Normal epithelial cells->Endothelial cells")) %>%
   arrange(desc(avg_sig_mean))
 interacting_pairs_process <- summary_filtered_df$interacting_pair
@@ -110,7 +110,7 @@ celltype_target_vec <- mapvalues(x = interaction_celltypes, from = summary_filte
 # celltype_text_vec <- paste0(celltype_source_vec, "->", celltype_target_vec)
 rowanno_obj1 <- rowAnnotation(Celltype.Ligand = anno_simple(x = vector(mode = "numeric", length = length(celltype_source_vec)), 
                                                             gp = gpar(fill = NA, col = NA), width = unit(10, "mm"), 
-                                                            pch = ifelse(celltype_source_vec == "Tumor cells", 23, 21), 
+                                                            pch = 21, 
                                                             pt_size = unit(7, "mm"), 
                                                             pt_gp = gpar(fill = colors_celltype[celltype_source_vec], col = NA)), 
                               Gene_source = anno_text(x = gene_source_vec,
@@ -123,7 +123,7 @@ rowanno_obj1 <- rowAnnotation(Celltype.Ligand = anno_simple(x = vector(mode = "n
                                                      just = "center"),
                               Celltype.Receptor = anno_simple(x = vector(mode = "numeric", length = length(celltype_target_vec)),
                                                               gp = gpar(fill = NA, col = NA), width = unit(10, "mm"), 
-                                                              pch = ifelse(celltype_target_vec == "Tumor cells", 23, 21), 
+                                                              pch = 21, 
                                                               pt_size = unit(7, "mm"), 
                                                               pt_gp = gpar(fill = colors_celltype[celltype_target_vec], col = NA)),
                               Gene_target = anno_text(x = gene_target_vec,
@@ -182,7 +182,7 @@ draw(object = p,
 dev.off()
 
 file2write <- paste0(dir_out, "druggable_interactions", ".pdf")
-pdf(file2write, width = 10, height = 5, useDingbats = F)
+pdf(file2write, width = 10, height = 4.5, useDingbats = F)
 draw(object = p, 
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
 dev.off()

@@ -55,8 +55,8 @@ plot_data_df <- plot_data_df %>%
 # plot all markers--------------------------------------------------------------------
 ## plot
 p <- ggplot()
-p <- p + geom_vline(xintercept = x_pos, linetype = 2)
-p <- p + geom_vline(xintercept = x_neg, linetype = 2)
+p <- p + geom_vline(xintercept = x_pos, linetype = 2, color = "grey70")
+p <- p + geom_vline(xintercept = x_neg, linetype = 2, color = "grey70")
 p <- p + geom_point(data = subset(plot_data_df, y_plot < y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = "grey70")
 p <- p + geom_point(data = subset(plot_data_df, x_plot < x_pos & x_plot > 0 & y_plot >= y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = color_right_pale)
 p <- p + geom_point(data = subset(plot_data_df, x_plot >= x_pos & y_plot >= y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = color_right_deep)
@@ -70,14 +70,11 @@ p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot 
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot < 0),
                          mapping = aes(x = x_plot, y = y_plot, label = text_gene), color = "black", force = 4, fontface = "italic", segment.alpha = 0.5)
 
-p <- p + theme_bw()
-# p <- p + ggtitle(label = paste0("C3L-00079 ", "VIM-high transitional cells vs tumor cells"))
-# p <- p + xlim(c(-3, 3))
-p <- p + xlab("log2(Fold-Change)")
+p <- p + theme_classic()
+p <- p + xlab("Log2(Fold-Change)")
 p <- p + ylab("-Log10(P-value-adjusted)")
-p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-               panel.background = element_blank())
-# p <- p + theme(axis.line = element_line(colour = "black"))
+p <- p + theme(axis.text = element_text(size = 14),
+               axis.title = element_text(size = 15))
 p
 file2write <- paste0(dir_out, "volcano.", "png")
 png(file2write, width = 800, height = 600, res = 150)

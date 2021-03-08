@@ -18,13 +18,13 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input cell type per barcode table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20201027.v1/31Aliquot.Barcode2CellType.20201027.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20201130.v1/31Aliquot.Barcode2CellType.20201130.v1.tsv", data.table = F)
 ## input id meta data table
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
 
 # input seurat object, and get umap info -----------------------------------------------------
-aliquot_show <- "C3L-00416 Merged"
-srat <- readRDS(file = "./Data Freezes/V1/snRNA/Merged_Seurat_Objects/C3L-00416.Tumor_Segments.Merged.20200319.v1.RDS")
+aliquot_show <- "C3N-00733_Merged"
+srat <- readRDS(file = "./Data_Freezes/V1/snRNA/Merged_Seurat_Objects/C3N-00733.Tumor_Segments.Merged.20200319.v1.RDS")
 umap_df <- FetchData(object = srat, vars = c("orig.ident", "UMAP_1", "UMAP_2"))
 umap_df$barcode_integrated <- rownames(umap_df)
 

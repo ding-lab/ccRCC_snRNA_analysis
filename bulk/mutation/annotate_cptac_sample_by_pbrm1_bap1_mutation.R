@@ -21,11 +21,14 @@ dir.create(dir_out)
 maf_df <- loadMaf()
 
 # annotate samples based on PBRM1 & BAP1 mutation -------------------------
-mut_matrix_wide_df <- generate_somatic_mutation_matrix(maf = maf_df, pair_tab = c("PBRM1", "BAP1", "VHL", "SETD2", "KDM5C"))
+mut_matrix_wide_df <- get_mutation_class_sim_matrix(maf = maf_df, pair_tab = ccRCC_SMGs)
 mut_matrix_df <- as.data.frame(t(mut_matrix_wide_df[,-1]))
 mut_matrix_df$Case <- rownames(mut_matrix_df)
 mut_matrix_df[is.na(mut_matrix_df)] <- ""
 mut_matrix_df <- mut_matrix_df %>%
+  mutate(mutation_category_sim = ifelse(PBRM1 == "" & BAP1 == "", "Non-mutants",
+                                    ifelse(PBRM1 != "" & BAP1 != "", "Both mutated",
+                                           ifelse(PBRM1 == "" & BAP1 != "", "BAP1 mutated", "PBRM1 mutated")))) %>%
   mutate(mutation_category = ifelse(PBRM1 == "" & BAP1 == "",
                                     ifelse(KDM5C == "" & SETD2 == "", "Non-mutants", "Others"),
                                     ifelse(PBRM1 != "" & BAP1 != "", "Both mutated",

@@ -83,11 +83,11 @@ map_infercnv_state2category <- function(copy_state) {
   return(cnv_cat)
 }
 
-get_somatic_mutation_detailed_matrix <- function(pair_tab, maf) {
+get_mutation_aachange_matrix <- function(pair_tab, maf) {
   genes4mat <- unique(unlist(pair_tab))
   length(genes4mat)
   
-  maf <- maf[maf$Hugo_Symbol %in% genes4mat,]
+  maf <- maf[maf$Hugo_Symbol %in% genes4mat & maf$Variant_Classification != "Silent",]
   nrow(maf)
   maf$sampID <- str_split_fixed(string = maf$Tumor_Sample_Barcode, pattern = "_", 2)[,1]
   
@@ -99,11 +99,11 @@ get_somatic_mutation_detailed_matrix <- function(pair_tab, maf) {
   return(mut_mat)
 }
 
-generate_somatic_mutation_matrix <- function(pair_tab, maf) {
+get_mutation_class_matrix <- function(pair_tab, maf) {
   genes4mat <- unique(unlist(pair_tab))
   length(genes4mat)
   
-  maf <- maf[maf$Hugo_Symbol %in% genes4mat,]
+  maf <- maf[maf$Hugo_Symbol %in% genes4mat & maf$Variant_Classification != "Silent",]
   nrow(maf)
   maf$sampID <- str_split_fixed(string = maf$Tumor_Sample_Barcode, pattern = "_", 2)[,1]
   
@@ -114,3 +114,41 @@ generate_somatic_mutation_matrix <- function(pair_tab, maf) {
   rownames(mut_mat) <- as.vector(mut_mat$Hugo_Symbol)
   return(mut_mat)
 }
+
+get_mutation_class_sim_matrix <- function(pair_tab, maf) {
+  genes4mat <- unique(unlist(pair_tab))
+  length(genes4mat)
+  
+  maf <- maf[maf$Hugo_Symbol %in% genes4mat & maf$Variant_Classification != "Silent",]
+  nrow(maf)
+  maf$sampID <- str_split_fixed(string = maf$Tumor_Sample_Barcode, pattern = "_", 2)[,1]
+  
+  mut_mat <- reshape2::dcast(data = maf, Hugo_Symbol ~ sampID, fun =  function(x) {
+    variant_class_sim <- plyr::mapvalues(x = unique(x), 
+                                   from = c("Frame_Shift_Del", "Frame_Shift_Ins", "Nonsense_Mutation", "Splice_Site", "Missense_Mutation", "In_Frame_Ins", "In_Frame_Del"),
+                                   to = c("Truncation", "Truncation", "Truncation", "Truncation", "Missense", "In_Frame_Ins", "In_Frame_Del"))
+    variant_class <- paste0(sort(variant_class_sim), collapse = ",")
+    
+    return(variant_class)
+  }, value.var = "Variant_Classification", drop=FALSE)
+  rownames(mut_mat) <- as.vector(mut_mat$Hugo_Symbol)
+  return(mut_mat)
+}
+
+get_somatic_mutation_vaf_matrix <- function(pair_tab, maf) {
+  genes4mat <- unique(unlist(pair_tab))
+  length(genes4mat)
+  
+  maf <- maf[maf$Hugo_Symbol %in% genes4mat & maf$Variant_Classification != "Silent",]
+  nrow(maf)
+  maf$sampID <- str_split_fixed(string = maf$Tumor_Sample_Barcode, pattern = "_", 2)[,1]
+  maf$vaf <- maf$t_alt_count/(maf$t_alt_count + maf$t_ref_count)
+  
+  mut_mat <- reshape2::dcast(data = maf, Hugo_Symbol ~ sampID, fun =  function(x) {
+    VAF <- paste0(unique(x), collapse = ",")
+    return(VAF)
+  }, value.var = "vaf", drop=FALSE)
+  rownames(mut_mat) <- as.vector(mut_mat$Hugo_Symbol)
+  return(mut_mat)
+}
+

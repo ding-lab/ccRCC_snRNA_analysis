@@ -16,23 +16,44 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-summary_df <- fread(data.table = F, input = "./Resources/Analysis_Results/cell_cell_interaction/summarize_interactions/rank_across_celltypes_by_pair_by_avgsigmean/20200925.v3/cellphonedb.summary_across_celltypes_by_pair.min5.tsv")
-## input summary for cell-cell interactin
-# summary_df <- fread(data.table = F, input = "./Resources/Analysis_Results/cell_cell_interaction/filter_interactions/filter_druggable_related_pair_celltypes/20200924.v1/filtered_druggale_related_pair_celltypes.tsv")
+summary_df <- fread(data.table = F, input = "./Resources/Analysis_Results/cell_cell_interaction/summarize_interactions/rank_across_celltypes_by_pair_by_avgsigmean/20201012.v1/cellphonedb.summary_across_celltypes_by_pair.min5.tsv")
+## input filtered summary data
+interactions_filtered_df <- fread(data.table = F, input = "./Data_Freezes/V1/snRNA/Cell_Cell_Interactions/Values_by_sample_mean_expr_of_curated_interactions_top3ct_stroma_immune_20200818_seen_5+_grouped_by_Inter.group_strongest_in_given_pair.txt")
 ## input cell-cell interaction values by case
-# cellphone_df <- fread(data.table = F, input = "./Resources/Analysis_Results/cell_cell_interaction/other/scale_pair_cell_types_vs_sample_sig_mean/20200924.v1/cellphonedb.pair_cell.types_vs_sample.sig_mean.scaled_by_sample_bypair..tsv")
 cellphone_df <- fread(data.table = F, input = "./Resources/Analysis_Results/cell_cell_interaction/other/scale_pair_cell_types_vs_sample_sig_mean/20200924.v1/cellphonedb.pair_cell.types_vs_sample.sig_mean.tsv")
+# cellphone_df <- fread(data.table = F, input = "./Resources/Analysis_Results/cell_cell_interaction/filter_interactions/filter_cellphonedb_out/20201012.v1/cell.phone.res.total.run20200818.filtered.txt")
 ## input sample meta data
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
 ## input clinical info
 specimen_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/extract_specimen_clinical_data/20200717.v1/snRNA_ccRCC_Specimen_Clinicl_Data.20200717.v1.tsv")
 ## input protein data
 protein_df <- fread("./Resources/Bulk_Processed_Data/Protein/6_CPTAC3_CCRCC_Whole_abundance_gene_protNorm=2_CB.tsv", data.table = F)
+## input mutation data
+# bulkprofile_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/other/merge_bulk_events/20200512.v1/merged_bulk_events.20200512.v1.tsv")
+bulkprofile_df <- fread(data.table = F, input = "./Resources/Analysis_Results/data_summary/merge_bulk_sn_profiles/20200512.v1/bulk_sn_omics_profile.20200512.v1.tsv")
+
+# preprocess the protein data ---------------------------------------------
+## get the bulk aliquot ids
+ids_aliquot_bulk <- mapvalues(x = ids_aliquot, from = idmetadata_df$Aliquot.snRNA.WU, to = as.vector(idmetadata_df$Aliquot.bulk))
+## make the matrix to plot the heatmap
+protein_df2plot <- protein_df %>%
+  filter(Index %in% c("VHL", "HIF1A", "EPAS1")) %>%
+  select("Index", "ReferenceIntensity", ids_aliquot_bulk[!is.na(ids_aliquot_bulk)])
+
+protein_mat1 <- protein_df2plot %>%
+  select(-Index) %>%
+  select(-ReferenceIntensity)
+rownames(protein_mat1) <- protein_df2plot$Index
+protein_mat2 <- protein_mat1
+protein_mat2 <- as.matrix(protein_mat1) - as.vector(protein_df2plot$ReferenceIntensity)
 
 # specify pairs to filter -------------------------------------------------
 ## get genes to filter
 summary_filtered_df <- summary_df %>%
-  filter(pair_cell.types %in% c("VEGFA_FLT1.Tumor cells|Endothelial cells", "VEGFA_KDR.Tumor cells|Endothelial cells", "FLT1_VEGFB.Endothelial cells|Tumor cells")) %>%
+  mutate(interacting_pair_directed = paste0(gene.source, "_", gene.target)) %>%
+  filter(interacting_pair_directed %in% c("VEGFA_FLT1", "VEGFB_FLT1", 'VEGFA_KDR')) %>%
+  filter(pair_cell.types %in% interactions_filtered_df$pair_cell.types[interactions_filtered_df$Inter.group != "Immune:Stroma"]) %>%
+  # filter(pair_cell.types %in% interactions_filtered_df$pair_cell.types | celltypes.source2target %in% c("Normal epithelial cells->Endothelial cells")) %>%
   arrange(desc(avg_sig_mean))
 interacting_pairs_process <- summary_filtered_df$interacting_pair
 interacting_pairs_process
@@ -48,35 +69,17 @@ plot_data_df <- cellphone_df %>%
 plot_data_mat <- as.matrix(plot_data_df[, -1])
 rownames(plot_data_mat) <- plot_data_df[,1]
 ## remove the sample without endothelial cells
-# plot_data_mat <- plot_data_mat[,!(colnames(plot_data_mat) %in% c("C3L-00359-T1"))]
-plot_data_mat[1:3, 1:10]
-summary(as.vector(plot_data_mat))
+plot_data_mat <- plot_data_mat[,!(colnames(plot_data_mat) %in% c("C3L-00359-T1", "C3L-00088-N"))]
+# plot_data_mat[1:3, 1:10]
+# summary(as.vector(plot_data_mat))
 ##
 plot_data_mat[is.na(plot_data_mat)] <- -3
 ids_aliquot <- colnames(plot_data_mat)
 interaction_celltypes <- rownames(plot_data_mat)
 
-# preprocess the protein data ---------------------------------------------
-## get the bulk aliquot ids
-ids_aliquot_bulk <- mapvalues(x = ids_aliquot, from = idmetadata_df$Aliquot.snRNA.WU, to = as.vector(idmetadata_df$Aliquot.bulk))
-## make the matrix to plot the heatmap
-protein_df2plot <- protein_df %>%
-  filter(Index %in% genes_process) %>%
-  select("Index", "ReferenceIntensity", ids_aliquot_bulk[!is.na(ids_aliquot_bulk)])
-
-protein_mat1 <- protein_df2plot %>%
-  select(-Index) %>%
-  select(-ReferenceIntensity)
-rownames(protein_mat1) <- protein_df2plot$Index
-protein_mat2 <- protein_mat1
-protein_mat2 <- as.matrix(protein_mat1) - as.vector(protein_df2plot$ReferenceIntensity)
-
 # specify colors ----------------------------------------------------------
-## cell type colors
-colors_celltype <- RColorBrewer::brewer.pal(n = 4, name = "Set1")
-names(colors_celltype) <- c("Tumor cells", "Endothelial cells", "Myofibroblasts", "Fibroblasts")
 ## specify color for NA values
-color_na <- "grey70"
+color_na <- "white"
 ## make color function for heatmap body color
 RColorBrewer::display.brewer.all()
 color_blue <- RColorBrewer::brewer.pal(n = 3, name = "Set1")[2]
@@ -88,12 +91,19 @@ colors_heatmapbody <- colorRamp2(c(-3, 0, 10, 20, 30, 40),
                                  c(color_na, brewer.pal(n = 5, name = "YlOrRd")))
 colors_heatmapbody_legand <- colorRamp2(c(0, 10, 20, 30, 40), 
                                         c(brewer.pal(n = 5, name = "YlOrRd")))
+## cell type colors
+unique(c(plot_data_df$Cell_type.source, plot_data_df$Cell_type.target))
+colors_celltype <- rep(x = colors_cellgroup14[c("Tumor cells", "Endothelial cells", "Myofibroblasts", "Fibroblasts", "Macrophages", "NK cells")], c(1, 1, 1, 1, 3, 2))
+names(colors_celltype) <- c("Tumor cells", "Endothelial cells", "Myofibroblasts", "Fibroblasts", 
+                            "Macrophages", "Macrophages proliferating", "TRM", 
+                            "NK cells strong", "NK cells weak")
+## make colors for sample type
+colors_sampletype <- c("Tumor" = color_red, "Normal" = RColorBrewer::brewer.pal(n = 3, name = "Set1")[3])
 ## make color for the protein
 colors_protein = colorRamp2(c(-1, 
                               0, 
                               1), 
                             c(color_blue, "white", color_red))
-
 
 # make row annotation -----------------------------------------------------
 avg_sig_mean_vec <- mapvalues(x = interaction_celltypes, from = summary_df$pair_cell.types, to = as.vector(summary_df$avg_sig_mean))
@@ -107,30 +117,52 @@ gene_text_vec <- paste0(gene_source_vec, "->", gene_target_vec)
 ## make cell types
 celltype_source_vec <- mapvalues(x = interaction_celltypes, from = summary_filtered_df$pair_cell.types, to = as.vector(summary_filtered_df$Cell_type.source))
 celltype_target_vec <- mapvalues(x = interaction_celltypes, from = summary_filtered_df$pair_cell.types, to = as.vector(summary_filtered_df$Cell_type.target))
-celltype_text_vec <- paste0(celltype_source_vec, "->", celltype_target_vec)
-rowanno_obj1 <- rowAnnotation(Genes = anno_text(x = gene_text_vec, gp = gpar(fontface = "italic", fontsize = 15)),
-                              CellTypes = anno_text(x = celltype_text_vec, gp = gpar(fontface = "italic", fontsize = 15)),
+# celltype_text_vec <- paste0(celltype_source_vec, "->", celltype_target_vec)
+rowanno_obj1 <- rowAnnotation(Celltype.Ligand = anno_simple(x = vector(mode = "numeric", length = length(celltype_source_vec)), 
+                                                            gp = gpar(fill = NA, col = NA), width = unit(10, "mm"), 
+                                                            pch = 21, 
+                                                            pt_size = unit(7, "mm"), 
+                                                            pt_gp = gpar(fill = colors_celltype[celltype_source_vec], col = NA)), 
+                              Gene_source = anno_text(x = gene_source_vec,
+                                                      gp = gpar(fontface = "italic", fontsize = 20, border = NA),
+                                                      location = 0.5,
+                                                      just = "center"),
+                              Text_arrow = anno_text(x = rep(x = "->", length(celltype_source_vec)),
+                                                     gp = gpar(fontsize = 17, border = NA),
+                                                     location = 0.5,
+                                                     just = "center"),
+                              Celltype.Receptor = anno_simple(x = vector(mode = "numeric", length = length(celltype_target_vec)),
+                                                              gp = gpar(fill = NA, col = NA), width = unit(10, "mm"), 
+                                                              pch = 21, 
+                                                              pt_size = unit(7, "mm"), 
+                                                              pt_gp = gpar(fill = colors_celltype[celltype_target_vec], col = NA)),
+                              Gene_target = anno_text(x = gene_target_vec,
+                                                      gp = gpar(fontface = "italic", fontsize = 20, border = NA),
+                                                      location = 0.5,
+                                                      just = "center"),
                               annotation_name_side = "bottom")
 
-# make column annotation --------------------------------------------------
-vegfa_protein_vec <- as.vector(protein_mat2["VEGFA",]); names(vegfa_protein_vec) <- ids_aliquot[!is.na(ids_aliquot_bulk)]; vegfa_protein_vec <- vegfa_protein_vec[ids_aliquot]
-vegfb_protein_vec <- as.vector(protein_mat2["VEGFB",]); names(vegfb_protein_vec) <- ids_aliquot[!is.na(ids_aliquot_bulk)]; vegfb_protein_vec <- vegfb_protein_vec[ids_aliquot]
-flt1_protein_vec <- as.vector(protein_mat2["FLT1",]); names(flt1_protein_vec) <- ids_aliquot[!is.na(ids_aliquot_bulk)]; flt1_protein_vec <- flt1_protein_vec[ids_aliquot]
-kdr_protein_vec <- as.vector(protein_mat2["KDR",]); names(kdr_protein_vec) <- ids_aliquot[!is.na(ids_aliquot_bulk)]; kdr_protein_vec <- kdr_protein_vec[ids_aliquot]
-
-colanno_obj1 <- HeatmapAnnotation(VEGFA.bulk.protein = anno_simple(x = vegfa_protein_vec, col = colors_protein),
-                                  FLT1.bulk.protein = anno_simple(x = flt1_protein_vec, col = colors_protein),
-                                  VEGFB.bulk.protein = anno_simple(x = vegfb_protein_vec, col = colors_protein),
-                                  KDR.bulk.protein = anno_simple(x = kdr_protein_vec, col = colors_protein),
-                                  annotation_name_side = "left")
-
 # make column split -------------------------------------------------------
-sampletypes_vec <- mapvalues(x = ids_aliquot, from = specimen_clinical_df$Aliquot.snRNA.WU, to = as.vector(specimen_clinical_df$Histologic_Type))
+sampletypes_vec <- mapvalues(x = ids_aliquot, from = specimen_clinical_df$Aliquot.snRNA.WU, to = as.vector(specimen_clinical_df$Sample_Type))
+sampletypes_factor <- factor(x = sampletypes_vec, levels = c("Tumor", "Normal"))
+
+# make column annotation --------------------------------------------------
+HIF1A_protein_vec <- as.vector(protein_mat2["HIF1A",]); names(HIF1A_protein_vec) <- ids_aliquot[!is.na(ids_aliquot_bulk)]; HIF1A_protein_vec <- HIF1A_protein_vec[ids_aliquot]
+EPAS1_protein_vec <- as.vector(protein_mat2["EPAS1",]); names(EPAS1_protein_vec) <- ids_aliquot[!is.na(ids_aliquot_bulk)]; EPAS1_protein_vec <- EPAS1_protein_vec[ids_aliquot]
+VHL_protein_vec <- as.vector(protein_mat2["VHL",]); names(VHL_protein_vec) <- ids_aliquot[!is.na(ids_aliquot_bulk)]; VHL_protein_vec <- VHL_protein_vec[ids_aliquot]
+VHL_variantclass_vec <- mapvalues(x = ids_aliquot, from = bulkprofile_df$Aliquot_snRNA_WU, to = as.vector(bulkprofile_df$Mut.VHL))
+VHL_variantclass_vec[VHL_variantclass_vec %in% ids_aliquot] <- NA
+colanno_obj1 <- HeatmapAnnotation(HIF1A.bulk.protein = anno_simple(x = HIF1A_protein_vec, col = colors_protein),
+                                  HIF2A.bulk.protein = anno_simple(x = EPAS1_protein_vec, col = colors_protein),
+                                  VHL.bulk.protein = anno_simple(x = VHL_protein_vec, col = colors_protein),
+                                  VHL.mutation= anno_simple(x = VHL_variantclass_vec, col = variant_class_colors[VHL_variantclass_vec]),
+                                  annotation_name_side = "left")
 
 # plot hetamp body --------------------------------------------------------
 p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              col = colors_heatmapbody,
-                             na_col = color_na, border = "black", 
+                             na_col = color_na, 
+                             border = "grey70",
                              ## row
                              row_names_side = "left",
                              row_names_max_width = unit(12, "cm"),
@@ -139,25 +171,26 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              show_row_dend = F, cluster_rows = T, 
                              row_title_side = "right",
                              ## column
-                             show_column_dend = F, cluster_columns = T, 
-                             column_split = sampletypes_vec, column_title = NULL, 
-                             bottom_annotation = colanno_obj1,
+                             show_column_dend = F, cluster_columns = T, show_column_names = T,
+                             column_split = sampletypes_factor, column_title = NULL, 
+                             top_annotation = colanno_obj1,
+                             ## others
                              show_heatmap_legend = F)
 p
 # make legend list --------------------------------------------------------
 list_lgd = list(
   Legend(col_fun = colors_heatmapbody_legand, 
-         title = "Scaled interaction strength", 
-         title_gp = gpar(fontsize = 10, fontface = "bold"),
+         title = "Interaction strength", 
+         title_gp = gpar(fontsize = 20),
          legend_width = unit(4, "cm"),
          legend_height = unit(3, "cm"),
          direction = "horizontal"),
-  Legend(col_fun = colors_protein, 
-         title = "Protein abundance", 
-         title_gp = gpar(fontsize = 10, fontface = "bold"),
-         legend_width = unit(4, "cm"),
-         legend_height = unit(3, "cm"),
-         direction = "horizontal"))
+  Legend(labels = names(variant_class_colors),
+         title = "VHL variant classification",
+         legend_gp = gpar(fill = variant_class_colors), 
+         labels_gp = gpar(fontsize=15), title_gp = gpar(fontsize = 20),
+         grid_height = unit(0.75, "cm"),
+         grid_width = unit(0.75, "cm"), nrow = 2))
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "druggable_interactions", ".png")
@@ -167,7 +200,7 @@ draw(object = p,
 dev.off()
 
 file2write <- paste0(dir_out, "druggable_interactions", ".pdf")
-pdf(file2write, width = 10, height = 3.75, useDingbats = F)
+pdf(file2write, width = 10, height = 6, useDingbats = F)
 draw(object = p, 
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
 dev.off()

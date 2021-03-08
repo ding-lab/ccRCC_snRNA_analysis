@@ -56,7 +56,8 @@ group1_findmarkers <- "Tumor cells"
 group2_findmarkers <- "Proximal tubule cells from NATs"
 
 # subset to cases with snATAC data ----------------------------------------
-easyids_snatac <- c("C3L-00416-T2", "C3L-01313-T1", "C3N-01200-T1", "C3L-00088-N", "C3N-01200-N")
+easyids_snatac <- c("C3N-00733-T1", "C3L-00610-T1", "C3L-01313-T1", "C3L-00416-T2", "C3L-01287-T1", "C3L-00917-T1", "C3L-00088-T1", "C3N-01200-T1", "C3L-00088-T2", "C3L-00079-T1", "C3L-00448-T1",
+                    "C3L-00088-N", "C3N-01200-N")
 aliquots_snatac <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Aliquot.snRNA.WU %in% easyids_snatac]
 aliquots_snatac
 aliquots_snatac_nat <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Aliquot.snRNA.WU %in% easyids_snatac & idmetadata_df$Sample_Type == "Normal"]
@@ -93,7 +94,7 @@ marker_roc_df <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = group
 marker_roc_df$row_name <- rownames(marker_roc_df)
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "findallmarkers_wilcox_tumorcells_vs_pt.", run_id, ".tsv")
+file2write <- paste0(dir_out, "findallmarkers_wilcox_combined_snatac_tumorcells_vs_pt.", run_id, ".tsv")
 write.table(x = marker_roc_df, file = file2write, sep = "\t", quote = F, row.names = F)
 cat("finish writing the result!\n")
 

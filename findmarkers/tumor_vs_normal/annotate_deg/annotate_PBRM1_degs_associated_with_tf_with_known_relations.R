@@ -18,7 +18,7 @@ dir.create(dir_out)
 ## input known TF relationship
 tf2target_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/complete_tf_target_table/20201027.v1/omnipathdb.transcriptional.plus_manual.20201027.v1.tsv")
 ## input the DEG-TF matrix
-deg2tf_wide_df <- fread(data.table = F, input = "./Supplementary_Information/Source_Data/PBRM1_mutants_TF_DEG_byMotif_inPromoterDACR.20201203.tsv")
+deg2tf_wide_df <- fread(data.table = F, input = "./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/PBRM1_mutants_tumor-up_TF_DEG_withMotifs_inPromoterDACR.20201227.tsv")
 
 # melt the DEG-TF table ---------------------------------------------------
 deg2tf_long_df <- melt(deg2tf_wide_df)

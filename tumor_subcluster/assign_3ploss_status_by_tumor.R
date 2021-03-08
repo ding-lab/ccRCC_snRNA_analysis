@@ -35,7 +35,8 @@ cnvfraction_df$aliquot.wu <- mapvalues(x = cnvfraction_df$aliquot, from = idmeta
 cnvfraction_df$gene_expected_state <- mapvalues(x = cnvfraction_df$gene_symbol, from = knowncnvgenes_df$Gene_Symbol, to = as.vector(knowncnvgenes_df$CNV_Type))
 ## filter genes
 cnvfraction_filtered_df <- cnvfraction_df %>%
-  filter(gene_symbol %in% genes_filtered)
+  filter(gene_symbol %in% genes_filtered) %>%
+  filter(!(grepl(x = tumor_subcluster, pattern = "CNA")))
 ## get 0 values to add
 cnvdetected_bystate_df <- cnvfraction_filtered_df %>%
   select(aliquot.wu, gene_symbol, cna_3state, tumor_subcluster) %>%
@@ -97,6 +98,7 @@ cnvfraction_subclonal_df <- cnvfraction_merged_df %>%
   filter(Group_3ploss == "Partial") %>%
   select(tumor_subcluster) %>%
   unique()
+nrow(cnvfraction_subclonal_df)
 cnvfraction_merged_df %>%
   filter(Group_3ploss == "Partial") %>%
   select(tumor_subcluster) %>%

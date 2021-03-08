@@ -37,13 +37,29 @@ fat_cadherins_genes <- c("FAT1", "FAT2", "FAT3", "FAT4")
 
 ## genes mutated in ccRCC
 genes_pathogenicpathways_in_ccRCC <- c(ubiquitin_proteasome_genes,
-                            swisnf_genes,
-                            other_epigeneticregulator_genes,
-                            pi3k_mtor_genes,
-                            p53_cellcycle_genes,
-                            fat_cadherins_genes)
+                                       swisnf_genes,
+                                       other_epigeneticregulator_genes,
+                                       pi3k_mtor_genes,
+                                       p53_cellcycle_genes,
+                                       fat_cadherins_genes)
 genes_pathogenicpathways_in_ccRCC <- unique(genes_pathogenicpathways_in_ccRCC)
 ## PBAF gens
 ### reference: https://www.nature.com/articles/onc20094/figures/1
 ### reference: https://www.nature.com/articles/onc20094/tables/1
 pbaf_genes <- c("PBRM1", "ARID2", "SMARCE1", "SMARCC2", "ACTL6A", "ACTL6B", "SMARCC1", "SMARCD1", "SMARCB1")
+
+# sample annotation -------------------------------------------------------
+snatacsample_anno_df <- data.frame(case = c("C3L-00088", "C3N-01200",
+                                            "C3L-01313", "C3N-01200", "C3L-01287", "C3L-00416", 
+                                            "C3L-00610", "C3N-00733", "C3L-00079", "C3L-00416", 
+                                            "C3L-00088", "C3L-00088", "C3L-00448", "C3L-00917"),
+                                   easyid = c("C3L-00088-N", "C3N-01200-N",
+                                              "C3L-01313-T1", "C3N-01200-T1", "C3L-01287-T1", "C3L-00416-T2", 
+                                              "C3L-00610-T1", "C3N-00733-T1", "C3L-00079-T1", "C3L-00416-T2", 
+                                              "C3L-00088-T1", "C3L-00088-T2", "C3L-00448-T1", "C3L-00917-T1"),
+                                   sample_group = c(rep("NAT", 2),
+                                                    rep("BAP1-mutant tumor", 4),
+                                                    rep("PBRM1-mutant tumor", 4),
+                                                    rep("non-mutant tumor", 4)))
+
+

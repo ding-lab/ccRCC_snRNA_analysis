@@ -42,23 +42,22 @@ loadCNAstatus <- function() {
   colnames(cna_status) <- colnames(cna)
   return(cna_status)
 }
-# 
-# loadRNA <- function() {
-#   rna_fn <- "ccRcc_RNA_rpkm_Mich_formatted_tumor.csv"
-#   rna_tab <- fread(input = paste0(dir2dinglab_projects, "TP53_shared_data/resources/rna/", rna_fn), data.table = F)
-#   
-#   colnames(rna_tab)[1] <- "gene"
-#   rna_mat <- as.matrix(rna_tab[,-1])
-#   rna_mat_log2 <- log2(rna_mat+1)
-#   rna_tab <- data.frame(gene = rna_tab$gene)
-#   rna_tab <- cbind(rna_tab, as.data.frame(rna_mat_log2))
-#   return(rna_tab) 
-# }
-# 
-loadParseProteomicsData <- function(expression_type, sample_type) {
+
+loadRNALog2 <- function() {
+  rna_tab <- fread(input = paste0(dir_base, "Resources/Bulk_Processed_Data/mRNA/RNA_rpkm_tumor_normal.tsv"), data.table = F)
+  
+  colnames(rna_tab)[1] <- "gene"
+  rna_mat <- as.matrix(rna_tab[,-1])
+  rna_mat_log2 <- log2(rna_mat+1)
+  rna_tab <- data.frame(gene = rna_tab$gene)
+  rna_tab <- cbind(rna_tab, as.data.frame(rna_mat_log2))
+  return(rna_tab)
+}
+
+loadParseProteomicsData <- function(expression_type) {
   ## expresson_type: PRO or PHO (phosphosite level) or PHO_collapsed (protein level)
   if (expression_type == "protein") {
-    path_protein <- paste0("./Resources/Bulk_Processed_Data/Protein/CCRCC_PRO_tumor_PGDAC_MD_MAD_partID.txt")
+    path_protein <-paste0(dir_base, "Resources/Bulk_Processed_Data/Protein/6_CPTAC3_CCRCC_Whole_abundance_gene_protNorm=2_CB.tsv")
     exp_data <- fread(input = path_protein, data.table = F)
   }
   return(exp_data)

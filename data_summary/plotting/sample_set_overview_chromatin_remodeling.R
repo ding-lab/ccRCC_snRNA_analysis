@@ -1,9 +1,31 @@
 # Yige Wu @ WashU 2020 Feb
 ## plot a heatmap with mutations and expression in epigenetic regulators and chramatin remodeling genes
 
-# source ------------------------------------------------------------------
-setwd(dir = "~/Box/")
-source("./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/ccRCC_snRNA_analysis/ccRCC_snRNA_shared.R")
+# set up libraries and output directory -----------------------------------
+## set working directory
+dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+setwd(dir_base)
+source("./ccRCC_snRNA_analysis/load_pkgs.R")
+source("./ccRCC_snRNA_analysis/functions.R")
+source("./ccRCC_snRNA_analysis/variables.R")
+source("./ccRCC_snRNA_analysis/plotting.R")
+source("./ccRCC_snRNA_analysis/load_data.R")
+## set run id
+version_tmp <- 1
+run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
+## set output directory
+dir_out <- paste0(makeOutDir(), run_id, "/")
+dir.create(dir_out)
+
+# input dependencies ---------------------------------------
+## input id meta data
+idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
+## input mutation matrix
+maf <- loadMaf()
+## input CNA matrix
+cna_tab <- loadCNAstatus()
+## load RNA
+rna_tab <- 
 
 # set variables -----------------------------------------------------------
 ## plotting paramters
@@ -12,11 +34,8 @@ breaks = seq(-(cap),cap, by=0.2)
 ## add color palette
 color.palette <- colorRampPalette(rev(brewer.pal(10, "RdBu")))(length(breaks))
 
-# input aliquots with snRNA already ---------------------------------------
-path_srat <- fread(input = "./Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/Resources/Analysis_Results/individual_cluster/write_path_to_seurat_objects_on_box/20200219.v1/Seurat_Object_Paths.20200219.v1.tsv", data.table = F)
-
 # plot MET, VEGFR  ---------------------------------------------------
-mut_genes <- c(SMGs[["CCRCC"]], pbaf_genes)
+mut_genes <- unique(c(ccRCC_drivers, pbaf_genes))
 cna_genes <- c("VHL", "SETD2", "BAP1","PBRM1")
 rna_genes <- c(pbaf_genes, 
                "SETD2", "BAP1",
@@ -46,20 +65,14 @@ phosphosite <- paste0(rsds, collapse = "_")
 ann_colors <- list()
 
 # input data first because different for each cancer type --------------------------------------------------------------
-## input mutation matrix
-maf <- loadMaf()
 somatic_mat <- generate_somatic_mutation_matrix(pair_tab = mut_genes, maf = maf)
 
 ## mutation needs to show both geneA and geneB
 somatic_mat <- somatic_mat[somatic_mat$Hugo_Symbol %in% mut_genes,]
 
-## input CNA matrix
-cna_tab <- loadCNAstatus()
+
 cna_tab <- cna_tab[cna_tab$gene %in% cna_genes, ]
 
-
-## load RNA
-rna_tab <- loadRNA()
 rna_tab <- rna_tab[rna_tab$gene %in% rna_genes,]
 
 ## input protein data
@@ -117,15 +130,6 @@ specimen2case_map <- cptac_sample_map %>%
   dplyr::filter(Type == "Tumor") %>%
   select(Case.ID, Specimen.Label)
 rownames(specimen2case_map) <- specimen2case_map$Specimen.Label
-
-
-# input xcell result and add immnue group ------------------------------------------------------
-xcell_tab <- readxl::read_excel("./Ding_Lab/Projects_Current/CPTAC/PGDAC/ccRCC_discovery_manuscript/ccRCC Manuscript/CPTAC3-ccRCC-SupplementaryTables_Final/Table S7.xlsx", sheet = "xCell Signatures", skip = 2)
-## immnue group 
-immune_groups <- unlist(xcell_tab[1,2:ncol(xcell_tab)])
-immune_group_df <- data.frame(immune_group = immune_groups, partID = specimen2case_map[names(immune_groups), "Case.ID"])
-# col_anno <- merge(col_anno, immune_group_df, by = c("partID"), all.x = T)
-# col_anno$is_orinal_segment_in_WashU <- as.character(col_anno$partID %in% shipped_sample_info$`Subject ID`)
 
 col_anno %>% head()
 
@@ -221,8 +225,8 @@ if (length(row_order) > 1) {
 }
 
 # plotting ----------------------------------------------------------------
-fn <- paste0(makeOutDir(), paste(geneB, phosphosite, sep = "_"), ".Legend.", format(Sys.Date(), "%Y%m%d") , ".v", version_tmp, ".pdf")
-my_heatmap <- pheatmap(mat_value, 
+fn <- paste0(dir_out, paste(geneB, phosphosite, sep = "_"), ".pdf")
+my_heatmap <- pheatmap::pheatmap(mat_value, 
                        gaps_row = c(13),
                        color = color.palette,
                        annotation_col = col_anno,

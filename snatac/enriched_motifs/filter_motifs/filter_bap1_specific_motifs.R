@@ -20,6 +20,7 @@ dir.create(dir_out)
 dam_df <- fread(data.table = F, input = "../ccRCC_snATAC/Resources/snATAC_Processed_Data/Enriched_Motifs/Tumor_vs_NormalPT/Score_difference.Tumor_Normal_comparison.20201130.tsv")
 ## input samples to intersect
 easyids2interesect <- c("C3L-00416-T2", "C3L-01313-T1", "C3N-01200-T1")
+easyids2interesect <- c("C3L-00416-T2", "C3L-01313-T1", "C3N-01200-T1", "C3L-01287-T1")
 
 # summarize genes by occurance ---------------------------------------------
 dam_filtered_df <- dam_df %>%

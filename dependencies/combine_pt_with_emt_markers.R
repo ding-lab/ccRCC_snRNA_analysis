@@ -16,9 +16,11 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_Markers/Gene2CellType_Tab.20200911.v1.tsv")
+# gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_Markers/Gene2CellType_Tab.20200911.v1.tsv")
+gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_Markers/Gene2CellType_Tab.20200922.v2.tsv")
 # emtgenes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_emt_genes/20200911.v1/EMT_Genes.20200911.v1.tsv")
-emtgenes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_emt_genes/20201026.v1/EMT_Genes.20201026.v1.tsv")
+# emtgenes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_emt_genes/20201026.v1/EMT_Genes.20201026.v1.tsv")
+emtgenes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_emt_genes/20201217.v1/EMT_Genes.20201217.v1.tsv")
 ## input essential tumor cell markers (tumor + PT markers)
 tumorgenes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/filter_markers/filter_tumor_pt_markers_bycelltypedegs/20200920.v2/Essential_Tumor_Cell_Markers.tsv")
 
@@ -26,16 +28,17 @@ tumorgenes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/fin
 
 ## prepare EMT genes
 emtgenes_2combine_df <- emtgenes_df %>%
-  dplyr::mutate(Gene_Group1 = "EMT_Genes") %>%
-  filter(Key_Mesenchymal_Genes | Key_Epithelial_Genes) %>%
+  dplyr::filter(Key_Mesenchymal_Genes | Key_Epithelial_Genes) %>%
   # dplyr::filter(is.na(gene_group) | (!is.na(gene_group) & gene_group != "Collagen")) %>%
   dplyr::rename(Gene = hgnc_symbol) %>%
   dplyr::rename(Gene_Group2 = gene_function) %>%
+  dplyr::mutate(Gene_Group1 = "EMT_Genes") %>%
   dplyr::select(Gene, Gene_Group1, Gene_Group2)
 ## prepare cell type markers
 gene2celltype_2combine_df <- gene2celltype_df %>%
   dplyr::filter(!(Gene %in% emtgenes_2combine_df$Gene)) %>%
-  dplyr::filter(Gene %in% tumorgenes_df$gene) %>%
+  dplyr::filter(Cell_Type1 %in% c("Tumor cells", "Proximal tubule", "Fibroblasts")) %>%
+  # dplyr::filter(Gene %in% tumorgenes_df$gene) %>%
   dplyr::mutate(Gene_Group1 = "Cell_Type_Markers") %>%
   dplyr::rename(Gene_Group2 = Cell_Type1) %>%
   dplyr::select(Gene, Gene_Group1, Gene_Group2)

@@ -1,5 +1,4 @@
-# Yige Wu @WashU March 2020
-## make scatterplot to compare the tumor content estimated from snRNA data with bulk RNA data
+# Yige Wu @WashU March 2021
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -33,10 +32,10 @@ plot_data_df <- plot_data_df %>%
 p <- ggplot()
 # p <- p + geom_point(data = plot_data_df, mapping = aes(x = x, y = y))
 p <- ggscatter(plot_data_df, x = "x", y = "y",
-                add = "reg.line",  # Add regressin line
-                add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
-                conf.int = TRUE # Add confidence interval
-               )
+               add = "reg.line",  # Add regressin line
+               add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+               conf.int = TRUE # Add confidence interval
+)
 # Add correlation coefficient
 p <- p + stat_cor(method = "pearson", label.x = 0.5, label.y = 0.8)
 p <- p + xlab("Tumor Content Estimated from snRNA Data")

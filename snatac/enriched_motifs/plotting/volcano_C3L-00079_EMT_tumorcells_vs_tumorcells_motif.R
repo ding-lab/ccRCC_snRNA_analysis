@@ -67,9 +67,7 @@ plot_data_df <- plot_data_df %>%
 # plot all markers--------------------------------------------------------------------
 ## plot
 p <- ggplot()
-# p <- p + geom_vline(xintercept = x_pos, linetype = 2)
-# p <- p + geom_vline(xintercept = x_neg, linetype = 2)
-p <- p + geom_vline(xintercept = 0, linetype = 2)
+p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey70")
 p <- p + geom_point(data = subset(plot_data_df, y_plot < y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = "grey70")
 p <- p + geom_point(data = subset(plot_data_df, y_plot >= y_bottom & x_plot > 0), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = color_right_deep)
 p <- p + geom_point(data = subset(plot_data_df, y_plot >= y_bottom & x_plot < 0), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = color_left_deep)
@@ -77,17 +75,15 @@ p <- p + geom_point(data = subset(plot_data_df, y_plot >= y_bottom & x_plot < 0)
 # p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_TF)),
 #                          mapping = aes(x = x_plot, y = y_plot, label = text_TF), color = "black", force = 4, fontface = "bold", segment.alpha = 0.5)
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_TF) & x_plot > 0),
-                         mapping = aes(x = x_plot, y = y_plot, label = text_TF), color = "black", force = 4, fontface = "italic", segment.alpha = 1, size = 6, segment.size = 0.2)
+                         mapping = aes(x = x_plot, y = y_plot, label = text_TF), color = "black", force = 4, alpha = 0.8, size = 6, segment.size = 0.2, segment.alpha = 0.5)
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_TF) & x_plot < 0),
-                         mapping = aes(x = x_plot, y = y_plot, label = text_TF), color = "black", force = 3, fontface = "italic", segment.alpha = 1, segment.size = 0.2)
+                         mapping = aes(x = x_plot, y = y_plot, label = text_TF), color = "black", force = 3, alpha = 0.8, segment.size = 0.2, segment.alpha = 0.5)
 p <- p + xlim(-3, NA)
-p <- p + theme_bw()
-# p <- p + ggtitle(label = paste0("C3L-00079 ", "VIM-high transitional cells vs tumor cells"))
+p <- p + theme_classic()
 p <- p + xlab("Bias-corrected accessibility deviations")
 p <- p + ylab("-Log10(P-value-adjusted)")
-p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-               panel.background = element_blank())
-# p <- p + theme(axis.line = element_line(colour = "black"))
+p <- p + theme(axis.text = element_text(size = 14),
+               axis.title = element_text(size = 15))
 p
 file2write <- paste0(dir_out, "volcano.", "png")
 png(file2write, width = 800, height = 600, res = 150)

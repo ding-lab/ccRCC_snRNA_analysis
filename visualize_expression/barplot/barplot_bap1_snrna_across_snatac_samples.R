@@ -38,11 +38,24 @@ plot_data_long_df$easy_id <- mapvalues(x = plot_data_long_df$aliquot, from = idm
 plot_data_long_df$sample_type <- mapvalues(x = plot_data_long_df$aliquot, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Sample_Type))
 plot_data_long_df <- plot_data_long_df %>%
   filter(easy_id %in% easyids_snatac) %>%
-  filter((cellgroup == "Tumor.cells" & sample_type == "Tumor") | (cellgroup == "Proximal.tubule" & sample_type == "Normal"))
+  filter((cellgroup == "Tumor.cells" & sample_type == "Tumor") | (cellgroup == "Proximal.tubule" & sample_type == "Normal")) %>%
+  mutate(sample_type_text = ifelse(sample_type == "Normal", "NAT", "Tumor"))
+arrange(desc(value))
+plot_data_long_df$easy_id_ordered <- factor(x = plot_data_long_df$easy_id, levels = plot_data_long_df$easy_id)
 
 # make barplot ------------------------------------------------------------
 p <- ggplot()
-p <- p + geom_col(data = plot_data_long_df, mapping = aes(x = easy_id, y = value))
+p <- p + geom_col(data = plot_data_long_df, mapping = aes(x = easy_id_ordered, y = value))
+p <- p + facet_grid(.~sample_type_text, scales = "free_x", shrink = T, space = "free_x")
+p <- p + theme_classic()
+p <- p + ylab(label = "Average snRNA expression")
+p <- p + theme(strip.background = element_rect(fill = NA),
+               panel.spacing = unit(0, "lines"))
+p <- p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+p <- p + theme(axis.title.x = element_blank(), axis.ticks.x = element_blank())
 p
-
+file2write <- paste0(dir_out, genes2filter, "_snRNA_expression_across_snATAC_samples.", "pdf")
+pdf(file2write, width = 3, height = 3, useDingbats = F)
+print(p)
+dev.off()
 

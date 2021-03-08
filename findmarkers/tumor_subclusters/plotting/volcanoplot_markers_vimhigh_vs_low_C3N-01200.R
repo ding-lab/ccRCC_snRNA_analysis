@@ -65,13 +65,15 @@ p <- p + geom_point(data = subset(plot_data_df, x_plot <= 0), mapping = aes(x = 
 # p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene)),
 #                          mapping = aes(x = x_plot, y = y_plot, label = text_gene), color = "black", force = 3, alpha = 0.8, fontface = "bold")
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot > 0),
-                         mapping = aes(x = x_plot, y = y_plot, label = text_gene), color = "black", force = 3, alpha = 0.8, fontface = "bold", xlim = c(1.5, NA))
+                         mapping = aes(x = x_plot, y = y_plot, label = text_gene), color = "black", force = 3, alpha = 0.8, fontface = "italic", xlim = c(1.5, NA), segment.color = "grey70")
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot < 0),
-                         mapping = aes(x = x_plot, y = y_plot, label = text_gene), color = "black", force = 2, alpha = 0.8, fontface = "bold", xlim = c(NA, -1))
-p <- p + theme_bw()
+                         mapping = aes(x = x_plot, y = y_plot, label = text_gene), color = "black", force = 2, alpha = 0.8, fontface = "italic", xlim = c(NA, -1), segment.color = "grey70")
+p <- p + theme_classic()
 # p <- p + ggtitle(label = paste0("C3N-01200 ", "VIM-high transitional cells vs tumor cells"))
-p <- p + xlab("log2(Fold-Change) (transitional cells vs tumor cells)")
+p <- p + xlab("Log2(Fold-Change) (Fate 2 vs. Fate 1 tumor cells)")
 p <- p + ylab("-Log10(P-value-adjusted)")
+p <- p + theme(axis.text = element_text(size = 12))
+p <- p + theme(axis.title = element_text(size = 12))
 p
 
 # write output ------------------------------------------------------------

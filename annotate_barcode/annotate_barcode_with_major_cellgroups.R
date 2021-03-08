@@ -42,7 +42,7 @@ barcode2celltype_df <- barcode2celltype_df %>%
   mutate(Cell_group14_w_transitional = ifelse(Cell_type.shorter == "EMT tumor cells", "EMT tumor cells", Cell_group13))
 table(barcode2celltype_df$Cell_group14_w_transitional)
 
-# make a new group for the transitional cells -----------------------------
+# make a new group for the epithelial cell types -----------------------------
 barcode2celltype_df <- barcode2celltype_df %>%
   mutate(Cell_group_w_epithelialcelltypes = ifelse(Cell_type.shorter == "Normal epithelial cells", Cell_type.detailed, Cell_group13))
 table(barcode2celltype_df$Cell_group_w_epithelialcelltypes)

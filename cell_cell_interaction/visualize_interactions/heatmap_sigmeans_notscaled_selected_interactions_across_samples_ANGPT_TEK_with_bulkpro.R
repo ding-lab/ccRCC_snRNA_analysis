@@ -28,6 +28,8 @@ idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sam
 specimen_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/extract_specimen_clinical_data/20200717.v1/snRNA_ccRCC_Specimen_Clinicl_Data.20200717.v1.tsv")
 ## input protein data
 protein_df <- fread("./Resources/Bulk_Processed_Data/Protein/6_CPTAC3_CCRCC_Whole_abundance_gene_protNorm=2_CB.tsv", data.table = F)
+## input mutation data
+bulkprofile_df <- fread(data.table = F, input = "./Resources/Analysis_Results/data_summary/merge_bulk_sn_profiles/20200512.v1/bulk_sn_omics_profile.20200512.v1.tsv")
 
 # specify pairs to filter -------------------------------------------------
 ## get genes to filter
@@ -127,10 +129,13 @@ rowanno_obj1 <- rowAnnotation(Genes = anno_text(x = gene_text_vec, gp = gpar(fon
 angpt2_protein_vec <- as.vector(protein_mat2["ANGPT2",]); names(angpt2_protein_vec) <- ids_aliquot[!is.na(ids_aliquot_bulk)]; angpt2_protein_vec <- angpt2_protein_vec[ids_aliquot]
 angpt1_protein_vec <- as.vector(protein_mat2["ANGPT1",]); names(angpt1_protein_vec) <- ids_aliquot[!is.na(ids_aliquot_bulk)]; angpt1_protein_vec <- angpt1_protein_vec[ids_aliquot]
 tek_protein_vec <- as.vector(protein_mat2["TEK",]); names(tek_protein_vec) <- ids_aliquot[!is.na(ids_aliquot_bulk)]; tek_protein_vec <- tek_protein_vec[ids_aliquot]
+VHL_variantclass_vec <- mapvalues(x = ids_aliquot, from = bulkprofile_df$Aliquot_snRNA_WU, to = as.vector(bulkprofile_df$Mut.VHL))
+VHL_variantclass_vec[VHL_variantclass_vec %in% ids_aliquot] <- NA
 
 colanno_obj1 <- HeatmapAnnotation(ANGPT2.bulk.protein = anno_simple(x = angpt2_protein_vec, col = colors_protein),
                                   ANGPT1.bulk.protein = anno_simple(x = angpt1_protein_vec, col = colors_protein),
                                   TEK.bulk.protein = anno_simple(x = tek_protein_vec, col = colors_protein),
+                                  VHL.mutation= anno_simple(x = VHL_variantclass_vec, col = variant_class_colors[VHL_variantclass_vec]),
                                   annotation_name_side = "left")
 
 # make column split -------------------------------------------------------
