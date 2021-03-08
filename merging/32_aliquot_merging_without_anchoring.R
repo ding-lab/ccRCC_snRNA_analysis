@@ -28,6 +28,7 @@ run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
+options(future.globals.maxSize = 1000 * 1024^2)
 
 # input dependencies ------------------------------------------------------
 ## input seurat paths
