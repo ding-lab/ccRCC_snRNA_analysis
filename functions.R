@@ -152,3 +152,21 @@ get_somatic_mutation_vaf_matrix <- function(pair_tab, maf) {
   return(mut_mat)
 }
 
+get_somatic_mutation_aachange_vaf_matrix <- function(pair_tab, maf) {
+  genes4mat <- unique(unlist(pair_tab))
+  length(genes4mat)
+  
+  maf <- maf[maf$Hugo_Symbol %in% genes4mat & maf$Variant_Classification != "Silent",]
+  nrow(maf)
+  maf$sampID <- str_split_fixed(string = maf$Tumor_Sample_Barcode, pattern = "_", 2)[,1]
+  maf$vaf <- maf$t_alt_count/(maf$t_alt_count + maf$t_ref_count)
+  
+  maf$aachange_vaf <- paste0(maf$HGVSp_Short, "(", signif(x = maf$vaf, digits = 2), ")")
+  mut_mat <- reshape2::dcast(data = maf, Hugo_Symbol ~ sampID, fun =  function(x) {
+    aahange_vaf <- paste0(unique(x), collapse = ",")
+    return(aahange_vaf)
+  }, value.var = "aachange_vaf", drop=FALSE)
+  rownames(mut_mat) <- as.vector(mut_mat$Hugo_Symbol)
+  return(mut_mat)
+}
+

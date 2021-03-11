@@ -11,7 +11,7 @@ source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/load_data.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -23,13 +23,11 @@ protein_df <- loadParseProteomicsData(expression_type = "protein")
 ## input bulk meta data
 metadata_bulk_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Meta_Data/cptac-metadata.csv")
 ## input id meta data
-metadata_sn_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv", data.table = F)
+metadata_sn_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210305.v1/meta_data.20210305.v1.tsv", data.table = F)
 ## input mutation file
 maf_df <- loadMaf()
 ## input te bulk genomics/methylation events
 bulk_sn_omicsprofile_df <- fread(input = "./Resources/Analysis_Results/data_summary/merge_bulk_sn_profiles/20200512.v1/bulk_sn_omics_profile.20200512.v1.tsv", data.table = F)
-## input clinical info
-specimen_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/extract_specimen_clinical_data/20200717.v1/snRNA_ccRCC_Specimen_Clinicl_Data.20200717.v1.tsv")
 
 # preprocess --------------------------------------------------------------
 ## set parameters
@@ -47,7 +45,10 @@ protein_df <- protein_df[exp_genes[exp_genes %in% protein_df$Index],]
 ### merge meta data
 metadata_merged_df <- merge(x = metadata_bulk_df %>%
                               filter(Type == "Tumor"), 
-                            y = metadata_sn_df, by.x = c("easy_id"), by.y = c("Aliquot.snRNA.WU"), all.x = T)
+                            y = metadata_sn_df %>%
+                              filter(Sample_Type == "Tumor"), 
+                            by.x = c("easy_id", "Case.ID"), by.y = c("Aliquot.snRNA.WU", "Case"), all = T)
+easyids_plot <- metadata_merged_df$easy_id
 ### make mutation matrix
 mut_mat <- get_mutation_class_sim_matrix(pair_tab = ccRCC_drivers, maf = maf_df)
 mut_df <- t(mut_mat[,-1]) %>% as.data.frame()
@@ -64,8 +65,14 @@ rownames(protein_scaled_mat) <- protein_df$Index
 ### rename column names
 easyids_protein <- mapvalues(x = aliquotids_protein, from = metadata_bulk_df$Specimen.Label, to = as.vector(metadata_bulk_df$easy_id))
 colnames(protein_scaled_mat) <- easyids_protein
-easyids_plot <- easyids_protein[grepl(pattern = "T1", x = easyids_protein)]
-protein_scaled_filtered_mat <- protein_scaled_mat[,easyids_plot]
+# easyids_plot <- easyids_protein[grepl(pattern = "T1", x = easyids_protein)]
+## add NA data for T2 and T3 segments
+easyids_pro_na <- easyids_plot[!(easyids_plot %in% easyids_protein)]
+protein_na_mat <- matrix(data = 0, nrow = nrow(protein_scaled_mat), ncol = length(easyids_pro_na))
+colnames(protein_na_mat) <- easyids_pro_na
+rownames(protein_na_mat) <- rownames(protein_scaled_mat)
+protein_scaled_padded_mat <- cbind(protein_na_mat, protein_scaled_mat)
+protein_scaled_filtered_mat <- protein_scaled_padded_mat[,easyids_plot]
 ## scale RNA data
 
 ## map ids
@@ -77,9 +84,9 @@ plot_data_mat <- protein_scaled_filtered_mat
 color_blue <- RColorBrewer::brewer.pal(n = 3, name = "Set1")[2]
 color_red <- RColorBrewer::brewer.pal(n = 3, name = "Set1")[1]
 summary(as.vector(plot_data_mat))
-colors_heatmapbody = colorRamp2(c(-0.75, 
+colors_heatmapbody = colorRamp2(c(-0.5, 
                                   0, 
-                                  0.75), 
+                                  0.5), 
                                 c(color_blue, "white", color_red))
 color_na <- "grey70"
 ## make colors for data availability
@@ -104,9 +111,9 @@ top_col_anno_df <- merge(x = metadata_merged_df,
 rownames(top_col_anno_df) <- top_col_anno_df$easy_id
 top_col_anno_df <- top_col_anno_df[easyids_plot,]
 top_col_anno_df <- top_col_anno_df %>%
-  mutate(Sample_atWashU = as.character(!is.na(Case))) %>%
+  mutate(Sample_atWashU = as.character(!is.na(Aliquot.snRNA))) %>%
   mutate(snRNA_available = as.character(!is.na(snRNA_available) & snRNA_available == TRUE)) %>%
-  mutate(snATAC_available = as.character(Case.ID %in% snatacsample_anno_df$case))
+  mutate(snATAC_available = as.character(!is.na(snATAC_available) & snATAC_available == TRUE))
 ### make text for translocations
 top_col_anno = HeatmapAnnotation(
   snRNA_Availability = anno_simple(x = top_col_anno_df$snRNA_available,
@@ -139,6 +146,7 @@ top_col_anno = HeatmapAnnotation(
 p <- Heatmap(matrix = plot_data_mat, col = colors_heatmapbody,
              na_col = color_na,
              ## column
+             cluster_columns = T,
              # column_split = col_split_factor,
              # column_order = order(match(plot_data_df$Aliquot_Suffix, c("T1", "T2", "T3", "N"))),
              # bottom_annotation = bottom_col_anno, 
@@ -152,7 +160,9 @@ p
 annotation_lgd = list(
   Legend(labels = names(colors_variant_class_sim), labels_gp = gpar(fontsize = 9),
          title = "Somatic Mutation Status", title_gp = gpar(fontsize = 9),
-         legend_gp = gpar(fill = colors_variant_class_sim), border = color_gridline))
+         legend_gp = gpar(fill = colors_variant_class_sim), border = color_gridline),
+  Legend(col_fun = colors_heatmapbody, 
+         title = "Protein abundance value\nlog2Intensity\n(Sample-Reference)"))
 # ## save heatmap as png
 # png(filename = paste0(dir_out, "data_availability",".png"), 
 #     width = 1600, height = 1600, res = 150)

@@ -20,7 +20,7 @@ dir.create(dir_out)
 ## input id meta data
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210305.v1/meta_data.20210305.v1.tsv")
 ## input cell type fraction
-cellgroupfrac_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/count_fraction/count_celltypeshorter_fraction_per_sample/20210308.v1/CellGroupBarcodes_Number_and_Fraction_per_Sample20210308.v1.tsv")
+cellgroupfrac_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/count_fraction/count_celltypedetailed_fraction_per_sample/20210308.v1/CellGroupBarcodes_Number_and_Fraction_per_Sample20210308.v1.tsv")
 ## input sample group
 sample_group_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutation/annotate_cptac_sample_by_pbrm1_bap1_mutation/20210304.v1/PBRM1_BAP1_Mutation_Status_By_Case.20210304.v1.tsv")
 
@@ -34,6 +34,8 @@ sample_group_df <- sample_group_df %>%
 # plot by cell group ------------------------------------------------------
 table(cellgroupfrac_df$Cell_group)
 cellgroup_tmp <- "CD8 CTL exhausted"
+cellgroup_tmp <- "CD4 CTL"
+
 # for (cellgroup_tmp in "Macrophages proliferating") {
 for (cellgroup_tmp in unique(cellgroupfrac_df$Cell_group)) {
   ## make plot data
