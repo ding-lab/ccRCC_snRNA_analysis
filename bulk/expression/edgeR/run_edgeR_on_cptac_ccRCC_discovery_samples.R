@@ -12,9 +12,6 @@ if (!requireNamespace("edgeR", quietly = TRUE)) {
   BiocManager::install("edgeR")
 }
 library(edgeR)
-library(data.table)
-library(dplyr)
-library(plyr)
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -25,6 +22,8 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input mutation table
 mut_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutation/annotate_cptac_sample_by_pbrm1_bap1_mutation/20210310.v1/PBRM1_BAP1_Mutation_Status_By_Case.20210310.v1.tsv")
+## input meta data
+ccrcc_df <- readxl::read_excel(path = "./Resources/Bulk_Processed_Data/CPTAC3-ccRCC-SupplementaryTables_Final/Table S1.xlsx", sheet = "ccrcc_clinical_characteristics")
 ## input sample info
 sampleinfo_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/mRNA/gdc_sample_sheet.2021-03-11.tsv")
 ## input htseq-count file info
@@ -34,7 +33,7 @@ dir_htseq <- "./Resources/Bulk_Processed_Data/mRNA/HTSeq-count-gzfiles/"
 # preprocess --------------------------------------------------------------
 sampleinfo_filtered_df <- sampleinfo_df %>%
   mutate(Case = str_split_fixed(string = `Case ID`, pattern = ",", n = 2)[,1]) %>%
-  filter(Case %in% mut_df$Case)
+  filter(Case %in% ccrcc_df$Case_ID[ccrcc_df$Histologic_Type == "Clear cell renal cell carcinoma"])
 sampleinfo_filtered_tumor_df <- sampleinfo_filtered_df %>%
   filter(`Sample Type` == "Primary Tumor")
 sampleinfo_filtered_nat_df <- sampleinfo_filtered_df %>%
@@ -42,6 +41,7 @@ sampleinfo_filtered_nat_df <- sampleinfo_filtered_df %>%
   mutate(condition = "NAT")
 ## add mutation status
 sampleinfo_filtered_tumor_df$condition <- mapvalues(x = sampleinfo_filtered_tumor_df$Case, from = mut_df$Case, to = as.vector(mut_df$mutation_category_sim))
+sampleinfo_filtered_tumor_df$condition[as.vector(sampleinfo_filtered_tumor_df$condition) == as.vector(sampleinfo_filtered_tumor_df$Case)] <- "Non-mutants"
 ## combine
 sampleinfo_filtered_df <- rbind(sampleinfo_filtered_tumor_df, sampleinfo_filtered_nat_df)
 
@@ -62,15 +62,15 @@ head(countCheck)
 keep <- which(rowSums(countCheck) >= 2)
 rm(countCheck)
 dgelist_obj <- dgelist_obj[keep,]
-dim(dgelist_obj) ## [1] 22888   257
+dim(dgelist_obj) ## [1] 22589   259
 summary(cpm(dgelist_obj))
 
 # Normalisation -----------------------------------------------------------
 dgelist_obj <- calcNormFactors(dgelist_obj, method="TMM")
 
 # Data Exploration --------------------------------------------------------
-file2write <- paste0(dir_out, "MDS.png")
-png(file2write, width = 2000, height = 2000, res = 150)
+file2write <- paste0(dir_out, "MDS.pdf")
+pdf(file2write, width = 15, height = 15)
 plotMDS(dgelist_obj)
 dev.off()
 
@@ -90,13 +90,51 @@ plotBCV(dgelist_obj)
 dev.off()
 
 # 2.8 Differential Expression ---------------------------------------------
-fit <- glmFit(dgelist_obj, designMat)
-View(fit$design)
-lrt_bap1vsnat <- glmLRT(fit, coef=2)
-result_bap1vsnat <- topTags(lrt_bap1vsnat, n = 15000)
-View(result_bap1vsnat$table)
-deGenes <- decideTestsDGE(lrt_bap1vsnat, p=0.001)
-deGenes <- rownames(lrt_bap1vsnat)[as.logical(deGenes)]
-plotSmear(lrt_bap1vsnat, de.tags=deGenes)
-abline(h=c(-1, 1), col=2)
+fit <- glmQLFit(dgelist_obj, designMat)
+result_sup_df <- NULL
+## BAP1 vs NAT
+qlf <- glmQLFTest(fit, coef=2)
+result_df <- qlf$table
+result_df$gene_ensembl_id <- rownames(result_df)
+result_df$comparison <- "BAP1 mutated vs NAT"
+result_sup_df <- rbind(result_df, result_sup_df)
+file2write <- paste0(dir_out, "BAP1-mutated_vs_NAT.glmQLFTest.output.RDS")
+saveRDS(object = qlf, file = file2write, compress = T)
+## PBRM1 vs NAT
+qlf <- glmQLFTest(fit, coef=3)
+result_df <- qlf$table
+result_df$gene_ensembl_id <- rownames(result_df)
+result_df$comparison <- "PBRM1 mutated vs NAT"
+result_sup_df <- rbind(result_df, result_sup_df)
+file2write <- paste0(dir_out, "PBRM1-mutated_vs_NAT.glmQLFTest.output.RDS")
+saveRDS(object = qlf, file = file2write, compress = T)
+## Non-mutants vs NAT
+qlf <- glmQLFTest(fit, coef=4)
+result_df <- qlf$table
+result_df$gene_ensembl_id <- rownames(result_df)
+result_df$comparison <- "Non-mutants vs NAT"
+result_sup_df <- rbind(result_df, result_sup_df)
+file2write <- paste0(dir_out, "Non-mutants_vs_NAT.glmQLFTest.output.RDS")
+saveRDS(object = qlf, file = file2write, compress = T)
+## BAP1 vs Non-mutants
+qlf <- glmQLFTest(fit, contrast = c(0, 1, 0, -1, 0))
+result_df <- qlf$table
+result_df$gene_ensembl_id <- rownames(result_df)
+result_df$comparison <- "BAP1 mutated vs Non-mutants"
+result_sup_df <- rbind(result_df, result_sup_df)
+file2write <- paste0(dir_out, "BAP1-mutated_vs_Non-mutants.glmQLFTest.output.RDS")
+saveRDS(object = qlf, file = file2write, compress = T)
+## PBRM1 vs Non-mutants
+qlf <- glmQLFTest(fit, contrast = c(0, 0, 1, -1, 0))
+result_df <- qlf$table
+result_df$gene_ensembl_id <- rownames(result_df)
+result_df$comparison <- "PBRM1 mutated vs Non-mutants"
+result_sup_df <- rbind(result_df, result_sup_df)
+file2write <- paste0(dir_out, "PBRM1-mutated_vs_Non-mutants.glmQLFTest.output.RDS")
+saveRDS(object = qlf, file = file2write, compress = T)
+## save DEG table
+file2write <- paste0(dir_out, "glmQLFTest.outputtables.tsv")
+write.table(x = result_sup_df, file = file2write, sep = "\t", row.names = F, quote = F)
+
+
 

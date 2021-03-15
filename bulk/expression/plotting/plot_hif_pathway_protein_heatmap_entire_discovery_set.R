@@ -22,26 +22,8 @@ dir.create(dir_out)
 protein_tab <- fread("~/Box/Ding_Lab/Projects_Current/CPTAC/PGDAC/ccRCC_discovery_manuscript/ccRCC_expression_matrices/proteome/6_CPTAC3_CCRCC_Whole_abundance_gene_protNorm=2_CB.tsv", data.table = F)
 ## input bulk meta data for the entire set
 bulk_meta_tab <- fread("~/Box/Ding_Lab/Projects_Current/CPTAC/PGDAC/ccRCC_discovery_manuscript/ccRCC_expression_matrices/cptac-metadata.csv")
-## input hif targets
-hif_targets_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_hif_targets/20200428.v1/HIF_Target_Genes.20200428.v1.tsv")
 ## input DEG for each cell group
 deg_df <- fread(input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/findallmarker_wilcox_cellgroup_on_katmai/20200714.v2/findallmarkers_wilcox_bycellgroup.pos..logfcthreshold0.1.minpct0.1.mindiffpct0.1.tsv", data.table = F)
-
-# get the aliquot IDs for bulk corresponding to the snRNA aliquots --------
-normal_bulk_aliquot_ids2plot <- bulk_meta_tab$Specimen.Label[bulk_meta_tab$Set.A == "yes" & bulk_meta_tab$Type == "Normal"]
-normal_bulk_aliquot_ids2plot
-
-case_ids2plot <- mapvalues(x = normal_bulk_aliquot_ids2plot, from = bulk_meta_tab$Specimen.Label, to = bulk_meta_tab$Case.ID)
-case_ids2plot
-
-tumor_bulk_aliquot_ids2plot <- mapvalues(x = case_ids2plot, from = bulk_meta_tab$Case.ID[bulk_meta_tab$Type == "Tumor" & bulk_meta_tab$Set.A == "yes"], to = as.vector(bulk_meta_tab$Specimen.Label[bulk_meta_tab$Type == "Tumor" & bulk_meta_tab$Set.A == "yes"]))
-tumor_bulk_aliquot_ids2plot
-
-# input TF table ----------------------------------------------------------
-tf_tab <- fread(input = "./Ding_Lab/Projects_Current/TP53_shared_data/resources/PPI/TF_interactions.txt", data.table = F)
-hif_targets_df <- tf_tab %>%
-  filter(source_genesymbol %in% c("HIF1A", "EPAS1"))
-
 
 # specify the genes to be plotted  -------------------------------------
 genes2plot <- intersect(hif_targets_df$target_genesymbol, protein_tab$Index)
@@ -97,13 +79,9 @@ p <- Heatmap(mat2plot,
              name = "log2Intensity\n(Sample-Reference)", show_column_names = F)
 
 ## save heatmap to file
-file2write <- paste0(dir_out, "All_HIF_Downstream_Protein_Expression.", run_id, ".pdf")
-pdf(file2write, width = 20, height = 7)
+file2write <- paste0(dir_out, "DEGs",  ".png")
+png(file2write, width = 2000, height = 1000, res = 150)
 print(p)
 dev.off()
-# file2write <- paste0(dir_out, "All_HIF_Downstream_Protein_Expression.", run_id, ".png")
-# png(file2write, width = 2000, height = 1000, res = 150)
-# print(p)
-# dev.off()
 
 
