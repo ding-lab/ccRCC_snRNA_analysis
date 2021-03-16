@@ -8,6 +8,11 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
+# install.packages('Seurat')
+## reference: https://github.com/mojaveazure/seurat-disk/issues/56
+# install.packages('https://cran.r-project.org/src/contrib/Archive/spatstat/spatstat_1.64-1.tar.gz', repos=NULL,type="source")
+# library(spatstat)
+library(Seurat)
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -28,6 +33,7 @@ aliquot2process <- "CPT0001260013"
 # input seurat object, and subset to cluster -----------------------------------------------------
 path_srat <- paths_srat_df$Path_box_seurat_object[paths_srat_df$Aliquot == aliquot2process]
 srat <- readRDS(file = path_srat)
+DefaultAssay(srat) <- "RNA"
 
 # annotate cell tyep ------------------------------------------------------
 barcode2celltype_aliquot_df <- barcode2celltype_df %>%
@@ -37,7 +43,7 @@ srat@meta.data$Cell_group.detailed <- mapvalues(x = rownames(srat@meta.data), fr
 
 # specify genes to plot ---------------------------------------------------
 # genes_plot <- c("VHL", "VIM", "COL5A1", "MT2A", "CDH1", "POSTN", "UMOD")
-genes_plot <- c("FTH1", "BEST1")
+genes_plot <- c("CA9")
 
 # plot by gene ------------------------------------------------------------
 for (gene_plot in genes_plot) {
