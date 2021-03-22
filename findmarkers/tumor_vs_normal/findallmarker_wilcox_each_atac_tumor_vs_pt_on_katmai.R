@@ -78,37 +78,38 @@ head(srat@meta.data$id_aliquot_barcode)
 cat("finish adding unique id for each barcode in the seurat object!\n")
 
 # run findallmarkers by tumor------------------------------------------------------
-degs_combined_df <- NULL
 for (aliquot_tumor_tmp in aliquots_snatac_tumor) {
   easyid_tumor_tmp <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == aliquot_tumor_tmp]
-  cat(paste0("Processing ", easyid_tumor_tmp, "\n"))
-  ## make combined id for the barcode2celltype table
-  barcode2celltype_df <- barcode2celltype_df %>%
-    mutate(id_aliquot_barcode = paste0(orig.ident, "_", individual_barcode)) %>%
-    mutate(group_findmarkers = ifelse(Cell_group5 == "Tumor cells" & orig.ident == aliquot_tumor_tmp, 
-                                      "Tumor cells", 
-                                      ifelse(Cell_type.detailed == "Proximal tubule" & orig.ident %in% aliquots_snatac_nat, "Proximal tubule cells from NATs", "Others")))
-  ## map group label
-  srat@meta.data$group_findmarkers <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$group_findmarkers), warn_missing = F)
-  cat("finish adding group labels\n")
-  
-  print(table(srat@meta.data$group_findmarkers))
-  Idents(srat) <- "group_findmarkers" 
-  ## run findmarkers
-  deg_df <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = group1_findmarkers, ident.2 = group2_findmarkers, only.pos = F,
-                               min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
-  deg_df$genesymbol_deg <- rownames(deg_df)
-  deg_df$easyid_tumor <- easyid_tumor_tmp
-  deg_df$aliquot_tumor <- aliquot_tumor_tmp
-  deg_df$cellnumber_tumorcells <- length(which(srat@meta.data$group_findmarkers == group1_findmarkers))
-  deg_df$cellnumber_ptcells <- length(which(srat@meta.data$group_findmarkers == group2_findmarkers))
-  
-  ## combine with the super tale
-  degs_combined_df <- rbind(degs_combined_df, deg_df)
+  file2write <- paste0("./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/Tumorcells_vs_PTcells/",
+                       easyid_tumor_tmp, ".Tumorcells_vs_PTcells.tsv")
+  if (!file.exists(file2write)) {
+    cat(paste0("Processing ", easyid_tumor_tmp, "\n"))
+    ## make combined id for the barcode2celltype table
+    barcode2celltype_df <- barcode2celltype_df %>%
+      mutate(id_aliquot_barcode = paste0(orig.ident, "_", individual_barcode)) %>%
+      mutate(group_findmarkers = ifelse(Cell_group5 == "Tumor cells" & orig.ident == aliquot_tumor_tmp, 
+                                        "Tumor cells", 
+                                        ifelse(Cell_type.detailed == "Proximal tubule" & orig.ident %in% aliquots_snatac_nat, "Proximal tubule cells from NATs", "Others")))
+    ## map group label
+    srat@meta.data$group_findmarkers <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$group_findmarkers), warn_missing = F)
+    cat("finish adding group labels\n")
+    
+    print(table(srat@meta.data$group_findmarkers))
+    Idents(srat) <- "group_findmarkers" 
+    ## run findmarkers
+    deg_df <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = group1_findmarkers, ident.2 = group2_findmarkers, only.pos = F,
+                          min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
+    deg_df$genesymbol_deg <- rownames(deg_df)
+    deg_df$easyid_tumor <- easyid_tumor_tmp
+    deg_df$aliquot_tumor <- aliquot_tumor_tmp
+    deg_df$cellnumber_tumorcells <- length(which(srat@meta.data$group_findmarkers == group1_findmarkers))
+    deg_df$cellnumber_ptcells <- length(which(srat@meta.data$group_findmarkers == group2_findmarkers))
+    
+    ## write output
+    write.table(x = deg_df, file = file2write, sep = "\t", quote = F, row.names = F)
+    cat("finish writing the result!\n\n")
+  }
 }
 
-# write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "findallmarkers_wilcox_each_snatac_tumorcell_vs_pt.", run_id, ".tsv")
-write.table(x = degs_combined_df, file = file2write, sep = "\t", quote = F, row.names = F)
-cat("finish writing the result!\n")
+
 
