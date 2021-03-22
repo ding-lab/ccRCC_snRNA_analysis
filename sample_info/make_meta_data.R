@@ -31,7 +31,7 @@ id_multisegment_df <- fread(input = "./Resources/Meta_Data/ccRCC_Specimen_Data_T
 ## input samples with snRNA data
 snrna_sample_df <- fread(data.table = F, input = "./Resources/snRNA_Processed_Data/scRNA_auto/summary/Seurat_Preprocessing.20210305.tsv")
 ## input samples with snATAC data
-snatac_sample_df <- fread(data.table = F, input = "../ccRCC_snATAC/Resources/Selection_Rationale/snATAC_Sample_Selection_Rationale.20210305.tsv")
+snatac_sample_df <- fread(data.table = F, input = "../ccRCC_snATAC/Resources/Selection_Rationale/snATAC_Sample_Selection_Rationale.20210322.tsv")
 ## input FFPE slides availability
 ffpe_sample_df <- readxl::read_excel(path = "./Resources/Sample_Info/02_Post_request_CPTAC3_shipment/Manfiest_ccRCC and GBM slides for IHC @ Wash U_10.28.2019.xlsx")
 

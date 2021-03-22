@@ -33,14 +33,14 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
-path_rds <- "./Resources/Analysis_Results/integration/31_aliquot_integration/31_aliquot_integration_without_anchoring/20200727.v1/31_aliquot_integration_without_anchoring.20200727.v1.RDS"
+path_rds <- "./Resources/Analysis_Results/merging/RunPCA_UMAP_clustering_32_aliquot/20210318.v1/32_aliquot.Merged.20210318.v1.RDS"
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 ## input the barcode-cell-type table
 barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_32aliquots/20210308.v1/32Aliquot.Barcode2CellType.20210308.v1.tsv", data.table = F)
 cat("finish reading the barcode-to-cell type table!\n")
 ## input idemta data
-idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210305.v1/meta_data.20210305.v1.tsv")
+idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210322.v1/meta_data.20210322.v1.tsv")
 
 # set parameters for findmarkers ------------------------------------------
 logfc.threshold.run <- 0
