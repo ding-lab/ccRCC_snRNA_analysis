@@ -55,7 +55,7 @@ group1_findmarkers <- "Tumor cells"
 group2_findmarkers <- "Proximal tubule cells from NATs"
 
 # subset to cases with snATAC data ----------------------------------------
-easyids_snatac <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$snATAC_used]
+easyids_snatac <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$snATAC_used & idmetadata_df$snRNA_available]
 aliquots_snatac <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Aliquot.snRNA.WU %in% easyids_snatac]
 aliquots_snatac
 aliquots_snatac_nat <- idmetadata_df$Aliquot.snRNA[idmetadata_df$Aliquot.snRNA.WU %in% easyids_snatac & idmetadata_df$Sample_Type == "Normal"]
