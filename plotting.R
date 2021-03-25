@@ -5,11 +5,11 @@ packages = c(
   "ggplot2",
   "ggrepel",
   "ComplexHeatmap",
-  "ggrastr",
   "circlize",
   "RColorBrewer",
   "ggthemes",
   "rcartocolor",
+  "ggrastr",
   "Polychrome"
 )
 

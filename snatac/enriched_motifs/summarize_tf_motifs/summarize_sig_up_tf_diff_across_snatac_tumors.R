@@ -1,4 +1,5 @@
 # Yige Wu @WashU Nov 2020
+## 2021-03-22 new motif scores
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -17,7 +18,7 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input motif result
 ### mean score 1 is for PT, mean score 2 is for the tumor cells
-dam_df <- fread(data.table = F, input = "../ccRCC_snATAC/Resources/snATAC_Processed_Data/Enriched_Motifs/Tumor_vs_NormalPT/Tumor_vsNormalPT_Motifs.20210311.tsv")
+dam_df <- fread(data.table = F, input = "../ccRCC_snATAC/Resources/snATAC_Processed_Data/Enriched_Motifs/Tumor_vs_NormalPT/Score_difference.Tumor_Normal_comparison.20210322.tsv")
 
 
 # preprocess --------------------------------------------------------------
@@ -29,12 +30,12 @@ sample_anno_df <- data.frame(easyid = c("C3L-00088-N", "C3N-01200-N",
                                               rep("BAP1-mutant tumor", 5),
                                               rep("PBRM1-mutant tumor", 5),
                                               rep("non-mutant tumor", 5)))
+## calculate cutoffs
 sample_count_df <- sample_anno_df %>%
   select(sample_group) %>%
   table() %>%
   as.data.frame() %>%
   dplyr::rename(sample_group = '.')
-## calculate cutoffs
 cutoff_bap1 <- 0.5*sample_count_df$Freq[sample_count_df$sample_group == "BAP1-mutant tumor"]
 cutoff_pbrm1 <- 0.5*sample_count_df$Freq[sample_count_df$sample_group == "PBRM1-mutant tumor"]
 cutoff_nonmutant <- 0.5*sample_count_df$Freq[sample_count_df$sample_group == "non-mutant tumor"]
