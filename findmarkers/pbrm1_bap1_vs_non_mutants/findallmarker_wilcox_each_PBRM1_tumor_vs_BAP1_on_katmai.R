@@ -78,7 +78,7 @@ cat("finish adding unique id for each barcode in the seurat object!\n")
 for (aliquot_group1_tmp in aliquots_group1) {
   easyid_group1_tmp <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == aliquot_group1_tmp]
   file2write <- paste0(dir_out,
-                       easyid_group1_tmp, ".vs_NonMutants_Tumorcells.tsv")
+                       easyid_group1_tmp, ".vs_BAP1Mutants_Tumorcells.tsv")
   if (!file.exists(file2write)) {
     cat(paste0("Processing ", easyid_group1_tmp, "\n"))
     ## make combined id for the barcode2celltype table
