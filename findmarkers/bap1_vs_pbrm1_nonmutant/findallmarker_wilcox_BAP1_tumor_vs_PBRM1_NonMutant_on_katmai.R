@@ -27,7 +27,7 @@ source("./ccRCC_snRNA_analysis/variables.R")
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
-dir_out <- "./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/PBRM1_BAP1_vs_NonMutants_Tumorcells/"
+dir_out <- "./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/BAP1_vs_PBRM1_NonMutants_Tumorcells/"
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
@@ -79,7 +79,7 @@ cat("finish adding unique id for each barcode in the seurat object!\n")
 for (aliquot_group1_tmp in aliquots_group1) {
   easyid_group1_tmp <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == aliquot_group1_tmp]
   file2write <- paste0(dir_out,
-                       easyid_group1_tmp, ".vs_NonMutants_Tumorcells.tsv")
+                       easyid_group1_tmp, ".vs_PBRM1_NonMutants_Tumorcells.tsv")
   if (!file.exists(file2write)) {
     cat(paste0("Processing ", easyid_group1_tmp, "\n"))
     ## make combined id for the barcode2celltype table
