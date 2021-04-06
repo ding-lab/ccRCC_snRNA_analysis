@@ -13,7 +13,7 @@ if (!requireNamespace("edgeR", quietly = TRUE)) {
 }
 library(edgeR)
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -28,6 +28,8 @@ ccrcc_df <- readxl::read_excel(path = "./Resources/Bulk_Processed_Data/CPTAC3-cc
 sampleinfo_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/mRNA/gdc_sample_sheet.2021-03-11.tsv")
 ## input the DEGList object
 dgelist_obj <- readRDS(file = './Resources/Analysis_Results/bulk/expression/edgeR/create_DGEList_object/create_DEGList_CPTAC_ccRCC_Discovery_cases/20210312.v1/CPTAC_Discovery_ccRCC_Cases.DEGList.RDS')
+## input the gene id mapping
+gene_mapping_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/expression/edgeR/map_to_genesymbols/map_CPTAC_Discovery_ensemblgeneids_to_genesymbols/20210312.v1/ensembl_gene_id.mapping.nodup.20210312.v1.tsv")
 
 # preprocess --------------------------------------------------------------
 sampleinfo_filtered_df <- sampleinfo_df %>%
@@ -66,7 +68,7 @@ result_sup_df <- NULL
 qlf <- glmQLFTest(fit, coef=2)
 result_df <- topTags(object = qlf, n = nrow(qlf$table))$table
 result_df$gene_ensembl_id <- rownames(result_df)
-result_df$comparison <- "BAP1 mutated vs NAT"
+result_df$comparison <- "BAP1_Mutated_vs_NAT"
 result_sup_df <- rbind(result_df, result_sup_df)
 # file2write <- paste0(dir_out, "BAP1-mutated_vs_NAT.glmQLFTest.output.RDS")
 # saveRDS(object = qlf, file = file2write, compress = T)
@@ -74,7 +76,7 @@ result_sup_df <- rbind(result_df, result_sup_df)
 qlf <- glmQLFTest(fit, coef=3)
 result_df <- topTags(object = qlf, n = nrow(qlf$table))$table
 result_df$gene_ensembl_id <- rownames(result_df)
-result_df$comparison <- "PBRM1 mutated vs NAT"
+result_df$comparison <- "PBRM1_Mutated_vs_NAT"
 result_sup_df <- rbind(result_df, result_sup_df)
 # file2write <- paste0(dir_out, "PBRM1-mutated_vs_NAT.glmQLFTest.output.RDS")
 # saveRDS(object = qlf, file = file2write, compress = T)
@@ -82,7 +84,7 @@ result_sup_df <- rbind(result_df, result_sup_df)
 qlf <- glmQLFTest(fit, coef=4)
 result_df <- topTags(object = qlf, n = nrow(qlf$table))$table
 result_df$gene_ensembl_id <- rownames(result_df)
-result_df$comparison <- "Non-mutants vs NAT"
+result_df$comparison <- "NonMutants_vs_NAT"
 result_sup_df <- rbind(result_df, result_sup_df)
 # file2write <- paste0(dir_out, "Non-mutants_vs_NAT.glmQLFTest.output.RDS")
 # saveRDS(object = qlf, file = file2write, compress = T)
@@ -90,7 +92,7 @@ result_sup_df <- rbind(result_df, result_sup_df)
 qlf <- glmQLFTest(fit, contrast = c(0, 1, 0, -1, 0))
 result_df <- topTags(object = qlf, n = nrow(qlf$table))$table
 result_df$gene_ensembl_id <- rownames(result_df)
-result_df$comparison <- "BAP1 mutated vs Non-mutants"
+result_df$comparison <- "BAP1_Mutated_vs_NonMutants"
 result_sup_df <- rbind(result_df, result_sup_df)
 # file2write <- paste0(dir_out, "BAP1-mutated_vs_Non-mutants.glmQLFTest.output.RDS")
 # saveRDS(object = qlf, file = file2write, compress = T)
@@ -98,12 +100,28 @@ result_sup_df <- rbind(result_df, result_sup_df)
 qlf <- glmQLFTest(fit, contrast = c(0, 0, 1, -1, 0))
 result_df <- topTags(object = qlf, n = nrow(qlf$table))$table
 result_df$gene_ensembl_id <- rownames(result_df)
-result_df$comparison <- "PBRM1 mutated vs Non-mutants"
+result_df$comparison <- "PBRM1_Mutated_vs_NonMutants"
 result_sup_df <- rbind(result_df, result_sup_df)
 # file2write <- paste0(dir_out, "PBRM1-mutated_vs_Non-mutants.glmQLFTest.output.RDS")
 # saveRDS(object = qlf, file = file2write, compress = T)
-## save DEG table
-file2write <- paste0(dir_out, "PBRM1_BAP1_DEGs.glmQLFTest.outputtables.tsv")
+## BAP1 vs PBRM1
+qlf <- glmQLFTest(fit, contrast = c(0, 1, -1, 0, 0))
+result_df <- topTags(object = qlf, n = nrow(qlf$table))$table
+result_df$gene_ensembl_id <- rownames(result_df)
+result_df$comparison <- "BAP1_Mutated_vs_PBRM1_Mutated"
+result_sup_df <- rbind(result_df, result_sup_df)
+
+# map gene symbol ---------------------------------------------------------
+result_sup_df <- result_sup_df %>%
+  dplyr::rename(ensembl_gene_id_version.deg = gene_ensembl_id) %>%
+  mutate(ensembl_gene_id = str_split_fixed(string = ensembl_gene_id_version.deg, pattern = "\\.", n = 2)[,1])
+
+result_sup_df <- merge(x = result_sup_df, y = gene_mapping_df, by = c("ensembl_gene_id"), all.x = T)
+result_sup_df <- result_sup_df %>%
+  dplyr::filter(!(ensembl_gene_id_version.deg %in% c("__alignment_not_unique", "__ambiguous", "__no_feature")))
+
+# save output -------------------------------------------------------------
+file2write <- paste0(dir_out, "PBRM1_BAP1_DEGs.glmQLFTest.OutputTables.tsv")
 write.table(x = result_sup_df, file = file2write, sep = "\t", row.names = F, quote = F)
 
 

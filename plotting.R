@@ -9,8 +9,8 @@ packages = c(
   "RColorBrewer",
   "ggthemes",
   "rcartocolor",
-  "ggrastr",
-  "Polychrome"
+  "Polychrome",
+  "ggrastr"
 )
 
 for (pkg_name_tmp in packages) {
