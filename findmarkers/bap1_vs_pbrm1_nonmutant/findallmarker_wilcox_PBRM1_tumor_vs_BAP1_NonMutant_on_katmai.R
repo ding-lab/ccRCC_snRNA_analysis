@@ -56,8 +56,8 @@ group1_findmarkers <- "BAP1-mutated Tumor cells"
 group2_findmarkers <- "PBRM1/Non-mutant Tumor cells"
 
 # preprocess ----------------------------------------
-cases_bap1 <- mut_df$Case[mut_df$mutation_category_sim %in% c("Both mutated", "PBRM1 mutated")]
-aliquots_group1 <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available & !(idmetadata_df$Case %in% cases_bap1) & idmetadata_df$Sample_Type == "Tumor"]
+cases_group1 <- mut_df$Case[mut_df$mutation_category_sim %in% c("Both mutated", "PBRM1 mutated")]
+aliquots_group1 <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available & (idmetadata_df$Case %in% cases_group1) & idmetadata_df$Sample_Type == "Tumor"]
 aliquots_group1
 cases_group2 <- mut_df$Case[mut_df$mutation_category_sim %in% c("Non-mutants", "BAP1 mutated")]
 aliquots_group2 <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available & idmetadata_df$Case %in% cases_group2 & idmetadata_df$Sample_Type == "Tumor"]
