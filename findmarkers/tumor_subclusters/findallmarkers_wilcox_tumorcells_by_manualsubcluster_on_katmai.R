@@ -33,7 +33,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the paths for reclustered seurat objects
-srat_paths_df <- fread(data.table = F, input = "./Data_Freezes/V1/snRNA/Tumor_Cell_Reclustered/Paths_TumorCellOnlyReclustered_SeuratObject.20201119.v1.tsv")
+srat_paths_df <- fread(data.table = F, input = "./Data_Freezes/V1/snRNA/Tumor_Cell_Reclustered/Paths_TumorCellOnlyReclustered_SeuratObject.20201127.v1.tsv")
 ## input the barcode-manualsubcluster info
 barcode2subclusterid_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_tumorsubclusterid/map_barcode_with_manual_tumorsubcluster_id/20201130.v1/Barcode2TumorSubclusterId.20201130.v1.tsv", data.table = F)
 barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20200902.v1/scrublet.run20200902_adj_cutoff.united_outputs.tsv", data.table = F)
@@ -101,7 +101,6 @@ for (sample_tmp in unique(srat_paths_df$Sample)) {
       ## write output
       write.table(x = markers_wilcox_tmp, file = file2write, sep = "\t", quote = F, row.names = F)
       cat(paste0("finish writing for ", sample_tmp, "!\n\n"))
-      
     }
   }
 }
