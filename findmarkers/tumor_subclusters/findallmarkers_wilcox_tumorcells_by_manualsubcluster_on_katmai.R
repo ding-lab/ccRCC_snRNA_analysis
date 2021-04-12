@@ -59,7 +59,7 @@ for (sample_tmp in unique(srat_paths_df$Sample)) {
   file2write <- paste0(dir_out,
                        sample_tmp, "TumorManualCluster.DEGs.Wilcox.Minpct", min.pct.run, 
                        ".Logfc", logfc.threshold.run,
-                       ".min.diff.pct", min.diff.pct,
+                       ".min.diff.pct", min.diff.pct.run,
                        ".tsv")
   if (!file.exists(file2write)) {
     ## input seurat object
