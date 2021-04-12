@@ -76,7 +76,7 @@ for (sample_tmp in unique(srat_paths_df$Sample)) {
     srat <- subset(x = srat, cells = metadata_new_df$barcode)
     print(dim(srat))
     ### change meta data
-    srat@meta.data$id_manual_cluster <- mapvalues(x = rownames(srat$meta.data), from = metadata_new_df$barcode, to = as.vector(metadata_new_df$id_manual_cluster_w0))
+    srat@meta.data$id_manual_cluster <- mapvalues(x = rownames(srat@meta.data), from = metadata_new_df$barcode, to = as.vector(metadata_new_df$id_manual_cluster_w0))
     ### change ident
     Idents(srat) <- "id_manual_cluster"
     
