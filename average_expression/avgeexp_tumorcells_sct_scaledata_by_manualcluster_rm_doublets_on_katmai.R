@@ -30,10 +30,6 @@ dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-## input the integrated data
-path_rds <- "./Resources/Analysis_Results/integration/31_aliquot_integration/31_aliquot_integration_without_anchoring/20200727.v1/31_aliquot_integration_without_anchoring.20200727.v1.RDS"
-srat <- readRDS(file = path_rds)
-print("Finish reading RDS file")
 ## input the barcode-to-tumorsubcluster table
 barcode2tumorsubcluster_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_tumorsubclusterid/map_barcode_with_manual_tumorsubcluster_id/20201130.v1/Barcode2TumorSubclusterId.20201130.v1.tsv", data.table = F)
 # nrow(barcode2tumorsubcluster_df)
@@ -41,6 +37,10 @@ cat("finish reading the barcode-to-tumorsubcluster table!\n")
 barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20200902.v1/scrublet.run20200902_adj_cutoff.united_outputs.tsv", data.table = F)
 ## input id meta data
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200505.v1/meta_data.20200505.v1.tsv")
+## input the integrated data
+path_rds <- "./Resources/Analysis_Results/integration/31_aliquot_integration/31_aliquot_integration_without_anchoring/20200727.v1/31_aliquot_integration_without_anchoring.20200727.v1.RDS"
+srat <- readRDS(file = path_rds)
+print("Finish reading RDS file")
 # spcify assay
 assay_process <- "SCT"
 slot_process <- "scale.data"

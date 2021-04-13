@@ -27,6 +27,7 @@ idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sam
 snRNA_mutation_df <- fread("./Resources/Analysis_Results/mutation/unite_10xmapping/20200303.v1/10XMapping.20200303.v1.tsv", data.table = F)
 ## input umap data
 umap_df <- fread(data.table = F, input = "./Resources/Analysis_Results/fetch_data/fetch_data_by_individual_sample/20200717.v1/Barcode2MetaData.20200717.v1.tsv")
+barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20200902.v1/scrublet.run20200902_adj_cutoff.united_outputs.tsv", data.table = F)
 
 # remove the silent mutations ---------------------------------------------
 snRNA_mutation_df <- snRNA_mutation_df %>%
@@ -67,6 +68,7 @@ for (snRNA_aliquot_id_tmp in "CPT0001260013") {
   
   ## merge with variant read info
   plot_data_df <- merge(plot_data_df, mutation_map_tab.var, by = c("barcode"), all.x = T)
+  plot_data_df <- merge(x = plot_data_df, y = barcode2scrublet_df, by.x = c("aliquot.x", "barcode"), by.y = c("Aliquot", "Barcodes"), all.x = T)
   
   ### create read type, distinguish variant allele and reference allele
   plot_data_df$read_type <- "NA"
@@ -97,6 +99,7 @@ for (snRNA_aliquot_id_tmp in "CPT0001260013") {
                            mapping = aes(UMAP_1, UMAP_2, label = gene_symbol, colour = Driver_Gene_Mutation, size = Driver_Gene_Mutation), max.overlaps = 30)
   p <- p + scale_color_manual(values = c("TRUE" = "black", "FALSE" = "grey50"))
   p <- p + scale_size_manual(values = c("TRUE" = 4, "FALSE" = 3))
+  p <- p + facet_grid(cols = vars(predicted_doublet))
   p <- p +
     theme_bw() +
     theme(panel.border = element_blank(), panel.grid.major = element_blank(),
@@ -108,7 +111,7 @@ for (snRNA_aliquot_id_tmp in "CPT0001260013") {
                           axis.title.y=element_blank())
   p
   file2write <- paste0(dir_out, aliquot_show, ".mut.png")
-  png(file2write, width = 800, height = 900, res = 150)
+  png(file2write, width = 2000, height = 900, res = 150)
   print(p)
   dev.off()
   
