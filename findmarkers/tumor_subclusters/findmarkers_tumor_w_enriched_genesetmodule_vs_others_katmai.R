@@ -86,9 +86,9 @@ for (module_tmp in modules_process) {
                        ".tsv")
   if (!file.exists(file2write)) {
     ## make combined id for the barcode2celltype table
+    barcode2info_df[, "is_module"] <- barcode2info_df[, module_tmp]
     barcode2info_df <- barcode2info_df %>%
       mutate(id_aliquot_barcode = paste0(orig.ident, "_", barcode)) %>%
-      mutate(is_module = module_tmp) %>%
       mutate(group_findmarkers = ifelse(!predicted_doublet, ifelse(is_module, "group1", "group2"), "others"))
     
     ## map group label
