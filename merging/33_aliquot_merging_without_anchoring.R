@@ -50,6 +50,8 @@ for (i in 1:nrow(paths_srat2process)) {
     filter(Barcode %in% rownames(seurat_obj@meta.data)) %>%
     filter(!predicted_doublet)
   barcodes_keep <- barcode2scrublet_tmp_df$Barcode
+  ###
+  print("subsetting")
   seurat_sub_obj <- subset(x = seurat_obj, cells = barcodes_keep)
   print(dim(seurat_sub_obj))
   renal.list[[sample_id_tmp]] <- seurat_sub_obj
