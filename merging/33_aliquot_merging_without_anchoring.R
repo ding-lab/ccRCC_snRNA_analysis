@@ -33,7 +33,7 @@ options(future.globals.maxSize = 1000 * 1024^2)
 
 # input dependencies ------------------------------------------------------
 ## input seurat paths
-paths_srat <- fread(data.table = F, input = "./Data_Freezes/V2/snRNA/Seurat_Object_Paths.20210423.v1.tsv")
+paths_srat <- fread(data.table = F, input = "./Data_Freezes/V2/snRNA/Seurat_Object_Paths.20210428.v1.tsv")
 ## input doublet prediction
 barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20210428.v1/scrublet.united_outputs.20210428.v1.tsv", data.table = F)
 
