@@ -7,7 +7,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 4
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -24,8 +24,13 @@ id_metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sa
 cellnumber_percluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/count_cellnumber_per_manual_cluster_rm_doublet/20210413.v1/CellNumberPerTumorManualCluster.20210413.v1.tsv")
 ## input the immune-therapy related genes
 genes_highlight_df <- readxl::read_excel(path = "./Resources/Knowledge/Gene_Lists/Cytokines/Cytokine_Genes.20210420.xlsx")
+genes_highlight_df <- fread(data.table = F, input = "./Resources/Knowledge/Databases/ImmPort/GeneList.txt")
 ## input pathway scores
 scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_msigdb_top_geneset_scores/20210419.v1/MSigDB.Hallmark.tsv")
+## input degs
+deg_df <- fread(data.table = F, input = "./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/Tumor_Subcluster_Group/20210421.v1/Immune.TumorManualCluster.DEGs.Wilcox.Minpct0.1.Logfc0.min.diff.pct0.1.tsv")
+## input by cluster enrichment assignment
+enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210421.v3/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
 
 # preprocess --------------------------------------------------------------
 ## add id for mapping
@@ -41,26 +46,21 @@ cluster_pass_df <- cellnumber_percluster_df %>%
 # specify genes to filter -------------------------------------------------
 genesetnames_plot <- c("HALLMARK_ALLOGRAFT_REJECTION","HALLMARK_COMPLEMENT", "HALLMARK_INFLAMMATORY_RESPONSE", "HALLMARK_INTERFERON_ALPHA_RESPONSE",
                        "HALLMARK_IL2_STAT5_SIGNALING", "HALLMARK_INTERFERON_GAMMA_RESPONSE")
-## add name for the marker groups
-pathway2genes_filtered_df <- pathway2genes_df %>%
-  filter(p.adjust < 0.05) %>%
-  filter(Description %in% genesetnames_plot)
+annonames_plot <- paste0(gsub(x = genesetnames_plot, pattern = "HALLMARK_", replacement = ""), "_Score")
+## get genes to filter
+deg_filtered_df <- deg_df %>%
+  filter(p_val_adj < 0.05 & avg_logFC > 0)
+deg_filtered_df <- merge(x = deg_filtered_df, y = genes_highlight_df, by.x = c("genesymbol_deg"), by.y = c("Symbol"))
+deg_filtered_df <- deg_filtered_df %>%
+  unique() %>%
+  arrange(p_val_adj, desc(avg_logFC))
 
-pathway2genes_list <- sapply(pathway2genes_filtered_df$geneID, function(x) {
-  genes_vec <- str_split(string = x, pattern = "\\/")[[1]]
-  return(genes_vec)
-})
-genes2filter <- unique(unlist(pathway2genes_list))
-gene2pathway_df <- data.frame(GeneSet_Name = rep(x = pathway2genes_filtered_df$Description, sapply(X = pathway2genes_list, FUN = function(x) {
-  length_vec <- length(x)
-  return(length_vec)
-})), GeneSymbol = unlist(pathway2genes_list))
-gene2pathway_df <- gene2pathway_df %>%
-  filter(GeneSymbol %in% avgexp_df$V1)
+genes2filter <- deg_df$genesymbol_deg[deg_df$p_val_adj < 0.05 & deg_df$avg_logFC > 0]
 
 # format expression data --------------------------------------------------
 plot_data_long_df <- avgexp_df %>%
-  filter(V1 %in% genes_highlight_df$gene_symbol) %>%
+  filter(V1 %in% genes_highlight_df$Symbol) %>%
+  # filter(V1 %in% genes_highlight_df$gene_symbol) %>%
   filter(V1 %in% genes2filter) %>%
   melt() %>%
   mutate(id_bycluster_byaliquot = gsub(x = variable, pattern = "SCT.", replacement = "")) %>%
@@ -79,6 +79,8 @@ rownames(plot_data_raw_mat) <- plot_data_wide_df$V1
 plot_data_mat <- t(apply(plot_data_raw_mat, 1, scale))
 rownames(plot_data_mat) <- rownames(plot_data_raw_mat)
 colnames(plot_data_mat) <- colnames(plot_data_raw_mat)
+## get row names and column names
+colnames_plot <- colnames(plot_data_mat)
 
 # specify colors ----------------------------------------------------------
 ## specify color for NA values
@@ -87,9 +89,9 @@ color_na <- "grey50"
 color_blue <- RColorBrewer::brewer.pal(n = 3, name = "Set1")[2]
 color_red <- RColorBrewer::brewer.pal(n = 3, name = "Set1")[1]
 summary(as.vector(plot_data_mat))
-colors_heatmapbody = colorRamp2(c(-1.5, 
+colors_heatmapbody = colorRamp2(c(-2, 
                                   0, 
-                                  1.5), 
+                                  2), 
                                 c(color_blue, "white", color_red))
 # colors for group
 colors_isenriched <- c("black", "grey80")
@@ -119,7 +121,7 @@ row_anno_obj <- rowAnnotation(Unscaled_Expression = anno_simple(x = orig_avgexp_
 
 # make column annotation --------------------------------------------------
 anno_names <- colnames(scores_df)
-anno_names <- anno_names[!(anno_names %in% "cluster_name")]
+anno_names <- anno_names[anno_names %in% annonames_plot]
 colors_scores_list <- list()
 for (anno_name_tmp in anno_names) {
   colors_scores_list[[anno_name_tmp]] <- colors_scores
@@ -130,17 +132,21 @@ colanno_df <- colanno_df[columnnames_plot,]
 colanno_obj = HeatmapAnnotation(df = colanno_df, col = colors_scores_list,
                                 annotation_name_gp = gpar(fontsize = 15, fontface = "bold"), annotation_name_side = "left", show_legend = F)
 
+# make column split -------------------------------------------------------
+col_split_vec <- mapvalues(x = colnames_plot, from = enrich_df$cluster_name, to = as.vector(enrich_df$Immune))
+
 # plot  ------------------------------------------------------------
 p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat, 
                              col = colors_heatmapbody,
                              na_col = color_na, border = "black",
                              ## row
-                             show_row_names = T, row_names_gp = gpar(fontsize = 10, fontface = "italic"), row_names_side = "left",
-                             row_title_rot = 0, row_title_gp = gpar(fontsize = 12, fontface = "bold"), right_annotation = row_anno_obj,
+                             show_row_names = T, row_names_gp = gpar(fontsize = 12, fontface = "italic"), row_names_side = "left",
+                             # row_title_rot = 0, row_title_gp = gpar(fontsize = 12, fontface = "bold"), 
+                             right_annotation = row_anno_obj,
                              # row_labels = factor_cellgroup,
                              show_row_dend = F, cluster_row_slices = T,
                              ## column
-                             show_column_dend = F, cluster_columns = T, 
+                             show_column_dend = F, cluster_columns = T, column_split = col_split_vec, cluster_column_slices = T,
                              # column_order = column_order_vec,
                              top_annotation = colanno_obj, show_column_names = T, column_names_side = "top",
                              show_heatmap_legend = F)
@@ -166,13 +172,9 @@ list_lgd = list(
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "Genes_by_tumorcluster", ".png")
-png(file2write, width = 3000, height = 2000, res = 150)
+png(file2write, width = 3000, height = 3000, res = 150)
 draw(object = p, 
      annotation_legend_side = "top", annotation_legend_list = list_lgd)
 dev.off()
-# file2write <- paste0(dir_out, "Cell_Cycle_Genes_by_tumorcluster", ".pdf")
-# pdf(file2write, width = 20, height = 6.5, useDingbats = F)
-# draw(object = p, 
-#      annotation_legend_side = "top", annotation_legend_list = list_lgd)
-# dev.off()
+
 

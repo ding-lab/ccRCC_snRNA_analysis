@@ -35,8 +35,6 @@ count_geneset_df <- ora_df %>%
   mutate(scoregroup_name = paste0(gsub(x = Description, pattern = "HALLMARK_", replacement = ""), "_Score")) %>%
   head(15)
 
-
-
 # format expression data --------------------------------------------------
 ## get dim names
 scorenames <- colnames(scores_df)
@@ -49,6 +47,7 @@ colnames(plot_data_mat) <- scores_df$cluster_name
 rownames_plot <- rownames(plot_data_mat)
 rowlabels_plot <- gsub(x = rownames_plot, pattern = "_Score", replacement = "")
 rowlabels_plot[rowlabels_plot == "EPITHELIAL_MESENCHYMAL_TRANSITION"] <- "EMT"
+
 # make column order -------------------------------------------------------
 col_order_df <- enrich_df %>%
   arrange(desc(Cell_cycle), desc(Immune), desc(EMT), desc(mTOR))

@@ -17,6 +17,7 @@ thisFile <- function() {
 }
 path_this_script <- thisFile()
 ## set working directory
+# dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
@@ -32,7 +33,9 @@ options(future.globals.maxSize = 1000 * 1024^2)
 
 # input dependencies ------------------------------------------------------
 ## input seurat paths
-paths_srat <- fread(data.table = F, input = "./Resources/Analysis_Results/data_summary/write_individual_srat_object_paths/20210308.v1/Seurat_Object_Paths.20210308.v1.tsv")
+paths_srat <- fread(data.table = F, input = "./Data_Freezes/V2/snRNA/Seurat_Object_Paths.20210423.v1.tsv")
+## input doublet prediction
+barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20210428.v1/scrublet.united_outputs.20210428.v1.tsv", data.table = F)
 
 # input the seurat object and store in a list--------------------------------------------------------
 paths_srat2process <- paths_srat
@@ -41,7 +44,15 @@ for (i in 1:nrow(paths_srat2process)) {
   sample_id_tmp <- paths_srat2process$Aliquot[i]
   seurat_obj_path <- paths_srat2process$Path_katmai_seurat_object[i]
   seurat_obj <- readRDS(file = seurat_obj_path)
-  renal.list[[sample_id_tmp]] <- seurat_obj
+  ## take out the doublets
+  barcode2scrublet_tmp_df <- barcode2scrublet_df %>%
+    filter(Aliquot == sample_id_tmp) %>%
+    filter(Barcode %in% rownames(seurat_obj@meta.data)) %>%
+    filter(!predicted_doublet)
+  barcodes_keep <- barcode2scrublet_tmp_df$Barcode
+  seurat_sub_obj <- subset(x = seurat_obj, cells = barcodes_keep)
+  print(dim(seurat_sub_obj))
+  renal.list[[sample_id_tmp]] <- seurat_sub_obj
 }
 length(renal.list)
 rm(seurat_obj)
@@ -67,5 +78,5 @@ cat("Finished FindNeighbors!\n")
 renal.integrated <- FindClusters(renal.integrated, resolution = 0.5)
 cat("Finished FindClusters!\n")
 ## save as RDS file
-saveRDS(object = renal.integrated, file = paste0(dir_out, "32_aliquot_merged_without_anchoring.", run_id, ".RDS"), compress = T)
+saveRDS(object = renal.integrated, file = paste0(dir_out, "33_aliquot_merged_without_anchoring.", run_id, ".RDS"), compress = T)
 cat("Finished saving the output!\n")

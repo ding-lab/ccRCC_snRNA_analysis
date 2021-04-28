@@ -18,8 +18,8 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## load CNV fraction in tumor cells
-cnv_3state_count_aliquots <- fread("./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/cnv_fraction_in_tumorcells_per_manualcluster/20201207.v1/fraction_of_tumorcells_with_cnv_by_gene_by_3state.per_manualsubcluster.20201207.v1.tsv", data.table = F)
-table(cnv_3state_count_aliquots$tumor_subcluster)
+cnv_3state_count_aliquots <- fread("./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/cnv_fraction_in_tumorcells_per_manualcluster_rm_doublets/20210427.v1/fraction_of_tumorcells_with_cnv_by_gene_by_3state.per_manualsubcluster.20210427.v1.tsv", data.table = F)
+unique(cnv_3state_count_aliquots$tumor_subcluster) %>% length()
 ## input known CNV genes
 knowncnvgenes_df <- readxl::read_xlsx(path = "./Resources/Knowledge/Known_Genetic_Alterations/Known_CNV.20200528.v1.xlsx", sheet = "Genes")
 ## load meta data
@@ -36,7 +36,9 @@ cnvfraction_df$gene_expected_state <- mapvalues(x = cnvfraction_df$gene_symbol, 
 ## filter genes
 cnvfraction_filtered_df <- cnvfraction_df %>%
   filter(gene_symbol %in% genes_filtered) %>%
+  filter(num_cells_nonna >= 50) %>%
   filter(!(grepl(x = tumor_subcluster, pattern = "CNA")))
+unique(cnvfraction_filtered_df$tumor_subcluster) %>% length()
 ## get 0 values to add
 cnvdetected_bystate_df <- cnvfraction_filtered_df %>%
   select(aliquot.wu, gene_symbol, cna_3state, tumor_subcluster) %>%
@@ -122,8 +124,17 @@ count_subclonal_df <- cnvfraction_merged_df %>%
   unique() %>%
   group_by(Group_3ploss) %>%
   summarise(number_clusters = n())
+## get clusters without 3p loss
+cnvfraction_subclonal_df <- rbind(cnvfraction_subclonal_df,
+                                  cnvfraction_merged_df %>%
+                                    filter(Fraction < 0.1) %>%
+                                    filter(Group_3ploss == "Minimal") %>%
+                                    select(tumor_subcluster) %>%
+                                    unique())
 
 # write outputs -----------------------------------------------------------
 file2write <- paste0(dir_out, "3pLoss_Type_Assignment_Per_Tumor.", run_id, ".tsv")
 write.table(x = cnvtype_bysample_df, file = file2write, quote = F, row.names = F, sep = "\t")
+file2write <- paste0(dir_out, "TumorClusters.WithLow3pLoss", run_id, ".tsv")
+write.table(x = cnvfraction_subclonal_df, file = file2write, quote = F, row.names = F, sep = "\t")
 

@@ -16,10 +16,10 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input meta data
-idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
+idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
 ## get file paths
-dir_scrublet_out <- "./Resources/Analysis_Results/scrublet/run20200902_adj_cutoff/"
-paths_file <- list.files(dir_scrublet_out, full.names = T)
+dir_scrublet_out <- "./Resources/snRNA_Processed_Data/Scrublet/outputs/"
+paths_file <- list.files(dir_scrublet_out, full.names = T, recursive = T)
 paths_file
 paths_file_process <- paths_file[grepl(pattern = "output_table.csv", x = paths_file)]
 paths_file_process
@@ -28,10 +28,13 @@ paths_file_process
 scrublet_united_df <- NULL
 for (path_file in paths_file_process) {
   scrublet_df <- fread(data.table = F, input = path_file)
+  colnames(scrublet_df)[1] <- "Barcode"
   ## get aliquot id
   id_aliquot <- str_split_fixed(string = path_file, pattern = dir_scrublet_out, n = 2)[,2]
+  id_aliquot <- str_split(string = path_file, pattern = "\\/")[[1]]
+  id_aliquot <- id_aliquot[length(id_aliquot)]
+  id_aliquot <- str_split(string = id_aliquot, pattern = "_")[[1]][1]
   id_aliquot
-  id_aliquot <- str_split_fixed(string = id_aliquot, pattern = "_|\\/", n = 3)[,2]
   id_aliquot_wu <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == id_aliquot]
   ## add aliquot id and reable aliquot id
   scrublet_df$Aliquot <- id_aliquot
@@ -39,6 +42,8 @@ for (path_file in paths_file_process) {
   ## unite
   scrublet_united_df <- rbind(scrublet_united_df, scrublet_df)
 }
+unique(scrublet_united_df$Aliquot_WU)
+
 # save output -------------------------------------------------------------
-file2write <- paste0(dir_out, "scrublet.", "run20200902_adj_cutoff.", "united_outputs", ".tsv")
+file2write <- paste0(dir_out, "scrublet.", "united_outputs.", run_id, ".tsv")
 write.table(x = scrublet_united_df, file = file2write, quote = F, sep = "\t", row.names = F)

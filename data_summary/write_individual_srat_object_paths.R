@@ -16,7 +16,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input seurat processing info to input individual seurat object later
-seurat_summary <- fread(input = "./Resources/snRNA_Processed_Data/scRNA_auto/summary/Seurat_Preprocessing.20210305.tsv", data.table = F)
+seurat_summary <- fread(input = "./Resources/snRNA_Processed_Data/scRNA_auto/summary/Seurat_Preprocessing.20210423.tsv", data.table = F)
 seurat_summary2process <- seurat_summary %>%
   filter(Cellranger_reference_type == "pre-mRNA") %>%
   filter(Proceed_for_downstream == "Yes") %>%
