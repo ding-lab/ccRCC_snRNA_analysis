@@ -24,7 +24,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -37,39 +37,50 @@ paths_srat <- fread(data.table = F, input = "./Data_Freezes/V2/snRNA/Seurat_Obje
 ## input doublet prediction
 barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20210428.v1/scrublet.united_outputs.20210428.v1.tsv", data.table = F)
 
-# input the seurat object and store in a list--------------------------------------------------------
-paths_srat2process <- paths_srat
-renal.list <- list()
-for (i in 1:nrow(paths_srat2process)) {
-  sample_id_tmp <- paths_srat2process$Aliquot[i]
-  seurat_obj_path <- paths_srat2process$Path_katmai_seurat_object[i]
-  seurat_obj <- readRDS(file = seurat_obj_path)
-  ## take out the doublets
-  barcode2scrublet_tmp_df <- barcode2scrublet_df %>%
-    filter(Aliquot == sample_id_tmp) %>%
-    filter(Barcode %in% rownames(seurat_obj@meta.data)) %>%
-    filter(!predicted_doublet)
-  barcodes_keep <- barcode2scrublet_tmp_df$Barcode
-  ###
-  print("subsetting")
-  seurat_sub_obj <- subset(x = seurat_obj, cells = barcodes_keep)
-  print(dim(seurat_sub_obj))
-  renal.list[[sample_id_tmp]] <- seurat_sub_obj
-}
-length(renal.list)
-rm(seurat_obj)
-
-# Run the standard workflow for visualization and clustering ------------
-renal.list <- lapply(X = renal.list, FUN = function(x) {
-  x <- NormalizeData(x)
-  x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 3000)
-})
-## integrate without anchor
-renal.integrated <- merge(x = renal.list[[1]], y = renal.list[2:length(renal.list)], project = "integrated")
-rm(renal.list)
 ## scale data with all the features
-renal.integrated <- SCTransform(renal.integrated, vars.to.regress = c("nCount_RNA","percent.mito"), return.only.var.genes = F)
-cat("Finished SCTransform!\n")
+path_final_file <- paste0(dir_out, "33_aliquot_merged_without_anchoring.", run_id, ".RDS")
+path_sct_file <- paste0(dir_out, "SCT." , ".RDS")
+
+if (!file.exists(path_sct_file)) {
+  # input the seurat object and store in a list--------------------------------------------------------
+  paths_srat2process <- paths_srat
+  renal.list <- list()
+  for (i in 1:nrow(paths_srat2process)) {
+    sample_id_tmp <- paths_srat2process$Aliquot[i]
+    seurat_obj_path <- paths_srat2process$Path_katmai_seurat_object[i]
+    seurat_obj <- readRDS(file = seurat_obj_path)
+    ## take out the doublets
+    barcode2scrublet_tmp_df <- barcode2scrublet_df %>%
+      filter(Aliquot == sample_id_tmp) %>%
+      filter(Barcode %in% rownames(seurat_obj@meta.data)) %>%
+      filter(!predicted_doublet)
+    barcodes_keep <- barcode2scrublet_tmp_df$Barcode
+    ###
+    print("subsetting")
+    seurat_sub_obj <- subset(x = seurat_obj, cells = barcodes_keep)
+    print(dim(seurat_sub_obj))
+    renal.list[[sample_id_tmp]] <- seurat_sub_obj
+  }
+  length(renal.list)
+  rm(seurat_obj)
+  
+  # Run the standard workflow for visualization and clustering ------------
+  renal.list <- lapply(X = renal.list, FUN = function(x) {
+    x <- NormalizeData(x)
+    x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 3000)
+  })
+  ## integrate without anchor
+  renal.integrated <- merge(x = renal.list[[1]], y = renal.list[2:length(renal.list)], project = "integrated")
+  rm(renal.list)
+  
+  renal.integrated <- SCTransform(renal.integrated, vars.to.regress = c("nCount_RNA","percent.mito"), return.only.var.genes = F)
+  cat("Finished SCTransform!\n")
+  saveRDS(object = renal.integrated, file = path_sct_file, compress = T)
+  cat("Finished Writing SCTransform!\n")
+} else {
+  renal.integrated <- readRDS(file = path_sct_file)
+}
+
 ## keep it consistant with individual processing pipeline
 renal.integrated <- RunPCA(renal.integrated, npcs = 30, verbose = FALSE)
 cat("Finished RUNPCA!\n")
@@ -80,5 +91,5 @@ cat("Finished FindNeighbors!\n")
 renal.integrated <- FindClusters(renal.integrated, resolution = 0.5)
 cat("Finished FindClusters!\n")
 ## save as RDS file
-saveRDS(object = renal.integrated, file = paste0(dir_out, "33_aliquot_merged_without_anchoring.", run_id, ".RDS"), compress = T)
+saveRDS(object = renal.integrated, file = path_final_file, compress = T)
 cat("Finished saving the output!\n")

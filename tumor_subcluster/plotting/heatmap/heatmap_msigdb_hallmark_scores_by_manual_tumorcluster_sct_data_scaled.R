@@ -7,7 +7,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 5
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -18,28 +18,26 @@ dir.create(dir_out)
 id_metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210322.v1/meta_data.20210322.v1.tsv")
 ## input pathway scores
 scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_msigdb_top_geneset_scores/20210419.v1/MSigDB.Hallmark.tsv")
-ora_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/pathway/ora_msigdb_tumor_manualsubcluster_up_degs/20210413.v1/ORA_Results.tsv")
 ## input by cluster enrichment assignment
 enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210421.v3/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
 
 # preprocess --------------------------------------------------------------
-count_geneset_df <- ora_df %>%
-  filter(p.adjust < 0.05) %>%
-  dplyr::select(Description, easy_id) %>%
-  unique() %>%
-  dplyr::select(Description) %>%
-  table() %>%
-  as.data.frame() %>%
-  dplyr::rename(Description = ".") %>%
-  arrange(desc(Freq)) %>%
-  mutate(scoregroup_name = paste0(gsub(x = Description, pattern = "HALLMARK_", replacement = ""), "_Score")) %>%
-  head(15)
+## group gene sets into modules
+module1_df <- data.frame(geneset_name = c("HALLMARK_MITOTIC_SPINDLE", "HALLMARK_E2F_TARGETS", "HALLMARK_G2M_CHECKPOINT", "HALLMARK_DNA_REPAIR", "HALLMARK_MYC_TARGETS_V1"),
+                         module_name = "Cell_cycle")
+module2_df <- data.frame(geneset_name = c("HALLMARK_ALLOGRAFT_REJECTION", "HALLMARK_COMPLEMENT", "HALLMARK_INFLAMMATORY_RESPONSE", "HALLMARK_INTERFERON_GAMMA_RESPONSE", "HALLMARK_KRAS_SIGNALING_UP"),
+                         module_name = "Immune")
+module3_df <- data.frame(geneset_name = c("HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION", "HALLMARK_HYPOXIA", "HALLMARK_TNFA_SIGNALING_VIA_NFKB"),
+                         module_name = "EMT")
+module4_df <- data.frame(geneset_name = c("HALLMARK_UV_RESPONSE_DN", "HALLMARK_MTORC1_SIGNALING"),
+                         module_name = "mTOR")
+modules_df <- rbind(module1_df, module2_df, module3_df, module4_df)
+modules_df <- modules_df %>%
+  mutate(scoregroup_name =  paste0(gsub(x = geneset_name, pattern = "HALLMARK_", replacement = ""), "_Score"))
 
 # format expression data --------------------------------------------------
 ## get dim names
-scorenames <- colnames(scores_df)
-scorenames <- scorenames[!(scorenames %in% "cluster_name")]
-scorenames <- count_geneset_df$scoregroup_name
+scorenames <- modules_df$scoregroup_name
 plot_data_t_mat <- as.matrix(scores_df[,scorenames])
 plot_data_mat <- t(plot_data_t_mat)
 colnames(plot_data_mat) <- scores_df$cluster_name
@@ -78,6 +76,7 @@ for (colname_tmp in colnames(colanno_df)) {
 colanno_obj = HeatmapAnnotation(df = colanno_df, col = colors_scores_list,
                                 annotation_name_gp = gpar(fontsize = 14), annotation_name_side = "left", show_legend = F)
 
+# add row split -----------------------------------------------------------
 
 
 
