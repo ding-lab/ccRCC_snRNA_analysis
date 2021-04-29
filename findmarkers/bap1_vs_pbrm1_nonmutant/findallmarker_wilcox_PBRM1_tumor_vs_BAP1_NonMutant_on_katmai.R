@@ -27,19 +27,20 @@ source("./ccRCC_snRNA_analysis/variables.R")
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
-dir_out <- "./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/PBRM1_vs_BAP1_NonMutants_Tumorcells/"
-dir.create(dir_out)
+dir_out1 <- "./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/PBRM1_vs_BAP1_NonMutants_Tumorcells/"
+dir.create(dir_out1)
+dir_out <- paste0(dir_out1, run_id, "/"); dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
-path_rds <- "./Resources/Analysis_Results/merging/RunPCA_UMAP_clustering_32_aliquot/20210318.v1/32_aliquot.Merged.20210318.v1.RDS"
+path_rds <- "./Resources/Analysis_Results/merging/33_aliquot_merging_without_anchoring/20210428.v2/33_aliquot_merged_without_anchoring.20210428.v2.RDS"
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 ## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_32aliquots/20210308.v1/32Aliquot.Barcode2CellType.20210308.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_33aliquots/20210423.v1/33Aliquot.Barcode2CellType.20210423.v1.tsv", data.table = F)
 cat("finish reading the barcode-to-cell type table!\n")
 ## input idemta data
-idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210322.v1/meta_data.20210322.v1.tsv")
+idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
 ## input PBRM1 and BAP1 classification
 mut_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutation/annotate_cptac_sample_by_pbrm1_bap1_mutation/20210310.v1/PBRM1_BAP1_Mutation_Status_By_Case.20210310.v1.tsv")
 
@@ -49,6 +50,7 @@ min.pct.run <- 0.1
 min.diff.pct.run <- 0.1
 ## spcify assay
 assay_process <- "RNA"
+DefaultAssay(srat) <- assay_process
 cat(paste0("Assay: ", assay_process, "\n"))
 cat("###########################################\n")
 ## specify cell groups to compare
