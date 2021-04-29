@@ -24,9 +24,10 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
-dir_out <- "./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/Tumorcells_vs_PTcells/"
+dir_out1 <- "./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/Tumorcells_vs_PTcells/"
+dir_out <- paste0(dir_out1, run_id, "/"); dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
@@ -45,6 +46,7 @@ min.pct.run <- 0.1
 min.diff.pct.run <- 0.1
 ## spcify assay
 assay_process <- "RNA"
+DefaultAssay(srat) <- assay_process
 cat(paste0("Assay: ", assay_process, "\n"))
 cat("###########################################\n")
 ## specify cell groups to compare
