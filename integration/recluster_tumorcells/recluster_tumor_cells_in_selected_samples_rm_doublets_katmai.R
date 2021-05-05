@@ -19,7 +19,7 @@ dir_out <- "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Data_Freezes/V2/snRNA/Tu
 
 # input dependencies ------------------------------------------------------
 ## input seurat object paths
-srat_paths <- fread(input = "./Resources/Analysis_Results/data_summary/write_individual_srat_object_paths/20210428.v1/Seurat_Object_Paths.20210428.v1.tsv", data.table = F)
+srat_paths <- fread(data.table = F, input = "./Data_Freezes/V2/snRNA/Seurat_Object_Paths.20210428.v1.tsv")
 ### filter out normal sample
 srat_paths <- srat_paths %>%
   filter(Sample_Type == "Tumor")
