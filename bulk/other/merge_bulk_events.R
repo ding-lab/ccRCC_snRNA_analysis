@@ -21,39 +21,54 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input bulk mutation result
-maf_df <- loadMaf()
+maf_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutation/merge_discovery_ith_mutations_for_snRNA_samples/20210504.v1/snRNA_samples.somatic_mutation.maf.v1.0.tsv")
 ## input germline mutation result
-vhl_germline_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Germline_Variants/2019-09-10/VHL_var.txt")
-bap1_germline_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Germline_Variants/2019-09-10/BAP1_var.txt")
+vhl_germline_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Germline_Variants/Analysis_Results/2019-09-10/VHL_var.txt")
+bap1_germline_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Germline_Variants/Analysis_Results/2019-09-10/BAP1_var.txt")
 ## input bulk CNV profile
-arm_cnv_df <- fread(input = "./Resources/Analysis_Results/bulk/copy_number/write_sample_bicseq_cnv_profile/20200316.v1/Bulk_WGS_Chr_CNV_Profile.20200316.v1.tsv", data.table = F)
+arm_cnv_df <- fread(input = "./Resources/Analysis_Results/bulk/copy_number/write_sample_bicseq_cnv_profile/20210503.v1/Bulk_WGS_Chr_CNV_Profile.20210503.v1.tsv", data.table = F)
 ## input methylatin value
 methylation_by_gene_df <- fread(input = "./Resources/Analysis_Results/bulk/methylation/average_methylation_by_gene_by_aliquot/20200317.v1/CCRCC.TumorBeta.by_gene.20200317.v1.tsv", data.table = F)
 ## input chr3 translocation data
 chr3_translocation_df <- openxlsx::read.xlsx("./Resources/Bulk_Processed_Data/CPTAC3-ccRCC-SupplementaryTables_Final/CPTAC-3-ccRCC_paper_STable S2.xlsx", sheet = "Tab1.Chr3_translocation_all", fillMergedCells = T)
-## input case ids to process
-srat_paths <- fread(input = "./Resources/Analysis_Results/individual_sample/write_path_to_seurat_objects_on_box/20200219.v1/Seurat_Object_Paths.20200219.v1.tsv", data.table = F)
 ## input id meta data
-id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200427.v1/meta_data.20200427.v1.tsv", data.table = F)
+id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv", data.table = F)
 ## input 10xmapping results
 sn_mut_df <- fread(input = "./Resources/Analysis_Results/mutation/unite_10xmapping/20200303.v1/10XMapping.20200303.v1.tsv", data.table = F)
-## set case ids to process
-case_ids <- unique(srat_paths$Case)
 
-# format somatic mutation data ----------------------------------------------------
-maf_df <- maf_df %>%
-  mutate(case_id = str_split_fixed(string = Tumor_Sample_Barcode, pattern = "_", n = 2)[,1]) %>%
-  filter(case_id %in% case_ids)
-var_class_df <- generate_somatic_mutation_matrix(pair_tab = genes_mutated_in_ccRCC, maf = maf_df)
+
+# preprocess --------------------------------------------------------------
+## set case ids to process
+case_ids <- unique(id_metadata_df$Case[id_metadata_df$snRNA_available])
+sample_ids <- unique(id_metadata_df$Sample[id_metadata_df$snRNA_available])
+genes_mut <-genes_pathogenicpathways_in_ccRCC
+
+# format somatic mutation data for the discovery data ----------------------------------------------------
+get_mutation_class_matrix <- function(pair_tab, maf) {
+  genes4mat <- unique(unlist(pair_tab))
+  length(genes4mat)
+  
+  maf <- maf[maf$Hugo_Symbol %in% genes4mat & maf$Variant_Classification != "Silent",]
+  nrow(maf)
+  
+  mut_mat <- reshape2::dcast(data = maf, Hugo_Symbol ~ sample_id, fun =  function(x) {
+    variant_class <- paste0(unique(x), collapse = ",")
+    return(variant_class)
+  }, value.var = "Variant_Classification", drop=FALSE)
+  rownames(mut_mat) <- as.vector(mut_mat$Hugo_Symbol)
+  return(mut_mat)
+}
+var_class_df <- get_mutation_class_matrix(pair_tab = genes_mut, maf = maf_df)
 var_class_by_case_mat <- t(var_class_df[,-1])
 var_class_by_case_mat[var_class_by_case_mat == "Silent"] <- ""
 var_class_by_case_mat[var_class_by_case_mat == ""] <- "None"
 var_class_by_case_df <- as.data.frame(var_class_by_case_mat)
 ### change column names
 colnames(var_class_by_case_df) <- paste0("Mut.", colnames(var_class_by_case_df))
-var_class_by_case_df$Case <- rownames(var_class_by_case_df)
+var_class_by_case_df$Sample <- rownames(var_class_by_case_df)
+var_class_by_case_df$Case <- mapvalues(x = var_class_by_case_df$Sample, from = id_metadata_df$Sample, to = as.vector(id_metadata_df$Case))
 ## add new aliquot id
-var_class_by_case_df$Aliquot_snRNA_WU <- paste0(var_class_by_case_df$Case, "-T1")
+var_class_by_case_df$Aliquot_snRNA_WU <- mapvalues(x = var_class_by_case_df$Sample, from = id_metadata_df$Sample, to = as.vector(id_metadata_df$Aliquot.snRNA.WU))
 
 # add germline mutation data ----------------------------------------------
 var_class_by_case_df[, "Mut.VHL.Germline"] <- "None"
@@ -66,8 +81,9 @@ sn_mut_df$Aliquot_snRNA_WU <- mapvalues(x = sn_mut_df$aliquot, from = id_metadat
 sn_mut_df$Case <- mapvalues(x = sn_mut_df$aliquot, from = id_metadata_df$Aliquot.snRNA, to = as.vector(id_metadata_df$Case))
 sn_mut_df <- sn_mut_df %>%
   filter(allele_type == "Var") %>%
-  filter(gene_symbol %in% genes_mutated_in_ccRCC) %>%
-  filter(!(grepl(x = Aliquot_snRNA_WU, pattern = "T1")))
+  filter(gene_symbol %in% var_class_df$Hugo_Symbol) %>%
+  # filter(!(grepl(x = Aliquot_snRNA_WU, pattern = "T1"))) %>%
+  filter(!(Aliquot_snRNA_WU %in% var_class_by_case_df$Aliquot_snRNA_WU))
 ## loop to add the mutation info for the additional segment
 var_class_additional_df <- NULL
 for (aliquot_wu_tmp in unique(sn_mut_df$Aliquot_snRNA_WU)) {
@@ -75,8 +91,9 @@ for (aliquot_wu_tmp in unique(sn_mut_df$Aliquot_snRNA_WU)) {
   var_tmp <- var_class_by_case_df %>%
     filter(Case == case_tmp)
   ## change based on the discovery mutation info
-  var_tmp_add <- var_tmp
+  var_tmp_add <- var_tmp[1,]
   var_tmp_add$Aliquot_snRNA_WU <- aliquot_wu_tmp
+  var_tmp_add$Sample <- mapvalues(x = aliquot_wu_tmp, from = id_metadata_df$Aliquot.snRNA.WU, to = as.vector(id_metadata_df$Sample))
   
   sn_mut_tmp <- sn_mut_df %>%
     filter(Aliquot_snRNA_WU == aliquot_wu_tmp)

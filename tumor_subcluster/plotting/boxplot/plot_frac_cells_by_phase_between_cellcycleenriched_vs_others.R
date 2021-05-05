@@ -33,7 +33,7 @@ plotdata_df <- frac_df %>%
 enrich_df <- enrich_df %>%
   mutate(cluster_name2 = gsub(x = cluster_name, pattern = "\\.", replacement = "-"))
 plotdata_df <- plotdata_df %>%
-  mutate(x_plot = ifelse(Cluster_Name %in% enrich_df$cluster_name2[enrich_df$Cell_cycle], "CellCycle\nEnriched", "Others")) %>%
+  mutate(x_plot = ifelse(Cluster_Name %in% enrich_df$cluster_name2[enrich_df$Cell_cycle], "cell-cycle-enriched\ntumor clusters", "other\ntumor clusters")) %>%
   mutate(y_plot = Frac.phase.cluster)
 
 # plot --------------------------------------------------------------------
@@ -45,15 +45,19 @@ for (phase_tmp in unique(plotdata_df$Phase)) {
   p = p + geom_boxplot(width=.1, outlier.shape = 23, outlier.fill = "red")
   p = p + geom_point(color = "black", fill = "black", shape = 16, position = pos, stroke = 0, alpha = 0.8, size = 2)
   p = p + stat_compare_means(data = plotdata_tmp_df, 
-                             mapping = aes(x = x_plot, y = y_plot, label = ..p.signif..),  ref.group = "Others",
+                             mapping = aes(x = x_plot, y = y_plot, label = ..p.signif..),  ref.group = "other\ntumor clusters",
                              symnum.args = symnum.args,
                              hide.ns = F, method = "wilcox.test")
-  p <- p + theme_classic()
+  p <- p + theme_classic(base_size = 12)
   p <- p + theme(legend.position = "none")
   p <- p + theme(axis.title.x = element_blank(), axis.text.x = element_text(size = 9.5, colour = "black"))
   p <- p + ylab(label = paste0("% of tumor cells in ", phase_tmp, " phase"))
   file2write <- paste0(dir_out, phase_tmp, ".png")
   png(file2write, width = 600, height = 600, res = 150)
+  print(p)
+  dev.off()
+  file2write <- paste0(dir_out, phase_tmp, ".pdf")
+  pdf(file2write, width = 3.5, height = 3, useDingbats = F)
   print(p)
   dev.off()
 }

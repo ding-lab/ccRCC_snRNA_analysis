@@ -15,7 +15,8 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-dir_deg_file_level1 <- "./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/Tumorcells_vs_PTcells/"
+# dir_deg_file_level1 <- "./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/Tumorcells_vs_PTcells/"
+dir_deg_file_level1 <- "./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/Tumorcells_vs_PTcells/20210429.v2/"
 
 # input files -------------------------------------------------------------
 paths_deg_file <- list.files(path = dir_deg_file_level1, full.names = T)
@@ -25,6 +26,7 @@ for (path_deg_file_tmp in paths_deg_file) {
   deg_df_tmp <- fread(data.table = F, input = path_deg_file_tmp)
   deg_sup_df <- rbind(deg_df_tmp, deg_sup_df)
 }
+unique(deg_sup_df$easyid_tumor)
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "Tumor_vs_PT_DEGs.", run_id, ".tsv")

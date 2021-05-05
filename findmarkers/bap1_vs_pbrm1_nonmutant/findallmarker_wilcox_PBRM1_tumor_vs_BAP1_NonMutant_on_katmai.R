@@ -65,7 +65,6 @@ cases_group2 <- mut_df$Case[mut_df$mutation_category_sim %in% c("Non-mutants", "
 aliquots_group2 <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available & idmetadata_df$Case %in% cases_group2 & idmetadata_df$Sample_Type == "Tumor"]
 aliquots_group2
 
-
 # preprocess the Seurat object meta data---------------------------------------------
 BC <- srat@meta.data %>% rownames
 ## get original barcode

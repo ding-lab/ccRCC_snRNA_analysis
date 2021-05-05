@@ -74,8 +74,10 @@ for (easyid_tmp in easyids_process) {
   ## make legend label
   legend_labels <- rownames(plotdata_df[-c(1,2),])
   # legend_labels[plotdata_pre_df$is.highlight] <- paste0(legend_labels[plotdata_pre_df$is.highlight], "(without 3p loss)")
-  file2write <- paste0(dir_out, easyid_tmp, ".png")
-  png(file2write, width = 800, height = 800, res = 150)
+  # file2write <- paste0(dir_out, easyid_tmp, ".png")
+  # png(file2write, width = 800, height = 800, res = 150)
+  file2write <- paste0(dir_out, easyid_tmp, ".pdf")
+  pdf(file2write, width = 5, height = 5, useDingbats = F)
   radarchart(df = plotdata_df, plty = linetypes_cluster, plwd=3,
              pcol = colors_cluster,
              #custom the grid
@@ -94,7 +96,7 @@ for (caseid_tmp in "C3N-01200") {
   plotdata_pre_df <- enrich_df %>%
     mutate(cluster_name2 = gsub(x = cluster_name, pattern = "\\.", replacement = "-")) %>%
     filter(grepl(x = cluster_name2, pattern = caseid_tmp)) %>%
-    mutate(cluster_label = gsub(x = cluster_name2, pattern = caseid_tmp, replacement = "")) %>%
+    mutate(cluster_label = gsub(x = cluster_name2, pattern = paste0(caseid_tmp, "\\-"), replacement = "")) %>%
     mutate(is.highlight = cluster_name2 %in% tumorclusters_highlight_df$tumor_subcluster)
   plotdata_df <- plotdata_pre_df[, modules_df$scoregroup_name]
   rownames(plotdata_df) <- plotdata_pre_df$cluster_label
@@ -110,10 +112,12 @@ for (caseid_tmp in "C3N-01200") {
   ## make legend label
   legend_labels <- rownames(plotdata_df[-c(1,2),])
   # legend_labels[plotdata_pre_df$is.highlight] <- paste0(legend_labels[plotdata_pre_df$is.highlight], "(without 3p loss)")
-  file2write <- paste0(dir_out, caseid_tmp, ".png")
-  png(file2write, width = 800, height = 800, res = 150)
+  # file2write <- paste0(dir_out, caseid_tmp, ".png")
+  # png(file2write, width = 800, height = 800, res = 150)
+  file2write <- paste0(dir_out, caseid_tmp, ".pdf")
+  pdf(file2write, width = 5, height = 5, useDingbats = F)
   radarchart(df = plotdata_df, plty = linetypes_cluster, plwd=3,
-             pcol = colors_cluster,
+             pcol = colors_cluster, 
              #custom the grid
              cglcol="grey", cglty=1, axislabcol="grey", caxislabels=seq(0,20,5), cglwd=0.8,
              ## title

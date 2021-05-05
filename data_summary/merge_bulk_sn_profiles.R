@@ -20,13 +20,13 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input bulk omics profile
 ## input te bulk genomics/methylation events
-merged_bulk_events_df <- fread(input = "./Resources/Analysis_Results/bulk/other/merge_bulk_events/20200512.v1/merged_bulk_events.20200512.v1.tsv", data.table = F)
+merged_bulk_events_df <- fread(input = "./Resources/Analysis_Results/bulk/other/merge_bulk_events/20210504.v1/merged_bulk_events.20210504.v1.tsv", data.table = F)
 ## input snRNA copy number profile for tumor cells
 merged_sn_events_df <- fread(input = "./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/estimate_fraction_of_tumorcells_with_expectedcnv_perchrregion_per_sample_using_cnvgenes/20200318.v1/fraction_of_tumorcells.expectedCNA.by_chr_region.20200318.v1.tsv", data.table = F)
 ## input the tumor content
 merged_tumorpurity_df <- fread(input = "./Resources/Analysis_Results/bulk/tumor_content/merge_tumor_content_from_bulk_and_snRNA/20200319.v1/Perc_Tumor_Content_from_snRNA_and_bulkRNA.20200319.v1.tsv", data.table = F)
 ## input id meta data
-id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200427.v1/meta_data.20200427.v1.tsv", data.table = F)
+id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv", data.table = F)
 
 # filter snRNA copy number to 3p, 5q, 14q ---------------------------------
 merged_sn_events_df <- merged_sn_events_df %>%
@@ -57,6 +57,7 @@ bulk_sn_omicsprofile_df <- merge(bulk_sn_omicsprofile_df,
                                    rename(TumorPurity.bulk = ESTIMATE_TumorPurity_RNA), 
                                  by = c("Case", "Aliquot.snRNA"), 
                                  all = T)
+bulk_sn_omicsprofile_df$Aliquot.snRNA <- mapvalues(x = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, from = id_metadata_df$Aliquot.snRNA.WU, to = as.vector(id_metadata_df$Aliquot.snRNA))
 
 # write table -------------------------------------------------------------
 file2write <- paste0(dir_out, "bulk_sn_omics_profile.", run_id, ".tsv")

@@ -7,7 +7,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -19,7 +19,8 @@ id_metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sa
 ## input pathway scores
 scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_msigdb_top_geneset_scores/20210419.v1/MSigDB.Hallmark.tsv")
 ## input by cluster enrichment assignment
-enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210421.v3/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
+# enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210421.v3/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
+enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210503.v1/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
 
 # preprocess --------------------------------------------------------------
 ## group gene sets into modules
@@ -29,7 +30,9 @@ module2_df <- data.frame(geneset_name = c("HALLMARK_ALLOGRAFT_REJECTION", "HALLM
                          module_name = "Immune")
 module3_df <- data.frame(geneset_name = c("HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION", "HALLMARK_HYPOXIA", "HALLMARK_TNFA_SIGNALING_VIA_NFKB"),
                          module_name = "EMT")
-module4_df <- data.frame(geneset_name = c("HALLMARK_UV_RESPONSE_DN", "HALLMARK_MTORC1_SIGNALING"),
+# module4_df <- data.frame(geneset_name = c("HALLMARK_UV_RESPONSE_DN", "HALLMARK_MTORC1_SIGNALING"),
+#                          module_name = "mTOR")
+module4_df <- data.frame(geneset_name = c("HALLMARK_MTORC1_SIGNALING"),
                          module_name = "mTOR")
 modules_df <- rbind(module1_df, module2_df, module3_df, module4_df)
 modules_df <- modules_df %>%
@@ -37,7 +40,7 @@ modules_df <- modules_df %>%
 
 # format expression data --------------------------------------------------
 ## get dim names
-scorenames <- modules_df$scoregroup_name
+scorenames <- c(modules_df$scoregroup_name, "UV_RESPONSE_DN_Score"); scorenames <- unique(scorenames)
 plot_data_t_mat <- as.matrix(scores_df[,scorenames])
 plot_data_mat <- t(plot_data_t_mat)
 colnames(plot_data_mat) <- scores_df$cluster_name

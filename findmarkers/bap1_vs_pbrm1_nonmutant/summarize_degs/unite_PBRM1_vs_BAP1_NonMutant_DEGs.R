@@ -15,7 +15,7 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-dirname_deg_files <- c("./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/PBRM1_vs_BAP1_NonMutants_Tumorcells/")
+dirname_deg_files <- c("./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/PBRM1_vs_BAP1_NonMutants_Tumorcells/20210429.v1/")
 ## input mutation category
 mut_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutation/annotate_cptac_sample_by_pbrm1_bap1_mutation/20210310.v1/PBRM1_BAP1_Mutation_Status_By_Case.20210310.v1.tsv")
 

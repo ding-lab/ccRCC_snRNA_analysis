@@ -15,7 +15,7 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/unite_tumor_vs_pt_DEGs/20210419.v1/Tumor_vs_PT_DEGs.20210419.v1.tsv")
+deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/unite_tumor_vs_pt_DEGs/20210429.v1/Tumor_vs_PT_DEGs.20210429.v1.tsv")
 
 # summarize genes by occurance ---------------------------------------------
 deg_sig_long_df <- deg_df %>%
@@ -44,9 +44,9 @@ deg_wide_df <- deg_wide_df[, c("genesymbol_deg", "Num_sig_up", "Num_sig_down", "
 # filter DEGs ----------------------------------------------
 cutoff_datapoints <- length(easyids_tumor)*0.5
 deg_enough_datapoint_df <- deg_wide_df %>%
-  filter(Num_datapoints >= cutoff_datapoints) %>%
-  mutate(Tumor_vs_PT = ifelse(Num_sig_up >= 0.5*Num_datapoints & Num_sig_down == 0, "Up",
-                              ifelse(Num_sig_down >= 0.5*Num_datapoints & Num_sig_up == 0, "Down", "Inconsistent")))
+  filter(Num_datapoints > cutoff_datapoints) %>%
+  mutate(Tumor_vs_PT = ifelse(Num_sig_up > cutoff_datapoints & Num_sig_down == 0, "Up",
+                              ifelse(Num_sig_down > cutoff_datapoints & Num_sig_up == 0, "Down", "Inconsistent")))
 table(deg_enough_datapoint_df$Tumor_vs_PT)
 deg_consistent_df <-  deg_enough_datapoint_df %>%
   filter(Tumor_vs_PT != "Inconsistent")

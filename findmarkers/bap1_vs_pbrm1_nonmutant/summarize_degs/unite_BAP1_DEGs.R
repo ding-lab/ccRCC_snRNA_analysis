@@ -15,7 +15,7 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-dirname_deg_files <- c("./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/BAP1_vs_PBRM1_NonMutants_Tumorcells/")
+dirname_deg_files <- c("./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/BAP1_vs_PBRM1_NonMutants_Tumorcells/20210429.v1/")
 ## input mutation category
 mut_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutation/annotate_cptac_sample_by_pbrm1_bap1_mutation/20210310.v1/PBRM1_BAP1_Mutation_Status_By_Case.20210310.v1.tsv")
 
@@ -30,7 +30,7 @@ for (path_deg_file_tmp in paths_deg_file) {
   deg_df_tmp$group1_mut_category <- mut_category_tmp
   deg_sup_df <- rbind(deg_df_tmp, deg_sup_df)
 }
-
+table(deg_sup_df$easyid_tumor)
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "BAP1_DEGs.", run_id, ".tsv")
 write.table(x = deg_sup_df, file = file2write, quote = F, sep = "\t", row.names = F)
