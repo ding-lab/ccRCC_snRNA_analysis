@@ -51,7 +51,7 @@ for (aliquot_tmp in aliquots2process) {
     
     ## take out the doublets
     barcode2scrublet_tmp_df <- barcode2scrublet_df %>%
-      filter(Aliquot == sample_id_tmp) %>%
+      filter(Aliquot == aliquot_tmp) %>%
       filter(Barcode %in% rownames(srat@meta.data)) %>%
       filter(!predicted_doublet) %>%
       filter(Barcode %in% barcodes2process)
