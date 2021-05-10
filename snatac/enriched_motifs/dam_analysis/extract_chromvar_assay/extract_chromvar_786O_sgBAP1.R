@@ -21,7 +21,6 @@ dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
-library(BSgenome.Hsapiens.UCSC.hg38)
 library(Signac)
 library(Seurat)
 library(JASPAR2020)
