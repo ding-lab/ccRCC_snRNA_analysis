@@ -18,9 +18,9 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input id meta data
-id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv", data.table = F)
+id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv", data.table = F)
 ## input te bulk genomics/methylation events
-bulk_sn_omicsprofile_df <- fread(input = "./Resources/Analysis_Results/data_summary/merge_bulk_sn_profiles/20200512.v1/bulk_sn_omics_profile.20200512.v1.tsv", data.table = F)
+bulk_sn_omicsprofile_df <- fread(input = "./Resources/Analysis_Results/data_summary/merge_bulk_sn_profiles/20210504.v1/bulk_sn_omics_profile.20210504.v1.tsv", data.table = F)
 ## input clinical info
 specimen_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/extract_specimen_clinical_data/20200717.v1/snRNA_ccRCC_Specimen_Clinicl_Data.20200717.v1.tsv")
 
@@ -31,7 +31,7 @@ id_metadata_filtered_df <- id_metadata_df %>%
   filter(Is_discovery_set) %>%
   filter(Sample_Type == "Tumor")
 ## merge id meta data with bulk omics data
-plot_data_df <- merge(id_metadata_filtered_df, bulk_sn_omicsprofile_df, by.x = c("Case", "Aliquot.snRNA", "Aliquot.snRNA.WU"), by.y = c("Case", "Aliquot.snRNA", "Aliquot_snRNA_WU"), all.x = T)
+plot_data_df <- merge(id_metadata_filtered_df, bulk_sn_omicsprofile_df, by.x = c("Case", "Aliquot.snRNA", "Aliquot.snRNA.WU", "Sample"), by.y = c("Case", "Aliquot.snRNA", "Aliquot_snRNA_WU", "Sample"), all.x = T)
 ## merge clinical info
 plot_data_df <- merge(plot_data_df,
                       specimen_clinical_df %>%
@@ -66,7 +66,7 @@ color_gridline = "grey90"
 ### make color for tumor purity
 tumorpurity_color_fun <-  colorRamp2(c(0, 0.5, 1),c("white", "yellow", "red"))
 ## make colors for cnv state
-colors_cnvstate <- c("#e41a1c", "#377eb8", "grey80")
+colors_cnvstate <- c("#e41a1c", "#377eb8", "white")
 names(colors_cnvstate)  <- c("gain", "loss", "neutral")
 
 # make top column annotation --------------------------------------------------
@@ -236,5 +236,12 @@ pdf(paste0(dir_out, "data_availability", ".pdf"),
 ### combine heatmap and heatmap legend
 draw(object = p, 
      annotation_legend_side = "right", annotation_legend_list = annotation_lgd)
+dev.off()
+
+pdf(paste0(dir_out, "legend.bottom", ".pdf"), 
+    width = 5, height = 5)
+### combine heatmap and heatmap legend
+draw(object = p, 
+     annotation_legend_side = "bottom", annotation_legend_list = annotation_lgd)
 dev.off()
 

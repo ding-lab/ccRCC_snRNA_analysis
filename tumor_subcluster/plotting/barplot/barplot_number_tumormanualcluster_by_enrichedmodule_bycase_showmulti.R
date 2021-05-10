@@ -22,6 +22,7 @@ enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_s
 # make plot data ----------------------------------------------------------
 plotdata_df <- enrich_df %>%
   mutate(sample = str_split_fixed(string = cluster_name, pattern = "_", n = 2)[,1]) %>%
+  mutate(sample = gsub(x = sample, pattern = "\\.", replacement = "-")) %>%
   mutate(case = paste0(str_split_fixed(string = sample, pattern = "\\.", n = 3)[,1], "-", str_split_fixed(string = sample, pattern = "\\.", n = 3)[,2])) %>%
   mutate(cluster_enrich_type = ifelse(EMT, "EMT",
                                       ifelse(Cell_cycle, "Cell_cycle",
@@ -29,7 +30,9 @@ plotdata_df <- enrich_df %>%
                                                     ifelse(mTOR, "mTOR", "Other"))))) %>%
   mutate(cluster_enrich_type2 = ifelse(cluster_enrich_type != "Cell_cycle" & Cell_cycle, "Cell_cycle",
                                        ifelse(cluster_enrich_type != "Immune" & Immune, "Immune",
-                                              ifelse(cluster_enrich_type != "mTOR" & mTOR, "mTOR", "NA"))))
+                                              ifelse(cluster_enrich_type != "mTOR" & mTOR, "mTOR", "NA")))) %>%
+  mutate(cluster_enrich_type3 = ifelse(cluster_enrich_type != "Immune" & cluster_enrich_type2 != "Immune" & Immune, "Immune",
+                                       ifelse(cluster_enrich_type != "mTOR" & cluster_enrich_type2 != "mTOR" & mTOR, "mTOR", "NA")))
 x_anno_df <- plotdata_df %>%
   select(sample) %>%
   table() %>%
@@ -43,25 +46,29 @@ plotdata_df$x_plot <- factor(x = plotdata_df$sample, levels = unique(plotdata_df
 ## make colors
 colors_enrich_type <- RColorBrewer::brewer.pal(n = 8, name = "Set2")[c(1,6,3,4,8)]
 names(colors_enrich_type) <- c("EMT", "Cell_cycle", "Immune", "mTOR", "Other")
+
 # plot --------------------------------------------------------------------
 p <- ggplot(data = plotdata_df, mapping = aes(x_plot, 1))
 p <- p + geom_col_pattern(
-  aes(fill = cluster_enrich_type, pattern_fill = cluster_enrich_type2, pattern_density = cluster_enrich_type2),
+  aes(fill = cluster_enrich_type, pattern_fill = cluster_enrich_type2, pattern_density = cluster_enrich_type2, pattern_size = 0),
   colour          = 'black',
   pattern         = 'stripe'
 )
 p <- p + scale_fill_manual(values = colors_enrich_type)
 p <- p + scale_pattern_fill_manual(values = colors_enrich_type)
 p <- p + scale_pattern_density_manual(values = c("NA" = 0, "Cell_cycle"=0.5, "Immune"=0.5, "mTOR" = 0.5))
-p <- p + theme_classic(base_size = 15)
-p <- p + theme(axis.text.x = element_text(angle = 90,hjust=0.95,vjust=0.2))
-p <- p + theme(axis.title.x = element_blank(), axis.ticks.x = element_blank())
+p <- p + theme_classic(base_size = 17)
+p <- p + theme(axis.text.x = element_text(angle = 90,hjust=0.95,vjust=0.2, size = 17), axis.line.x = element_blank(), axis.ticks.x = element_blank())
+p <- p + theme(axis.title.x = element_blank(), axis.ticks.x = element_blank(), axis.line.y = element_blank())
+p <- p + theme(axis.text.y = element_text(size = 17), axis.ticks.y = element_blank())
 p <- p + scale_y_continuous(breaks = seq(0, 10, 2))
 p <- p + ylab("Number of tumor subclusters/sample")
 file2write <- paste0(dir_out, "barplot.pdf")
-pdf(file2write, width = 8, height = 5, useDingbats = F)
+pdf(file2write, width = 10, height = 6, useDingbats = F)
 print(p)
 dev.off()
+
+
 p <- ggplot(data = plotdata_df, mapping = aes(x_plot, 1))
 p <- p + geom_col_pattern(
   aes(fill = cluster_enrich_type, pattern_fill = cluster_enrich_type2, pattern_density = cluster_enrich_type2),
