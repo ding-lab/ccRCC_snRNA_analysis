@@ -23,6 +23,8 @@ methy_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Methy
 probe_group_df1 <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Methylation/Methylation_Subtype/methylation.sig.1000.probes.by.metSubtype_3.1.txt")
 probe_group_df2 <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Methylation/Methylation_Subtype/methylation.sig.1000.probes.by.metSubtype_3.2.txt")
 probe_group_df3 <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Methylation/Methylation_Subtype/methylation.sig.1000.probes.by.metSubtype_3.3.txt")
+## input mutation info
+mut_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Methylation/Methylation_Subtype/methylation_subtype_3_features.sig.50.txt")
 
 # preprocess --------------------------------------------------------------
 probe_group_df <- rbind(probe_group_df1 %>%
@@ -35,15 +37,14 @@ probe_group_df <- rbind(probe_group_df,
 
 # format matrix data --------------------------------------------------
 ## get dim names
-probe_names <- colnames(methy_df)
+probe_names <- methy_df$V1
 probe_names <- probe_names[grepl(pattern = "cg", x = probe_names)]
-plot_data_t_mat <- as.matrix(methy_df[,probe_names])
-plot_data_mat <- t(plot_data_t_mat)
-colnames(plot_data_mat) <- methy_df$V1
+plot_data_mat <- as.matrix(methy_df[,-1])
+rownames(plot_data_mat) <- probe_names
 ## make row label
 rownames_plot <- rownames(plot_data_mat)
 colnames_plot <- colnames(plot_data_mat)
-
+  
 # specify colors ----------------------------------------------------------
 ## specify color for NA values
 color_na <- "grey50"
@@ -69,9 +70,9 @@ colnames_plot[(paste0(colnames_plot, 1) %in% id_metadata_df$Aliquot.snRNA.WU[id_
 
 # make column annotation --------------------------------------------------
 ## merge data
-colanno_df <- methy_df[, c("VHL_somatic_mutation", "PBRM1_somatic_mutation", "BAP1_somatic_mutation")]
-rownames(colanno_df) <- methy_df$V1
-colanno_df <- colanno_df[colnames_plot,]
+colanno_df <- mut_df[, c("Mut.VHL", "Mut.PBRM1", "Mut.BAP1")]
+rownames(colanno_df) <- mut_df$Aliquot_snRNA_WU
+colanno_df <- colanno_df[easyids_plot,]
 ## make colors
 colors_scores_list <- list()
 for (colname_tmp in colnames(colanno_df)) {
