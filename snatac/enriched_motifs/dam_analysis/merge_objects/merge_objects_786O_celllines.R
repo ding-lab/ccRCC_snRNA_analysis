@@ -29,7 +29,7 @@ library(future)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -68,9 +68,9 @@ combined.peaks <- combined.peaks[peakwidths  < 10000 & peakwidths > 20]
 print("Finished filtering combined.peaks")
 # combined.peaks
 ####Now using MACS2-peak calling:
-## for testing only: subsampling
-# peaks.use=sample(combined.peaks, size = 5000, replace = FALSE)
-peaks.use <- combined.peaks
+## 5K peaks are not the ones in the final object this step is just to make initial merge (to have fragment files together) but you will use the peaks from the first script
+peaks.use=sample(combined.peaks, size = 5000, replace = FALSE)
+# peaks.use <- combined.peaks
 
 # Quantify peaks in each dataset ------------------------------------------
 ## We can now create a matrix of peaks x cell for each sample using the FeatureMatrix function. This function is parallelized using the future package. See the parallelization vignette for more information about using future.
