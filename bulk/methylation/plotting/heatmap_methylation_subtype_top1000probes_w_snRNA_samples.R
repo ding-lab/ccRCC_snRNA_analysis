@@ -61,7 +61,7 @@ color_gridline = "grey90"
 row_split_vec <- mapvalues(x = rownames_plot, from = probe_group_df$Gene, to = as.vector(probe_group_df$Probe_subtype))
 
 # make column split -------------------------------------------------------
-column_split_vec <- mapvalues(x = colnames_plot, from = methy_df$V1, to = as.vector(methy_df$subtype))
+column_split_vec <- mapvalues(x = colnames_plot, from = mut_df$V1, to = as.vector(mut_df$subtype))
 # mapvalues(x = "C3L-00908-T", from = methy_df$V1, to = as.vector(methy_df$subtype))
 # mapvalues(x = "C3L-00416-T", from = methy_df$V1, to = as.vector(methy_df$subtype))
 # mapvalues(x = "C3L-00416-T", from = methy_df$V1, to = as.vector(methy_df$BAP1_somatic_mutation))
@@ -70,9 +70,10 @@ colnames_plot[(paste0(colnames_plot, 1) %in% id_metadata_df$Aliquot.snRNA.WU[id_
 
 # make column annotation --------------------------------------------------
 ## merge data
-colanno_df <- mut_df[, c("Mut.VHL", "Mut.PBRM1", "Mut.BAP1")]
-rownames(colanno_df) <- mut_df$Aliquot_snRNA_WU
-colanno_df <- colanno_df[easyids_plot,]
+## merge data
+colanno_df <- mut_df[, c("VHL_somatic_mutation", "PBRM1_somatic_mutation", "BAP1_somatic_mutation")]
+rownames(colanno_df) <- mut_df$V1
+colanno_df <- colanno_df[colnames_plot,]
 ## make colors
 colors_scores_list <- list()
 for (colname_tmp in colnames(colanno_df)) {
