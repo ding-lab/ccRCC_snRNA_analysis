@@ -1,5 +1,6 @@
 # Yige Wu @WashU May 2021
 ## source activate ccrcc_snrna
+## reference: https://satijalab.org/signac/articles/merging.html
 
 # set up libraries and output directory -----------------------------------
 ## getting the path to the current script
@@ -43,6 +44,7 @@ options(future.globals.maxSize = 300 * 1024^3) # for 300 Gb RAM
 samples <- c("BAP1_786O", "Control_786O")
 paths_rds <- c("/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/4.Cell_lines/BAP1-20210412-786-O_processed_atac.chromvar.rds",
                "/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/4.Cell_lines/control-20210412-786-O_processed_atac.chromvar.rds")
+atac=vector(mode = "list", length = length(samples))
 for (i in 1:length(samples)){
   atac[[i]]=paths_rds[i]
   DefaultAssay(atac[[i]]) <- 'X500peaksMACS2'
