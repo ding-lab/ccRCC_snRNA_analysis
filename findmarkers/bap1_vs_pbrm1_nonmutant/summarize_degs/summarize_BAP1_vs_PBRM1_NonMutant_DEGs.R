@@ -38,6 +38,7 @@ deg_wide_df3$mean_avg_logFC <- rowMeans(deg_wide_df3[, easyids_tumor], na.rm = T
 deg_wide_df <- merge(x = deg_wide_df, y = deg_wide_df2, by = c("genesymbol_deg"), all.x = T)
 deg_wide_df$mean_avg_logFC <- mapvalues(x = deg_wide_df$genesymbol_deg, from = deg_wide_df3$genesymbol_deg, to = as.vector(deg_wide_df3$mean_avg_logFC))
 deg_wide_df$mean_avg_logFC <- as.numeric(deg_wide_df$mean_avg_logFC)
+
 # filter BAP1-specific DEGs ----------------------------------------------
 # cutoff_bap1_vs_others <- 0.5*length(unique(deg_df$easyid_tumor[deg_df$comparison == "BAP1_vs_PBRM1_Mutants_Tumorcells"]))
 cutoff_bap1_vs_others <- 0.5*length(easyids_tumor)

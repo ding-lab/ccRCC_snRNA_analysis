@@ -38,10 +38,11 @@ genesetnames_plot <- c("HALLMARK_MITOTIC_SPINDLE", "HALLMARK_E2F_TARGETS", "HALL
                        "HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION", "HALLMARK_HYPOXIA", "HALLMARK_MTORC1_SIGNALING",
                        "HALLMARK_COMPLEMENT", "HALLMARK_INFLAMMATORY_RESPONSE", "HALLMARK_INTERFERON_ALPHA_RESPONSE",
                        "HALLMARK_KRAS_SIGNALING_UP", "HALLMARK_TNFA_SIGNALING_VIA_NFKB", "HALLMARK_DNA_REPAIR", "HALLMARK_MYC_TARGETS_V1", "HALLMARK_IL2_STAT5_SIGNALING",
-                       "HALLMARK_INTERFERON_GAMMA_RESPONSE", "HALLMARK_PI3K_AKT_MTOR_SIGNALING", "HALLMARK_TGF_BETA_SIGNALING", "HALLMARK_ESTROGEN_RESPONSE_EARLY")
+                       "HALLMARK_INTERFERON_GAMMA_RESPONSE", "HALLMARK_PI3K_AKT_MTOR_SIGNALING", "HALLMARK_TGF_BETA_SIGNALING", "HALLMARK_ESTROGEN_RESPONSE_EARLY",
+                       "HALLMARK_NOTCH_SIGNALING")
 ## add name for the marker groups
 pathway2genes_filtered_df <- pathway2genes_df %>%
-  filter(p.adjust < 0.05) %>%
+  # filter(p.adjust < 0.05) %>%
   filter(Description %in% genesetnames_plot)
 
 pathway2genes_list <- sapply(pathway2genes_filtered_df$geneID, function(x) {

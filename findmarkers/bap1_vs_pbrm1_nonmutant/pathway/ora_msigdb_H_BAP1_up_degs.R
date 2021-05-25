@@ -26,7 +26,8 @@ filters = listFilters(ensembl)
 ## input wikipathway 
 wp2gene <- read.gmt("./Resources/Knowledge/Databases/MSigDB/h.all.v7.4.entrez.gmt")
 ## input degs
-deg_all_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/summarize_degs/summarize_BAP1_vs_PBRM1_NonMutant_DEGs/20210430.v1/BAP1_DEGs.Consistent20210430.v1.tsv")
+# deg_all_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/summarize_degs/summarize_BAP1_vs_PBRM1_NonMutant_DEGs/20210430.v1/BAP1_DEGs.Consistent20210430.v1.tsv")
+deg_all_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/summarize_degs/summarize_BAP1_vs_PBRM1_NonMutant_DEGs/20210430.v3/BAP1_DEGs.Consistent20210430.v3.tsv")
 
 # convert gene symbol to entrez ids ---------------------------------------
 deg_df <- deg_all_df %>%

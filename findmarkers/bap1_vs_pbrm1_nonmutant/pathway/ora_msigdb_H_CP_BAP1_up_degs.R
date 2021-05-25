@@ -11,7 +11,7 @@ library(clusterProfiler)
 library(biomaRt)
 library(org.Hs.eg.db)
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -28,7 +28,8 @@ wp2gene1 <- read.gmt("./Resources/Knowledge/Databases/MSigDB/h.all.v7.4.entrez.g
 wp2gene2 <- read.gmt("./Resources/Knowledge/Databases/MSigDB/c2.cp.v7.4.entrez.gmt")
 wp2gene <- rbind(wp2gene1, wp2gene2)
 ## input degs
-deg_all_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/summarize_degs/summarize_BAP1_vs_PBRM1_NonMutant_DEGs/20210430.v1/BAP1_DEGs.Consistent20210430.v1.tsv")
+# deg_all_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/summarize_degs/summarize_BAP1_vs_PBRM1_NonMutant_DEGs/20210430.v1/BAP1_DEGs.Consistent20210430.v1.tsv")
+deg_all_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/summarize_degs/summarize_BAP1_vs_PBRM1_NonMutant_DEGs/20210430.v3/BAP1_DEGs.Consistent20210430.v3.tsv")
 
 # convert gene symbol to entrez ids ---------------------------------------
 deg_df <- deg_all_df %>%
@@ -70,7 +71,7 @@ if (length(enricher_out) > 0 ) {
 # plot enrichment map -----------------------------------------------------
 p <- dotplot(object = enricher_out, showCategory=min(50, nrow(enricher_out_all_df[enricher_out_all_df$p.adjust < 0.05,])))
 file2write <- paste(dir_out, "dotplot.pdf")
-pdf(file2write, width = 12, height = 10, useDingbats = F)
+pdf(file2write, width = 15, height = 10, useDingbats = F)
 print(p)
 dev.off()
 
