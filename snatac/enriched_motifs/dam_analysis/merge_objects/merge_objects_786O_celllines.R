@@ -21,6 +21,11 @@ path_this_script <- thisFile()
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
 # dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
+## library additional libaries
+library(Signac)
+library(Seurat)
+library(GenomicRanges)
+library(future)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
@@ -29,11 +34,7 @@ run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
-## library additional libaries
-library(Signac)
-library(Seurat)
-library(GenomicRanges)
-library(future)
+
 
 # set up running parameters -----------------------------------------------
 ###some parallelization-solution from the tutorial:
