@@ -54,15 +54,18 @@ for (i in 1:length(samples)){
   print (paste(i,samples[i],sep=' '))
   atac[[i]]$Piece_ID=samples[i]
 }
-
+print("Finished creating the atac list")
 
 # Creating a common peak set ----------------------------------------------
 ## If the peaks were identified independently in each experiment then they will likely not overlap perfectly. We can merge peaks from all the datasets to create a common peak set, and quantify this peak set in each experiment prior to merging the objects.
 #####To obtain the best results - use ALL peaks!
 combined.peaks <- Signac::UnifyPeaks(object.list = atac, mode = "reduce")
+print("Finished UnifyPeaks")
 peakwidths <- GenomicRanges::width(combined.peaks)
+print("Finished width")
 combined.peaks <- combined.peaks[peakwidths  < 10000 & peakwidths > 20]
-combined.peaks
+print("Finished filtering combined.peaks")
+# combined.peaks
 ####Now using MACS2-peak calling:
 ## for testing only: subsampling
 peaks.use=sample(combined.peaks, size = 5000, replace = FALSE)
@@ -80,6 +83,7 @@ for (i in 1:length(samples)){
     cells = colnames(atac[[i]])
   ) 
 }
+print("Finished Quantify peaks")
 
 # create the seurat objects -----------------------------------------------
 ## We will now use the quantified matrices to create a Seurat object for each dataset, storing the Fragment object for each dataset in the assay.
@@ -91,12 +95,15 @@ for (i in 1:length(samples)){
   ###remove other assay
   atac[[i]][['X500peaksMACS2']]<-NULL
 }
+print("Finished creating seurat objects")
 
 # Merge objects -----------------------------------------------------------
 ## Now that the objects each contain an assay with the same set of features, we can use the standard merge function to merge the objects. This will also merge all the fragment objects so that we retain the fragment information for each cell in the final merged object.
 combined <- merge(x = atac[[1]], y = atac[2:length(samples)], add.cell.ids = samples)
+print("Finished merge")
 ## save output
 file2write <- paste0(dir_out, "786O_CellLines.Merged.", run_id, ".RDS")
 saveRDS(object = combined, file = file2write, compress = T)
+print("Finished saveRDS")
 
 
