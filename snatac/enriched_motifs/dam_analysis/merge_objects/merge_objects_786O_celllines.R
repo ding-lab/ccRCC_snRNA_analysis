@@ -40,6 +40,7 @@ dir.create(dir_out)
 ###some parallelization-solution from the tutorial:
 future::plan("multiprocess", workers = 40)
 options(future.globals.maxSize = 300 * 1024^3) # for 300 Gb RAM
+print("Finished setting running parameters")
 
 # input individual RDS objects into a list ---------------------------------------------------
 samples <- c("BAP1_786O", "Control_786O")
@@ -68,8 +69,8 @@ print("Finished filtering combined.peaks")
 # combined.peaks
 ####Now using MACS2-peak calling:
 ## for testing only: subsampling
-peaks.use=sample(combined.peaks, size = 5000, replace = FALSE)
-
+# peaks.use=sample(combined.peaks, size = 5000, replace = FALSE)
+peaks.use <- combined.peaks
 
 # Quantify peaks in each dataset ------------------------------------------
 ## We can now create a matrix of peaks x cell for each sample using the FeatureMatrix function. This function is parallelized using the future package. See the parallelization vignette for more information about using future.
