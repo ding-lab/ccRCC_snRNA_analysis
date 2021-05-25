@@ -47,7 +47,7 @@ paths_rds <- c("/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Pr
 atac=vector(mode = "list", length = length(samples))
 for (i in 1:length(samples)){
   atac[[i]]=paths_rds[i]
-  DefaultAssay(atac[[i]]) <- 'X500peaksMACS2'
+  Seurat::DefaultAssay(atac[[i]]) <- 'X500peaksMACS2'
   atac[[i]][['RNA']]<-NULL
   atac[[i]][['peaks']]<-NULL
   print (paste(i,samples[i],sep=' '))
