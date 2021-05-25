@@ -47,7 +47,7 @@ paths_rds <- c("/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Pr
                "/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/4.Cell_lines/control-20210412-786-O_processed_atac.chromvar.rds")
 atac=vector(mode = "list", length = length(samples))
 for (i in 1:length(samples)){
-  atac[[i]]=paths_rds[i]
+  atac[[i]]=readRDS(file = paths_rds[i])
   Seurat::DefaultAssay(atac[[i]]) <- 'X500peaksMACS2'
   atac[[i]][['RNA']]<-NULL
   atac[[i]][['peaks']]<-NULL
