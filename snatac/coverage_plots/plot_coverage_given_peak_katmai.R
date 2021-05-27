@@ -22,9 +22,6 @@ dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
 setwd(dir_base)
 ## library additional libaries
 library(Signac)
-library(Seurat)
-library(GenomicRanges)
-library(future)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
@@ -47,10 +44,12 @@ en=strsplit(x = peak_plot, split = "\\-")[[1]][3]; en = as.numeric(en)
 new_st=st-1000
 new_en=en+1000
 peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
+## change atac ident
+print(head(atac@meta.data))
 
 # plot --------------------------------------------------------------------
-p=CoveragePlot(
-  object = atac,
+p=Signac::CoveragePlot(
+  object = atac, 
   region = peak_plot_expanded,
   annotation = TRUE,
   peaks = TRUE,
