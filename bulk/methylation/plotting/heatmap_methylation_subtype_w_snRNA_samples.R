@@ -19,6 +19,7 @@ dir.create(dir_out)
 id_metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
 ## input methylation data
 methy_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Methylation/Methylation_Subtype/methylation_subtype_3_features.sig.50.txt")
+# methy_df <- fread(data.table = F, input = "~/Box/CPTAC_ccRCC/Data_Freeze_1.1/CPTAC_ccRCC_Discovery/DNA_methylation/")
 ## input methylylation probe group
 probe_group_df1 <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Methylation/Methylation_Subtype/methylation.sig.50.probes.by.metSubtype_3.1.txt")
 probe_group_df2 <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Methylation/Methylation_Subtype/methylation.sig.50.probes.by.metSubtype_3.2.txt")
