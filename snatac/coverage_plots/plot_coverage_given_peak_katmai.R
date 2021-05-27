@@ -46,10 +46,9 @@ new_en=en+1000
 peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
 ## change atac ident
 print(head(atac@meta.data))
-
 # plot --------------------------------------------------------------------
 p=Signac::CoveragePlot(
-  object = atac, 
+  object = atac, group.by = "Piece_ID",
   region = peak_plot_expanded,
   annotation = TRUE,
   peaks = TRUE,
