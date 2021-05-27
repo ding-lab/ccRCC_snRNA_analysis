@@ -34,7 +34,7 @@ dir.create(dir_out)
 ## input selected probes
 gene2probe_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/methylation/select_top_variable_probe_per_gene/20210527.v1/top_variable_probes_per_gene.quantitle0.9.tsv")
 ## input methylation
-methyl_df <- fread(data.table = F, input = "~/Box/CPTAC_ccRCC/Data_Freeze_1.1/CPTAC_ccRCC_Discovery/DNA_methylation/CPTAC_ccRCC_discovery_tumor_methylation_betavalue_probe_level_v1.0.tsv")
+methyl_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Methylation/CPTAC_ccRCC_discovery_tumor_methylation_betavalue_probe_level_v1.0.tsv")
 
 # average -----------------------------------------------------------------
 start_time <- Sys.time()

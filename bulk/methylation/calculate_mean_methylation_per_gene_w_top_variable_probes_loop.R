@@ -30,4 +30,9 @@ for (gene_tmp in unique(gene2probe_df$gene_HGNC)) {
 end_time <- Sys.time()
 end_time - start_time
 ## 1000 loops took Time difference of 2.360591 mins
+## Time difference of 1.047274 hours
 methyl_mean_df2 <- cbind(data.frame(gene_HGNC = unique(gene2probe_df$gene_HGNC)), methyl_mean_df)
+
+# write output ------------------------------------------------------------
+file2write <- paste0(dir_out, "TopVariableProbe_Averaged_Methylation_ByGene.", run_id, ".tsv")
+write.table(x = methyl_mean_df2, file = file2write, quote = F, sep = "\t", row.names = F)

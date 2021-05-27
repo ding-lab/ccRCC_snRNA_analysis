@@ -33,4 +33,5 @@ end_time <- Sys.time()
 end_time - start_time
 ## 100 loops took Time difference of 12.96927 secs for lapply
 ## 100 loops took Time difference of 9.062799 secs secs for mclapply
+## 23490 loops: Time difference of 30.25247 mins
 methyl_mean_df2 <- cbind(data.frame(gene_HGNC = unique(gene2probe_df$gene_HGNC)), methyl_mean_df)
