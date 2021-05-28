@@ -68,7 +68,6 @@ for (i in 1) {
     peaks = Signac::StringToGRanges(peak_plot, sep = c("-", "-")))
   p <- CombineTracks(
     plotlist = list(cov_plot, peak_plot, gene_plot),
-    expression.plot = expr_plot,
     heights = c(10, 1, 1),
   )
   ## write output
