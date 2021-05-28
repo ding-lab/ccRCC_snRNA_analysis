@@ -71,7 +71,7 @@ genes2test <- rna_df$gene_nam
 length(genes2test) ## 44391
 
 # process by gene ---------------------------------------------------------
-cor_result_list <- BiocParallel::bplapply(X = , FUN = function(i, p2g_df, met_df, exp_df, genes_vec) {
+cor_result_list <- BiocParallel::bplapply(X = 1:length(genes2test), FUN = function(i, p2g_df, met_df, exp_df, genes_vec) {
   ## extract RNA info
   g <- genes_vec[i]
   exp_vec <- exp_df[exp_df$gene_name == g,3:ncol(exp_df)]; exp_vec <- unlist(exp_vec)
