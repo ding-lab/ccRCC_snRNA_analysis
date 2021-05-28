@@ -56,24 +56,31 @@ for (i in 1) {
   cpg_en <- probe_tmp_df[1, "CpG_end"]
   
   # plot --------------------------------------------------------------------
-  cov_plot=CoveragePlot(
+  cov_plot= Signac::CoveragePlot(
     object = atac, group.by = "Piece_ID", 
     region = peak_plot_expanded,
-    annotation = T,features = gene_tmp,
+    annotation = T, features = gene_tmp,
     peaks = F,
     links=FALSE)
-  peak_plot <- PeakPlot(
+  print("Finished cov_plot")
+  
+  peak_plot <- Signac::PeakPlot(
     object = atac,
     region = peak_plot_expanded, 
     peaks = Signac::StringToGRanges(peak_plot, sep = c("-", "-")))
-  cpg_plot <- PeakPlot(
+  print("Finished peak_plot")
+  
+  cpg_plot <- Signac::PeakPlot(
     object = atac,
     region = peak_plot_expanded, 
     peaks = Signac::StringToGRanges(paste0(chr, cpg_st, cpg_en, collapse = "-"), sep = c("-", "-")))
-  p <- CombineTracks(
+  print("Finished cpg_plot")
+  
+  p <- Signac::CombineTracks(
     plotlist = list(cov_plot, peak_plot, cpg_plot),
-    heights = c(10, 1, 1),
-  )
+    heights = c(10, 1, 1))
+  print("Finished CombineTracks")
+  
   ## write output
   file2write <- paste0(dir_out, gene_tmp, "_", chr, "_", st, "_", en, ".png")
   png(file2write, width = 1000, height = 1000, res = 150)
