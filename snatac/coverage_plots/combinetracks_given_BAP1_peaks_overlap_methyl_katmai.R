@@ -41,8 +41,8 @@ peaks_plot_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Dat
 ## input the probe info
 probes_anno_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/methylation/annotate_methyl_subtype_specific_top1000_probes/20210525.v1/methyl_subtype_specific_1000_probe2gene.20210525.v1.tsv")
 
-# for (i in 1:nrow(peaks_plot_df)) {
-for (i in 1) {
+for (i in 1:nrow(peaks_plot_df)) {
+# for (i in 1) {
   ## process peak range
   chr=peaks_plot_df$seqnames[i]
   st=peaks_plot_df$start[i]; st = as.numeric(st)
