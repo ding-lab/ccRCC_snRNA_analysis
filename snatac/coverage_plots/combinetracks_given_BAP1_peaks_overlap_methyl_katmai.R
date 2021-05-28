@@ -51,7 +51,7 @@ for (i in 1) {
   gene_tmp <- peaks_plot_df$SYMBOL[i]
   ## process CpG range
   probe_tmp_df <- probes_anno_df[probes_anno_df$gene_HGNC == gene_tmp & !is.na(probes_anno_df$gene_HGNC),]
-  cpg_st <- probe_tmp_df[1, "probeGeg"]
+  cpg_st <- probe_tmp_df[1, "probeBeg"]
   cpg_en <- probe_tmp_df[1, "probeEnd"]
   range_cpg <- paste(chr, cpg_st, cpg_en, sep = "-")
   print(range_cpg)
