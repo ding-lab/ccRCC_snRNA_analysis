@@ -34,7 +34,7 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input the merged object
 # atac <- readRDS(file = "./Resources/Analysis_Results/snatac/merge_objects/merge_objects_786O_celllines/20210527.v1/786O_CellLines.Merged.20210527.v1.RDS")
-atac <- readRDS(file = "./Resources/Analysis_Results/snatac/merge_objects/add_gene_activity_to_786O_celllines_merged_katmai//20210528.v1/786O_CellLines.Merged.20210527.v1.RDS")
+atac <- readRDS(file = "./Resources/Analysis_Results/snatac/merge_objects/add_gene_activity_to_786O_celllines_merged_katmai/20210528.v1/786O_CellLines.Merged.20210528.v1.RDS")
 print("Finished readRDS")
 ## specify the peak to plot
 peaks_plot_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/BAP1_down_Promoter_and_overlapping_methylationProbes_m1.tsv")
