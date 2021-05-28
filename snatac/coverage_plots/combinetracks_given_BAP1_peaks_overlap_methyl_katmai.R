@@ -55,6 +55,8 @@ for (i in 1) {
   probe_tmp_df <- probes_anno_df[probes_anno_df$gene_HGNC == gene_tmp & !is.na(probes_anno_df$gene_HGNC),]
   cpg_st <- probe_tmp_df[1, "CpG_beg"]
   cpg_en <- probe_tmp_df[1, "CpG_end"]
+  range_cpg <- paste(chr, cpg_st, cpg_en, sep = "-")
+  print(range_cpg)
   
   # plot --------------------------------------------------------------------
   cov_plot= Signac::CoveragePlot(
@@ -74,7 +76,7 @@ for (i in 1) {
   cpg_plot <- Signac::PeakPlot(
     object = atac,
     region = peak_plot_expanded, 
-    peaks = Signac::StringToGRanges(paste0(chr, cpg_st, cpg_en, collapse = "-"), sep = c("-", "-")))
+    peaks = Signac::StringToGRanges(range_cpg, sep = c("-", "-")))
   print("Finished cpg_plot")
   
   p <- Signac::CombineTracks(
