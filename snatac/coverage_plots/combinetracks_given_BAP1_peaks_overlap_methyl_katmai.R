@@ -82,7 +82,7 @@ for (i in 1) {
     peaks = Signac::StringToGRanges(range_cpg, sep = c("-", "-")))
   print("Finished cpg_plot")
   
-  gene_plot <- AnnotationPlot(
+  gene_plot <- Signac::AnnotationPlot(
     object = atac,
     region = peak_plot_expanded, 
   )
