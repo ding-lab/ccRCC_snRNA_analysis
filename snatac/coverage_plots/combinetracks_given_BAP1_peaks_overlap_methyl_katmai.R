@@ -41,8 +41,7 @@ probes_anno_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bu
 
 # for (i in 1:nrow(peaks_plot_df)) {
 for (i in 1) {
-    
-  # process peak ------------------------------------------------------------
+  ## process peak range
   chr=peaks_plot_df$seqnames[i]
   st=peaks_plot_df$start[i]; st = as.numeric(st)
   en=peaks_plot_df$end[i]; en = as.numeric(en)
@@ -51,23 +50,28 @@ for (i in 1) {
   new_en=en+1000
   peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
   gene_tmp <- peaks_plot_df$SYMBOL[i]
+  ## process CpG range
+  probe_tmp_df <- probes_anno_df[probes_anno_df$gene_HGNC == gene_tmp & !is.na(probes_anno_df$gene_HGNC),]
+  cpg_st <- probe_tmp_df[1, "CpG_beg"]
+  cpg_en <- probe_tmp_df[1, "CpG_end"]
   
   # plot --------------------------------------------------------------------
   cov_plot=CoveragePlot(
     object = atac, group.by = "Piece_ID", 
     region = peak_plot_expanded,
-    annotation = F,
+    annotation = T,features = gene_tmp,
     peaks = F,
     links=FALSE)
-  gene_plot <- AnnotationPlot(
-    object = atac, 
-    region = peak_plot_expanded)
   peak_plot <- PeakPlot(
     object = atac,
     region = peak_plot_expanded, 
     peaks = Signac::StringToGRanges(peak_plot, sep = c("-", "-")))
+  cpg_plot <- PeakPlot(
+    object = atac,
+    region = peak_plot_expanded, 
+    peaks = Signac::StringToGRanges(paste0(chr, cpg_st, cpg_en, collapse = "-"), sep = c("-", "-")))
   p <- CombineTracks(
-    plotlist = list(cov_plot, peak_plot, gene_plot),
+    plotlist = list(cov_plot, peak_plot, cpg_plot),
     heights = c(10, 1, 1),
   )
   ## write output
