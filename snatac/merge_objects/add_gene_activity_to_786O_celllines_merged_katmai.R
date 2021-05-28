@@ -26,6 +26,7 @@ library(Signac)
 library(Seurat)
 library(GenomicRanges)
 library(future)
+library(EnsDb.Hsapiens.v86)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
@@ -46,6 +47,17 @@ print("Finished setting running parameters")
 ## input the merged object
 atac <- readRDS(file = "./Resources/Analysis_Results/snatac/merge_objects/merge_objects_786O_celllines/20210527.v1/786O_CellLines.Merged.20210527.v1.RDS")
 print("Finished readRDS")
+
+# add gene annotations ----------------------------------------------------
+# extract gene annotations from EnsDb
+annotations <- GetGRangesFromEnsDb(ensdb = EnsDb.Hsapiens.v86)
+
+# change to UCSC style
+seqlevelsStyle(annotations) <- 'UCSC'
+genome(annotations) <- "hg38"
+
+# add the gene information to the object
+Annotation(atac) <- annotations
 
 # Create a gene activity matrix -------------------------------------------
 gene.activities <- GeneActivity(atac)
