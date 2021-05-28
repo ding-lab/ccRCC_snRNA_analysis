@@ -25,7 +25,7 @@ setwd(dir_base)
 library(data.table)
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 5
+version_tmp <- 6
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -64,8 +64,8 @@ for (i in 1) {
   # plot --------------------------------------------------------------------
   cov_plot= Signac::CoveragePlot(
     object = atac, group.by = "Piece_ID", 
-    region = peak_plot_expanded, features = gene_tmp,
-    annotation = T, 
+    region = peak_plot_expanded,
+    annotation = F, 
     peaks = F,
     links=FALSE)
   print("Finished cov_plot")
@@ -82,9 +82,13 @@ for (i in 1) {
     peaks = Signac::StringToGRanges(range_cpg, sep = c("-", "-")))
   print("Finished cpg_plot")
   
+  gene_plot <- AnnotationPlot(
+    object = atac,
+    region = peak_plot_expanded, 
+  )
   p <- Signac::CombineTracks(
-    plotlist = list(cov_plot, peak_plot, cpg_plot),
-    heights = c(10, 1, 1))
+    plotlist = list(cov_plot, peak_plot, cpg_plot, gene_plot),
+    heights = c(10, 1, 1, 1))
   print("Finished CombineTracks")
   
   ## write output
