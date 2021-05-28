@@ -84,8 +84,7 @@ for (i in 1) {
   
   gene_plot <- Signac::AnnotationPlot(
     object = atac,
-    region = peak_plot_expanded, 
-  )
+    region = peak_plot_expanded)
   p <- Signac::CombineTracks(
     plotlist = list(cov_plot, peak_plot, cpg_plot, gene_plot),
     heights = c(10, 1, 1, 1))
