@@ -59,8 +59,8 @@ for (i in 1) {
   # plot --------------------------------------------------------------------
   cov_plot= Signac::CoveragePlot(
     object = atac, group.by = "Piece_ID", 
-    region = peak_plot_expanded,
-    annotation = T, features = gene_tmp,
+    region = peak_plot_expanded, features = gene_tmp,
+    annotation = T, 
     peaks = F,
     links=FALSE)
   print("Finished cov_plot")

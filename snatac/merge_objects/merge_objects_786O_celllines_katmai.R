@@ -102,6 +102,17 @@ print("Finished creating seurat objects")
 ## Now that the objects each contain an assay with the same set of features, we can use the standard merge function to merge the objects. This will also merge all the fragment objects so that we retain the fragment information for each cell in the final merged object.
 combined <- merge(x = atac[[1]], y = atac[2:length(samples)], add.cell.ids = samples)
 print("Finished merge")
+
+# Create a gene activity matrix -------------------------------------------
+gene.activities <- GeneActivity(combined)
+combined[['RNA']] <- CreateAssayObject(counts = gene.activities)
+combined <- NormalizeData(
+  object = combined,
+  assay = 'RNA',
+  normalization.method = 'LogNormalize',
+  scale.factor = median(combined$nCount_RNA)
+)
+
 ## save output
 file2write <- paste0(dir_out, "786O_CellLines.Merged.", run_id, ".RDS")
 saveRDS(object = combined, file = file2write, compress = T)
