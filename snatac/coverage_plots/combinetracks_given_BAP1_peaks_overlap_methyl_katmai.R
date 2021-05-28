@@ -47,9 +47,7 @@ for (i in 1) {
   st=peaks_plot_df$start[i]; st = as.numeric(st)
   en=peaks_plot_df$end[i]; en = as.numeric(en)
   peak_plot=paste(chr,st,en,sep='-')
-  new_st=st-1000
-  new_en=en+1000
-  peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
+
   gene_tmp <- peaks_plot_df$SYMBOL[i]
   ## process CpG range
   probe_tmp_df <- probes_anno_df[probes_anno_df$gene_HGNC == gene_tmp & !is.na(probes_anno_df$gene_HGNC),]
@@ -57,6 +55,10 @@ for (i in 1) {
   cpg_en <- probe_tmp_df[1, "CpG_end"]
   range_cpg <- paste(chr, cpg_st, cpg_en, sep = "-")
   print(range_cpg)
+  
+  new_st=min(c(st-1000, cpg_st))
+  new_en=max(c(en+1000, cpg_en))
+  peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
   
   # plot --------------------------------------------------------------------
   cov_plot= Signac::CoveragePlot(
