@@ -35,27 +35,30 @@ dir.create(dir_out)
 ## input the merged object
 atac <- readRDS(file = "./Resources/Analysis_Results/snatac/merge_objects/merge_objects_786O_celllines/20210527.v1/786O_CellLines.Merged.20210527.v1.RDS")
 ## specify the peak to plot
+peaks_plot_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/BAP1_down_Promoter_and_overlapping_methylationProbes_m1.tsv")
 peak_plot <- c("chr1-39408619-39409119")
 
-# process peak ------------------------------------------------------------
-chr=strsplit(x = peak_plot, split = "\\-")[[1]][1]
-st=strsplit(x = peak_plot, split = "\\-")[[1]][2]; st = as.numeric(st)
-en=strsplit(x = peak_plot, split = "\\-")[[1]][3]; en = as.numeric(en)
-new_st=st-1000
-new_en=en+1000
-peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
-## change atac ident
-print(head(atac@meta.data))
-# plot --------------------------------------------------------------------
-p=Signac::CoveragePlot(
-  object = atac, group.by = "Piece_ID",
-  region = peak_plot_expanded,
-  annotation = TRUE,
-  peaks = F, ranges = Signac::StringToGRanges(peak_plot, sep = c("-", "-")),
-  links=FALSE)
-## write output
-file2write <- paste0(dir_out, "test.png")
-png(file2write, width = 1000, height = 1000, res = 150)
-print(p)
-dev.off()
+for (i in 1:nrow(peaks_plot_df)) {
+  # process peak ------------------------------------------------------------
+  chr=peaks_plot_df$seqnames[i]
+  st=peaks_plot_df$start[i]; st = as.numeric(st)
+  en=peaks_plot_df$end[i]; en = as.numeric(en)
+  new_st=st-1000
+  new_en=en+1000
+  peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
+  ## change atac ident
+  print(head(atac@meta.data))
+  # plot --------------------------------------------------------------------
+  p=Signac::CoveragePlot(
+    object = atac, group.by = "Piece_ID",
+    region = peak_plot_expanded,
+    annotation = TRUE,
+    peaks = TRUE, 
+    links=FALSE)
+  ## write output
+  file2write <- paste0(dir_out, chr, "_", st, "_", en, ".png")
+  png(file2write, width = 1000, height = 1000, res = 150)
+  print(p)
+  dev.off()
+}
 
