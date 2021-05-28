@@ -25,7 +25,7 @@ setwd(dir_base)
 library(data.table)
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 4
+version_tmp <- 5
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -33,7 +33,8 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the merged object
-atac <- readRDS(file = "./Resources/Analysis_Results/snatac/merge_objects/merge_objects_786O_celllines/20210527.v1/786O_CellLines.Merged.20210527.v1.RDS")
+# atac <- readRDS(file = "./Resources/Analysis_Results/snatac/merge_objects/merge_objects_786O_celllines/20210527.v1/786O_CellLines.Merged.20210527.v1.RDS")
+atac <- readRDS(file = "./Resources/Analysis_Results/snatac/merge_objects/add_gene_activity_to_786O_celllines_merged_katmai//20210528.v1/786O_CellLines.Merged.20210527.v1.RDS")
 print("Finished readRDS")
 ## specify the peak to plot
 peaks_plot_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/BAP1_down_Promoter_and_overlapping_methylationProbes_m1.tsv")
@@ -63,8 +64,8 @@ for (i in 1) {
   # plot --------------------------------------------------------------------
   cov_plot= Signac::CoveragePlot(
     object = atac, group.by = "Piece_ID", 
-    region = peak_plot_expanded, #features = gene_tmp,
-    annotation = F, 
+    region = peak_plot_expanded, features = gene_tmp,
+    annotation = T, 
     peaks = F,
     links=FALSE)
   print("Finished cov_plot")
