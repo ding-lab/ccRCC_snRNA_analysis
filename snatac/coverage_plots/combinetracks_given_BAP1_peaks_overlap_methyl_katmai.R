@@ -36,8 +36,12 @@ dir.create(dir_out)
 atac <- readRDS(file = "./Resources/Analysis_Results/snatac/merge_objects/merge_objects_786O_celllines/20210527.v1/786O_CellLines.Merged.20210527.v1.RDS")
 ## specify the peak to plot
 peaks_plot_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/BAP1_down_Promoter_and_overlapping_methylationProbes_m1.tsv")
+## input the probe info
+probes_anno_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/methylation/annotate_methyl_subtype_specific_top1000_probes/20210525.v1/methyl_subtype_specific_1000_probe2gene.20210525.v1.tsv")
 
-for (i in 1:nrow(peaks_plot_df)) {
+# for (i in 1:nrow(peaks_plot_df)) {
+for (i in 1) {
+    
   # process peak ------------------------------------------------------------
   chr=peaks_plot_df$seqnames[i]
   st=peaks_plot_df$start[i]; st = as.numeric(st)
@@ -49,16 +53,29 @@ for (i in 1:nrow(peaks_plot_df)) {
   gene_tmp <- peaks_plot_df$SYMBOL[i]
   
   # plot --------------------------------------------------------------------
-  p=Signac::CoveragePlot(
+  cov_plot=CoveragePlot(
     object = atac, group.by = "Piece_ID", 
     region = peak_plot_expanded,
-    features = gene_tmp, annotation = TRUE,
-    peaks = F, ranges = Signac::StringToGRanges(peak_plot, sep = c("-", "-")), ranges.title = "Peak",
+    annotation = F,
+    peaks = F,
     links=FALSE)
+  gene_plot <- AnnotationPlot(
+    object = atac, 
+    region = peak_plot_expanded)
+  peak_plot <- PeakPlot(
+    object = atac,
+    region = peak_plot_expanded, 
+    peaks = Signac::StringToGRanges(peak_plot, sep = c("-", "-")))
+  p <- CombineTracks(
+    plotlist = list(cov_plot, peak_plot, gene_plot),
+    expression.plot = expr_plot,
+    heights = c(10, 1, 1),
+  )
   ## write output
   file2write <- paste0(dir_out, gene_tmp, "_", chr, "_", st, "_", en, ".png")
   png(file2write, width = 1000, height = 1000, res = 150)
   print(p)
   dev.off()
 }
+
 
