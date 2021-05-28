@@ -24,10 +24,7 @@ setwd(dir_base)
 ## library additional libaries
 library(Signac)
 library(Seurat)
-library(GenomicRanges)
-library(future)
 library(EnsDb.Hsapiens.v86)
-source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
 version_tmp <- 1
@@ -36,13 +33,6 @@ run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
 
-
-# set up running parameters -----------------------------------------------
-###some parallelization-solution from the tutorial:
-future::plan("multiprocess", workers = 40)
-options(future.globals.maxSize = 300 * 1024^3) # for 300 Gb RAM
-print("Finished setting running parameters")
-
 # input individual RDS objects into a list ---------------------------------------------------
 ## input the merged object
 atac <- readRDS(file = "./Resources/Analysis_Results/snatac/merge_objects/merge_objects_786O_celllines/20210527.v1/786O_CellLines.Merged.20210527.v1.RDS")
@@ -50,19 +40,19 @@ print("Finished readRDS")
 
 # add gene annotations ----------------------------------------------------
 # extract gene annotations from EnsDb
-annotations <- GetGRangesFromEnsDb(ensdb = EnsDb.Hsapiens.v86)
+annotations <- Signac::GetGRangesFromEnsDb(ensdb = EnsDb.Hsapiens.v86)
 
 # change to UCSC style
-seqlevelsStyle(annotations) <- 'UCSC'
-genome(annotations) <- "hg38"
+GenomeInfoDb::seqlevelsStyle(annotations) <- 'UCSC'
+GenomeInfoDb::genome(annotations) <- "hg38"
 
 # add the gene information to the object
-Annotation(atac) <- annotations
+Signac::Annotation(atac) <- annotations
 
 # Create a gene activity matrix -------------------------------------------
-gene.activities <- GeneActivity(atac)
+gene.activities <- Signac::GeneActivity(atac)
 atac[['RNA']] <- CreateAssayObject(counts = gene.activities)
-atac <- NormalizeData(
+atac <- Seurat::NormalizeData(
   object = atac,
   assay = 'RNA',
   normalization.method = 'LogNormalize',
