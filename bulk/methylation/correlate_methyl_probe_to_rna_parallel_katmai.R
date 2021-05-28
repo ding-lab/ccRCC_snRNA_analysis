@@ -67,10 +67,13 @@ rna_df <- rna_df[rna_df$gene_name %in% genes2test, c("gene_id", "gene_name", cas
 ## decide to remove the duplicated gene name because 
 ## for example those RNA such as Y_RNA, it has 782 gene ids and >2000 probes related, this created a lot more test to do which is is not useful for the correlation with chromatin accessibility
 rna_df <- rna_df[!duplicated(rna_df$gene_name),]
+genes2test <- rna_df$gene_nam
+length(genes2test) ## 44391
 
 # process by gene ---------------------------------------------------------
-cor_result_list <- BiocParallel::bplapply(X = genes2test, FUN = function(g, p2g_df, met_df, exp_df) {
+cor_result_list <- BiocParallel::bplapply(X = , FUN = function(i, p2g_df, met_df, exp_df, genes_vec) {
   ## extract RNA info
+  g <- genes_vec[i]
   exp_vec <- exp_df[exp_df$gene_name == g,3:ncol(exp_df)]; exp_vec <- unlist(exp_vec)
   num_0s_tmp <- length(which(exp_vec == 0))
   probes2test_tmp <- p2g_df$probeID[p2g_df$gene_HGNC == g]
@@ -84,9 +87,9 @@ cor_result_list <- BiocParallel::bplapply(X = genes2test, FUN = function(g, p2g_
     test_result_df <- rbind(test_result_df, test_result_tmp_df)
   }
   test_result_df$gene_symbol = g
-  print(g)
+  print(paste0(i, ":", signif(x = 100*(i/length(genes_vec)), digits = 4), "% done"))
   return(test_result_df)
-}, BPPARAM = BiocParallel::MulticoreParam(), p2g_df = probe2gene_df, met_df = methyl_df, exp_df = rna_df)
+}, BPPARAM = BiocParallel::MulticoreParam(log = T, workers = 28), p2g_df = probe2gene_df, met_df = methyl_df, exp_df = rna_df, genes_vec = genes2test)
 cor_result_df <- do.call(rbind.data.frame, cor_result_list)
 
 # write output ------------------------------------------------------------
