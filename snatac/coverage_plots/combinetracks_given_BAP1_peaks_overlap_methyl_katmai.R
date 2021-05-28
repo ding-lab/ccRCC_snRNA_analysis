@@ -22,7 +22,7 @@ dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
 setwd(dir_base)
 ## library additional libaries
 # library(Signac)
-source("./ccRCC_snRNA_analysis/load_pkgs.R")
+library(data.table)
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
 version_tmp <- 2
