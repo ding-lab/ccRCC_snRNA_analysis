@@ -25,7 +25,7 @@ setwd(dir_base)
 library(data.table)
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 3
+version_tmp <- 4
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -51,8 +51,8 @@ for (i in 1) {
   gene_tmp <- peaks_plot_df$SYMBOL[i]
   ## process CpG range
   probe_tmp_df <- probes_anno_df[probes_anno_df$gene_HGNC == gene_tmp & !is.na(probes_anno_df$gene_HGNC),]
-  cpg_st <- probe_tmp_df[1, "CpG_beg"]
-  cpg_en <- probe_tmp_df[1, "CpG_end"]
+  cpg_st <- probe_tmp_df[1, "probeGeg"]
+  cpg_en <- probe_tmp_df[1, "progEnd"]
   range_cpg <- paste(chr, cpg_st, cpg_en, sep = "-")
   print(range_cpg)
   
