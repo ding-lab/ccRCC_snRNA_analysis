@@ -52,7 +52,7 @@ for (i in 1) {
   ## process CpG range
   probe_tmp_df <- probes_anno_df[probes_anno_df$gene_HGNC == gene_tmp & !is.na(probes_anno_df$gene_HGNC),]
   cpg_st <- probe_tmp_df[1, "probeGeg"]
-  cpg_en <- probe_tmp_df[1, "progEnd"]
+  cpg_en <- probe_tmp_df[1, "probeEnd"]
   range_cpg <- paste(chr, cpg_st, cpg_en, sep = "-")
   print(range_cpg)
   
