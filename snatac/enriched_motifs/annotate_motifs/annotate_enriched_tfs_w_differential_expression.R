@@ -16,11 +16,12 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the DEG-TF matrix
-deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/overlap_tumor_vs_normal_snRNA_bulkRNA_protein_DEGs/20210511.v1/Tumor_vs_PT_DEGs.Overlap.snRNA.bulkRNA.Protein.20210511.v1.tsv")
+deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/unite_tumor_vs_normal_snRNA_bulkRNA_protein_DEGs/20210601.v1/Tumor_vs_PT_DEGs.United.snRNA.bulkRNA.Protein.20210601.v1.tsv")
 ## specify enriched motifs
+# motifs_plot <- c("NFKB2", "NFKB1", "HIF1A", "ARNT::HIF1A", "RBPJ", "MXI1", "ZNF75D", "HSF2", "NEUROD1", "SREBF2", "NEUROG2(var.2)",
+#                  "KLF15", "NRF1", "SP9", "ZBTB14", "EGR1", "SP3", "TCFL5", "ZNF148", "KLF14", "SP1")
 motifs_plot <- c("NFKB2", "NFKB1", "HIF1A", "ARNT::HIF1A", "RBPJ", "MXI1", "ZNF75D", "HSF2", "NEUROD1", "SREBF2", "NEUROG2(var.2)",
-                 "KLF15", "NRF1", "SP9", "ZBTB14", "EGR1", "SP3", "TCFL5", "ZNF148", "KLF14", "SP1")
-
+                 "E2F4", "CREB3L4(var.2)", "E2F1", "SPDEF", "CREM", "FEV", "HES2", "CREB3", "ATF7", "FOSL1::JUND(var.2)", "FLI1")
 # melt the DEG-TF table ---------------------------------------------------
 ### get the gene symbols of the TFs
 genesymbols_tf <- sapply(X = motifs_plot, FUN = function(x) {
