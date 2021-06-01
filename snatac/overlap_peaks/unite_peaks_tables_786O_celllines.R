@@ -1,6 +1,5 @@
-# Yige Wu @WashU May 2021
+# Yige Wu @WashU Jun 2021
 ## source activate ccrcc_snrna
-## reference: https://satijalab.org/signac/articles/merging.html
 
 # set up libraries and output directory -----------------------------------
 ## getting the path to the current script
