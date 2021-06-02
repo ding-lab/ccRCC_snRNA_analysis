@@ -26,8 +26,11 @@ source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
-dir_out1 <- "./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/Tumorcells_vs_PTcells/"
-dir_out <- paste0(dir_out1, run_id, "/"); dir.create(dir_out)
+## set output directory
+dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
+dir.create(dir_out)
+library(future)
+plan("multiprocess", workers = 4)
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
