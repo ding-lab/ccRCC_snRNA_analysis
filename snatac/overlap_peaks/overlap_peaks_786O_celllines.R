@@ -79,6 +79,7 @@ for (i in 1:24){
   all_st_1=as.data.frame(all_st[[i]])
   all_st_1=all_st_1[!duplicated(all_st_1),]
   all_st_f=rbind(all_st_f,all_st_1)
+  print(paste0("rbind ", i))
 }
 recentered_final=rbind(recentered_non_olap,all_st_f)
 
