@@ -35,7 +35,8 @@ plan("multiprocess", workers = 10)
 options(future.globals.maxSize= 891289600)
 
 # input dependencies ------------------------------------------------------
-atac=readRDS('Resources/Analysis_Results/snatac/merge_objects/add_gene_activity_to_786O_celllines_merged_katmai/20210528.v1/786O_CellLines.Merged.20210528.v1.RDS')
+atac=readRDS('./Resources/Analysis_Results/snatac/merge_objects/add_gene_activity_to_786O_celllines_merged_katmai/20210528.v1/786O_CellLines.Merged.20210528.v1.RDS')
+print(paste0("Finished reading atac object!"))
 recentered_final <- read.table(file = "./Resources/Analysis_Results/snatac/overlap_peaks/overlap_peaks_786O_celllines/20210601.v1/recentered_final.filtered.20210601.v1.tsv", sep='\t',header=TRUE)
 
 # create featurematrix with the new set of peaks --------------------------
@@ -46,11 +47,14 @@ matrix.counts <- Signac::FeatureMatrix(
   sep = c("-","-"),
   cells = colnames(atac)
 )
+print(paste0("Finished FeatureMatrix!"))
+
 atac[['peaksMACS2']] <- Signac::CreateChromatinAssay(counts = matrix.counts,
                                              fragments=Signac::Fragments(atac@assays$peaksinters))
+print(paste0("Finished CreateChromatinAssay!"))
+
 SeuratObject::DefaultAssay(atac)<-'peaksMACS2'
 
-atac[['X500peaksMACS2']]<-NULL
 atac[['peaksinters']]<-NULL
 print(paste0("Finished creating peaksMACS2 assay!"))
 
