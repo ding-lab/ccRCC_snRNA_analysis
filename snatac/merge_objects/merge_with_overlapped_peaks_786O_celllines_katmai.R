@@ -75,7 +75,7 @@ atac <- FindNeighbors(object = atac, reduction = 'lsi', dims = 2:50)
 print(paste0("Finished FindNeighbors!"))
 
 atac <- FindClusters(object = atac, verbose = FALSE, algorithm = 3)
-print(paste0("Finished FindNeighbors!"))
+print(paste0("Finished FindClusters!"))
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "786O_CellLines.PeakOverlapped.20210528.v1.RDS")
