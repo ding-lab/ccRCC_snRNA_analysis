@@ -24,7 +24,7 @@ setwd(dir_base)
 # library(Signac)
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -53,8 +53,8 @@ for (i in 1:nrow(peaks_plot_df)) {
 
   gene_tmp <- peaks_plot_df$SYMBOL[i]
   
-  new_st=st-1000
-  new_en=en+1000
+  new_st=st-3000
+  new_en=en+3000
   peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
   
   # plot --------------------------------------------------------------------
@@ -77,7 +77,7 @@ for (i in 1:nrow(peaks_plot_df)) {
     region = peak_plot_expanded)
   p <- Signac::CombineTracks(
     plotlist = list(cov_plot, peak_plot,gene_plot),
-    heights = c(10, 1, 1))
+    heights = c(10, 1, 2))
   print("Finished CombineTracks")
   
   ## write output
