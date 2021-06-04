@@ -1,4 +1,4 @@
-# Yige Wu @WashU May 2021
+# Yige Wu @WashU Jun 2021
 ## source activate ccrcc_snrna
 
 # set up libraries and output directory -----------------------------------
@@ -37,7 +37,7 @@ atac <- readRDS(file = "./Resources/Analysis_Results/snatac/merge_objects/add_ge
 print("Finished readRDS")
 
 # specify peak and gene to plot -------------------------------------------
-peaks_plot_df <- data.frame(seqname = c("chr3"),
+peaks_plot_df <- data.frame(seqnames = c("chr3"),
                             start = c(52401004),
                             end = c(52410030),
                             SYMBOL = "BAP1")
