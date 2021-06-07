@@ -88,7 +88,7 @@ cna_bypeak_df[1:5, 1:5]
 cna_bybc_bypeak_df <- cna_bypeak_df[, cases_process]
 # rm(cna_bypeak_df)
 cna_bybc_bypeak_df[1:5, 1:5]
-cna_bybc_bypeak_df[, wcelltypes_process == "PT"] <- 0.0
+cna_bybc_bypeak_df[, celltypes_process == "PT"] <- 0
 cna_bybc_bypeak_df[1:5, 1:5]
 rownames(cna_bybc_bypeak_df) <- cna_bypeak_df$peak
 colnames(cna_bybc_bypeak_df) <- barcodes_process
