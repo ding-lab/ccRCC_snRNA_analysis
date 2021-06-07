@@ -30,7 +30,7 @@ run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
 library(future)
-plan("multiprocess", workers = 4)
+plan("multiprocess", workers = 5)
 options(future.globals.maxSize = 5 * 1024^3) # for 5 Gb RAM
 
 # input dependencies ------------------------------------------------------
@@ -45,7 +45,7 @@ cat("finish reading the barcode-to-cell type table!\n")
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
 
 # set parameters for findmarkers ------------------------------------------
-logfc.threshold.run <- 0.25
+logfc.threshold.run <- 0.1
 min.pct.run <- 0.1
 min.diff.pct.run <- 0.1
 ## spcify assay
@@ -54,7 +54,7 @@ DefaultAssay(srat) <- assay_process
 cat(paste0("Assay: ", assay_process, "\n"))
 cat("###########################################\n")
 ## specify test
-test_process <- "negbinom"
+test_process <- "LR"
 ## specify cell groups to compare
 group1_findmarkers <- "Tumor cells"
 group2_findmarkers <- "Proximal tubule cells from NATs"

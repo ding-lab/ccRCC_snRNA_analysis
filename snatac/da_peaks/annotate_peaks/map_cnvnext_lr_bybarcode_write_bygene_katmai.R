@@ -36,8 +36,8 @@ dir.create(dir_out)
 # plan("multiprocess", workers = 4)
 library(foreach)
 library(doParallel)
-cl <- makeCluster(4)
-doParallel::registerDoParallel(cl)
+doParallel::registerDoParallel(cl = makeCluster(4), cores = 5)
+getDoParWorkers()
 options(future.globals.maxSize = 5 * 1024^3) # for 5 Gb RAM
 
 # input dependencies ------------------------------------------------------
@@ -70,7 +70,7 @@ genes_process <- cna_df$gene_name[cna_df$gene_name %in% genes_process]
 
 # preprocess mean CNV values per gene--------------------------------------------------------------
 start_time <- Sys.time()
-foreach (gene_tmp = genes_process[1:100]) %dopar% {
+foreach (gene_tmp = genes_process[1:50]) %dopar% {
   ## filter the CNVs
   cna_filtered_df <- cna_df[cna_df$gene_name == gene_tmp,]
   cna_filtered_df <- cna_filtered_df[!duplicated(cna_filtered_df$gene_name),]
