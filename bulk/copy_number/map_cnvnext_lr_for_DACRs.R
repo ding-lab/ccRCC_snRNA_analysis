@@ -74,41 +74,7 @@ dacrs_df <- dacrs_df %>%
   mutate(chr_peak = str_split_fixed(string = peak, pattern = "\\-", n = 3)[,1])
 length(which(is.na(dacrs_df$gene_cnv_mean))) # [1] 5230
 length(which(is.na(dacrs_df$gene_cnv_mean)))/nrow(dacrs_df) # [1] 0.189816
-## filter
-dacrs_filtered_df <- dacrs_df %>%
-  filter(Count_sig >= 12) %>%
-  filter(Count_oppositeFC == 0) %>%
-  filter(!is.na(potential_cnv_effect) & potential_cnv_effect != DAP_direction)
-
-# test effect of the removal ----------------------------------------------
-dacrs_df %>%
-  filter(Count_sig >= 12) %>%
-  filter(Count_oppositeFC == 0) %>%
-  select(DAP_direction, chr_peak) %>%
-  table()
-dacrs_filtered_df %>%
-  filter(Count_sig >= 12) %>%
-  filter(Count_oppositeFC == 0) %>%
-  select(DAP_direction, chr_peak) %>%
-  table()
-
-dacrs_df %>%
-  filter(Count_sig >= 12) %>%
-  filter(Count_oppositeFC == 0) %>%
-  nrow()
-
-dacrs_df %>%
-  filter(Count_sig >= 12) %>%
-  filter(Count_oppositeFC == 0) %>%
-  select(DAP_direction) %>%
-  table()
-
-dacrs_filtered_df %>%
-  filter(Count_sig >= 12) %>%
-  nrow()
 
 # write table -------------------------------------------------------------
 file2write <- paste0(dir_out, "ccRCC_specific.DACRs.PotentialCNVEffectAnnotated.", run_id, ".tsv")
 write.table(x = dacrs_df, file = file2write, quote = F, sep = "\t", row.names = F)
-file2write <- paste0(dir_out, "ccRCC_specific.DACRs.PotentialCNVEffectFiltered.", run_id, ".tsv")
-write.table(x = dacrs_filtered_df, file = file2write, quote = F, sep = "\t", row.names = F)
