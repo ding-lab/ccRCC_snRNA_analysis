@@ -12,7 +12,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -26,7 +26,7 @@ metadata_df <- fread("./Resources/Analysis_Results/sample_info/make_meta_data/20
 ## input the barcode info
 barcodes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_33aliquots/20210423.v1/33Aliquot.Barcode2CellType.20210423.v1.tsv")
 ## input prefiltered genes to test
-genes_filtered_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/summarize_tumor_vs_pt_DEGs/20210429.v1/Tumor_DEGs.EnoughDataPoints.Consistent.20210429.v1.tsv")
+genes_filtered_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/findmarker_LR_all_ccRCC_vs_pt_on_katmai/20210607.v1/LR.logfc.threshold0.1.min.pct0.1.min.diff.pct0.1.AssayRNA.tsv")
 
 # preprocess ----------------------------
 ## get barcodes to process
@@ -56,7 +56,7 @@ colnames(cna_df) <- colnames_new
 ## filter the CNVs
 cna_filtered_df <- cna_df %>%
   filter(gene_name %in% genes_process)
-cna_df <- cna_df[!duplicated(cna_df$gene_name),]
+cna_filtered_df <- cna_filtered_df[!duplicated(cna_filtered_df$gene_name),]
 cna_bybc_df <- cna_filtered_df[, cases_process]
 cna_bybc_df[, celltypes_process == "PT"] <- 0
 rownames(cna_bybc_df) <- cna_filtered_df$gene_name

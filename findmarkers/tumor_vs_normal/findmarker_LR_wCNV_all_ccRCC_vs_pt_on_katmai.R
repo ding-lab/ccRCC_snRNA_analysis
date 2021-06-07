@@ -44,7 +44,7 @@ cat("finish reading the barcode-to-cell type table!\n")
 ## input idemta data
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
 ## input CNV value per barcode per gene
-cnv_per_feature_df=readRDS('./Resources/Analysis_Results/findmarkers/tumor_vs_normal/annotate_deg/map_CNVnex_lr_by_filteredgenes_by_snRNAbarcode/20210607.v1/Barcode2Gene.CNV.20210607.v1.RDS')
+cnv_per_feature_df=readRDS('./Resources/Analysis_Results/findmarkers/tumor_vs_normal/annotate_deg/map_CNVnex_lr_by_filteredgenes_by_snRNAbarcode/20210607.v2/Barcode2Gene.CNV.20210607.v2.RDS')
 
 # set parameters for findmarkers ------------------------------------------
 logfc.threshold.run <- 0.1
@@ -91,8 +91,8 @@ cat("finish adding group labels\n")
 Idents(srat) <- "group_findmarkers" 
 
 # set inputs for the below process --------------------------------------------------------------
-cells.1 <- WhichCells(object = object, idents = ident.use.1)
-cells.2 <- WhichCells(object = object, idents = ident.use.2)
+cells.1 <- WhichCells(object = srat, idents = ident.use.1)
+cells.2 <- WhichCells(object = srat, idents = ident.use.2)
 data.use=srat[[assay]]
 data.use <- data.use[features, c(cells.1, cells.2)]
 
@@ -102,6 +102,7 @@ group.info <- data.frame(row.names = c(cells.1, cells.2))
 group.info[cells.1, "group"] <- "Group1"
 group.info[cells.2, "group"] <- "Group2"
 group.info[, "group"] <- factor(x = group.info[, "group"])
+print(head(group.info))
 
 ## prepare data.use object
 data.use <- data.use[, rownames(group.info), drop = FALSE]
@@ -115,7 +116,7 @@ latent.vars$barcode_merged <- rownames(latent.vars)
 latent.vars <- cbind(latent.vars, cnv_per_feature_df[latent.vars$id_aliquot_barcode,])
 rownames(latent.vars) <- latent.vars$barcode_merged
 latent.vars <- latent.vars[rownames(group.info), , drop = FALSE]
-
+print(head(latent.vars))
 # run test ----------------------------------------------------------------
 my.sapply <- ifelse(
   nbrOfWorkers() == 1,
