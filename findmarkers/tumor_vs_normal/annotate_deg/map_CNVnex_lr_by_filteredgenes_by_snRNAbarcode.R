@@ -25,6 +25,8 @@ cna_df <- fread(data.table = F, input = "~/Box/CPTAC_ccRCC/Data_Freeze_1.1/CPTAC
 metadata_df <- fread("./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv", data.table = F)
 ## input the barcode info
 barcodes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_33aliquots/20210423.v1/33Aliquot.Barcode2CellType.20210423.v1.tsv")
+## input prefiltered genes to test
+genes_filtered_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/summarize_tumor_vs_pt_DEGs/20210429.v1/Tumor_DEGs.EnoughDataPoints.Consistent.20210429.v1.tsv")
 
 # preprocess ----------------------------
 ## get barcodes to process
@@ -41,31 +43,28 @@ barcodes_process <- barcodes_df$id_bc[barcodes_df$keep]
 cases_process <- barcodes_df$Case[barcodes_df$keep]
 celltypes_process <- barcodes_df$Cell_group_w_epithelialcelltypes[barcodes_df$keep]
 table(celltypes_process)
+## get genes to process
+genes_process <- unique(genes_filtered_df$genesymbol_deg)
+genes_process <- genes_process[genes_process %in% cna_df$gene_name]
+length(genes_process)
 
 # preprocess mean CNV values per gene--------------------------------------------------------------
-## filter the CNVs
-cna_filtered_df <- cna_df
 ## preprocess the CNV data frame
-colnames_old <- colnames(cna_filtered_df)
+colnames_old <- colnames(cna_df)
 colnames_new <- str_split_fixed(string = colnames_old, pattern = "\\.", n = 4)[,1]
-colnames(cna_filtered_df) <- colnames_new
-cna_filtered_df <- cna_filtered_df[!duplicated(cna_filtered_df$gene_name),]
-## add peak
-cna_bypeak_df <- merge(x = cna_filtered_df, 
-                       y = dacrs_filtered_df %>%
-                         select(peak, Gene),
-                       by.x = c("gene_name"), by.y = c("Gene"), all.x = T)
-
-cna_bybc_bypeak_df <- cna_bypeak_df[, cases_process]
-cna_bybc_bypeak_df[, celltypes_process == "PT"] <- 0
-rownames(cna_bybc_bypeak_df) <- cna_bypeak_df$peak
-colnames(cna_bybc_bypeak_df) <- barcodes_process
-cna_bybc_bypeak_df[1:5, 1:5]
-cna_t_mat <- t(as.matrix(cna_bybc_bypeak_df))
+colnames(cna_df) <- colnames_new
+## filter the CNVs
+cna_filtered_df <- cna_df %>%
+  filter(gene_name %in% genes_process)
+cna_df <- cna_df[!duplicated(cna_df$gene_name),]
+cna_bybc_df <- cna_filtered_df[, cases_process]
+cna_bybc_df[, celltypes_process == "PT"] <- 0
+rownames(cna_bybc_df) <- cna_filtered_df$gene_name
+colnames(cna_bybc_df) <- barcodes_process
+cna_bybc_df[1:5, 1:5]
+cna_t_mat <- t(as.matrix(cna_bybc_df))
 cna_t_mat[1:5, 1:5]
 
 # write table -------------------------------------------------------------
-file2write <- paste0(dir_out, "Barcode2Peak.CNV.", run_id, ".tsv")
-write.table(x = cna_t_mat, file = file2write, quote = F, sep = "\t", row.names = T)
-file2write <- paste0(dir_out, "Barcode2Peak.CNV.", run_id, ".RDS")
+file2write <- paste0(dir_out, "Barcode2Gene.CNV.", run_id, ".RDS")
 saveRDS(object = cna_t_mat, file = file2write, compress = T)

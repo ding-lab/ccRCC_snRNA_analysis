@@ -16,22 +16,30 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input all dap + caps
-peak2gene_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/filter_peaks/filter_cnv_affected_ccRCC_specific_DACRs/20210603.v1/ccRCC_specific.DACRs.PotentialCNVEffectFiltered.20210603.v1.tsv")
+peak2gene_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Peak_Annotation/All_peaks_annotated_26snATAC_merged_obj.20210607.tsv")
+peaks_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/DA_peaks_Tumor_vs_PT_affected_byCNV_removed.tsv")
 ## input degs
 degs_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/summarize_tumor_vs_pt_DEGs/20210429.v1/Tumor_DEGs.EnoughDataPoints.Consistent.20210429.v1.tsv")
 
-# filter peaks ------------------------------------------------------------
-unique(peak2gene_df$Gene) %>% length()
-unique(peak2gene_df$Gene[peak2gene_df$DAP_type == "Promoter"]) %>% length()
-nrow(peak2gene_df[peak2gene_df$DAP_type == "Promoter",])
-
+# annotate and filter peaks ------------------------------------------------------------
+## annotate peaks
+peaks_anno_df <- merge(x = peaks_df, y = peak2gene_df %>%
+                         select(peak, SYMBOL, annotation), 
+                       by = c("peak"), all.x = T)
+peaks_anno_df <- peaks_anno_df %>%
+  mutate(DAP_type = str_split_fixed(string = annotation, pattern = " \\(", n = 2)[,1])
+table(peaks_anno_df$DAP_type)
+## filter by DEGs
 degs_filter <- degs_df$genesymbol_deg[degs_df$Tumor_vs_PT == "Up"]
-peaks_filtered_df <- peak2gene_df %>%
+peaks_filtered_df <- peaks_anno_df %>%
   filter(DAP_type == "Promoter") %>%
+  rename(Gene = SYMBOL) %>%
   filter(Gene %in% degs_filter) %>%
   unique()
 nrow(peaks_filtered_df)
-unique(peaks_filtered_df$Gene) %>% length()
+table(peaks_filtered_df$DAP_type)
+table(peaks_filtered_df$DAP_type[peaks_filtered_df$avg_log2FC > 0.6])
+table(peaks_filtered_df$DAP_type[peaks_filtered_df$avg_log2FC > 0.2])
 
 # write -------------------------------------------------------------------
 file2write <- paste0(dir_out, "DEG_associated_Promoter_Peaks.", run_id, ".tsv")
