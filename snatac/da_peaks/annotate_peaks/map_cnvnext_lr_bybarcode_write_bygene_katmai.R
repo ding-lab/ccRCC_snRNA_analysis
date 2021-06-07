@@ -32,8 +32,12 @@ run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
-library(future)
-plan("multiprocess", workers = 4)
+# library(future)
+# plan("multiprocess", workers = 4)
+library(foreach)
+library(doParallel)
+cl <- makeCluster(4)
+doParallel::registerDoParallel(cl)
 options(future.globals.maxSize = 5 * 1024^3) # for 5 Gb RAM
 
 # input dependencies ------------------------------------------------------
@@ -55,45 +59,34 @@ barcodes_df$Sample_type <- mapvalues(x = barcodes_df$Sample, from = metadata_df$
 # table(barcodes_df$Cell_type)
 # barcodes_df %>%
 #   filter(Sample_type == "Tumor" & Cell_type == "PT")
-barcodes_p_process <- barcodes_df$id_bc[barcodes_df$Cell_type %in% c("PT")]
-barcodes_t_process <- barcodes_df$id_bc[barcodes_df$Cell_type %in% c("Tumor")]
-cases_t_process <- barcodes_df$Case[barcodes_df$Cell_type %in% c("Tumor")]
-cases_p_process <- barcodes_df$Case[barcodes_df$Cell_type %in% c("PT")]
+barcodes_process <- barcodes_df$id_bc[barcodes_df$Cell_type %in% c("Tumor", "PT")]
+cases_process <- barcodes_df$Case[barcodes_df$Cell_type %in% c("Tumor", "PT")]
 rm(barcodes_df)
 ## get genes to process
 peaks_df <- peaks_df %>%
   rename(Gene = SYMBOL)
 genes_process <- unique(peaks_df$Gene)
+genes_process <- cna_df$gene_name[cna_df$gene_name %in% genes_process]
 
 # preprocess mean CNV values per gene--------------------------------------------------------------
-## filter the CNVs
-cna_filtered_df <- cna_df[cna_df$gene_name %in% genes_process,]
-rm(cna_df)
-## preprocess the CNV data frame
-colnames_old <- colnames(cna_filtered_df)
-colnames_new <- str_split_fixed(string = colnames_old, pattern = "\\.", n = 4)[,1]
-colnames(cna_filtered_df) <- colnames_new
-cna_filtered_df <- cna_filtered_df[!duplicated(cna_filtered_df$gene_name),]
-## add peak
-cna_bypeak_df <- merge(x = cna_filtered_df, 
-                       y = peaks_df %>%
-                         select(peak, Gene),
-                       by.x = c("gene_name"), by.y = c("Gene"), all.x = T)
-rm(peaks_df)
-rm(cna_filtered_df)
-cna_bypeak_df[1:5, 1:5]
-cna_bybc_bypeak_t_df <- cna_bypeak_df[, cases_t_process]
-colnames(cna_bybc_bypeak_t_df) <- barcodes_t_process
-cna_bybc_bypeak_p_df <- cna_bypeak_df[, cases_p_process]
-cna_bybc_bypeak_p_df <- cna_bybc_bypeak_p_df*0
-colnames(cna_bybc_bypeak_p_df) <- barcodes_p_process
-cna_bybc_bypeak_df <- cbind(cna_bybc_bypeak_t_df, cna_bybc_bypeak_p_df)
-# rm(cna_bypeak_df)
-rownames(cna_bybc_bypeak_df) <- cna_bypeak_df$peak
-cna_bybc_bypeak_df[1:5, 1:5]
-cna_t_mat <- t(as.matrix(cna_bybc_bypeak_df))
-cna_t_mat[1:5, 1:5]
-
-# write table -------------------------------------------------------------
-file2write <- paste0(dir_out, "Barcode2AllPeaks.CNV.", run_id, ".RDS")
-saveRDS(object = cna_t_mat, file = file2write, compress = T)
+start_time <- Sys.time()
+foreach (gene_tmp = genes_process[1:100]) %dopar% {
+  ## filter the CNVs
+  cna_filtered_df <- cna_df[cna_df$gene_name == gene_tmp,]
+  cna_filtered_df <- cna_filtered_df[!duplicated(cna_filtered_df$gene_name),]
+  cna_filtered_vec <- unlist(cna_filtered_df[, unique(cases_process)])
+  cna_bybc_vec <- cna_filtered_vec[cases_process]
+  cna_bybc_vec[celltypes_process == "PT"] <- 0
+  cna_t_df <- data.frame(cnv_gene = cna_bybc_vec)
+  rownames(cna_t_df) <- barcodes_process
+  # cna_t_df[1:5,]
+  
+  # write outupt -------------------------------------------------------------
+  ## based on this, I'll save as RDS compressed: https://waterdata.usgs.gov/blog/formats/
+  file2write <- paste0(dir_out, gene_tmp, ".CNV.ByATACBarcode",  ".RDS")
+  saveRDS(object = cna_t_df, file = file2write, compress = T)
+  # file2write <- paste0(dir_out, gene_tmp, ".CNV.ByATACBarcode",  ".tsv")
+  # write.table(x = cna_t_df, file = file2write, quote = F, sep = "\t", row.names = T)
+}
+end_time <- Sys.time()
+end_time - start_time
