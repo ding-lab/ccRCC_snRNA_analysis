@@ -35,7 +35,7 @@ barcodes_df <- barcodes_df %>%
 barcodes_df$Case <- mapvalues(x = barcodes_df$orig.ident, from = metadata_df$Aliquot.snRNA, to = as.vector(metadata_df$Case))
 barcodes_df$Sample_type <- mapvalues(x = barcodes_df$orig.ident, from = metadata_df$Aliquot.snRNA, to = as.vector(metadata_df$Sample_Type))
 barcodes_df <- barcodes_df %>%
-  mutate(keep = ((Sample_type == "Tumor" & Cell_type.shorter == "Tumor cells") | (Sample_type == "Normal" & Cell_type.detailed == "Proximal tubule")))
+  mutate(keep = ((Sample_type == "Tumor" & Cell_group_w_epithelialcelltypes == "Tumor cells") | (Sample_type == "Normal" & Cell_group_w_epithelialcelltypes == "Proximal tubule")))
 table(barcodes_df$Cell_type.detailed[barcodes_df$keep])
 # barcodes_df %>%
 #   filter(Sample_type == "Tumor" & Cell_type == "PT")

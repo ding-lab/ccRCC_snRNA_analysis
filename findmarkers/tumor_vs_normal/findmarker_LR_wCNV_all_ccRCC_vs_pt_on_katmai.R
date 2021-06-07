@@ -107,7 +107,7 @@ cat("finish making group.info\n")
 
 ## prepare data.use object
 data.use <- data.use[, rownames(group.info), drop = FALSE]
-cat("finish re-ording data.use\n")
+cat("finish re-ordering data.use\n")
 
 ## prepare latent.vars data frame
 latent.vars <- FetchData(
@@ -117,7 +117,7 @@ latent.vars <- FetchData(
 )
 latent.vars$barcode_merged <- rownames(latent.vars)
 print(head(latent.vars))
-latent.vars$id_aliquot_barcode[!(latent.vars$id_aliquot_barcode %in% rownames(cnv_per_feature_df))]
+head(latent.vars$id_aliquot_barcode[!(latent.vars$id_aliquot_barcode %in% rownames(cnv_per_feature_df))])
 latent.vars <- cbind(latent.vars, cnv_per_feature_df[latent.vars$id_aliquot_barcode,])
 rownames(latent.vars) <- latent.vars$barcode_merged
 latent.vars <- latent.vars[rownames(group.info), , drop = FALSE]
