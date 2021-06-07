@@ -103,16 +103,21 @@ group.info[cells.1, "group"] <- "Group1"
 group.info[cells.2, "group"] <- "Group2"
 group.info[, "group"] <- factor(x = group.info[, "group"])
 print(head(group.info))
+cat("finish making group.info\n")
 
 ## prepare data.use object
 data.use <- data.use[, rownames(group.info), drop = FALSE]
+cat("finish re-ording data.use\n")
+
 ## prepare latent.vars data frame
 latent.vars <- FetchData(
   object = srat,
-  vars = c("id_aliquot_barcode"),
+  vars = c("id_aliquot_barcode", "orig.ident"),
   cells = c(cells.1, cells.2)
 )
 latent.vars$barcode_merged <- rownames(latent.vars)
+print(head(latent.vars))
+latent.vars$id_aliquot_barcode[!(latent.vars$id_aliquot_barcode %in% rownames(cnv_per_feature_df))]
 latent.vars <- cbind(latent.vars, cnv_per_feature_df[latent.vars$id_aliquot_barcode,])
 rownames(latent.vars) <- latent.vars$barcode_merged
 latent.vars <- latent.vars[rownames(group.info), , drop = FALSE]
