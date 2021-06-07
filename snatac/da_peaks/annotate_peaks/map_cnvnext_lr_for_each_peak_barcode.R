@@ -24,9 +24,9 @@ cna_df <- fread(data.table = F, input = "~/Box/CPTAC_ccRCC/Data_Freeze_1.1/CPTAC
 ## input snRNA sample set
 metadata_df <- fread("./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv", data.table = F)
 ## input peaks
-peaks_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/All_peaks_annotated_26snATAC_merged_obj.20210607.tsv")
+peaks_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Peak_Annotation/All_peaks_annotated_26snATAC_merged_obj.20210607.tsv")
 ## input the barcode info
-barcodes_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Cell_type_annotation_snATAC.20210604.tsv")
+barcodes_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Barcode_Annotation/Cell_type_annotation_snATAC.20210604.tsv")
 
 # preprocess ----------------------------
 ## get barcodes to process
@@ -38,10 +38,11 @@ barcodes_df$Sample_type <- mapvalues(x = barcodes_df$Sample, from = metadata_df$
 # barcodes_df %>%
 #   filter(Sample_type == "Tumor" & Cell_type == "PT")
 barcodes_process <- barcodes_df$id_bc[barcodes_df$Cell_type %in% c("Tumor", "PT")]
-# barcodes_p_process <- barcodes_df$id_bc[barcodes_df$Cell_type %in% c("PT")]
-# barcodes_t_process <- barcodes_df$id_bc[barcodes_df$Cell_type %in% c("Tumor")]
-# cases_t_process <- barcodes_df$Case[barcodes_df$Cell_type %in% c("Tumor")]
-cases_process <- barcodes_df$Case[barcodes_df$Cell_type %in% c("Tumor", "PT")]
+barcodes_p_process <- barcodes_df$id_bc[barcodes_df$Cell_type %in% c("PT")]
+barcodes_t_process <- barcodes_df$id_bc[barcodes_df$Cell_type %in% c("Tumor")]
+# cases_process <- barcodes_df$Case[barcodes_df$Cell_type %in% c("Tumor", "PT")]
+cases_t_process <- barcodes_df$Case[barcodes_df$Cell_type %in% c("Tumor")]
+cases_p_process <- barcodes_df$Case[barcodes_df$Cell_type %in% c("PT")]
 celltypes_process <- barcodes_df$Cell_type[barcodes_df$Cell_type %in% c("Tumor", "PT")]
 # easyids_process <- barcodes_df$[barcodes_df$Cell_type %in% c("Tumor", "PT")]
 rm(barcodes_df)
@@ -67,13 +68,14 @@ cna_bypeak_df <- merge(x = cna_filtered_df,
 rm(peaks_df)
 rm(cna_filtered_df)
 cna_bypeak_df[1:5, 1:5]
-cna_bybc_bypeak_df <- cna_bypeak_df[, cases_process]
+cna_bybc_bypeak_t_df <- cna_bypeak_df[, cases_t_process]
+colnames(cna_bybc_bypeak_t_df) <- barcodes_t_process
+cna_bybc_bypeak_p_df <- cna_bypeak_df[, cases_p_process]
+cna_bybc_bypeak_p_df <- cna_bybc_bypeak_p_df*0
+colnames(cna_bybc_bypeak_p_df) <- barcodes_p_process
+cna_bybc_bypeak_df <- cbind(cna_bybc_bypeak_t_df, cna_bybc_bypeak_p_df)
 # rm(cna_bypeak_df)
-cna_bybc_bypeak_df[1:5, 1:5]
-cna_bybc_bypeak_df[, wcelltypes_process == "PT"] <- 0.0
-cna_bybc_bypeak_df[1:5, 1:5]
 rownames(cna_bybc_bypeak_df) <- cna_bypeak_df$peak
-colnames(cna_bybc_bypeak_df) <- barcodes_process
 cna_bybc_bypeak_df[1:5, 1:5]
 cna_t_mat <- t(as.matrix(cna_bybc_bypeak_df))
 cna_t_mat[1:5, 1:5]

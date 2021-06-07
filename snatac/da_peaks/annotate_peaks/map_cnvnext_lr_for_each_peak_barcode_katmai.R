@@ -55,13 +55,10 @@ barcodes_df$Sample_type <- mapvalues(x = barcodes_df$Sample, from = metadata_df$
 # table(barcodes_df$Cell_type)
 # barcodes_df %>%
 #   filter(Sample_type == "Tumor" & Cell_type == "PT")
-barcodes_process <- barcodes_df$id_bc[barcodes_df$Cell_type %in% c("Tumor", "PT")]
-# barcodes_p_process <- barcodes_df$id_bc[barcodes_df$Cell_type %in% c("PT")]
-# barcodes_t_process <- barcodes_df$id_bc[barcodes_df$Cell_type %in% c("Tumor")]
-# cases_t_process <- barcodes_df$Case[barcodes_df$Cell_type %in% c("Tumor")]
-cases_process <- barcodes_df$Case[barcodes_df$Cell_type %in% c("Tumor", "PT")]
-celltypes_process <- barcodes_df$Cell_type[barcodes_df$Cell_type %in% c("Tumor", "PT")]
-# easyids_process <- barcodes_df$[barcodes_df$Cell_type %in% c("Tumor", "PT")]
+barcodes_p_process <- barcodes_df$id_bc[barcodes_df$Cell_type %in% c("PT")]
+barcodes_t_process <- barcodes_df$id_bc[barcodes_df$Cell_type %in% c("Tumor")]
+cases_t_process <- barcodes_df$Case[barcodes_df$Cell_type %in% c("Tumor")]
+cases_p_process <- barcodes_df$Case[barcodes_df$Cell_type %in% c("PT")]
 rm(barcodes_df)
 ## get genes to process
 peaks_df <- peaks_df %>%
@@ -85,13 +82,14 @@ cna_bypeak_df <- merge(x = cna_filtered_df,
 rm(peaks_df)
 rm(cna_filtered_df)
 cna_bypeak_df[1:5, 1:5]
-cna_bybc_bypeak_df <- cna_bypeak_df[, cases_process]
+cna_bybc_bypeak_t_df <- cna_bypeak_df[, cases_t_process]
+colnames(cna_bybc_bypeak_t_df) <- barcodes_t_process
+cna_bybc_bypeak_p_df <- cna_bypeak_df[, cases_p_process]
+cna_bybc_bypeak_p_df <- cna_bybc_bypeak_p_df*0
+colnames(cna_bybc_bypeak_p_df) <- barcodes_p_process
+cna_bybc_bypeak_df <- cbind(cna_bybc_bypeak_t_df, cna_bybc_bypeak_p_df)
 # rm(cna_bypeak_df)
-cna_bybc_bypeak_df[1:5, 1:5]
-cna_bybc_bypeak_df[, celltypes_process == "PT"] <- 0
-cna_bybc_bypeak_df[1:5, 1:5]
 rownames(cna_bybc_bypeak_df) <- cna_bypeak_df$peak
-colnames(cna_bybc_bypeak_df) <- barcodes_process
 cna_bybc_bypeak_df[1:5, 1:5]
 cna_t_mat <- t(as.matrix(cna_bybc_bypeak_df))
 cna_t_mat[1:5, 1:5]
