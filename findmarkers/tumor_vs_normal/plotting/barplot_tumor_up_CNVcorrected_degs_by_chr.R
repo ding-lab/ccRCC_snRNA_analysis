@@ -19,11 +19,13 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input annotated table
 deg2region_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/annotate_deg/annotate_tumor_vs_pt_snRNA_degs_to_chr_regions/20210602.v1/Tumor_vs_PT.snRNA_DEGs.Chromosome_Regions.20210602.v1.tsv")
+degs_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/unite_tumor_vs_normal_snRNA_individual_and_CNVcorrected_DEGs/20210608.v1/Consistent.Tumor_vs_PT_DEGs.CNVcorrected.20210608.v1.tsv")
 
 #  plot----------------------------------------------------------
 ## make plot data
 plotdata_df <- deg2region_df %>%
   filter(Tumor_vs_PT == "Up") %>%
+  filter(hgnc_symbol %in% degs_df$genesymbol_deg) %>%
   select(chromosome_name) %>%
   table() %>%
   as.data.frame() %>%
@@ -34,8 +36,14 @@ p <- ggplot()
 p <- p + geom_bar(data = plotdata_df, mapping = aes(x = chromosome_name, y = Freq), stat = "identity")
 p <- p + theme_classic(base_size = 12)
 p <- p + ylim(c(0, 125))
-p <- p + ggtitle(paste0("Significant DEGS across >= 15 Tumorcell-vs-PT comparisons"))
-file2write <- paste0(dir_out, "Up_DEGs.bychr.png")
+p <- p + ggtitle(paste0("Significant DEGS across >= 15 Tumorcell-vs-PT comparisons"), subtitle = 'CNV corrected')
+file2write <- paste0(dir_out, "Up_DEGs.bychr.CNVcorrected.png")
 png(file2write, width = 800, height = 600, res = 150)
 print(p)
 dev.off()
+
+deg2region_df %>%
+  filter(Tumor_vs_PT == "Up") %>%
+  filter(!(hgnc_symbol %in% degs_df$genesymbol_deg)) %>%
+  select(chromosome_name) %>%
+  table()
