@@ -128,9 +128,14 @@ print(head(latent.vars))
 cat("finish preparing latent.vars\n")
 
 ## test special symbol change
-rownames(data.use)[grepl(pattern = "\\-|\\_", x = rownames(data.use))]
+cat("printing special symbols in latent.vars\n")
 colnames(latent.vars)[grepl(pattern = "\\-|\\_", x = rownames(latent.vars))]
-stop("test")
+cat("printing special symbols in data.use\n")
+rownames(data.use)[grepl(pattern = "\\-|\\_", x = rownames(data.use))]
+colnames(latent.vars)=gsub('-','_',colnames(latent.vars))
+cat("finish changing special symbols in latent.vars\n")
+rownames(data.use)=gsub('-','_',rownames(data.use))
+cat("finish changing special symbols in data.use\n")
 
 # run test ----------------------------------------------------------------
 my.sapply <- ifelse(
