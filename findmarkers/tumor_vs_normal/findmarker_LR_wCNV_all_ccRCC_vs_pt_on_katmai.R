@@ -18,7 +18,7 @@ thisFile <- function() {
 path_this_script <- thisFile()
 ## set working directory
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
-# dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -120,11 +120,18 @@ latent.vars <- FetchData(
 )
 latent.vars$barcode_merged <- rownames(latent.vars)
 print(head(latent.vars))
-head(latent.vars$id_aliquot_barcode[!(latent.vars$id_aliquot_barcode %in% rownames(cnv_per_feature_df))])
+# head(latent.vars$id_aliquot_barcode[!(latent.vars$id_aliquot_barcode %in% rownames(cnv_per_feature_df))])
 latent.vars <- cbind(latent.vars, cnv_per_feature_df[latent.vars$id_aliquot_barcode,])
 rownames(latent.vars) <- latent.vars$barcode_merged
 latent.vars <- latent.vars[rownames(group.info), , drop = FALSE]
 print(head(latent.vars))
+cat("finish preparing latent.vars\n")
+
+## test special symbol change
+rownames(data.use)[grepl(pattern = "\\-|\\_", x = rownames(data.use))]
+colnames(latent.vars)[grepl(pattern = "\\-|\\_", x = rownames(latent.vars))]
+stop("test")
+
 # run test ----------------------------------------------------------------
 my.sapply <- ifelse(
   nbrOfWorkers() == 1,
@@ -135,6 +142,7 @@ my.sapply <- ifelse(
 p_val <- my.sapply(
   X = rownames(x = data.use),
   FUN = function(x) {
+    print(x)
     model.data <- cbind(GENE = data.use[x,], group.info, latent.vars)
     fmla <- as.formula(object = paste(
       "group ~ GENE +",
