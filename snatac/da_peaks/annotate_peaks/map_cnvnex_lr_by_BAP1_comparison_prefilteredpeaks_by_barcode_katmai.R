@@ -38,7 +38,7 @@ options(future.globals.maxSize = 5 * 1024^3) # for 5 Gb RAM
 
 # input dependencies ------------------------------------------------------
 ## input CNA matrix
-cna_df <- fread(data.table = F, input = "~/Box/CPTAC_ccRCC/Data_Freeze_1.1/CPTAC_ccRCC_Combined/Absolute_cnv/c3-ccrcc-combined-cnvex-lr_v1.0.csv")
+cna_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/WGS_CNV_Somatic/Absolute_cnv/c3-ccrcc-combined-cnvex-lr_v1.0.csv")
 ## input snRNA sample set
 metadata_df <- fread("./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv", data.table = F)
 ## input peaks
