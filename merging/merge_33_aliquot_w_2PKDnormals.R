@@ -30,7 +30,7 @@ run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
 library(future)
-plan("multiprocess", workers = 5)
+plan("multiprocess", workers = 3)
 options(future.globals.maxSize = 7 * 1024^3) # for 7 Gb RAM
 
 # input dependencies ------------------------------------------------------
