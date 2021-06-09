@@ -64,7 +64,6 @@ test_process <- "LR"
 ident.use.1 <- "Tumor cells"
 ident.use.2 <- "Proximal tubule cells from NATs"
 ## set "features"
-### first set just a few to test
 features=colnames(cnv_per_feature_df)
 
 # preprocess the Seurat object meta data---------------------------------------------

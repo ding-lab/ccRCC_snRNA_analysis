@@ -48,6 +48,8 @@ cat("finish reading the barcode-to-cell type table!\n")
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
 ## input PBRM1 and BAP1 classification
 mut_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutation/annotate_cptac_sample_by_pbrm1_bap1_mutation/20210310.v1/PBRM1_BAP1_Mutation_Status_By_Case.20210310.v1.tsv")
+## input CNV value per barcode per gene
+cnv_per_feature_df=readRDS('./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/annotate_degs/map_CNVnex_lr_by_BAP1prefilteredgenes_by_snRNAbarcode/20210609.v1/Barcode2BAP1PrefilteredGene.CNV.20210609.v1.RDS')
 
 # set parameters for findmarkers ------------------------------------------
 logfc.threshold.run <- 0
@@ -63,6 +65,8 @@ test_process <- "LR"
 ## specify cell groups to compare
 ident.use.1 <- "BAP1-mutated Tumor cells"
 ident.use.2 <- "PBRM1/Non-mutant Tumor cells"
+## set "features"
+features=colnames(cnv_per_feature_df)
 
 # preprocess the Seurat object meta data---------------------------------------------
 ## get aliquot ids for the two groups
