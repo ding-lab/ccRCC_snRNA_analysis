@@ -32,6 +32,9 @@ dir.create(dir_out)
 library(future)
 plan("multiprocess", workers = 5)
 options(future.globals.maxSize = 5 * 1024^3) # for 5 Gb RAM
+library(Seurat)
+library(lmtest)
+library(future.apply)
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
@@ -93,14 +96,80 @@ cat("finish adding group labels\n")
 print(table(srat@meta.data$group_findmarkers))
 Idents(srat) <- "group_findmarkers" 
 
-# run findallmarkers by tumor------------------------------------------------------
-## run findmarkers
-deg_df <- FindMarkers(object = srat, test.use = test_process, ident.1 = ident.use.1, ident.2 = ident.use.2, only.pos = F,
-                      min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
-cat("finish FindMarkers\n")
-deg_df$genesymbol_deg <- rownames(deg_df)
-deg_df$cellnumber_tumorcells <- length(which(srat@meta.data$group_findmarkers == ident.use.1))
-deg_df$cellnumber_ptcells <- length(which(srat@meta.data$group_findmarkers == ident.use.2))
+# set inputs for the below process --------------------------------------------------------------
+cells.1 <- WhichCells(object = srat, idents = ident.use.1)
+cells.2 <- WhichCells(object = srat, idents = ident.use.2)
+data.use=srat[[assay]]
+data.use <- data.use[features, c(cells.1, cells.2)]
+
+# process inputs further --------------------------------------------------
+## prepare group.info data frame
+group.info <- data.frame(row.names = c(cells.1, cells.2))
+group.info[cells.1, "group"] <- "Group1"
+group.info[cells.2, "group"] <- "Group2"
+group.info[, "group"] <- factor(x = group.info[, "group"])
+print(head(group.info))
+cat("finish making group.info\n")
+
+## prepare data.use object
+data.use <- data.use[, rownames(group.info), drop = FALSE]
+cat("finish re-ordering data.use\n")
+
+## prepare latent.vars data frame
+latent.vars <- FetchData(
+  object = srat,
+  vars = c("id_aliquot_barcode", "orig.ident"),
+  cells = c(cells.1, cells.2)
+)
+latent.vars$barcode_merged <- rownames(latent.vars)
+print(head(latent.vars))
+# head(latent.vars$id_aliquot_barcode[!(latent.vars$id_aliquot_barcode %in% rownames(cnv_per_feature_df))])
+latent.vars <- cbind(latent.vars, cnv_per_feature_df[latent.vars$id_aliquot_barcode,])
+rownames(latent.vars) <- latent.vars$barcode_merged
+latent.vars <- latent.vars[rownames(group.info), , drop = FALSE]
+print(head(latent.vars))
+cat("finish preparing latent.vars\n")
+
+## test special symbol change
+cat("printing special symbols in latent.vars\n")
+colnames(latent.vars)[grepl(pattern = "\\-|\\_", x = rownames(latent.vars))]
+cat("printing special symbols in data.use\n")
+rownames(data.use)[grepl(pattern = "\\-|\\_", x = rownames(data.use))]
+colnames(latent.vars)=gsub('-','_',colnames(latent.vars))
+cat("finish changing special symbols in latent.vars\n")
+rownames(data.use)=gsub('-','_',rownames(data.use))
+cat("finish changing special symbols in data.use\n")
+
+# run test ----------------------------------------------------------------
+my.sapply <- ifelse(
+  nbrOfWorkers() == 1,
+  #  test = verbose && nbrOfWorkers() == 1,
+  yes = pbsapply,
+  no = future_sapply
+)
+p_val <- my.sapply(
+  X = rownames(x = data.use),
+  FUN = function(x) {
+    print(x)
+    model.data <- cbind(GENE = data.use[x,], group.info, latent.vars)
+    fmla <- as.formula(object = paste(
+      "group ~ GENE +",
+      paste(c(x), collapse = "+")
+    ))
+    fmla2 <- as.formula(object = paste(
+      "group ~",
+      paste(c(x), collapse = "+")
+    ))
+    model1 <- glm(formula = fmla, data = model.data, family = "binomial")
+    model2 <- glm(formula = fmla2, data = model.data, family = "binomial")
+    lrtest <- lrtest(model1, model2)
+    return(lrtest$Pr[2])
+  }
+)
+deg_df <- data.frame(p_val)
+deg_df$row.names = rownames(data.use)
+deg_df$p_val=as.numeric(as.character(unlist(to.return$p_val)))
+deg_df$FDR=p.adjust(to.return$p_val,method='fdr')
 
 ## write output
 file2write <- paste0(dir_out, test_process, 
