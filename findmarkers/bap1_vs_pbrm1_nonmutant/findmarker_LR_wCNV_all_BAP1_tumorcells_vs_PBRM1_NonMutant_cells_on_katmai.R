@@ -172,8 +172,8 @@ p_val <- my.sapply(
 )
 deg_df <- data.frame(p_val)
 deg_df$row.names = rownames(data.use)
-deg_df$p_val=as.numeric(as.character(unlist(to.return$p_val)))
-deg_df$FDR=p.adjust(to.return$p_val,method='fdr')
+deg_df$p_val=as.numeric(as.character(unlist(deg_df$p_val)))
+deg_df$FDR=p.adjust(deg_df$p_val,method='fdr')
 
 ## write output
 file2write <- paste0(dir_out, test_process, 
