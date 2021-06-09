@@ -17,7 +17,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input united DEG result
-degs_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/unite_tumor_vs_normal_snRNA_bulkRNA_protein_DEGs/20210601.v1/Tumor_vs_PT_DEGs.United.snRNA.bulkRNA.Protein.20210601.v1.tsv")
+degs_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/unite_tumor_vs_normal_snRNA_bulkRNA_protein_DEGs/20210608.v1/Tumor_vs_PT_DEGs.United.snRNA.bulkRNA.Protein.20210608.v1.tsv")
 ## input the metabolism genes to look at
 genes_process <- c("HK1", "HK2", "HK3", "GPI", "PFKP", "PFKL", "PFKM", "ALDOB", "ALDOA", "ALDOC", "TPI1", "GAPDH", "PGK1", "PGK2",
                    "PGAM1", "PGAM2", "ENO1", "ENO2", "ENO3", "PKM", "PKLR", "LDHA", "LDHB", "LDHC", "LDHD",
@@ -34,4 +34,4 @@ rownames(degs_filtered_df) <- degs_filtered_df$genesymbol_deg
 rownames_ordered <- genes_process[genes_process %in% degs_filtered_df$genesymbol_deg]
 degs_filtered_df <- degs_filtered_df[rownames_ordered,]
 degs_filtered_selected_df <- degs_filtered_df %>%
-  select(genesymbol_deg, Num_sig_up, Num_sig_down, logFC.bulkRNA, FDR.bulkRNA, direction.bulkRNA, meddiff_exp.bulkpro, FDR.bulkpro, direction.bulkpro)
+  select(genesymbol_deg, avg_log2FC.allTumorcellsvsPT, FDR.CNVcorrected, Num_sig_up, Num_sig_down, logFC.bulkRNA, FDR.bulkRNA, direction.bulkRNA, meddiff_exp.bulkpro, FDR.bulkpro, direction.bulkpro)
