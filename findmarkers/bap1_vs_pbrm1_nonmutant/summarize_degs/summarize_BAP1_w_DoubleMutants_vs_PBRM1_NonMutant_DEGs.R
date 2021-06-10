@@ -19,13 +19,13 @@ deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarker
 
 # summarize genes by occurance ---------------------------------------------
 deg_sig_long_df <- deg_df %>%
-  filter(group1_mut_category %in% c("BAP1 mutated") & !(easyid_tumor %in% c("C3L-01287-T1"))) %>%
+  filter(group1_mut_category %in% c("BAP1 mutated", "Both mutated") & !(easyid_tumor %in% c("C3L-01287-T1"))) %>%
   filter(p_val_adj < 0.05) %>%
-  mutate(deg_category = paste0("BAP1", "_", ifelse(avg_logFC > 0, "Up", "Down")))
+  mutate(deg_category = paste0("Num_sig_", ifelse(avg_logFC > 0, "up", "down")))
 deg_wide_df <- dcast(data = deg_sig_long_df, formula = genesymbol_deg~deg_category)
 ## including all fold changes
 deg_long_df <- deg_df %>%
-  filter(group1_mut_category %in% c("BAP1 mutated") & !(easyid_tumor %in% c("C3L-01287-T1")))
+  filter(group1_mut_category %in% c("BAP1 mutated", "Both mutated") & !(easyid_tumor %in% c("C3L-01287-T1")))
 deg_wide_df2 <- dcast(data = deg_long_df, formula = genesymbol_deg~easyid_tumor, value.var = 'avg_logFC', na.rm = T)
 easyids_tumor <- unique(deg_long_df$easyid_tumor)
 deg_wide_df2$Num_up <- rowSums(deg_wide_df2[, easyids_tumor] > 0, na.rm = T)
@@ -43,16 +43,16 @@ deg_wide_df$mean_avg_logFC <- as.numeric(deg_wide_df$mean_avg_logFC)
 # cutoff_bap1_vs_others <- 0.5*length(unique(deg_df$easyid_tumor[deg_df$comparison == "BAP1_vs_PBRM1_Mutants_Tumorcells"]))
 cutoff_bap1_vs_others <- 0.5*length(easyids_tumor)
 deg_wide_df <- deg_wide_df %>%
-  mutate(BAP1_vs_OtherTumor_snRNA = ifelse(BAP1_Up >= cutoff_bap1_vs_others, "Up",
-                                           ifelse(BAP1_Down >= cutoff_bap1_vs_others, "Down", "Inconsistent")))
+  mutate(BAP1_vs_OtherTumor_snRNA = ifelse(Num_sig_up >= cutoff_bap1_vs_others, "Up",
+                                           ifelse(Num_sig_down >= cutoff_bap1_vs_others, "Down", "Inconsistent")))
 table(deg_wide_df$BAP1_vs_OtherTumor_snRNA)
 deg_bap1_df <- deg_wide_df %>%
   filter(BAP1_vs_OtherTumor_snRNA != "Inconsistent") %>%
-  arrange(desc(BAP1_Up), desc(BAP1_Down))
+  arrange(desc(Num_sig_up), desc(Num_sig_down))
 nrow(deg_bap1_df)
 deg_bap1_df <- deg_bap1_df %>%
   filter(Num_up == 0 | Num_down == 0) %>%
-  arrange(desc(BAP1_Up), desc(BAP1_Down))
+  arrange(desc(Num_sig_up), desc(Num_sig_down))
 nrow(deg_bap1_df)
 table(deg_bap1_df$BAP1_vs_OtherTumor_snRNA)
 

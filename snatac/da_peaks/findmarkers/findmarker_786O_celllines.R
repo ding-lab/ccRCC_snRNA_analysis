@@ -41,7 +41,7 @@ print(paste0("Finished reading atac object!"))
 # specify the run parameters ----------------------------------------------
 logfc.threshold.run <- 0
 min.pct.run <- 0.1
-min.diff.pct.run <- 0.1
+min.diff.pct.run <- 0
 
 # findmarker --------------------------------------------------------------
 print(head(atac@meta.data))
@@ -58,7 +58,10 @@ da_peaks <- FindMarkers(
 da_peaks$row_name <- rownames(da_peaks)
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "DA_Peaks.BAP1_vs_Control.786O_CellLines.", run_id, ".tsv")
+file2write <- paste0(dir_out, "DA_Peaks.BAP1_vs_Control.786O_CellLines.", 
+                     "min.diff.pct.", min.diff.pct.run,
+                     "min.pct.", min.pct.run,
+                     "logfc.threshold.", logfc.threshold.run, ".tsv")
 write.table(x = da_peaks, file = file2write, sep = "\t", row.names = F, quote = F)
 
 
