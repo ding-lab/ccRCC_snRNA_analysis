@@ -25,7 +25,7 @@ library(Signac)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -74,7 +74,7 @@ Idents(atac_subset)=factor(atac_subset$Piece_ID,levels=c(pieceids_selected, 'C3L
 
 # plot --------------------------------------------------------------------
 p=Signac::CoveragePlot(
-  object = atac_subset, group.by = "Piece_ID",
+  object = atac_subset,
   region = peak_plot_expanded,
   annotation = TRUE,
   peaks = TRUE,
@@ -85,6 +85,10 @@ p=Signac::CoveragePlot(
 ## write output
 file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".", motif_plot, ".png")
 png(file2write, width = 1000, height = 800, res = 150)
+print(p)
+dev.off()
+file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".", motif_plot, ".pdf")
+pdf(file2write, width = 10, height = 8)
 print(p)
 dev.off()
 
