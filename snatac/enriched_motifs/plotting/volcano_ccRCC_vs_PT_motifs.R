@@ -69,23 +69,24 @@ p <- p + scale_color_manual(values = c("consistently higher in ccRCC" = color_re
 #                          mapping = aes(x = x_plot, y = y_plot, label = text_TF), color = "black", force = 4, fontface = "bold", segment.alpha = 0.5)
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_tf) & x_plot > 0),
                          mapping = aes(x = x_plot, y = y_plot, label = text_tf), 
-                         color = "black", alpha = 1, size = 4, #fontface = "bold",
+                         color = "black", alpha = 1, size = 5, #fontface = "bold",
                          segment.size = 0.4, segment.alpha = 1, min.segment.length = 0,
                          xlim = c(0, NA))
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_tf) & x_plot < 0),
                          mapping = aes(x = x_plot, y = y_plot, label = text_tf), 
-                         color = "black", alpha = 1, size = 4, #fontface = "bold",
+                         color = "black", alpha = 1, size = 5, #fontface = "bold",
                          segment.size = 0.4, segment.alpha = 1, min.segment.length = 0,
                          xlim = c(NA, 0))
 p <- p + scale_size_area(max_size = 4)
 p <- p + theme_classic()
 p <- p + xlab("Motif score difference (ccRCC cells - PT cells)")
 p <- p + ylab("-Log10FDR")
-p <- p + guides(color = guide_legend(title = "Motif type", title.position = "top", nrow = 3, override.aes = aes(size = 3)),
-                size = guide_legend(title = "Motif score difference\nconsistency index", title.position = "top", nrow = 2))
+p <- p + guides(color = guide_legend(title = "Motif type", title.position = "top", nrow = 3, override.aes = aes(size = 3), label.theme = element_text(size = 14)),
+                size = guide_legend(title = "Motif score difference\nconsistency index", title.position = "top", title.theme = element_text(size = 14),
+                                    nrow = 2, label.theme = element_text(size = 14)))
 # p <- p + labs(color = "|(No. tumors with higher motif scores) - (No. tumors with lower motif scores)|/(No. all tumors)")
 p <- p + theme(axis.text = element_text(size = 14),
-               axis.title = element_text(size = 15),
+               axis.title = element_text(size = 14),
                legend.position = "bottom", legend.box = "horizontal")
 file2write <- paste0(dir_out, "volcano.", "png")
 png(file2write, width = 800, height = 800, res = 150)
