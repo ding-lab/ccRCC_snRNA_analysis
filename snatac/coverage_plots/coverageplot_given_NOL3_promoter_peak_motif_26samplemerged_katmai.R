@@ -25,7 +25,7 @@ library(Signac)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -33,8 +33,10 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the merged object
-atac=readRDS(paste('/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/3.Merge_snATAC/Merge.SelectPeaks.v.20210526/',
-                   '26_ccRCC_snATAC.selectedPeaks.chromvar.v3.20210602.rds',sep=''))
+# atac=readRDS(paste('/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/3.Merge_snATAC/Merge.SelectPeaks.v.20210526/',
+#                    '26_ccRCC_snATAC.selectedPeaks.chromvar.v3.20210602.rds',sep=''))
+atac=readRDS(paste('/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/3.Merge_snATAC/Merge.SelectPeaks.v.20210503/',
+                   '26_ccRCC_snATAC.selectedPeaks.chromvar.CICERo.v6.20210512.rds',sep=''))
 Idents(atac)=atac$Piece_ID
 ## input motif-peak mapping result
 peak2motif_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Motifs_Mapped_to_Peaks/Motifs_matched.DEG_associated_Peaks.Motif_annotation.20210517.v1.tsv")
@@ -61,13 +63,14 @@ atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_sele
 chr=strsplit(x = peak_plot, split = "\\-")[[1]][1]
 st=strsplit(x = peak_plot, split = "\\-")[[1]][2]; st = as.numeric(st)
 en=strsplit(x = peak_plot, split = "\\-")[[1]][3]; en = as.numeric(en)
-new_st=st-3000
-new_en=en+3000
+new_st=st-1000
+new_en=en+1000
 peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
 ## process motif coordinates
 motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == peak_plot & peak2motif_df$motif.name == motif_plot & peak2motif_df$Peak_Type == "Promoter"]; motif_coord <- unique(motif_coord)
-# ## change atac ident
+## change atac ident
 # print(head(atac@meta.data))
+Idents(atac_subset)=factor(atac_subset$Piece_ID,levels=c(pieceids_selected, 'C3L-00088-N','C3N-01200-N'))
 
 # plot --------------------------------------------------------------------
 p=Signac::CoveragePlot(
@@ -76,7 +79,7 @@ p=Signac::CoveragePlot(
   annotation = TRUE,
   peaks = TRUE,
   ranges=StringToGRanges(motif_coord, sep = c("-", "-")),
-  ranges.title = paste(motif_plot,"-motifs",sep=''),
+  ranges.title = paste(motif_plot,"\nmotif",sep=''),
   links=FALSE)
 
 ## write output
