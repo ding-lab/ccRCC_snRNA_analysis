@@ -56,6 +56,7 @@ da_peaks <- FindMarkers(
   latent.vars = 'peak_RF_500MACS2'
 )
 da_peaks$row_name <- rownames(da_peaks)
+print(paste0("Finished FindMarkers!"))
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "DA_Peaks.BAP1_vs_Control.786O_CellLines.", 
@@ -63,5 +64,6 @@ file2write <- paste0(dir_out, "DA_Peaks.BAP1_vs_Control.786O_CellLines.",
                      "min.pct.", min.pct.run,
                      "logfc.threshold.", logfc.threshold.run, ".tsv")
 write.table(x = da_peaks, file = file2write, sep = "\t", row.names = F, quote = F)
+print(paste0("Finished write.table!"))
 
 
