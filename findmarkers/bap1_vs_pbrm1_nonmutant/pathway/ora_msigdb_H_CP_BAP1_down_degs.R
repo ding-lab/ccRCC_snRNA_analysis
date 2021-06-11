@@ -28,21 +28,25 @@ wp2gene1 <- read.gmt("./Resources/Knowledge/Databases/MSigDB/h.all.v7.4.entrez.g
 wp2gene2 <- read.gmt("./Resources/Knowledge/Databases/MSigDB/c2.cp.v7.4.entrez.gmt")
 wp2gene <- rbind(wp2gene1, wp2gene2)
 ## input degs
-deg_all_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/summarize_degs/summarize_BAP1_vs_PBRM1_NonMutant_DEGs/20210430.v1/BAP1_DEGs.Consistent20210430.v1.tsv")
+# deg_all_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/summarize_degs/summarize_BAP1_vs_PBRM1_NonMutant_DEGs/20210430.v1/BAP1_DEGs.Consistent20210430.v1.tsv")
+deg_all_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/summarize_degs/unite_BAP1_snRNA_bulkRNA_protein_DEGs/20210610.v1/BAP1_snRNA_DEGs.Consistent.CNVcorrected.20210610.v1.tsv")
+genes_background_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/findallmarker_LR_all_BAP1_tumorcells_vs_PBRM1_NonMutant_cells_on_katmai/20210609.v1/gProfiler_hsapiens_6-10-2021_5-56-28 PM.csv")
 
 # convert gene symbol to entrez ids ---------------------------------------
-deg_df <- deg_all_df %>%
-  filter(BAP1_vs_OtherTumor_snRNA == "Down") %>%
-  mutate(gene = genesymbol_deg) %>%
-  mutate(avg_logFC = mean_avg_logFC) %>%
-  arrange(desc(avg_logFC))
+genes2convert <- unique(genes_background_df$genesymbol_deg)
 genes2convert <- unique(deg_df$gene)
+
 ## retrieve entrezgene_id
 genesymbol2entrezid_df <- getBM(attributes=c('entrezgene_id', 'hgnc_symbol'), 
                                 filters = 'hgnc_symbol', 
                                 values = genes2convert, 
                                 mart = ensembl)
 ## add entrez ids to the deg table
+deg_df <- deg_all_df %>%
+  filter(BAP1_vs_OtherTumor_snRNA == "Down") %>%
+  mutate(gene = genesymbol_deg) %>%
+  mutate(avg_logFC = mean_avg_logFC) %>%
+  arrange(desc(avg_logFC))
 deg_df$entrezgene_id <- mapvalues(x = deg_df$gene, from = genesymbol2entrezid_df$hgnc_symbol, to = as.vector(genesymbol2entrezid_df$entrezgene_id))
 ## filter markers by entrez id
 deg_filtered_df <- deg_df %>%
@@ -57,8 +61,10 @@ names(de_genes) <- deg_filtered_df$entrezgene_id
 ## sort
 de_genes <- sort(de_genes, decreasing = T)
 de_genes
+## make universe gene list
+universe_genes <- as.character(genes_background_df$converted_alias[!is.na(genes_background_df$converted_alias)])
 # test over-representation analysis and gene set enrichment using wikipathway ------------------------------
-enricher_out <- tryCatch(expr = enricher(gene = names(de_genes), TERM2GENE = wp2gene, pvalueCutoff = 1),
+enricher_out <- tryCatch(expr = enricher(gene = names(de_genes), TERM2GENE = wp2gene, pvalueCutoff = 1, universe = universe_genes),
                          error = function(e) {warning("ORA failed.");return(NULL)})
 
 if (length(enricher_out) > 0 ) {
