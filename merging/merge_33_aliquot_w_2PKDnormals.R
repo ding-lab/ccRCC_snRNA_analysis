@@ -30,8 +30,8 @@ run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
 library(future)
-plan("multiprocess", workers = 3)
-options(future.globals.maxSize = 35 * 1024^3) # for 35 Gb RAM
+plan("multiprocess", workers = 2)
+options(future.globals.maxSize = 50 * 1024^3) # for 50 Gb RAM
 
 # input dependencies ------------------------------------------------------
 ## input seurat paths
