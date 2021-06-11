@@ -25,7 +25,7 @@ library(Signac)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -42,7 +42,7 @@ peak2fcs_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/
 ## specify parameters to plot
 peak_plot <- c("chr15-72230151-72230651")
 motif_plot <- "RBPJ"
-topn_plot <- 3
+topn_plot <- 24
 
 # preprocess samples to show ----------------------------------------------
 peak2fcs_tmp_df <- peak2fcs_df %>%
@@ -85,7 +85,7 @@ p=Signac::CoveragePlot(
 # print(p)
 # dev.off()
 file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".", motif_plot, ".pdf")
-pdf(file2write, width = 6, height = 4)
+pdf(file2write, width = 6, height = 20)
 print(p)
 dev.off()
 
