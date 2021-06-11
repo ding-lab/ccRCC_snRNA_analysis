@@ -23,6 +23,7 @@ setwd(dir_base)
 ## library additional libaries
 # library(Signac)
 library(data.table)
+library(stringr)
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
 version_tmp <- 6
