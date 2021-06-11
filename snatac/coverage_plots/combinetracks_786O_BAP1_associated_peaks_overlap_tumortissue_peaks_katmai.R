@@ -83,7 +83,7 @@ for (i in 1:nrow(peaks_celline_df)) {
     region = peak_plot_expanded)
   
   p <- Signac::CombineTracks(
-    plotlist = list(cov_plot, peak_plot, cpg_plot, gene_plot),
+    plotlist = list(cov_plot, peak_cl_plot, peak_tt_plot, gene_plot),
     heights = c(10, 1, 1, 1))
   print("Finished CombineTracks")
   
