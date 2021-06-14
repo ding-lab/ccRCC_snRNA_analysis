@@ -24,9 +24,10 @@ setwd(dir_base)
 # library(Signac)
 library(data.table)
 library(stringr)
+library(dplyr)
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 6
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -88,7 +89,7 @@ for (i in 1:nrow(peaks_plot_df)) {
   
   ## write output
   file2write <- paste0(dir_out, gene_tmp, "_", chr, "_", st, "_", en, ".png")
-  png(file2write, width = 1000, height = 1000, res = 150)
+  png(file2write, width = 1000, height = 800, res = 150)
   print(p)
   dev.off()
 }
