@@ -26,6 +26,23 @@ plotdata_df <- peaks2degs_df %>%
 
 # plot --------------------------------------------------------------------
 p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", color = "DAP_type",
+               add = "reg.line",  # Add regressin line
+               add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+               conf.int = TRUE # Add confidence interval
+)
+p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
+p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
+p <- p + stat_cor(method = "pearson", label.x = 0.5, label.y = 1.2)
+p <- p + geom_text_repel(data = subset(x = plotdata_df, abs(avg_log2FC.snATAC) > 1 | abs(avg_log2FC.snRNA) > 1), 
+                         mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.snRNA, label = Gene), 
+                         max.overlaps = Inf, min.segment.length = 0)
+p <- p + guides(color = guide_legend(nrow = 2))
+file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC.",".png")
+png(file2write, width = 800, height = 900, res = 150)
+print(p)
+dev.off()
+
+p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", color = "DAP_type",
                    add = "reg.line",  # Add regressin line
                    add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
                    conf.int = TRUE # Add confidence interval
