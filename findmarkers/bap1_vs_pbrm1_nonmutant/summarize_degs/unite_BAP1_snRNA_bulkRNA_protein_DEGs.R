@@ -19,14 +19,17 @@ deg_snRNA_df <- fread(data.table = F, input = "./Resources/Analysis_Results/find
 deg_bulkRNA_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/expression/edgeR/run_deg_analysis/run_BAP1_vs_PBRM1_NonMutant_deg_on_cptac_ccRCC_discovery_cases/20210406.v1/BAP1_Mutated_vs_PBRM1_NonMutants.glmQLFTest.OutputTables.tsv")
 # deg_bulkprotein_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/expression/")
 deg_cnvcor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/findmarker_LR_wCNV_all_BAP1_tumorcells_vs_PBRM1_NonMutant_cells_on_katmai/20210609.v1/LR.logfc.threshold0.min.pct0.1.min.diff.pct0.AssayRNA.tsv")
+deg2fc_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/findallmarker_LR_all_BAP1_tumorcells_vs_PBRM1_NonMutant_cells_on_katmai/20210609.v1/LR.logfc.threshold0.min.pct0.1.min.diff.pct0.AssayRNA.tsv")
 
 # overlap -----------------------------------------------------------------
+deg_cnvcor_df$avg_lo2FC.alltumorcells <- mapvalues(x = deg_cnvcor_df$row.names, from = deg2fc_df$genesymbol_deg, to = as.vector(deg2fc_df$avg_log2FC))
+deg_cnvcor_df$avg_lo2FC.alltumorcells <- as.numeric(deg_cnvcor_df$avg_lo2FC.alltumorcells)
 table(deg_snRNA_df$BAP1_vs_OtherTumor_snRNA)
 deg_merged_df <- merge(x = deg_snRNA_df, 
                        y = deg_cnvcor_df %>%
                          rename(genesymbol_deg = row.names) %>%
                          rename(FDR.cnvcorrected = FDR) %>%
-                         select(genesymbol_deg, FDR.cnvcorrected), by = c("genesymbol_deg"), all = T)
+                         select(genesymbol_deg, FDR.cnvcorrected, avg_lo2FC.alltumorcells), by = c("genesymbol_deg"), all = T)
 ## preprocess the bulk DEGs
 deg_bulkRNA_df2 <- deg_bulkRNA_df %>%
   # filter(abs(logFC) > 0.5) %>%
