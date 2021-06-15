@@ -77,11 +77,7 @@ p=Signac::CoveragePlot(
   links=FALSE)
 
 ## write output
-# file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".", motif_plot, ".png")
-# png(file2write, width = 1000, height = 800, res = 150)
-# print(p)
-# dev.off()
-file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".", motif_plot, ".pdf")
+file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".pdf")
 pdf(file2write, width = 6, height = 7, useDingbats = F)
 print(p)
 dev.off()

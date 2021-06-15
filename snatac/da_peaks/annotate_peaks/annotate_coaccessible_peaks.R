@@ -15,43 +15,36 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-# coaccess_df <- fread(data.table = F, input = "../ccRCC_snATAC/Resources/snATAC_Processed_Data/Peak_Annotation/da_up_peaks_Tumor_vs_PT.annotated.CICERO.20210513.tsv")
 coaccess_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Coaccessibility/26_ccRCC_snATAC_CICERO.0.25_cutoff.tsv")
+## input peak2gene annotation
+peak2gene_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Peak_Annotation/All_peaks_annotated_26snATAC_merged_obj.20210607.tsv")
 
 # filter and extract ------------------------------------------------------
 nrow(coaccess_df)
 coaccess_filtered_df <- coaccess_df %>%
-  filter(Count_up >= 5) %>%
-  filter(!is.na(cicero_coaccess) & cicero_coaccess >= 0.25) %>%
-  mutate(peak_coacess = str_split_fixed(string = cicero_co_accessible_peaks, pattern = "_", n = 2)[,2])
+  filter(coaccess >= 0.25)
 nrow(coaccess_filtered_df)
-## first scenerio: DAP is promoter region for gene X, then the coaccessible peak is potential enhancer for gene X
-coaccess_enhancer_df <- coaccess_filtered_df %>%
-  filter(Type == "Promoter") %>%
-  select(peak_coacess, Gene) %>%
-  rename(Peak = peak_coacess) %>%
-  mutate(Peak_Type = "Enhancer") %>%
-  mutate(Is.CAP = T) %>%
-  mutate(Is.DAP = F)
-coaccess_enhancer_df$Is.DAP[coaccess_enhancer_df$Peak %in% coaccess_filtered_df$peak] <- T
-## second scenerio: the coaccessible peak is promoter region for gene Y, then the DAP is potential enhancer for gene Y
-coaccess_promoter_df <- coaccess_filtered_df %>%
-  filter(cicero_Type == "Promoter") %>%
-  select(peak_coacess, cicero_Gene, cicero_Type) %>%
-  rename(Peak = peak_coacess) %>%
-  rename(Gene = cicero_Gene) %>%
-  rename(Peak_Type = cicero_Type) %>%
-  mutate(Is.CAP = T) %>%
-  mutate(Is.DAP = F)
-dap_enhancer_df <- coaccess_filtered_df %>%
-  filter(cicero_Type == "Promoter") %>%
-  mutate(Peak_Type = "Enhancer") %>%
-  select(peak, cicero_Gene, Peak_Type) %>%
-  rename(Peak = peak) %>%
-  rename(Gene = cicero_Gene) %>%
-  mutate(Is.CAP = T) %>%
-  mutate(Is.DAP = T)
-  
+## prepare gene annotation
+peak2gene_df <- peak2gene_df %>%
+  mutate(peak2gene_type = str_split_fixed(string = annotation, pattern = " \\(", n = 2)[,1])
+table(peak2gene_df$peak2gene_type)
+### filter to only peak 1
+peak2gene_df1 <- peak2gene_df %>%
+  filter(peak %in% coaccess_filtered_df$Peak1) %>%
+  mutate(genesymbol = SYMBOL) %>%
+  select(peak, peak2gene_type, genesymbol)
+peak2gene_df2 <- peak2gene_df %>%
+  filter(peak %in% coaccess_filtered_df$Peak2) %>%
+  mutate(genesymbol = SYMBOL) %>%
+  select(peak, peak2gene_type, genesymbol)
+## merge
+coaccess_peaks2genes_df <- merge(x = coaccess_filtered_df, y = peak2gene_df1, by.x = c("Peak1"), by.y = c("peak"), all.x = T)
+coaccess_peaks2genes_df <- merge(x = coaccess_peaks2genes_df, y = peak2gene_df2, by.x = c("Peak2"), by.y = c("peak"), all.x = T, suffixes = c(".1", ".2"))
+
+coaccess_filtered_df$peak2gene_type.1 <- mapvalues(x = coaccess_filtered_df$Peak1, from = peak2gene_df$peak, to = as.vector(peak2gene_df$peak2gene_type))
+coaccess_filtered_df$genesymbol.1 <- mapvalues(x = coaccess_filtered_df$Peak1, from = peak2gene_df$peak, to = as.vector(peak2gene_df$SYMBOL))
+
+
 # get unique co-accessible peaks--------------------------------------------------------------
 coaccess_uniq_df <- coaccess_filtered_df %>%
   filter(Type == "Promoter" | cicero_Type == "Promoter") %>%
