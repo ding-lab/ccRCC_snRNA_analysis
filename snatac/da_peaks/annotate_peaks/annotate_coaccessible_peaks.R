@@ -41,19 +41,6 @@ peak2gene_df2 <- peak2gene_df %>%
 coaccess_peaks2genes_df <- merge(x = coaccess_filtered_df, y = peak2gene_df1, by.x = c("Peak1"), by.y = c("peak"), all.x = T)
 coaccess_peaks2genes_df <- merge(x = coaccess_peaks2genes_df, y = peak2gene_df2, by.x = c("Peak2"), by.y = c("peak"), all.x = T, suffixes = c(".1", ".2"))
 
-coaccess_filtered_df$peak2gene_type.1 <- mapvalues(x = coaccess_filtered_df$Peak1, from = peak2gene_df$peak, to = as.vector(peak2gene_df$peak2gene_type))
-coaccess_filtered_df$genesymbol.1 <- mapvalues(x = coaccess_filtered_df$Peak1, from = peak2gene_df$peak, to = as.vector(peak2gene_df$SYMBOL))
-
-
-# get unique co-accessible peaks--------------------------------------------------------------
-coaccess_uniq_df <- coaccess_filtered_df %>%
-  filter(Type == "Promoter" | cicero_Type == "Promoter") %>%
-  select(peak_coacess) %>%
-  unique()
-peak2gene_df <- rbind(coaccess_enhancer_df, coaccess_promoter_df, dap_enhancer_df)
-peak2gene_df <- unique(peak2gene_df)
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "Coaccessible_Peaks.", run_id, ".tsv")
-write.table(x = coaccess_uniq_df, file = file2write, quote = F, sep = "\t", row.names = F)
-file2write <- paste0(dir_out, "Peak2Gene.", run_id, ".tsv")
-write.table(x = peak2gene_df, file = file2write, quote = F, sep = "\t", row.names = F)
+file2write <- paste0(dir_out, "Coaccessible_Peaks.Annotated.", run_id, ".tsv")
+write.table(x = coaccess_peaks2genes_df, file = file2write, quote = F, sep = "\t", row.names = F)
