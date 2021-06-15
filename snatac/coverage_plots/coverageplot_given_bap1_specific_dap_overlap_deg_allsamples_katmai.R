@@ -52,8 +52,8 @@ Idents(atac_subset)=factor(atac_subset$Piece_ID,levels=c(pieceids_selected, 'C3L
 
 # process coordinates ------------------------------------------------------------
 ## specify parameters to plot
-for (peak_plot in c("chr16-66955443-66955943")) {
-# for (peak_plot in unique(peaks_df$peak)) {
+# for (peak_plot in c("chr16-66955443-66955943")) {
+for (peak_plot in unique(peaks_df$peak)) {
 
   chr=strsplit(x = peak_plot, split = "\\-")[[1]][1]
   st=strsplit(x = peak_plot, split = "\\-")[[1]][2]; st = as.numeric(st)
@@ -72,7 +72,7 @@ for (peak_plot in c("chr16-66955443-66955943")) {
   
   ## write output
   file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".pdf")
-  pdf(file2write, width = 6, height = 12, useDingbats = F)
+  pdf(file2write, width = 6, height = 10, useDingbats = F)
   print(p)
   dev.off()
 }
