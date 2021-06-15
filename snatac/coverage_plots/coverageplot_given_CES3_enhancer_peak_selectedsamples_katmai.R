@@ -25,7 +25,7 @@ library(Signac)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 3
+version_tmp <- 4
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -80,7 +80,7 @@ p=Signac::CoveragePlot(
 
 ## write output
 file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".pdf")
-pdf(file2write, width = 6, height = 7, useDingbats = F)
+pdf(file2write, width = 8, height = 7, useDingbats = F)
 print(p)
 dev.off()
 
