@@ -25,7 +25,7 @@ library(Signac)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -53,7 +53,8 @@ peak2fcs_long_tmp_df <- peak2fcs_long_tmp_df %>%
   arrange(value) %>%
   mutate(pieceid = str_split_fixed(string = variable, pattern = "_", n = 2)[,1])
 pieceids_selected <- head(x = peak2fcs_long_tmp_df$pieceid, topn_plot)
-pieceids_selected <- c(pieceids_selected, "C3N-00733-T1", "C3N-00242-T1", "C3L-00917-T1", "C3L-00026-T1")
+# pieceids_selected <- c(pieceids_selected, "C3N-00733-T1", "C3N-00242-T1", "C3L-00917-T1", "C3L-00026-T1")
+pieceids_selected <- c("C3N-00437-T1", "C3L-00416-T2", "C3N-00317-T1", "C3N-00733-T1", "C3N-00242-T1", "C3L-00917-T1", "C3L-00026-T1")
 
 # preprocess ATAC object --------------------------------------------------
 atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_selected) | cell_type=='PT' & Piece_ID %in% c('C3L-00088-N','C3N-01200-N'))
