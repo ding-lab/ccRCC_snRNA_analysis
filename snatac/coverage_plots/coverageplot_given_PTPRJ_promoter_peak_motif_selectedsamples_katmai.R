@@ -64,8 +64,6 @@ en=strsplit(x = peak_plot, split = "\\-")[[1]][3]; en = as.numeric(en)
 new_st=st-1000
 new_en=en+1000
 peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
-## process motif coordinates
-motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == peak_plot & peak2motif_df$motif.name == motif_plot & peak2motif_df$Peak_Type == "Promoter"]; motif_coord <- unique(motif_coord)
 ## change atac ident
 # print(head(atac@meta.data))
 Idents(atac_subset)=factor(atac_subset$Piece_ID,levels=c(pieceids_selected, 'C3L-00088-N','C3N-01200-N'))

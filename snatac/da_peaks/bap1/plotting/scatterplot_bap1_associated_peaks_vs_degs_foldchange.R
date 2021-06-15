@@ -27,16 +27,22 @@ plotdata_df <- peaks2degs_df %>%
 # plot --------------------------------------------------------------------
 p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", color = "DAP_type",
                    add = "reg.line",  # Add regressin line
-                   add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
-                   conf.int = TRUE # Add confidence interval
+                   add.params = list(color = "blue", fill = "lightgray", linetype = 2), # Customize reg. line
+                   conf.int = F # Add confidence interval
 )
 p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
 p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
 p <- p + stat_cor(method = "pearson", label.x = 0.5, label.y = 1.2)
-p <- p + guides(color = guide_legend(nrow = 2))
-file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC.",".png")
-png(file2write, width = 800, height = 900, res = 150)
+p <- p + guides(color = guide_legend(nrow = 2, override.aes = aes(size = 3), label.theme = element_text(size = 14)))
+p <- p + theme(axis.text = element_text(size = 14),
+               axis.title = element_text(size = 14),
+               legend.position = "bottom", legend.box = "horizontal")
+# file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC.",".png")
+# png(file2write, width = 800, height = 900, res = 150)
+# print(p)
+# dev.off()
+file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC.",".pdf")
+pdf(file2write, width = 5.5, height = 6, useDingbats = F)
 print(p)
 dev.off()
-
 
