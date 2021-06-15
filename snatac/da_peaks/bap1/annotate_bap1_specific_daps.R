@@ -40,8 +40,9 @@ peaks_anno_df$avg_log2FC <- as.numeric(as.vector(peaks_anno_df$avg_log2FC))
 peaks_anno_df <- peaks_anno_df %>%
   mutate(peak2gene_type = str_split_fixed(string = annotation, pattern = " \\(", n = 2)[,1]) %>%
   select(-annotation)
-## annotate with coaccessiblity results
-peaks_anno_df <- merge(x = peaks_anno_df, 
+
+# annotate with coaccessiblity results ------------------------------------
+peaks_anno_wcoaccess_df <- merge(x = peaks_anno_df, 
                        y = coaccess_peak2genes_df %>%
                          select(Peak1, Peak2, peak2gene_type.2, genesymbol.2, coaccess) %>%
                          rename(peak.coaccess = Peak2) %>%
@@ -49,5 +50,20 @@ peaks_anno_df <- merge(x = peaks_anno_df,
                          rename(genesymbol.coaccess = genesymbol.2) %>%
                          rename(coaccess_score = coaccess),
                        by.x = c("peak"), by.y = c("Peak1"))
+peak2gene_enhancers_df <- peaks_anno_wcoaccess_df %>%
+  filter(peak2gene_type != "Promoter" & peak2gene_type.coaccess == "Promoter")
+peak2gene_enh_pro_df <- rbind(peak2gene_enhancers_df %>%
+                                mutate(peak2gene_type = "Enhancer") %>%
+                                mutate(Gene = genesymbol.coaccess),
+                              peaks_anno_df %>%
+                                filter(peak2gene_type == "Promoter") %>%
+                                mutate(peak.coaccess = NA) %>%
+                                mutate(peak2gene_type.coaccess = NA) %>%
+                                mutate(genesymbol.coaccess = NA) %>%
+                                mutate(coaccess_score = NA))
+
+# write outupt ------------------------------------------------------------
+file2write <- paste0(dir_out, "BAP1_DAP2Gene.EnhancerPromoter.", run_id, ".tsv")
+write.table(file = file2write, x = peak2gene_enh_pro_df, quote = F, sep = "\t", row.names = F)
 
 
