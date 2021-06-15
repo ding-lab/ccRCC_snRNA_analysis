@@ -42,21 +42,14 @@ Idents(atac)=atac$Piece_ID
 peak2fcs_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/DOWN_BAP1_specific_peaks.Filtered.CNV_corrected.Annotated.20210610.tsv")
 # peaks_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/bap1/overlap_bap1_specific_enhancer_promoter_peaks_with_degs/20210615.v1/BAP1_DAP2DEG.20210615.v1.tsv")
 ## specify parameters to plot
-peak_plot <- c("chr16-66955443-66955943")
-topn_plot <- 3
-
-# preprocess samples to show ----------------------------------------------
-peak2fcs_tmp_df <- peak2fcs_df %>%
-  filter(peak == peak_plot)
-peak2fcs_long_tmp_df <- melt(data = peak2fcs_tmp_df, measure.vars = colnames(peak2fcs_tmp_df)[grepl(pattern = "_Signif_avg_lnFC", x = colnames(peak2fcs_tmp_df))])
-peak2fcs_long_tmp_df <- peak2fcs_long_tmp_df %>%
-  arrange(value) %>%
-  mutate(pieceid = str_split_fixed(string = variable, pattern = "_", n = 2)[,1])
-pieceids_selected <- head(x = peak2fcs_long_tmp_df$pieceid, topn_plot)
-pieceids_selected <- c(pieceids_selected, "C3L-00610-T1", "C3N-00242-T1", "C3L-00917-T1", "C3L-00088-T1")
+peak_plot <- c("chr16-66955443-66961444")
 
 # preprocess ATAC object --------------------------------------------------
+pieceids_selected <- c("C3L-01313-T1", "C3N-01200-T1", "C3N-00317-T1", "C3N-00437-T1", "C3L-00908-T1", "C3L-00416-T2", ## BAP1 mutants
+                       "C3N-00733-T1", "C3L-00733-T1", "C3L-00610-T1", "C3L-00079-T1", "C3N-00242-T1", "C3L-01302-T1", "C3N-01213-T1", "C3L-0004-T1", "C3L-00790-T1", "C3L-00583-T1",
+                       "C3L-00917-T1", "C3L-00088-T1", "C3L-00088-T2", "C3L-00448-T1", "C3L-00096-T1", "C3L-00010-T1", "C3N-00495-T1", "C3L-00026-T1")
 atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_selected) | cell_type=='PT' & Piece_ID %in% c('C3L-00088-N','C3N-01200-N'))
+Idents(atac_subset)=factor(atac_subset$Piece_ID,levels=c(pieceids_selected, 'C3L-00088-N','C3N-01200-N'))
 
 # process coordinates ------------------------------------------------------------
 chr=strsplit(x = peak_plot, split = "\\-")[[1]][1]
@@ -65,9 +58,6 @@ en=strsplit(x = peak_plot, split = "\\-")[[1]][3]; en = as.numeric(en)
 new_st=st-1000
 new_en=en+1000
 peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
-## change atac ident
-# print(head(atac@meta.data))
-Idents(atac_subset)=factor(atac_subset$Piece_ID,levels=c(pieceids_selected, 'C3L-00088-N','C3N-01200-N'))
 
 # plot --------------------------------------------------------------------
 p=Signac::CoveragePlot(
@@ -79,7 +69,7 @@ p=Signac::CoveragePlot(
 
 ## write output
 file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".pdf")
-pdf(file2write, width = 6, height = 7, useDingbats = F)
+pdf(file2write, width = 6, height = 10, useDingbats = F)
 print(p)
 dev.off()
 
