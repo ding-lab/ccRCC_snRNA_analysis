@@ -53,7 +53,7 @@ peak2fcs_long_tmp_df <- peak2fcs_long_tmp_df %>%
   arrange(value) %>%
   mutate(pieceid = str_split_fixed(string = variable, pattern = "_", n = 2)[,1])
 pieceids_selected <- head(x = peak2fcs_long_tmp_df$pieceid, topn_plot)
-pieceids_selected <- c(pieceids_selected, "C3L-00610-T1", "C3N-00242-T1", "C3L-00917-T1", "C3L-00088-T1")
+pieceids_selected <- c(pieceids_selected, "C3N-00733-T1", "C3N-00242-T1", "C3L-00917-T1", "C3L-00026-T1")
 
 # preprocess ATAC object --------------------------------------------------
 atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_selected) | cell_type=='PT' & Piece_ID %in% c('C3L-00088-N','C3N-01200-N'))
