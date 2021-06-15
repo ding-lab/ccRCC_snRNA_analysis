@@ -42,7 +42,7 @@ Idents(atac)=atac$Piece_ID
 peak2fcs_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/DOWN_BAP1_specific_peaks.Filtered.CNV_corrected.Annotated.20210610.tsv")
 # peaks_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/bap1/overlap_bap1_specific_enhancer_promoter_peaks_with_degs/20210615.v1/BAP1_DAP2DEG.20210615.v1.tsv")
 ## specify parameters to plot
-peak_plot <- c("chr16-66955443-66961444")
+peak_plot <- c("chr16-66955443-66955943")
 topn_plot <- 3
 
 # preprocess samples to show ----------------------------------------------
@@ -63,7 +63,7 @@ chr=strsplit(x = peak_plot, split = "\\-")[[1]][1]
 st=strsplit(x = peak_plot, split = "\\-")[[1]][2]; st = as.numeric(st)
 en=strsplit(x = peak_plot, split = "\\-")[[1]][3]; en = as.numeric(en)
 new_st=st-500
-new_en=en+500
+new_en=66961444+500
 peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
 ## change atac ident
 # print(head(atac@meta.data))
