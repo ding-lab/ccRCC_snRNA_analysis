@@ -73,10 +73,10 @@ features=colnames(cnv_per_feature_df)
 cases_group1 <- mut_df$Case[mut_df$mutation_category_sim %in% c("Both mutated", "PBRM1 mutated")];
 cases_group1 <- cases_group1[cases_group1 %in% idmetadata_df$Case[idmetadata_df$snRNA_available]] ## 9 PBRM1-mutated cases, 2 BAP1 & PBRM1 mutated cases
 aliquots_group1 <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available & (idmetadata_df$Case %in% cases_group1) & idmetadata_df$Sample_Type == "Tumor"]
-aliquots_group1 ## 10 samples
+aliquots_group1 ## 13 samples
 cases_group2 <- mut_df$Case[mut_df$mutation_category_sim %in% c("Non-mutants", "BAP1 mutated")]; cases_group2 <- cases_group2[!(cases_group2 %in% c("C3L-00359"))]
 aliquots_group2 <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available & idmetadata_df$Case %in% cases_group2 & idmetadata_df$Sample_Type == "Tumor"]
-aliquots_group2 ## 19 samples
+aliquots_group2 ## 17 samples
 BC <- srat@meta.data %>% rownames
 ## get original barcode
 srat@meta.data$original_barcode <- BC %>% strsplit("_") %>% lapply("[[",1) %>% unlist

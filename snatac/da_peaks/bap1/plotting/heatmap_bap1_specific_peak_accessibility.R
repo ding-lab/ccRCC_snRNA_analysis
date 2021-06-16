@@ -7,7 +7,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 4
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -47,6 +47,8 @@ plotdata_mat <- scale(x = plotdata_df2)
 rownames(plotdata_mat) <- plotdata_df$Sample
 
 # make row split ----------------------------------------------------------
+row_split_vec <- plotdata_df$Cell_type
+row_split_vec[row_split_vec == "Tumor"] <- "Tumor cells"
 row_split_factor <- factor(plotdata_df$Cell_type, levels = c('PT','Tumor'))
 
 # make column split -------------------------------------------------------
@@ -62,7 +64,7 @@ row_anno_df=plotdata_df %>%
   mutate(Case = gsub(x = Sample, pattern = "\\-[A-Z][0-9]", replacement = "")) %>%
   mutate(BAP1_status = ifelse(Case %in% cases_bap1 & Cell_type == "Tumor", 'BAP1_mutant', 'NOT_BAP1_mutant')) %>%
   mutate(PBRM1_status = ifelse(Case %in% cases_pbrm1 & Cell_type == "Tumor", 'PBRM1_mutant','NOT_PBRM1_mutant'))
-row_ha= rowAnnotation(Cell_type=row_anno_df$Cell_type, 
+row_ha= rowAnnotation(#Cell_type=row_anno_df$Cell_type, 
                       BAP1_status=row_anno_df$BAP1_status,
                       PBRM1_status=row_anno_df$PBRM1_status,
                       col=list(BAP1_status=c('BAP1_mutant'='#984EA3','NOT_BAP1_mutant'='white smoke'),
@@ -81,17 +83,17 @@ colors_heatmapbody = colorRamp2(c(-2, 0, 2),
                                 c(color_blue, "white", color_red))
 
 # plot --------------------------------------------------------------------
-# x=Heatmap(matrix = plotdata_mat, name='Peak_accessibility', col = colors_heatmapbody,
-#           ## rows
-#           show_row_names = T,  show_row_dend=FALSE,  right_annotation=row_ha, row_split = row_split_factor, cluster_row_slices=F, 
-#           ## columns
-#           show_column_names = FALSE, show_column_dend=FALSE, column_title = NULL,
-#           column_split = column_split_factor, cluster_column_slices=F, 
-#           use_raster=FALSE)
-# file2write <- paste0(dir_out, "BAP1_specific_peak_accessibility.pdf")
-# pdf(file2write,width=6,height=6, useDingbats = F)
-# print(x)
-# dev.off()
+x=Heatmap(matrix = plotdata_mat, name='Peak\naccessibility', col = colors_heatmapbody,
+          ## rows
+          show_row_names = T,  show_row_dend=FALSE,  right_annotation=row_ha, row_split = row_split_factor, cluster_row_slices=F, 
+          ## columns
+          show_column_names = FALSE, show_column_dend=FALSE, column_title = NULL,
+          column_split = column_split_factor, cluster_column_slices=F, 
+          use_raster=F)
+file2write <- paste0(dir_out, "BAP1_specific_peak_accessibility.pdf")
+pdf(file2write,width=6, height=5.8, useDingbats = F)
+print(x)
+dev.off()
 
 x=Heatmap(matrix = plotdata_mat, name='Peak\naccessibility', col = colors_heatmapbody,
           ## rows

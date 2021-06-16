@@ -27,17 +27,19 @@ source("./ccRCC_snRNA_analysis/variables.R")
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
-dir_out1 <- "./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/PBRM1_vs_BAP1_NonMutants_Tumorcells/"
-dir.create(dir_out1)
-dir_out <- paste0(dir_out1, run_id, "/"); dir.create(dir_out)
+dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
+dir.create(dir_out)
+library(future)
+plan("multiprocess", workers = 5)
+options(future.globals.maxSize = 7 * 1024^3) # for 7 Gb RAM
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
-path_rds <- "./Resources/Analysis_Results/merging/33_aliquot_merging_without_anchoring/20210428.v2/33_aliquot_merged_without_anchoring.20210428.v2.RDS"
+path_rds <- "./Data_Freezes/V2/snRNA/All_Cells_Merged/33_aliquot_merged_without_anchoring.20210428.v2.RDS"
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 ## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_33aliquots/20210423.v1/33Aliquot.Barcode2CellType.20210423.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Data_Freezes/V2/snRNA/Cell_Type_Assignment/33Aliquot.Barcode2CellType.20210423.v1.tsv", data.table = F)
 cat("finish reading the barcode-to-cell type table!\n")
 ## input idemta data
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
@@ -47,23 +49,26 @@ mut_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutat
 # set parameters for findmarkers ------------------------------------------
 logfc.threshold.run <- 0
 min.pct.run <- 0.1
-min.diff.pct.run <- 0.1
+min.diff.pct.run <- 0
 ## spcify assay
 assay_process <- "RNA"
 DefaultAssay(srat) <- assay_process
 cat(paste0("Assay: ", assay_process, "\n"))
 cat("###########################################\n")
 ## specify cell groups to compare
-group1_findmarkers <- "BAP1-mutated Tumor cells"
-group2_findmarkers <- "PBRM1/Non-mutant Tumor cells"
+group1_findmarkers <- "PBRM1-mutated Tumor cells"
+group2_findmarkers <- "BAP1/Non-mutant Tumor cells"
 
 # preprocess ----------------------------------------
-cases_group1 <- mut_df$Case[mut_df$mutation_category_sim %in% c("Both mutated", "PBRM1 mutated")]
+cases_group1 <- mut_df$Case[mut_df$mutation_category_sim %in% c("Both mutated", "PBRM1 mutated")];
+cases_group1 <- cases_group1[cases_group1 %in% idmetadata_df$Case[idmetadata_df$snRNA_available]] ## 9 PBRM1-mutated cases, 2 BAP1 & PBRM1 mutated cases
 aliquots_group1 <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available & (idmetadata_df$Case %in% cases_group1) & idmetadata_df$Sample_Type == "Tumor"]
-aliquots_group1
-cases_group2 <- mut_df$Case[mut_df$mutation_category_sim %in% c("Non-mutants", "BAP1 mutated")]
+aliquots_group1 ## 13 samples
+cases_group2 <- mut_df$Case[mut_df$mutation_category_sim %in% c("Non-mutants", "BAP1 mutated")]; cases_group2 <- cases_group2[!(cases_group2 %in% c("C3L-00359"))]
+cases_group2 <- cases_group2[cases_group2 %in% idmetadata_df$Case[idmetadata_df$snRNA_available]] ## 14 cases: 6 BAP1 mutated cases, 8 non-mutants
+# View(mut_df[mut_df$Case %in% cases_group2,])
 aliquots_group2 <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available & idmetadata_df$Case %in% cases_group2 & idmetadata_df$Sample_Type == "Tumor"]
-aliquots_group2
+aliquots_group2 ## 17 samples
 
 # preprocess the Seurat object meta data---------------------------------------------
 BC <- srat@meta.data %>% rownames
