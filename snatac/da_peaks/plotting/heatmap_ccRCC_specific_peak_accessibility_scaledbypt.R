@@ -7,7 +7,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -43,7 +43,7 @@ plotdata_df <- plotdata_df[!(rownames(plotdata_df) %in% c('C3L-00088-N_Tumor','C
 colnames(plotdata_df)[2:3]=c('Sample','Cell_type')
 plotdata_df <- plotdata_df[plotdata_df$Cell_type %in% c('Tumor','PT'),]
 plotdata_df2 <- plotdata_df[, colnames(plotdata_df)[grepl(pattern = "chr", x = colnames(plotdata_df))]]
-plotdata_mat <- scale(x = plotdata_df2)
+plotdata_mat <- scale(x = plotdata_df2, scale = T, center = colMeans(plotdata_mat[1:2,]))
 rownames(plotdata_mat) <- plotdata_df$Sample
 
 # make row split ----------------------------------------------------------
@@ -65,12 +65,12 @@ row_anno_df=plotdata_df %>%
   mutate(BAP1_status = ifelse(Case %in% cases_bap1 & Cell_type == "Tumor", 'BAP1_mutant', 'NOT_BAP1_mutant')) %>%
   mutate(PBRM1_status = ifelse(Case %in% cases_pbrm1 & Cell_type == "Tumor", 'PBRM1_mutant','NOT_PBRM1_mutant'))
 row_ha= rowAnnotation(#Cell_type=row_anno_df$Cell_type, 
-                      BAP1_status=row_anno_df$BAP1_status,
-                      PBRM1_status=row_anno_df$PBRM1_status,
-                      col=list(BAP1_status=c('BAP1_mutant'='#984EA3','NOT_BAP1_mutant'='white smoke'),
-                               PBRM1_status=c('PBRM1_mutant'='#FF7F00','NOT_PBRM1_mutant'='white smoke'),
-                               Cell_type=c('PT'='#1B9E77','Tumor'='#E7298A')), 
-                      annotation_width = unit(3, "mm"))
+  BAP1_status=row_anno_df$BAP1_status,
+  PBRM1_status=row_anno_df$PBRM1_status,
+  col=list(BAP1_status=c('BAP1_mutant'='#984EA3','NOT_BAP1_mutant'='white smoke'),
+           PBRM1_status=c('PBRM1_mutant'='#FF7F00','NOT_PBRM1_mutant'='white smoke'),
+           Cell_type=c('PT'='#1B9E77','Tumor'='#E7298A')), 
+  annotation_width = unit(3, "mm"))
 
 # specify colors ----------------------------------------------------------
 ## specify color for NA values
@@ -79,8 +79,9 @@ color_na <- "grey50"
 summary(as.numeric(unlist(plotdata_mat)))
 color_red <- RColorBrewer::brewer.pal(n = 5, name = "Set1")[1]
 color_blue <- RColorBrewer::brewer.pal(n = 5, name = "Set1")[2]
-colors_heatmapbody = colorRamp2(c(-2, 0, 2), 
-                                c(color_blue, "white", color_red))
+colors_heatmapbody = colorRamp2(c(-1, 0, 0.5, 1, 1.5, 2), 
+                                # c(color_blue, "white", color_red))
+                                c(color_blue, "white", brewer.pal(n = 4, name = "YlOrRd")))
 
 # plot --------------------------------------------------------------------
 x=Heatmap(matrix = plotdata_mat, name='Peak\naccessibility', col = colors_heatmapbody,
