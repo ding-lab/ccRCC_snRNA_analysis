@@ -27,8 +27,8 @@ deg_wide_df <- dcast(data = deg_sig_long_df, formula = genesymbol_deg~deg_catego
 ## including all fold changes
 deg_long_df <- deg_df %>%
   filter(group1_mut_category %in% c("PBRM1 mutated", "Both mutated"))
-deg_wide_df2 <- dcast(data = deg_long_df, formula = genesymbol_deg~easyid_tumor, value.var = 'avg_log2FC', na.rm = T)
 easyids_tumor <- unique(deg_long_df$easyid_tumor)
+deg_wide_df2 <- dcast(data = deg_long_df, formula = genesymbol_deg~easyid_tumor, value.var = 'avg_log2FC', na.rm = T)
 deg_wide_df2$Num_up <- rowSums(deg_wide_df2[, easyids_tumor] > 0, na.rm = T)
 deg_wide_df2$Num_down <- rowSums(deg_wide_df2[, easyids_tumor] < 0, na.rm = T)
 ## including only significant fold changes

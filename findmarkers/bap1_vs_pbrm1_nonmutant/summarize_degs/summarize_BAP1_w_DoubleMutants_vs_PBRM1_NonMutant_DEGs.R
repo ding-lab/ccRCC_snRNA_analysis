@@ -21,6 +21,7 @@ deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarker
 deg_sig_long_df <- deg_df %>%
   filter(group1_mut_category %in% c("BAP1 mutated", "Both mutated") & !(easyid_tumor %in% c("C3L-01287-T1"))) %>%
   filter(p_val_adj < 0.05) %>%
+  filter(abs(pct.1 - pct.2) >= 0.1) %>%
   mutate(deg_category = paste0("Num_sig_", ifelse(avg_logFC > 0, "up", "down")))
 deg_wide_df <- dcast(data = deg_sig_long_df, formula = genesymbol_deg~deg_category)
 ## including all fold changes

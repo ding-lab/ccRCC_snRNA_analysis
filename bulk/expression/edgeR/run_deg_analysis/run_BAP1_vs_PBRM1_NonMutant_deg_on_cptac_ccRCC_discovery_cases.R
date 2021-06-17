@@ -1,5 +1,7 @@
 # Yige Wu @WashU Mar 2021
 ## reference: https://bioinformatics-core-shared-training.github.io/cruk-bioinf-sschool/Day3/rnaSeq_DE.pdf
+## logFC is based on 2: https://support.bioconductor.org/p/50273/
+## https://www.biostars.org/p/303806/
 
 # set up libraries and output directory -----------------------------------
 ## set working directory

@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 3
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -55,75 +55,68 @@ plot_data_df <- plot_data_df %>%
 
 # plot all markers--------------------------------------------------------------------
 ## plot
-p <- ggplot()
-p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey70")
-p <- p + geom_point(data = subset(plot_data_df, foldchange_type == "mixed fold change directions"), mapping = aes(x = x_plot, y = y_plot, size = size_plot, color = foldchange_type), alpha = 0.5, shape = 16)
-p <- p + geom_point(data = subset(plot_data_df, foldchange_type != "mixed fold change directions"), mapping = aes(x = x_plot, y = y_plot, size = size_plot, color = foldchange_type), alpha = 0.9, shape = 16)
-# p <- p + geom_point(data = subset(plot_data_df, foldchange_type == "Mixed fold change directions"), mapping = aes(x = x_plot, y = y_plot, size = size_plot), alpha = 0.5, color = color_purple)
-# p <- p + geom_point(data = subset(plot_data_df, foldchange_type == "Consistently higher in ccRCC"), mapping = aes(x = x_plot, y = y_plot, size = size_plot), alpha = 0.8, color = color_red)
-# p <- p + geom_point(data = subset(plot_data_df, foldchange_type == "Consistently lower in ccRCC"), mapping = aes(x = x_plot, y = y_plot, size = size_plot), alpha = 0.8, color = color_blue)
-p <- p + scale_color_manual(values = c("consistently higher in ccRCC" = color_red, 
-                                       "consistently lower in ccRCC" = color_blue, 
-                                       "mixed fold change directions" = color_purple))
-# p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_TF)),
-#                          mapping = aes(x = x_plot, y = y_plot, label = text_TF), color = "black", force = 4, fontface = "bold", segment.alpha = 0.5)
-p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_tf) & x_plot > 0),
-                         mapping = aes(x = x_plot, y = y_plot, label = text_tf), 
-                         color = "black", alpha = 1, size = 5, #fontface = "bold",
-                         segment.size = 0.4, segment.alpha = 1, min.segment.length = 0,
-                         xlim = c(0, NA))
-p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_tf) & x_plot < 0),
-                         mapping = aes(x = x_plot, y = y_plot, label = text_tf), 
-                         color = "black", alpha = 1, size = 5, #fontface = "bold",
-                         segment.size = 0.4, segment.alpha = 1, min.segment.length = 0,
-                         xlim = c(NA, 0), ylim = c(75, NA))
-p <- p + scale_size_area(max_size = 4)
-p <- p + theme_classic()
-p <- p + xlab("Motif score difference (ccRCC cells - PT cells)")
-p <- p + ylab("-Log10FDR")
-p <- p + guides(size = guide_legend(title = "Motif score difference\nconsistency index", title.position = "top", title.theme = element_text(size = 14),
-                                    nrow = 3, label.theme = element_text(size = 14)),
-                color = guide_legend(title = "Motif type", title.position = "top", nrow = 3, override.aes = aes(size = 3), label.theme = element_text(size = 14)))
-# p <- p + labs(color = "|(No. tumors with higher motif scores) - (No. tumors with lower motif scores)|/(No. all tumors)")
-p <- p + theme(axis.text = element_text(size = 14),
-               axis.title = element_text(size = 14),
-               legend.position = "bottom", legend.box = "horizontal")
-# file2write <- paste0(dir_out, "volcano.", "png")
-# png(file2write, width = 800, height = 800, res = 150)
+# p <- ggplot()
+# p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey70")
+# p <- p + geom_point(data = subset(plot_data_df, foldchange_type == "mixed fold change directions"), mapping = aes(x = x_plot, y = y_plot, size = size_plot, color = foldchange_type), alpha = 0.5, shape = 16)
+# p <- p + geom_point(data = subset(plot_data_df, foldchange_type != "mixed fold change directions"), mapping = aes(x = x_plot, y = y_plot, size = size_plot, color = foldchange_type), alpha = 0.9, shape = 16)
+# p <- p + scale_color_manual(values = c("consistently higher in ccRCC" = color_red, 
+#                                        "consistently lower in ccRCC" = color_blue, 
+#                                        "mixed fold change directions" = color_purple))
+# # p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_TF)),
+# #                          mapping = aes(x = x_plot, y = y_plot, label = text_TF), color = "black", force = 4, fontface = "bold", segment.alpha = 0.5)
+# p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_tf) & x_plot > 0),
+#                          mapping = aes(x = x_plot, y = y_plot, label = text_tf), 
+#                          color = "black", alpha = 1, size = 5, #fontface = "bold",
+#                          segment.size = 0.4, segment.alpha = 1, min.segment.length = 0,
+#                          xlim = c(0, NA))
+# p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_tf) & x_plot < 0),
+#                          mapping = aes(x = x_plot, y = y_plot, label = text_tf), 
+#                          color = "black", alpha = 1, size = 5, #fontface = "bold",
+#                          segment.size = 0.4, segment.alpha = 1, min.segment.length = 0,
+#                          xlim = c(NA, 0), ylim = c(75, NA))
+# p <- p + scale_size_area(max_size = 4)
+# p <- p + theme_classic()
+# p <- p + xlab("Motif score difference (ccRCC cells - PT cells)")
+# p <- p + ylab("-Log10FDR")
+# p <- p + guides(size = guide_legend(title = "Motif score difference\nconsistency index", title.position = "top", title.theme = element_text(size = 14),
+#                                     nrow = 3, label.theme = element_text(size = 14)),
+#                 color = guide_legend(title = "Motif type", title.position = "top", nrow = 3, override.aes = aes(size = 3), label.theme = element_text(size = 14)))
+# # p <- p + labs(color = "|(No. tumors with higher motif scores) - (No. tumors with lower motif scores)|/(No. all tumors)")
+# p <- p + theme(axis.text = element_text(size = 14),
+#                axis.title = element_text(size = 14),
+#                legend.position = "bottom", legend.box = "horizontal")
+# # file2write <- paste0(dir_out, "volcano.", "png")
+# # png(file2write, width = 800, height = 800, res = 150)
+# # print(p)
+# # dev.off()
+# file2write <- paste0(dir_out, "volcano.", "pdf")
+# pdf(file2write, width = 6, height = 6.5, useDingbats = F)
 # print(p)
 # dev.off()
-file2write <- paste0(dir_out, "volcano.", "pdf")
-pdf(file2write, width = 6, height = 6.5, useDingbats = F)
-print(p)
-dev.off()
 
 p <- ggplot()
 p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey70")
-p <- p + geom_point(data = subset(plot_data_df, foldchange_type == "mixed fold change directions"), mapping = aes(x = x_plot, y = y_plot, size = size_plot, color = foldchange_type), alpha = 0.5, shape = 16)
-p <- p + geom_point(data = subset(plot_data_df, foldchange_type != "mixed fold change directions"), mapping = aes(x = x_plot, y = y_plot, size = size_plot, color = foldchange_type), alpha = 0.9, shape = 16)
-# p <- p + geom_point(data = subset(plot_data_df, foldchange_type == "Mixed fold change directions"), mapping = aes(x = x_plot, y = y_plot, size = size_plot), alpha = 0.5, color = color_purple)
-# p <- p + geom_point(data = subset(plot_data_df, foldchange_type == "Consistently higher in ccRCC"), mapping = aes(x = x_plot, y = y_plot, size = size_plot), alpha = 0.8, color = color_red)
-# p <- p + geom_point(data = subset(plot_data_df, foldchange_type == "Consistently lower in ccRCC"), mapping = aes(x = x_plot, y = y_plot, size = size_plot), alpha = 0.8, color = color_blue)
+p <- p + geom_point(data = subset(plot_data_df, foldchange_type == "mixed fold change directions"), 
+                    mapping = aes(x = x_plot, y = y_plot, color = foldchange_type), alpha = 0.5, shape = 16)
+p <- p + geom_point(data = subset(plot_data_df, foldchange_type != "mixed fold change directions"), 
+                    mapping = aes(x = x_plot, y = y_plot, color = foldchange_type), alpha = 0.9, shape = 16, size = 3)
 p <- p + scale_color_manual(values = c("consistently higher in ccRCC" = color_red, 
                                        "consistently lower in ccRCC" = color_blue, 
                                        "mixed fold change directions" = color_purple))
-# p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_TF)),
-#                          mapping = aes(x = x_plot, y = y_plot, label = text_TF), color = "black", force = 4, fontface = "bold", segment.alpha = 0.5)
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_tf) & x_plot > 0),
                          mapping = aes(x = x_plot, y = y_plot, label = text_tf), 
                          color = "black", alpha = 1, size = 5, #fontface = "bold",
-                         segment.size = 0.4, segment.alpha = 1, min.segment.length = 0,
+                         segment.size = 0.2, segment.alpha = 0.5, min.segment.length = 0,
                          xlim = c(0, NA))
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_tf) & x_plot < 0),
                          mapping = aes(x = x_plot, y = y_plot, label = text_tf), 
                          color = "black", alpha = 1, size = 5, #fontface = "bold",
-                         segment.size = 0.4, segment.alpha = 1, min.segment.length = 0,
+                         segment.size = 0.2, segment.alpha = 0.5, min.segment.length = 0,
                          xlim = c(NA, 0), ylim = c(75, NA))
 p <- p + scale_size_area(max_size = 4)
 p <- p + theme_classic()
-p <- p + xlab("Motif score difference (ccRCC cells - PT cells)")
+p <- p + xlab("Motif score difference\n(Tumor cells (24 tumors) vs. PT cells (2 NATs))")
 p <- p + ylab("-Log10FDR")
-# p <- p + labs(color = "|(No. tumors with higher motif scores) - (No. tumors with lower motif scores)|/(No. all tumors)")
 p <- p + theme(axis.text = element_text(size = 14),
                axis.title = element_text(size = 14),
                legend.position = "none")

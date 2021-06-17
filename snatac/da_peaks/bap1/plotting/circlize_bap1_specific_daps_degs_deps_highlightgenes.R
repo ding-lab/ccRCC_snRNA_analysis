@@ -11,7 +11,7 @@ source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 library(circlize)
 ## set run id
-version_tmp <- 4
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -20,6 +20,8 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 daps_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/bap1/annotate_bap1_specific_daps/20210615.v1/BAP1_DAP2Gene.EnhancerPromoter.20210615.v1.tsv")
 degs_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/annotate_degs/annotate_bap1_degs_deps_to_chr_regions/20210616.v1/BAP1_vs_PBRM1_NonMutants.DEGs.Chromosome_Regions_Annotated.20210616.v1.tsv")
+## input dap deg overlap
+dap2deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/bap1/overlap_bap1_specific_enhancer_promoter_peaks_with_degs/20210615.v1/BAP1_DAP2DEG.20210615.v1.tsv")
 
 # prepare plot data for DAPs-------------------------------------------------------
 daps_bed1 <- daps_df %>%
@@ -116,6 +118,44 @@ degs_bulkrna_bed2 <- degs_df %>%
   select(chr, start, end, value)
 degs_bulkrna_bed_list = list(degs_bulkrna_bed1, degs_bulkrna_bed2)
 
+# prepare plot data for highlighting genes-------------------------------------------------------
+## prepare genes to highlight
+genes_highlight <- dap2deg_df %>%
+  filter(abs(avg_log2FC.snATAC) >= 0.5 & abs(avg_log2FC.snRNA) >= 0.5)
+highlight_bed <- degs_df %>%
+  filter(genesymbol_deg %in% genes_highlight$Gene) %>%
+  mutate(chr = paste0("chr", chromosome_name)) %>%
+  rename(start = start_position) %>%
+  rename(end = end_position) %>%
+  mutate(value = genesymbol_deg) %>%
+  select(chr, start, end, value)
+
+# plot version 1 --------------------------------------------------------------------
+## initialize
+file2write <- paste0(dir_out, "BAP1_specific_daps_degs.onlysndata.pdf")
+pdf(file2write, width = 6, height = 6, useDingbats = F)
+circos.par(gap.degree = c(rep(1, 23), 40), start.degree = 90)
+circos.initializeWithIdeogram(plotType = c("ideogram", "labels"), labels.cex = 1.2)
+# circos.initializeWithIdeogram(plotType = c("axis", "labels"))
+## plot track
+circos.genomicTrack(daps_bed_list, 
+                    panel.fun = function(region, value, ...) {
+                      i = getI(...)
+                      color_i <- c("#377EB8", "#E41A1C")[i]
+                      circos.genomicPoints(region, value, pch = 16, cex = 0.3, col = color_i, ...)
+                    }, track.height = 0.15, bg.col = "#8DD3C7", bg.border = "grey70")
+circos.yaxis(side = "left", sector.index = "chr1", labels.cex = 0.8, at = c(-1.5, 0, 1.5))
+circos.genomicTrack(degs_snrna_bed_list, 
+                    panel.fun = function(region, value, ...) {
+                      i = getI(...)
+                      color_i <- c("#377EB8", "#E41A1C")[i]
+                      circos.genomicPoints(region, value, pch = 16, cex = 0.3, col = color_i, ...)
+                    }, track.height = 0.15, bg.col = "#FDB462", bg.border = "grey70")
+circos.yaxis(side = "left", sector.index = "chr1", labels.cex = 0.8, at = c(-1.5, 0, 1.5))
+circos.genomicLabels(highlight_bed, labels.column = 4, side = "inside", connection_height = 0.02, labels_height = 0.03, cex = 0.8)
+circos.clear()
+dev.off()
+
 # plot version 1 --------------------------------------------------------------------
 ## initialize
 file2write <- paste0(dir_out, "BAP1_specific_daps_degs.bulkRNAFDR0.05.pdf")
@@ -129,15 +169,16 @@ circos.genomicTrack(daps_bed_list,
                       i = getI(...)
                       color_i <- c("#377EB8", "#E41A1C")[i]
                       circos.genomicPoints(region, value, pch = 16, cex = 0.3, col = color_i, ...)
-                    }, track.height = 0.2, bg.col = "#8DD3C7", bg.border = "grey70")
+                    }, track.height = 0.15, bg.col = "#8DD3C7", bg.border = "grey70")
 circos.yaxis(side = "left", sector.index = "chr1", labels.cex = 0.8, at = c(-1.5, 0, 1.5))
 circos.genomicTrack(degs_snrna_bed_list, 
                     panel.fun = function(region, value, ...) {
                       i = getI(...)
                       color_i <- c("#377EB8", "#E41A1C")[i]
                       circos.genomicPoints(region, value, pch = 16, cex = 0.3, col = color_i, ...)
-                    }, track.height = 0.2, bg.col = "#FDB462", bg.border = "grey70")
+                    }, track.height = 0.15, bg.col = "#FDB462", bg.border = "grey70")
 circos.yaxis(side = "left", sector.index = "chr1", labels.cex = 0.8, at = c(-1.5, 0, 1.5))
+circos.genomicLabels(highlight_bed, labels.column = 4, side = "inside", connection_height = 0.01, labels_height = 0.03, cex = 0.5)
 circos.genomicTrack(degs_bulkrna_bed_list, 
                     panel.fun = function(region, value, ...) {
                       i = getI(...)
@@ -145,7 +186,8 @@ circos.genomicTrack(degs_bulkrna_bed_list,
                       circos.genomicPoints(region, value, pch = 16, cex = 0.3, col = color_i, ...)
                     }, track.height = 0.15, bg.col = "#FFFFB3", bg.border = "grey70")
 circos.yaxis(side = "left", sector.index = "chr1", labels.cex = 0.8, at = c(-5, 0, 5))
-circos.genomicTrack(deps_bed_list, 
+
+circos.genomicTrack(deps_bed_list,
                     panel.fun = function(region, value, ...) {
                       i = getI(...)
                       color_i <- c("#377EB8", "#E41A1C")[i]
@@ -157,115 +199,3 @@ circos.clear()
 dev.off()
 
 
-# plot legend -------------------------------------------------------------
-library(ComplexHeatmap)
-
-lgd_points = Legend(at = c("down-regulated in BAP1-mutants", "up-regulated in BAP1-mutants"), type = "points", 
-                    legend_gp = gpar(col = c("#377EB8", "#E41A1C"), fill = NA),
-                    title = "Point colors")
-lgd_background = Legend(at = c("snATAC-seq", "snRNA-seq", "bulk RNA-seq", "bulk proteomics"), type = "grid", 
-                    legend_gp = gpar(fill = c("#8DD3C7", "#FDB462", "#FFFFB3", "#BEBADA")),
-                    title = "Data types", nrow = 2, border = "grey70")
-lgd_list_vertical <- packLegend(lgd_points, lgd_background)
-file2write <- paste0(dir_out, "legend.pdf")
-pdf(file2write, width = 3, height = 1.5, useDingbats = F)
-draw(lgd_list_vertical, x = unit(4, "mm"), y = unit(4, "mm"), just = c("left", "bottom"))
-dev.off()
-
-# # plot version 1 --------------------------------------------------------------------
-# ## initialize
-# file2write <- paste0(dir_out, "BAP1_specific_daps_degs.bulkRNAFDR0.001.pdf")
-# pdf(file2write, width = 6, height = 6, useDingbats = F)
-# circos.par(gap.degree = c(rep(1, 23), 40), start.degree = 90)
-# circos.initializeWithIdeogram(plotType = c("ideogram", "labels"), labels.cex = 1.2)
-# # circos.initializeWithIdeogram(plotType = c("axis", "labels"))
-# ## plot track
-# circos.genomicTrack(daps_bed_list, 
-#                     panel.fun = function(region, value, ...) {
-#                       i = getI(...)
-#                       color_i <- c("#377EB8", "#E41A1C")[i]
-#                       circos.genomicPoints(region, value, pch = 16, cex = 0.3, col = color_i, ...)
-#                     }, track.height = 0.2, bg.col = RColorBrewer::brewer.pal(n = 4, name = "Set3")[1], bg.border = "grey70")
-# circos.yaxis(side = "left", sector.index = "chr1", labels.cex = 0.8, at = c(-1.5, 0, 1.5))
-# circos.genomicTrack(degs_snrna_bed_list, 
-#                     panel.fun = function(region, value, ...) {
-#                       i = getI(...)
-#                       color_i <- c("#377EB8", "#E41A1C")[i]
-#                       circos.genomicPoints(region, value, pch = 16, cex = 0.3, col = color_i, ...)
-#                     }, track.height = 0.2, bg.col = RColorBrewer::brewer.pal(n = 6, name = "Set3")[6], bg.border = "grey70")
-# circos.yaxis(side = "left", sector.index = "chr1", labels.cex = 0.8, at = c(-1.5, 0, 1.5))
-# circos.genomicTrack(degs_bulkrna_bed_list, 
-#                     panel.fun = function(region, value, ...) {
-#                       i = getI(...)
-#                       color_i <- c("#377EB8", "#E41A1C")[i]
-#                       circos.genomicPoints(region, value, pch = 16, cex = 0.3, col = color_i, ...)
-#                     }, track.height = 0.15, bg.col = RColorBrewer::brewer.pal(n = 4, name = "Set3")[2], bg.border = "grey70")
-# circos.yaxis(side = "left", sector.index = "chr1", labels.cex = 0.8, at = c(-5, 0, 5))
-# circos.genomicTrack(deps_bed_list, 
-#                     panel.fun = function(region, value, ...) {
-#                       i = getI(...)
-#                       color_i <- c("#377EB8", "#E41A1C")[i]
-#                       circos.genomicPoints(region, value, pch = 16, cex = 0.3, col = color_i, ...)
-#                     }, track.height = 0.15, bg.col = RColorBrewer::brewer.pal(n = 4, name = "Set3")[3], bg.border = "grey70")
-# # circos.yaxis(side = "left", sector.index = "chr1", labels.cex = 0.8)
-# circos.yaxis(side = "left", sector.index = "chr1", labels.cex = 0.8, at = c(-0.5, 0, 0.5))
-# circos.clear()
-# dev.off()
-
-# # plot version 1 --------------------------------------------------------------------
-# degs_bulkrna_bed1 <- degs_df %>%
-#   filter(FDR.bulkRNA < 0.0001) %>%
-#   filter(logFC.bulkRNA < 0) %>%
-#   filter(!is.na(start_position)) %>%
-#   mutate(chr = paste0("chr", chromosome_name)) %>%
-#   rename(start = start_position) %>%
-#   rename(end = end_position) %>%
-#   rename(value = logFC.bulkRNA) %>%
-#   select(chr, start, end, value)
-# degs_bulkrna_bed2 <- degs_df %>%
-#   filter(FDR.bulkRNA < 0.0001) %>%
-#   filter(logFC.bulkRNA > 0) %>%
-#   filter(!is.na(start_position)) %>%
-#   mutate(chr = paste0("chr", chromosome_name)) %>%
-#   rename(start = start_position) %>%
-#   rename(end = end_position) %>%
-#   rename(value = logFC.bulkRNA) %>%
-#   select(chr, start, end, value)
-# degs_bulkrna_bed_list = list(degs_bulkrna_bed1, degs_bulkrna_bed2)
-# ## initialize
-# file2write <- paste0(dir_out, "BAP1_specific_daps_degs.bulkRNAFDR0.0001.pdf")
-# pdf(file2write, width = 6, height = 6, useDingbats = F)
-# circos.par(gap.degree = c(rep(1, 23), 30), start.degree = 90)
-# circos.initializeWithIdeogram(plotType = c("ideogram", "labels"), labels.cex = 1.2)
-# # circos.initializeWithIdeogram(plotType = c("axis", "labels"))
-# ## plot track
-# circos.genomicTrack(daps_bed_list, 
-#                     panel.fun = function(region, value, ...) {
-#                       i = getI(...)
-#                       color_i <- c("#377EB8", "#E41A1C")[i]
-#                       circos.genomicPoints(region, value, pch = 16, cex = 0.3, col = color_i, ...)
-#                     }, track.height = 0.2, bg.col = RColorBrewer::brewer.pal(n = 4, name = "Set3")[1], bg.border = "grey70")
-# circos.yaxis(side = "left", sector.index = "chr1", labels.cex = 0.8, at = c(-1.5, 0, 1.5))
-# circos.genomicTrack(degs_snrna_bed_list, 
-#                     panel.fun = function(region, value, ...) {
-#                       i = getI(...)
-#                       color_i <- c("#377EB8", "#E41A1C")[i]
-#                       circos.genomicPoints(region, value, pch = 16, cex = 0.3, col = color_i, ...)
-#                     }, track.height = 0.2, bg.col = RColorBrewer::brewer.pal(n = 6, name = "Set3")[6], bg.border = "grey70")
-# circos.yaxis(side = "left", sector.index = "chr1", labels.cex = 0.8, at = c(-1.5, 0, 1.5))
-# circos.genomicTrack(degs_bulkrna_bed_list, 
-#                     panel.fun = function(region, value, ...) {
-#                       i = getI(...)
-#                       color_i <- c("#377EB8", "#E41A1C")[i]
-#                       circos.genomicPoints(region, value, pch = 16, cex = 0.3, col = color_i, ...)
-#                     }, track.height = 0.15, bg.col = RColorBrewer::brewer.pal(n = 4, name = "Set3")[2], bg.border = "grey70")
-# circos.yaxis(side = "left", sector.index = "chr1", labels.cex = 0.8, at = c(-15, 0, 5))
-# circos.genomicTrack(deps_bed_list, 
-#                     panel.fun = function(region, value, ...) {
-#                       i = getI(...)
-#                       color_i <- c("#377EB8", "#E41A1C")[i]
-#                       circos.genomicPoints(region, value, pch = 16, cex = 0.3, col = color_i, ...)
-#                     }, track.height = 0.2, bg.col = RColorBrewer::brewer.pal(n = 4, name = "Set3")[3], bg.border = "grey70")
-# circos.yaxis(side = "left", sector.index = "chr1", labels.cex = 0.8, at = c(-1, 0, 1))
-# circos.clear()
-# dev.off()

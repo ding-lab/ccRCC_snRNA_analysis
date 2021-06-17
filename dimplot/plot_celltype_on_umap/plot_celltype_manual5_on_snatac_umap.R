@@ -11,7 +11,7 @@ source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 library(ggrastr)
 ## set run id
-version_tmp <- 3
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -19,11 +19,14 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input cell type per barcode table
-barcode2celltype_df <- fread(input = "../ccRCC_snATAC/Resources/snATAC_Processed_Data/Barcode_Annotation/UMAP/UMAP_data_13_snATAC_Normal_epithelialCells_reclustered.20201209.tsv", data.table = F)
+# barcode2celltype_df <- fread(input = "../ccRCC_snATAC/Resources/snATAC_Processed_Data/Barcode_Annotation/UMAP/UMAP_data_13_snATAC_Normal_epithelialCells_reclustered.20201209.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/snATAC_Processed_Data/Barcode_Annotation/26_snATAC.ManualReviwed.UMAP_data.tsv", data.table = F)
 
 # plot for cell group----------------------------------------------------------
+table(barcode2celltype_df$cell_type)
 plot_data_df <- barcode2celltype_df %>%
-  mutate(Cell_group = ifelse(cell_type_manual_5 == "EMT tumor cells", "Tumor cells", cell_type_manual_5))
+  mutate(Cell_group = ifelse(cell_type %in% c("EMT tumor cells", "Tumor"), "Tumor cells", cell_type))
+  # mutate(Cell_group = ifelse(cell_type_manual_5 == "EMT tumor cells", "Tumor cells", cell_type_manual_5))
 table(plot_data_df$Cell_group)
 ## make colors
 names(colors_cellgroup14)
@@ -43,10 +46,12 @@ p <- p + scale_color_manual(values = colors_tmp)
 p <- p + guides(colour = guide_legend(override.aes = list(size=5), nrow = 4))
 p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                panel.background = element_blank(), axis.line = element_line(colour = "black"))
-p <- p + theme(axis.text.x=element_blank(),
-               axis.ticks.x=element_blank())
-p <- p + theme(axis.text.y=element_blank(),
-               axis.ticks.y=element_blank())
+p <- p + theme(axis.line=element_blank(),axis.text.x=element_blank(),
+               axis.text.y=element_blank(),axis.ticks=element_blank(),
+               axis.title.x=element_blank(),
+               axis.title.y=element_blank(), 
+               panel.background=element_blank(),panel.border=element_blank(),panel.grid.major=element_blank(),
+               panel.grid.minor=element_blank(),plot.background=element_blank())
 p <- p + theme(legend.position="bottom")
 p
 ## save as pdf
