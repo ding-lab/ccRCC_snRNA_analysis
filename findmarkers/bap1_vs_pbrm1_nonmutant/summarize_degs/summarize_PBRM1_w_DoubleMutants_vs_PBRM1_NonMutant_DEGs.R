@@ -15,29 +15,30 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/summarize_degs/")
+deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/summarize_degs/unite_PBRM1_vs_BAP1_NonMutant_DEGs/20210617.v1/PBRM1_vs_BAP1_NonMutants_DEGs.20210617.v1.tsv")
 
 # summarize genes by occurance ---------------------------------------------
 deg_sig_long_df <- deg_df %>%
   filter(group1_mut_category %in% c("PBRM1 mutated", "Both mutated")) %>%
   filter(p_val_adj < 0.05) %>%
-  mutate(deg_category = paste0("Num_sig_", ifelse(avg_logFC > 0, "up", "down")))
+  filter(abs(pct.1 - pct.2) >= 0.1) %>%
+  mutate(deg_category = paste0("Num_sig_", ifelse(avg_log2FC > 0, "up", "down")))
 deg_wide_df <- dcast(data = deg_sig_long_df, formula = genesymbol_deg~deg_category)
 ## including all fold changes
 deg_long_df <- deg_df %>%
   filter(group1_mut_category %in% c("PBRM1 mutated", "Both mutated"))
-deg_wide_df2 <- dcast(data = deg_long_df, formula = genesymbol_deg~easyid_tumor, value.var = 'avg_logFC', na.rm = T)
+deg_wide_df2 <- dcast(data = deg_long_df, formula = genesymbol_deg~easyid_tumor, value.var = 'avg_log2FC', na.rm = T)
 easyids_tumor <- unique(deg_long_df$easyid_tumor)
 deg_wide_df2$Num_up <- rowSums(deg_wide_df2[, easyids_tumor] > 0, na.rm = T)
 deg_wide_df2$Num_down <- rowSums(deg_wide_df2[, easyids_tumor] < 0, na.rm = T)
 ## including only significant fold changes
-deg_wide_df3 <- dcast(data = deg_sig_long_df, formula = genesymbol_deg~easyid_tumor, value.var = 'avg_logFC', na.rm = T)
-deg_wide_df3$mean_avg_logFC <- rowMeans(deg_wide_df3[, easyids_tumor], na.rm = T)
+deg_wide_df3 <- dcast(data = deg_sig_long_df, formula = genesymbol_deg~easyid_tumor, value.var = 'avg_log2FC', na.rm = T)
+deg_wide_df3$mean_avg_log2FC <- rowMeans(deg_wide_df3[, easyids_tumor], na.rm = T)
 
 ## combine
 deg_wide_df <- merge(x = deg_wide_df, y = deg_wide_df2, by = c("genesymbol_deg"), all.x = T)
-deg_wide_df$mean_avg_logFC <- mapvalues(x = deg_wide_df$genesymbol_deg, from = deg_wide_df3$genesymbol_deg, to = as.vector(deg_wide_df3$mean_avg_logFC))
-deg_wide_df$mean_avg_logFC <- as.numeric(deg_wide_df$mean_avg_logFC)
+deg_wide_df$mean_avg_log2FC <- mapvalues(x = deg_wide_df$genesymbol_deg, from = deg_wide_df3$genesymbol_deg, to = as.vector(deg_wide_df3$mean_avg_log2FC))
+deg_wide_df$mean_avg_log2FC <- as.numeric(deg_wide_df$mean_avg_log2FC)
 
 # filter PBRM1-specific DEGs ----------------------------------------------
 # cutoff_pbrm1_vs_others <- 0.5*length(unique(deg_df$easyid_tumor[deg_df$comparison == "PBRM1_vs_PBRM1_Mutants_Tumorcells"]))
