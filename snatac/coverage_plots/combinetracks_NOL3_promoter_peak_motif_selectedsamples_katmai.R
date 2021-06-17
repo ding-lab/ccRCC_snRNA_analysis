@@ -26,7 +26,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -76,15 +76,32 @@ color_tumorcell <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[4]
 color_pt <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[1]
 colors_celltype <- c(rep(x = color_tumorcell, 24), rep(x = color_pt, 6))
 names(colors_celltype) <- c(peak2fcs_long_tmp_df$pieceid, 'C3L-00088-N','C3N-01200-N', "K1103044", "K1301462", "K1301463FB", "K1900070_1FB")
-p=Signac::CoveragePlot(
+
+cov_plot= Signac::CoveragePlot(
+  object = atac_subset,
+  region = peak_plot_expanded,
+  annotation = F, 
+  peaks = T,
+  links=FALSE)
+cov_plot <- cov_plot + scale_fill_manual(values =  colors_celltype)
+print("Finished cov_plot")
+
+motif_plot <- Signac::PeakPlot(
   object = atac_subset,
   region = peak_plot_expanded, 
-  annotation = TRUE,
-  peaks = TRUE,
-  ranges=StringToGRanges(motif_coord, sep = c("-", "-")),
-  ranges.title = paste(motif_plot,"\nmotif",sep=''),
-  links=FALSE)
-p <- p + scale_fill_manual(values =  colors_celltype)
+  peaks = StringToGRanges(motif_coord, sep = c("-", "-")))
+print("Finished motif plot")
+
+gene_plot <- Signac::AnnotationPlot(
+  object = atac_subset,
+  region = peak_plot_expanded)
+
+p <- Signac::CombineTracks(
+  plotlist = list(cov_plot, motif_plot, gene_plot),
+  heights = c(7, 1, 1))
+print("Finished CombineTracks")
+
+print("Finished peak_plot for cell line")
 ## write output
 # file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".", motif_plot, ".png")
 # png(file2write, width = 1000, height = 800, res = 150)
