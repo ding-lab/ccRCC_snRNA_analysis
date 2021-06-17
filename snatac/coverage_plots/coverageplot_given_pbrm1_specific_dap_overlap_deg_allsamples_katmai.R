@@ -25,7 +25,7 @@ library(Signac)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -43,9 +43,10 @@ peaks_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/d
 
 
 # preprocess ATAC object --------------------------------------------------
-pieceids_selected <- c("C3N-00733-T1", "C3L-00733-T1", "C3L-00610-T1", "C3L-00079-T1", "C3N-00242-T1", "C3L-01302-T1", "C3N-01213-T1", "C3L-0004-T1", "C3L-00790-T1", "C3L-00583-T1", ## PBRM1 mutants
-                       "C3L-01313-T1", "C3N-01200-T1", "C3N-00317-T1", "C3N-00437-T1", "C3L-00908-T1", "C3L-00416-T2", ## BAP1 mutants
-                       "C3L-00917-T1", "C3L-00088-T1", "C3L-00088-T2", "C3L-00448-T1", "C3L-00096-T1", "C3L-00010-T1", "C3N-00495-T1", "C3L-00026-T1")
+pieceids_selected <- c("C3N-00733-T1", "C3L-00079-T1", "C3L-01302-T1", "C3N-01213-T1", "C3L-0004-T1", "C3L-00790-T1", "C3L-00583-T1", "C3L-00610-T1", "C3N-00242-T1", ## PBRM1 mutants
+                       "C3L-00908-T1", "C3L-00416-T2", ## PBRM1 & BAP1 mutants
+                       "C3L-01313-T1", "C3N-01200-T1", "C3N-00317-T1", "C3N-00437-T1", ## BAP1 mutants
+                       "C3L-00096-T1", "C3N-00495-T1", "C3L-00917-T1", "C3L-00088-T1", "C3L-00088-T2", "C3L-00448-T1", "C3L-00010-T1", "C3L-00026-T1")
 atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_selected) | cell_type=='PT' & Piece_ID %in% c('C3L-00088-N','C3N-01200-N'))
 Idents(atac_subset)=factor(atac_subset$Piece_ID,levels=c(pieceids_selected, 'C3L-00088-N','C3N-01200-N'))
 
@@ -68,11 +69,12 @@ for (peak_plot in unique(peaks_df$peak)) {
     region = peak_plot_expanded, 
     annotation = TRUE,
     peaks = TRUE,
-    links=FALSE)
+    links=FALSE, 
+    heights = c(10, 1, 1), peaks.group.by = )
   
   ## write output
   file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".pdf")
-  pdf(file2write, width = 6, height = 10, useDingbats = F)
+  pdf(file2write, width = 6, height = 9, useDingbats = F)
   print(p)
   dev.off()
 }
