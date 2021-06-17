@@ -26,7 +26,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -81,10 +81,16 @@ cov_plot= Signac::CoveragePlot(
   object = atac_subset,
   region = peak_plot_expanded,
   annotation = F, 
-  peaks = T,
+  peaks = F,
   links=FALSE)
 cov_plot <- cov_plot + scale_fill_manual(values =  colors_celltype)
 print("Finished cov_plot")
+
+peak_plot <- Signac::PeakPlot(
+  object = atac_subset,
+  region = peak_plot_expanded, 
+  peaks = StringToGRanges(peak_plot, sep = c("-", "-")))
+print("Finished peak plot")
 
 motif_plot <- Signac::PeakPlot(
   object = atac_subset,
@@ -97,8 +103,8 @@ gene_plot <- Signac::AnnotationPlot(
   region = peak_plot_expanded)
 
 p <- Signac::CombineTracks(
-  plotlist = list(cov_plot, motif_plot, gene_plot),
-  heights = c(7, 1, 1))
+  plotlist = list(cov_plot, peak_plot, motif_plot, gene_plot),
+  heights = c(7, 0.5, 0.5, 1.5))
 print("Finished CombineTracks")
 
 print("Finished peak_plot for cell line")
