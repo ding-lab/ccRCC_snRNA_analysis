@@ -35,7 +35,7 @@ dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-exp_df <- fread("~/Box/CPTAC_ccRCC/Data_Freeze_1.1/CPTAC_ccRCC_Discovery/DNA_methylation/CPTAC_ccRCC_discovery_tumor_methylation_betavalue_probe_level_v1.0.tsv", data.table = F)
+exp_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Methylation/CPTAC_ccRCC_discovery_tumor_methylation_betavalue_probe_level_v1.0.tsv")
 ## input bulk meta data
 metadata_bulk_df <- fread("./Resources/Bulk_Processed_Data/Meta_Data/cptac-metadata.csv")
 ## input clinical info
