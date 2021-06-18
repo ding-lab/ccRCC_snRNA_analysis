@@ -25,7 +25,10 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 library(doParallel)
 ## set run id
-version_tmp <- "maxCores_minus1"
+no_cores <- detectCores() - 1  
+no_cores <- 4
+# version_tmp <- "maxCores_minus1"
+version_tmp <- paste(no_cores, "Cores")
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -81,8 +84,6 @@ exp_mat <- exp_df[,c(ids_exp_group1, ids_exp_group2)]
 gene_index_vec = exp_df$Locus
 ids_group1 = ids_exp_group1
 ids_group2 = ids_exp_group2
-no_cores <- detectCores() - 1  
-no_cores
 cl <- makeCluster(no_cores, type="FORK")
 registerDoParallel(cl)
 start_time <- Sys.time()
