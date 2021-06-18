@@ -26,7 +26,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 library(doParallel)
 ## set run id
 no_cores <- detectCores() - 1  
-no_cores <- 4
+no_cores <- 2
 # version_tmp <- "maxCores_minus1"
 version_tmp <- paste(no_cores, "Cores")
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
