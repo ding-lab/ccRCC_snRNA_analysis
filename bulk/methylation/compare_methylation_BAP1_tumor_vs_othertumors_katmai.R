@@ -26,7 +26,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 library(doParallel)
 ## set run id
 no_cores <- detectCores() - 1  
-no_cores <- 10
+no_cores <- 20
 # version_tmp <- "maxCores_minus1"
 version_tmp <- paste0(no_cores, "Cores")
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -70,7 +70,7 @@ probe_test_df <- probe_anno_df %>%
   filter(probeID %in% exp_df$Locus) %>%
   select(probeID)
 nrow(probe_test_df)
-probes_test <- head(probe_test_df$probeID, 1000)
+probes_test <- head(probe_test_df$probeID, 5000)
 # test by wilcox and return values ----------------------------------------
 exp_mat <- exp_df[,c(ids_exp_group1, ids_exp_group2)]
 gene_index_vec = exp_df$Locus
@@ -99,6 +99,7 @@ end_time <- Sys.time()
 end_time - start_time 
 ## 1.119908 mins for 1000 for 2 cores
 ## 37.37539 secs for 1000 for 4 cores
+## 19.8362 for 1000 for 10 cores
 # stopCluster(cl)
 
 ## make test result into a data frame
