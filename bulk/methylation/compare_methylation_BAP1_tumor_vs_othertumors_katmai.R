@@ -37,9 +37,7 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 exp_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Methylation/CPTAC_ccRCC_discovery_tumor_methylation_betavalue_probe_level_v1.0.tsv")
 ## input bulk meta data
-metadata_bulk_df <- fread("./Resources/Bulk_Processed_Data/Meta_Data/cptac-metadata.csv")
-## input clinical info
-case_clinical_df <- readxl::read_excel(path = "./Resources/Bulk_Processed_Data/CPTAC3-ccRCC-SupplementaryTables_Final/Table S1.xlsx", sheet = "ccrcc_clinical_characteristics")
+metadata_bulk_df <- fread("./Resources/Bulk_Processed_Data/Case_ID/CPTAC_ccRCC_discovery_caseID_v1.0.tsv")
 ## input mutation table
 mut_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutation/annotate_cptac_sample_by_pbrm1_bap1_mutation/20210412.v1/PBRM1_BAP1_Mutation_Status_By_Case.20210412.v1.tsv")
 ## input methylation annotation
@@ -47,27 +45,21 @@ probe_anno_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/
 
 # get the aliquot IDs for bulk corresponding to the snRNA aliquots --------
 metadata_filtered_df <- metadata_bulk_df %>%
-  filter(Set.A == "yes") %>%
-  filter(Specimen.Label != "CPT0012090003")
-metadata_filtered_df$Histologic_Type <- mapvalues(x = metadata_filtered_df$Case.ID, from = case_clinical_df$Case_ID, to = case_clinical_df$Histologic_Type)
-metadata_filtered_df <- metadata_filtered_df %>%
   filter(Histologic_Type == "Clear cell renal cell carcinoma")
 ## add mutation group
-metadata_filtered_df$group <- mapvalues(x = metadata_filtered_df$Case.ID, from = mut_df$Case, to = as.vector(mut_df$mutation_category_sim))
-metadata_filtered_df$group[as.vector(metadata_filtered_df$group) == as.vector(metadata_filtered_df$Case.ID)] <- "Non-mutants"
+metadata_filtered_df$group <- mapvalues(x = metadata_filtered_df$CASE_ID, from = mut_df$Case, to = as.vector(mut_df$mutation_category_sim))
+metadata_filtered_df$group[as.vector(metadata_filtered_df$group) == as.vector(metadata_filtered_df$CASE_ID)] <- "Non-mutants"
 table(metadata_filtered_df$group)
 ## get aliquout ids for the two groups
 ids_exp_group1 <- metadata_filtered_df %>%
-  filter(Type == "Tumor") %>%
   filter(group %in% c("BAP1 mutated", "Both mutated")) %>%
-  filter(!(Case.ID %in% c("C3L-01287"))) %>%
-  mutate(Sample.ID = paste0(Case.ID, "-T"))
+  filter(!(CASE_ID %in% c("C3L-01287"))) %>%
+  mutate(Sample.ID = paste0(CASE_ID, "-T"))
 ids_exp_group1 <- ids_exp_group1$Sample.ID
 ids_exp_group1 ## 16 samples
 ids_exp_group2 <- metadata_filtered_df %>%
-  filter(Type == "Tumor") %>%
   filter(!(group %in% c("BAP1 mutated", "Both mutated"))) %>%
-  mutate(Sample.ID = paste0(Case.ID, "-T"))
+  mutate(Sample.ID = paste0(CASE_ID, "-T"))
 ids_exp_group2 <- ids_exp_group2$Sample.ID
 ids_exp_group2  ## 86 samples
 ## prepare probes to test
