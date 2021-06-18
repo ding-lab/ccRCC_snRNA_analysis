@@ -26,7 +26,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 library(doParallel)
 ## set run id
 no_cores <- detectCores() - 1  
-no_cores <- 2
+no_cores <- 4
 # version_tmp <- "maxCores_minus1"
 version_tmp <- paste0(no_cores, "Cores")
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -97,7 +97,8 @@ test_list<-foreach(g=probes_test) %dopar% {
 }
 end_time <- Sys.time()
 end_time - start_time 
-stopCluster(cl)
+## 1.119908 mins for 100 for 2 cores
+# stopCluster(cl)
 
 ## make test result into a data frame
 test_df <- data.frame(matrix(data = unlist(test_list), ncol = 4, byrow = T))
