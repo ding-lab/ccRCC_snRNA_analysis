@@ -74,6 +74,7 @@ no_cores <- detectCores() - 1
 no_cores
 cl <- makeCluster(no_cores, type="FORK")
 registerDoParallel(cl)
+registerDoParallel(cores = 5)
 start_time <- Sys.time()
 test_list<-foreach(g=head(gene_index_vec, 1000)) %dopar% {
   exp_raw_vec1 <- unlist(exp_mat[gene_index_vec == g, ids_group1])
@@ -93,6 +94,7 @@ test_list<-foreach(g=head(gene_index_vec, 1000)) %dopar% {
 end_time <- Sys.time()
 end_time - start_time 
 ## Local: 5.262457 secs for 100 (3 cores), 3.908356 secs for 100 (4 cores)
+## Local: Time difference of 1.484208 mins for 100 (7 cores)
 stopCluster(cl)
 
 ## make test result into a data frame
