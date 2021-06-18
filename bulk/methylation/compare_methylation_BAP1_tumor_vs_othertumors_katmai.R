@@ -76,7 +76,7 @@ exp_mat <- exp_df[,c(ids_exp_group1, ids_exp_group2)]
 gene_index_vec = exp_df$Locus
 ids_group1 = ids_exp_group1
 ids_group2 = ids_exp_group2
-cl <- makeCluster(no_cores, type="FORK")
+cl <- makeCluster(no_cores, type="FORK", outfile = paste0(dir_out, "makecluster.txt"))
 registerDoParallel(cl)
 start_time <- Sys.time()
 test_list<-foreach(g=probes_test) %dopar% {
