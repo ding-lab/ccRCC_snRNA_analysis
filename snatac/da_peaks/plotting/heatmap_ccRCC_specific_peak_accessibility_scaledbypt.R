@@ -7,7 +7,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -19,6 +19,10 @@ acc_down_df=fread(data.table = F, input = './Resources/snATAC_Processed_Data/Dif
 acc_up_df=fread(data.table = F, input ='./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/Accessibility/UP_ccRCC_specific.Accessibility.20210617.tsv')
 ## input sample category
 mut_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutation/annotate_cptac_sample_by_pbrm1_bap1_mutation/20210412.v1/PBRM1_BAP1_Mutation_Status_By_Case.20210412.v1.tsv")
+# > ncol(acc_up_df)
+# [1] 752
+# > ncol(acc_down_df)
+# [1] 6
 
 # make data matrix --------------------------------------------------------
 ## add row names

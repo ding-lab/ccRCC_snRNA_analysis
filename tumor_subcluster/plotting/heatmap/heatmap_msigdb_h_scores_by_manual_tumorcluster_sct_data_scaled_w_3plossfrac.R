@@ -28,7 +28,7 @@ cnv_df <- fread(data.table = F, input = "./Resources/Analysis_Results/copy_numbe
 module1_df <- data.frame(geneset_name = c("HALLMARK_MITOTIC_SPINDLE", "HALLMARK_E2F_TARGETS", "HALLMARK_G2M_CHECKPOINT", "HALLMARK_DNA_REPAIR", "HALLMARK_MYC_TARGETS_V1"),
                          module_name = "Cell_cycle")
 module2_df <- data.frame(geneset_name = c("HALLMARK_ALLOGRAFT_REJECTION", "HALLMARK_COMPLEMENT", "HALLMARK_INFLAMMATORY_RESPONSE", "HALLMARK_INTERFERON_GAMMA_RESPONSE", "HALLMARK_KRAS_SIGNALING_UP"),
-                         module_name = "Immune")
+                         module_name = "Immune_signaling")
 module3_df <- data.frame(geneset_name = c("HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION", "HALLMARK_HYPOXIA", "HALLMARK_TNFA_SIGNALING_VIA_NFKB"),
                          module_name = "EMT")
 # module4_df <- data.frame(geneset_name = c("HALLMARK_UV_RESPONSE_DN", "HALLMARK_MTORC1_SIGNALING"),
@@ -79,7 +79,7 @@ cnv_plot_long_df <- cnv_df %>%
   group_by(cluster_name) %>%
   summarise(Frac_3ploss = max(Fraction))
 enrich_plot_df <- enrich_df[, c("cluster_name", "Cell_cycle", "Immune", "EMT", "mTOR")]
-colnames(enrich_plot_df) <- c("cluster_name", paste0(colnames(enrich_plot_df)[-1], "_Module_Enriched"))
+colnames(enrich_plot_df) <- c("cluster_name", paste0(c("Cell_cycle", "Immune_signaling", "EMT", "mTOR"), "_Module_Enriched"))
 ## merge data
 colanno_df <- merge(x = enrich_plot_df, y = cnv_plot_long_df, by = c("cluster_name"), all.x = T)
 colanno_df$Frac_3ploss[is.na(colanno_df$Frac_3ploss)] <- 0
