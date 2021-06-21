@@ -82,8 +82,8 @@ ids_group2 = ids_exp_group2
 registerDoParallel(cores = no_cores)
 start_time <- Sys.time()
 test_list<-foreach(g=probes_test) %dopar% {
-  exp_raw_vec1 <- unlist(exp_mat[gene_index_vec == g, ids_group1])
-  exp_raw_vec2 <- unlist(exp_mat[gene_index_vec == g, ids_group2])
+  exp_raw_vec1 <- unlist(exp_mat[gene_index_vec == g, ids_group1][1,])
+  exp_raw_vec2 <- unlist(exp_mat[gene_index_vec == g, ids_group2][1,])
   exp_vec1 <- exp_raw_vec1[!is.na(exp_raw_vec1)]
   exp_vec2 <- exp_raw_vec2[!is.na(exp_raw_vec2)]
   if (length(exp_vec1) >= 5 & length(exp_vec2) >= 5) {
