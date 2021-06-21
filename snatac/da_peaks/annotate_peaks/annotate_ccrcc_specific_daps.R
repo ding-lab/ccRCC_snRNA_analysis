@@ -38,8 +38,15 @@ peak2gene_filtered_df <- peak2gene_df %>%
 peaks_anno_df$annotation <- mapvalues(x = peaks_anno_df$peak, from = peak2gene_filtered_df$peak, to = as.vector(peak2gene_filtered_df$annotation))
 peaks_anno_df$Gene <- mapvalues(x = peaks_anno_df$peak, from = peak2gene_filtered_df$peak, to = as.vector(peak2gene_filtered_df$SYMBOL))
 peaks_anno_df <- peaks_anno_df %>%
-  mutate(DAP_type = str_split_fixed(string = annotation, pattern = " \\(", n = 2)[,1])
-table(peaks_anno_df$DAP_type)
+  mutate(peak2gene_type = str_split_fixed(string = annotation, pattern = " \\(", n = 2)[,1])
+
+peaks_anno_df %>%
+  filter(peak2gene_type == "Promoter") %>%
+  nrow()
+
+peaks_anno_df %>%
+  filter(peak2gene_type != "Promoter") %>%
+  nrow()
 
 # annotate with coaccessiblity results ------------------------------------
 peaks_anno_wcoaccess_df <- merge(x = peaks_anno_df, 
@@ -52,6 +59,14 @@ peaks_anno_wcoaccess_df <- merge(x = peaks_anno_df,
                        by.x = c("peak"), by.y = c("Peak1"))
 peak2gene_enhancers_df <- peaks_anno_wcoaccess_df %>%
   filter(peak2gene_type != "Promoter" & peak2gene_type.coaccess == "Promoter")
+peak2gene_enhancers_df %>%
+  select(peak) %>%
+  unique() %>%
+  nrow()
+peak2gene_enhancers_df %>%
+  select(Gene) %>%
+  unique() %>%
+  nrow()
 peak2gene_enh_pro_df <- rbind(peak2gene_enhancers_df %>%
                                 mutate(peak2gene_type = "Enhancer") %>%
                                 mutate(Gene = genesymbol.coaccess),
@@ -62,10 +77,11 @@ peak2gene_enh_pro_df <- rbind(peak2gene_enhancers_df %>%
                                 mutate(genesymbol.coaccess = NA) %>%
                                 mutate(coaccess_score = NA))
 
+
 # write outupt ------------------------------------------------------------
-file2write <- paste0(dir_out, "PBRM1_DAPs.Annotated.", run_id, ".tsv")
+file2write <- paste0(dir_out, "ccRCC_vs_PT_DAPs.Annotated.", run_id, ".tsv")
 write.table(file = file2write, x = peaks_anno_df, quote = F, sep = "\t", row.names = F)
-file2write <- paste0(dir_out, "PBRM1_DAP2Gene.EnhancerPromoter.", run_id, ".tsv")
+file2write <- paste0(dir_out, "ccRCC_vs_PT_DAP2Gene.EnhancerPromoter.", run_id, ".tsv")
 write.table(file = file2write, x = peak2gene_enh_pro_df, quote = F, sep = "\t", row.names = F)
 
 

@@ -26,7 +26,7 @@ case_clinical_df <- readxl::read_excel(path = "./Resources/Bulk_Processed_Data/C
 mut_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutation/annotate_cptac_sample_by_pbrm1_bap1_mutation/20210412.v1/PBRM1_BAP1_Mutation_Status_By_Case.20210412.v1.tsv")
 ## input methylation annotation
 probe_anno_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Methylation/EPIC.hg38.manifest.tsv")
-probe_anno_df2 <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Methylation/EPIC.hg38.manifest.gencode.v36.tsv.gz")
+# probe_anno_df2 <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Methylation/EPIC.hg38.manifest.gencode.v36.tsv.gz")
 
 probe_anno_df %>%
   filter(!MASK_general) %>%
@@ -70,15 +70,15 @@ exp_mat <- exp_df[,c(ids_exp_group1, ids_exp_group2)]
 gene_index_vec = exp_df$Locus
 ids_group1 = ids_exp_group1
 ids_group2 = ids_exp_group2
-no_cores <- detectCores() - 1  
-no_cores
-cl <- makeCluster(no_cores, type="FORK")
-registerDoParallel(cl)
+# no_cores <- detectCores() - 1  
+# no_cores
+# cl <- makeCluster(no_cores, type="FORK")
+# registerDoParallel(cl)
 registerDoParallel(cores = 5)
 start_time <- Sys.time()
 test_list<-foreach(g=head(gene_index_vec, 1000)) %dopar% {
-  exp_raw_vec1 <- unlist(exp_mat[gene_index_vec == g, ids_group1])
-  exp_raw_vec2 <- unlist(exp_mat[gene_index_vec == g, ids_group2])
+  exp_raw_vec1 <- unlist(exp_mat[gene_index_vec == g, ids_group1][1,])
+  exp_raw_vec2 <- unlist(exp_mat[gene_index_vec == g, ids_group2][1,])
   exp_vec1 <- exp_raw_vec1[!is.na(exp_raw_vec1)]
   exp_vec2 <- exp_raw_vec2[!is.na(exp_raw_vec2)]
   if (length(exp_vec1) >= 5 & length(exp_vec2) >= 5) {

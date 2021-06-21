@@ -17,9 +17,9 @@ dir.create(dir_out)
 ## input the average expression calculated (SCT)
 avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/averageexpression_tumorcellsubset_sct_usescaledata_by_manualtumorcluster_on_katmai/20201130.v1/AverageExpression_ByManualTumorSubcluster.20201130.v1.tsv", data.table = F)
 ## input the genes to plot
-emt_genes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_emt_scores_tumorcells_per_manual_tumorcluster_scaled/20201201.v1/EMT_scores_genes.20201201.v1.tsv")
+emt_genes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_emt_scores_tumorcells_per_manual_tumorcluster_scaled/20201201.v1/EMT_scores_genes.20201201.v1.tsv")
 ## input emt score pre-calculated
-emt_scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_emt_scores_tumorcells_per_manual_tumorcluster_scaled/20201201.v1/EMT_scores_by_manual_tumorcluster.20201201.v1.tsv")
+emt_scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_emt_scores_tumorcells_per_manual_tumorcluster_scaled/20201201.v1/EMT_scores_by_manual_tumorcluster.20201201.v1.tsv")
 
 # specify genes to filter -------------------------------------------------
 ## add name for the marker groups
@@ -93,7 +93,7 @@ emt_group_vec <- mapvalues(x = columnnames_plot, from = emt_scores_df$easyid_clu
 scores_mesenchymal <- mapvalues(x = columnnames_plot, from = emt_scores_df$easyid_cluster, to = as.vector(emt_scores_df$Score_mesenchymal)); scores_mesenchymal <- as.numeric(scores_mesenchymal)
 scores_epithelial <- mapvalues(x = columnnames_plot, from = emt_scores_df$easyid_cluster, to = as.vector(emt_scores_df$Score_epithelial)); scores_epithelial <- as.numeric(scores_epithelial)
 ## make highlighted samples
-index_highlight <- which(columnnames_plot %in% c("C3L.00079.T1_C4"))
+index_highlight <- which(columnnames_plot %in% c("C3L.00079.T1_C4", "C3N.00242.T1_C1", "C3N.00242.T1_C2", "C3N.00242.T1_C3", "C3N.00242.T1_C4"))
 texts_highlight <- columnnames_plot[index_highlight];
 ## make column annotation object
 colanno_obj = HeatmapAnnotation(link = anno_mark(at = index_highlight, labels = texts_highlight, labels_gp = gpar(fontsize = 15), side = "top"),
