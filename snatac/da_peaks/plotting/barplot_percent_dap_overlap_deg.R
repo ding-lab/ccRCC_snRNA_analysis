@@ -18,14 +18,19 @@ dir.create(dir_out)
 # make plot data ----------------------------------------------------------
 plotdata_df <- data.frame(peak2gene_type = c("Promoter peak", "Promoter peak", "Enhancer peak", "Enhancer peak"),
                           No_peaks = c(73, 269, 144, 212),
-                          Is_differentially_expressed = c("TRUE", "FALSE", "TRUE", "FALSE"))
-
+                          Peak_for_differentially_expressed_gene = c("TRUE", "FALSE", "TRUE", "FALSE"))
 
 # plot  -------------------------------------------------------------------
 p <- ggplot()
-p <- p + geom_bar(data = plotdata_df, mapping = aes(x = peak2gene_type, y = No_peaks, fill = Is_differentially_expressed), stat = "identity")
-p <- p + scale_fill_manual(values = c("TRUE" = "yellow", "FALSE" = "grey40"))
-p <- p + theme_classic()
-p <- p + theme(axis.title.x = element_blank())
+p <- p + geom_bar(data = plotdata_df, mapping = aes(x = peak2gene_type, y = No_peaks, fill = Peak_for_differentially_expressed_gene), stat = "identity")
+# p <- p + geom_text(data = plotdata_df, mapping = aes(x = peak2gene_type, y = 0.5, label = peak2gene_type), angle = 90, hjust = "bottom", size = 3)
+p <- p + scale_fill_manual(values = c("TRUE" = brewer.pal(n = 9, name = "Set1")[3], "FALSE" = brewer.pal(n = 12, name = "Set3")[12]))
+p <- p + theme_classic(base_size = 12)
+p <- p + theme(axis.title.x = element_blank(),
+               axis.text.x = element_text(angle = 15, vjust = 1, hjust = 1))
 # p <- p + theme(legend.position = "")
 p
+file2write <- paste0(dir_out, "No_peaks_de.pdf")
+pdf(file2write, width = 5, height = 4, useDingbats = F)
+print(p)
+dev.off()
