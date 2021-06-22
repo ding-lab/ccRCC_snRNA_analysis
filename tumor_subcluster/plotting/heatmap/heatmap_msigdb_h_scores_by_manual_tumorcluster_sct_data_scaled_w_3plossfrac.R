@@ -49,12 +49,13 @@ colnames(plot_data_mat) <- scores_df$cluster_name
 rownames_plot <- rownames(plot_data_mat)
 rowlabels_plot <- gsub(x = rownames_plot, pattern = "_Score", replacement = "")
 rowlabels_plot[rowlabels_plot == "EPITHELIAL_MESENCHYMAL_TRANSITION"] <- "EMT"
-colnames_plot <- colnames(plot_data_mat)
+
 
 # make column order -------------------------------------------------------
 col_order_df <- enrich_df %>%
   arrange(desc(Cell_cycle), desc(Immune), desc(EMT), desc(mTOR))
 plot_data_mat <- plot_data_mat[, col_order_df$cluster_name]
+colnames_plot <- colnames(plot_data_mat)
 
 # specify colors ----------------------------------------------------------
 ## specify color for NA values
@@ -108,10 +109,6 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              top_annotation = colanno_obj,
                              show_column_names = F, column_names_side = "top", column_names_gp = gpar(fontsize = 5),
                              show_heatmap_legend = F)
-p
-
-
-# make legend list --------------------------------------------------------
 list_lgd = list(
   Legend(labels = names(colors_isenriched), labels_gp = gpar(fontsize = 14),
          title = "Expression enriched", title_gp = gpar(fontsize = 14),
@@ -131,15 +128,18 @@ list_lgd = list(
          legend_height = unit(4, "cm"),
          direction = "horizontal"))
 
-# write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "GeneSetScores", ".png")
-png(file2write, width = 1200, height = 600, res = 150)
-draw(object = p, 
-     annotation_legend_side = "top", annotation_legend_list = list_lgd)
-dev.off()
 file2write <- paste0(dir_out, "GeneSetScores", ".pdf")
 pdf(file2write, width = 9, height = 5, useDingbats = F)
 draw(object = p,
      annotation_legend_side = "top", annotation_legend_list = list_lgd)
 dev.off()
+
+
+# plot with column name ---------------------------------------------------
+file2write <- paste0(dir_out, "GeneSetScores", ".png")
+png(file2write, width = 1200, height = 600, res = 150)
+draw(object = p, 
+     annotation_legend_side = "top", annotation_legend_list = list_lgd)
+dev.off()
+
 

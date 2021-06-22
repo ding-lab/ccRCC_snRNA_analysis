@@ -11,46 +11,27 @@ source("./ccRCC_methyl_analysis/plotting.R")
 library(ggpubr)
 library(ggrepel)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-peaks2probes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/bap1/overlap_bap1_specific_enhancer_promoter_peaks_with_diff_methyl/20210621.v1/BAP1_DAP2Diff_Methylation.20210621.v1.tsv")
+peaks2probes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/bap1/overlap_bap1_specific_enhancer_promoter_peaks_with_diff_methyl/20210621.v2/BAP1_DAP2Diff_Methylation.wGeneCorrection.20210621.v2.tsv")
 
 # make plot data ----------------------------------------------------------
 plotdata_df <- peaks2probes_df %>%
   filter(!is.na(avg_log2FC.snATAC) & !is.na(avg_log2FC.methyl)) %>%
-  select(avg_log2FC.snATAC, avg_log2FC.methyl, Gene, peak2gene_type, fdr.methyl) %>%
-  unique()
-
-# plot --------------------------------------------------------------------
-p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.methyl", color = "peak2gene_type", alpha = 0.8,
-                   add = "reg.line",  # Add regressin line
-                   add.params = list(color = "blue", fill = "lightgray", linetype = 2), # Customize reg. line
-                   conf.int = F # Add confidence interval
-)
-p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
-p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
-p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0)
-p <- p + scale_color_manual(values = c("Promoter" = brewer.pal(n = 4, name = "Dark2")[2], "Enhancer" = brewer.pal(n = 4, name = "Dark2")[1]))
-p <- p + guides(color = guide_legend(nrow = 1, override.aes = aes(size = 3), label.theme = element_text(size = 14)))
-p <- p + theme(axis.text = element_text(size = 14),
-               axis.title = element_text(size = 14),
-               legend.position = "bottom", legend.box = "horizontal")
-# file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC.",".png")
-# png(file2write, width = 800, height = 900, res = 150)
-# print(p)
-# dev.off()
-file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC.",".pdf")
-pdf(file2write, width = 5.5, height = 6, useDingbats = F)
-print(p)
-dev.off()
+  filter(!is.na(rho)) %>%
+  mutate(log10_methyl_rna_cor_fdr = -log10(fdr))
+  # select(avg_log2FC.snATAC, avg_log2FC.methyl, Gene, peak2gene_type, fdr.methyl) %>%
+  # unique()
 
 # plot just promoter peaks--------------------------------------------------------------------
-p <- ggscatter(data = subset(plotdata_df, peak2gene_type == "Promoter"), x = "avg_log2FC.snATAC", y = "avg_log2FC.methyl", color = "peak2gene_type", alpha = 0.8,
+p <- ggscatter(data = subset(plotdata_df, peak2gene_type == "Promoter"), x = "avg_log2FC.snATAC", y = "avg_log2FC.methyl", 
+               color = "rho", size = "log10_methyl_rna_cor_fdr",
+               alpha = 0.6,
                add = "reg.line",  # Add regressin line
                add.params = list(color = "blue", fill = "lightgray", linetype = 2), # Customize reg. line
                conf.int = F # Add confidence interval
@@ -58,8 +39,10 @@ p <- ggscatter(data = subset(plotdata_df, peak2gene_type == "Promoter"), x = "av
 p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
 p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
 p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0)
-p <- p + scale_color_manual(values = c("Promoter" = brewer.pal(n = 4, name = "Dark2")[2], "Enhancer" = brewer.pal(n = 4, name = "Dark2")[1]))
-p <- p + guides(color = guide_legend(nrow = 1, override.aes = aes(size = 3), label.theme = element_text(size = 14)))
+p <- p + scale_colour_gradient2(low = "blue", high = "red")
+# p <- p + scale_color_manual(values = c("Promoter" = brewer.pal(n = 4, name = "Dark2")[2], "Enhancer" = brewer.pal(n = 4, name = "Dark2")[1]))
+p <- p + guides(color = guide_legend(nrow = 2, override.aes = aes(size = 3), label.theme = element_text(size = 14)),
+                size = guide_legend(nrow = 2, label.theme = element_text(size = 14)))
 p <- p + theme(axis.text = element_text(size = 14),
                axis.title = element_text(size = 14),
                legend.position = "bottom", legend.box = "horizontal")
@@ -72,8 +55,10 @@ pdf(file2write, width = 5.5, height = 6, useDingbats = F)
 print(p)
 dev.off()
 
-# plot just enhancer peaks--------------------------------------------------------------------
-p <- ggscatter(data = subset(plotdata_df, peak2gene_type == "Enhancer"), x = "avg_log2FC.snATAC", y = "avg_log2FC.methyl", color = "peak2gene_type",alpha = 0.8,
+# plot just promoter peaks, filter methyl probes--------------------------------------------------------------------
+p <- ggscatter(data = subset(plotdata_df, peak2gene_type == "Promoter" & fdr < 0.05), x = "avg_log2FC.snATAC", y = "avg_log2FC.methyl", 
+               color = "rho", size = "log10_methyl_rna_cor_fdr",
+               alpha = 0.6,
                add = "reg.line",  # Add regressin line
                add.params = list(color = "blue", fill = "lightgray", linetype = 2), # Customize reg. line
                conf.int = F # Add confidence interval
@@ -81,8 +66,38 @@ p <- ggscatter(data = subset(plotdata_df, peak2gene_type == "Enhancer"), x = "av
 p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
 p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
 p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0)
-p <- p + scale_color_manual(values = c("Promoter" = brewer.pal(n = 4, name = "Dark2")[2], "Enhancer" = brewer.pal(n = 4, name = "Dark2")[1]))
-p <- p + guides(color = guide_legend(nrow = 1, override.aes = aes(size = 3), label.theme = element_text(size = 14)))
+p <- p + scale_colour_gradient2(low = "blue", high = "red")
+# p <- p + scale_color_manual(values = c("Promoter" = brewer.pal(n = 4, name = "Dark2")[2], "Enhancer" = brewer.pal(n = 4, name = "Dark2")[1]))
+p <- p + guides(color = guide_legend(nrow = 2, override.aes = aes(size = 3), label.theme = element_text(size = 14)),
+                size = guide_legend(nrow = 2, label.theme = element_text(size = 14)))
+p <- p + theme(axis.text = element_text(size = 14),
+               axis.title = element_text(size = 14),
+               legend.position = "bottom", legend.box = "horizontal")
+# file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC.",".png")
+# png(file2write, width = 800, height = 900, res = 150)
+# print(p)
+# dev.off()
+file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC.Promoter.ExpCorrelatedProbes.",".pdf")
+pdf(file2write, width = 5.5, height = 6, useDingbats = F)
+print(p)
+dev.off()
+
+# plot just enhancer peaks--------------------------------------------------------------------
+p <- ggscatter(data = subset(plotdata_df, peak2gene_type == "Enhancer"), x = "avg_log2FC.snATAC", y = "avg_log2FC.methyl", 
+               color = "rho", size = "log10_methyl_rna_cor_fdr",
+               alpha = 0.8,
+               add = "reg.line",  # Add regressin line
+               add.params = list(color = "blue", fill = "lightgray", linetype = 2), # Customize reg. line
+               conf.int = F # Add confidence interval
+)
+p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
+p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
+p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0)
+p <- p + scale_colour_gradient2(low = "blue", high = "red")
+# p <- p + scale_color_manual(values = c("Promoter" = brewer.pal(n = 4, name = "Dark2")[2], "Enhancer" = brewer.pal(n = 4, name = "Dark2")[1]))
+# p <- p + guides(color = guide_legend(nrow = 1, override.aes = aes(size = 3), label.theme = element_text(size = 14)))
+p <- p + guides(color = guide_legend(nrow = 2, override.aes = aes(size = 3), label.theme = element_text(size = 14)),
+                size = guide_legend(nrow = 2, label.theme = element_text(size = 14)))
 p <- p + theme(axis.text = element_text(size = 14),
                axis.title = element_text(size = 14),
                legend.position = "bottom", legend.box = "horizontal")
@@ -95,39 +110,40 @@ pdf(file2write, width = 5.5, height = 6, useDingbats = F)
 print(p)
 dev.off()
 
-# plot highlight genes ----------------------------------------------------
-plotdata_df <- plotdata_df %>%
-  mutate(highlight = (avg_log2FC.snATAC*avg_log2FC.snRNA >0) & (abs(avg_log2FC.snATAC) > 1 | abs(avg_log2FC.snRNA) > 1))
-
-p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", color = "peak2gene_type",
+# plot just enhancer peaks filter methyl probes--------------------------------------------------------------------
+p <- ggscatter(data = subset(plotdata_df, peak2gene_type == "Enhancer" & fdr < 0.05), x = "avg_log2FC.snATAC", y = "avg_log2FC.methyl", 
+               color = "rho", size = "log10_methyl_rna_cor_fdr",
+               alpha = 0.8,
                add = "reg.line",  # Add regressin line
-               add.params = list(color = "grey50", linetype = 2), # Customize reg. line
+               add.params = list(color = "blue", fill = "lightgray", linetype = 2), # Customize reg. line
                conf.int = F # Add confidence interval
 )
 p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
 p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
-# p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0)
-p <- p + geom_text_repel(data = subset(x = plotdata_df, highlight == T), 
-                         mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.snRNA, label = Gene), 
-                         max.overlaps = Inf, min.segment.length = 0)
-p <- p + guides(color = guide_legend(nrow = 2))
+p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0)
+p <- p + scale_colour_gradient2(low = "blue", high = "red")
+# p <- p + scale_color_manual(values = c("Promoter" = brewer.pal(n = 4, name = "Dark2")[2], "Enhancer" = brewer.pal(n = 4, name = "Dark2")[1]))
+# p <- p + guides(color = guide_legend(nrow = 1, override.aes = aes(size = 3), label.theme = element_text(size = 14)))
+p <- p + guides(color = guide_legend(nrow = 2, override.aes = aes(size = 3), label.theme = element_text(size = 14)),
+                size = guide_legend(nrow = 2, label.theme = element_text(size = 14)))
 p <- p + theme(axis.text = element_text(size = 14),
                axis.title = element_text(size = 14),
                legend.position = "bottom", legend.box = "horizontal")
-file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC." , "1",".png")
+# file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC.",".png")
 # png(file2write, width = 800, height = 900, res = 150)
 # print(p)
 # dev.off()
-file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC.","1",".pdf")
+file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC.Enhancer.ExpCorrelatedProbes.",".pdf")
 pdf(file2write, width = 5.5, height = 6, useDingbats = F)
 print(p)
 dev.off()
 
 # plot highlight genes ----------------------------------------------------
 plotdata_df <- plotdata_df %>%
-  mutate(highlight = (avg_log2FC.snATAC*avg_log2FC.snRNA > 0) & (abs(avg_log2FC.snATAC) > 0.5 & abs(avg_log2FC.snRNA) > 0.5))
+  mutate(highlight = abs(avg_log2FC.snATAC) > 1 & abs(avg_log2FC.methyl) > 1)
 
-p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", color = "peak2gene_type",
+p <- ggscatter(data = subset(plotdata_df, peak2gene_type == "Promoter"), x = "avg_log2FC.snATAC", y = "avg_log2FC.methyl",
+               color = "rho", size = "log10_methyl_rna_cor_fdr",
                add = "reg.line",  # Add regressin line
                add.params = list(color = "grey50", linetype = 2), # Customize reg. line
                conf.int = F # Add confidence interval
@@ -135,9 +151,40 @@ p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRN
 p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
 p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
 # p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0)
-p <- p + geom_text_repel(data = subset(x = plotdata_df, highlight == T), 
-                         mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.snRNA, label = Gene), 
+p <- p + geom_text_repel(data = subset(x = plotdata_df, highlight == T & peak2gene_type == "Promoter"), 
+                         mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.methyl, label = Gene), 
                          max.overlaps = Inf, min.segment.length = 0)
+p <- p + scale_colour_gradient2(low = "blue", high = "red")
+p <- p + guides(color = guide_legend(nrow = 2))
+p <- p + theme(axis.text = element_text(size = 14),
+               axis.title = element_text(size = 14),
+               legend.position = "bottom", legend.box = "horizontal")
+# file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC." , "1.", "Promoter",".png")
+# png(file2write, width = 800, height = 900, res = 150)
+# print(p)
+# dev.off()
+file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC.","1.", "Promoter",".pdf")
+pdf(file2write, width = 5.5, height = 6, useDingbats = F)
+print(p)
+dev.off()
+
+# plot highlight genes ----------------------------------------------------
+plotdata_df <- plotdata_df %>%
+  mutate(highlight = (abs(avg_log2FC.snATAC) > 0.5 & abs(avg_log2FC.methyl) > 1))
+
+p <- ggscatter(data = subset(plotdata_df, peak2gene_type == "Promoter"), x = "avg_log2FC.snATAC", y = "avg_log2FC.methyl",
+               color = "rho", size = "log10_methyl_rna_cor_fdr",
+               add = "reg.line",  # Add regressin line
+               add.params = list(color = "grey50", linetype = 2), # Customize reg. line
+               conf.int = F # Add confidence interval
+)
+p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
+p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
+# p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0)
+p <- p + geom_text_repel(data = subset(x = plotdata_df, highlight == T & peak2gene_type == "Promoter"), 
+                         mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.methyl, label = Gene), 
+                         max.overlaps = Inf, min.segment.length = 0)
+p <- p + scale_colour_gradient2(low = "blue", high = "red")
 p <- p + guides(color = guide_legend(nrow = 2))
 p <- p + theme(axis.text = element_text(size = 14),
                axis.title = element_text(size = 14),
@@ -146,28 +193,30 @@ p <- p + theme(axis.text = element_text(size = 14),
 # png(file2write, width = 800, height = 900, res = 150)
 # print(p)
 # dev.off()
-file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC.","0.5",".pdf")
-pdf(file2write, width = 5.5, height = 6, useDingbats = F)
+file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC.","0.5", "Promoter",".pdf")
+pdf(file2write, width = 8, height = 9, useDingbats = F)
+# pdf(file2write, width = 5.5, height = 6, useDingbats = F)
 print(p)
 dev.off()
 
-# plot highlight genes ----------------------------------------------------
+# plot highlight PTPRJ ----------------------------------------------------
 plotdata_df <- plotdata_df %>%
-  mutate(highlight = (Gene %in% c("PTPRJ", "CES3")))
+  mutate(highlight = (Gene %in% c("PTPRJ")))
 
-p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", color = "peak2gene_type",
+p <- ggscatter(data = subset(plotdata_df, peak2gene_type == "Promoter"), x = "avg_log2FC.snATAC", y = "avg_log2FC.methyl",
+               color = "rho", size = "log10_methyl_rna_cor_fdr",
                add = "reg.line",  # Add regressin line
-               add.params = list(color = "grey50", linetype = 2, alpha = 0.8), # Customize reg. line
+               add.params = list(color = "grey50", linetype = 2), # Customize reg. line
                conf.int = F # Add confidence interval
 )
 p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
 p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
-p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0, size = 4)
-p <- p + geom_text_repel(data = subset(x = plotdata_df, highlight == T), 
-                         mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.snRNA, label = Gene), 
-                         max.overlaps = Inf, size = 6,
-                         segment.size = 0.4, segment.alpha = 0.6, min.segment.length = 0)
-p <- p + guides(color = guide_legend(nrow = 1, override.aes = aes(size = 3), label.theme = element_text(size = 14)))
+# p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0)
+p <- p + geom_text_repel(data = subset(x = plotdata_df, highlight == T & peak2gene_type == "Promoter"), 
+                         mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.methyl, label = Gene), 
+                         max.overlaps = Inf, min.segment.length = 0)
+p <- p + scale_colour_gradient2(low = "blue", high = "red")
+p <- p + guides(color = guide_legend(nrow = 2))
 p <- p + theme(axis.text = element_text(size = 14),
                axis.title = element_text(size = 14),
                legend.position = "bottom", legend.box = "horizontal")
@@ -175,8 +224,39 @@ p <- p + theme(axis.text = element_text(size = 14),
 # png(file2write, width = 800, height = 900, res = 150)
 # print(p)
 # dev.off()
-file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC.","PTPRJ_CES3",".pdf")
+file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC.","PTPRJ",".pdf")
 pdf(file2write, width = 5.5, height = 6, useDingbats = F)
 print(p)
 dev.off()
+
+# plot highlight PTPRJ ----------------------------------------------------
+plotdata_df <- plotdata_df %>%
+  mutate(highlight = (Gene %in% c("CES3")))
+
+p <- ggscatter(data = subset(plotdata_df, peak2gene_type == "Enhancer"), x = "avg_log2FC.snATAC", y = "avg_log2FC.methyl",
+               color = "rho", size = "log10_methyl_rna_cor_fdr",
+               add = "reg.line",  # Add regressin line
+               add.params = list(color = "grey50", linetype = 2), # Customize reg. line
+               conf.int = F # Add confidence interval
+)
+p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
+p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
+# p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0)
+p <- p + geom_text_repel(data = subset(x = plotdata_df, highlight == T & peak2gene_type == "Enhancer"), 
+                         mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.methyl, label = Gene), 
+                         max.overlaps = Inf, min.segment.length = 0)
+p <- p + scale_colour_gradient2(low = "blue", high = "red")
+p <- p + guides(color = guide_legend(nrow = 2))
+p <- p + theme(axis.text = element_text(size = 14),
+               axis.title = element_text(size = 14),
+               legend.position = "bottom", legend.box = "horizontal")
+# file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC." , "1",".png")
+# png(file2write, width = 800, height = 900, res = 150)
+# print(p)
+# dev.off()
+file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC.","CES3",".pdf")
+pdf(file2write, width = 5.5, height = 6, useDingbats = F)
+print(p)
+dev.off()
+
 

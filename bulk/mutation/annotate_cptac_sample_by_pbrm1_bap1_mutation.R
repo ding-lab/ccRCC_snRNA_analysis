@@ -38,3 +38,6 @@ mut_matrix_df <- mut_matrix_df %>%
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "PBRM1_BAP1_Mutation_Status_By_Case.", run_id, ".tsv")
 write.table(x = mut_matrix_df, file = file2write, quote = F, sep = "\t", row.names = F)
+
+test_df <- maf_df %>%
+  filter(Tumor_Sample_Barcode == "C3L-00096_T")
