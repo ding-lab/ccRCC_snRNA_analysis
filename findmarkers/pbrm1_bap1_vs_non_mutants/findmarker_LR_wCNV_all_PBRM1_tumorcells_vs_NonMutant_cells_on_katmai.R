@@ -64,7 +64,7 @@ cat("###########################################\n")
 test_process <- "LR"
 ## specify cell groups to compare
 ident.use.1 <- "PBRM1-mutated Tumor cells"
-ident.use.2 <- "BAP1/Non-mutant Tumor cells"
+ident.use.2 <- "Non-mutant Tumor cells"
 ## set "features"
 features=colnames(cnv_per_feature_df)
 
