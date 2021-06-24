@@ -19,7 +19,7 @@ id_metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sa
 ## input pathway scores
 scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_msigdb_top_geneset_scores/20210419.v1/MSigDB.Hallmark.tsv")
 ## input by cluster enrichment assignment
-enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210503.v1/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
+enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210624.v1/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
 ## input CNV data
 cnv_df <- fread(data.table = F, input = "./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/cnv_fraction_in_tumorcells_per_manualcluster_rm_doublets/20210427.v1/fraction_of_tumorcells_with_cnv_by_gene_by_3state.per_manualsubcluster.20210427.v1.tsv")
 
@@ -29,7 +29,7 @@ module1_df <- data.frame(geneset_name = c("HALLMARK_MITOTIC_SPINDLE", "HALLMARK_
                          module_name = "Cell_cycle")
 module2_df <- data.frame(geneset_name = c("HALLMARK_ALLOGRAFT_REJECTION", "HALLMARK_COMPLEMENT", "HALLMARK_INFLAMMATORY_RESPONSE", "HALLMARK_INTERFERON_GAMMA_RESPONSE", "HALLMARK_KRAS_SIGNALING_UP"),
                          module_name = "Immune_signaling")
-module3_df <- data.frame(geneset_name = c("HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION", "HALLMARK_HYPOXIA", "HALLMARK_TNFA_SIGNALING_VIA_NFKB"),
+module3_df <- data.frame(geneset_name = c("HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION"),
                          module_name = "EMT")
 # module4_df <- data.frame(geneset_name = c("HALLMARK_UV_RESPONSE_DN", "HALLMARK_MTORC1_SIGNALING"),
 #                          module_name = "mTOR")
@@ -41,7 +41,7 @@ modules_df <- modules_df %>%
 
 # format expression data --------------------------------------------------
 ## get dim names
-scorenames <- c(modules_df$scoregroup_name, "UV_RESPONSE_DN_Score"); scorenames <- unique(scorenames)
+scorenames <- c(modules_df$scoregroup_name, "UV_RESPONSE_DN_Score", "HYPOXIA_Score", "TNFA_SIGNALING_VIA_NFKB_Score"); scorenames <- unique(scorenames)
 plot_data_t_mat <- as.matrix(scores_df[,scorenames])
 plot_data_mat <- t(plot_data_t_mat)
 colnames(plot_data_mat) <- scores_df$cluster_name

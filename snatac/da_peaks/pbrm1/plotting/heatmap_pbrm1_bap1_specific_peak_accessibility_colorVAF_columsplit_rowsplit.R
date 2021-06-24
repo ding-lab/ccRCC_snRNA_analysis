@@ -7,7 +7,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -17,8 +17,8 @@ dir.create(dir_out)
 ## input accessibility data
 acc_pbrm1_down_df=fread(data.table = F, input = './Resources/snATAC_Processed_Data/Differential_Peaks/PBRM1_Specific/Accessibility/DOWN_PBRM1mutants_vs_nonMutans.Accessibility.20210623.tsv')
 acc_pbrm1_up_df=fread(data.table = F, input ='./Resources/snATAC_Processed_Data/Differential_Peaks/PBRM1_Specific/Accessibility/UP_PBRM1mutants_vs_nonMutans.Accessibility.20210623.tsv')
-acc_bap1_down_df=fread(data.table = F, input = './Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/Accessibility/DOWN_BAP1mutants_vs_nonMutans.Accessibility.20210623.tsv')
-acc_bap1_up_df=fread(data.table = F, input ='./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/Accessibility/UP_BAP1mutants_vs_nonMutans.Accessibility.20210623.tsv')
+acc_bap1_down_df=fread(data.table = F, input = './Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/Accessibility/DOWN_BAP1mutants_vs_nonMutans.Accessibility.20210624.tsv')
+acc_bap1_up_df=fread(data.table = F, input ='./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/Accessibility/UP_BAP1mutants_vs_nonMutans.Accessibility.20210624.tsv')
 
 ## input sample category
 mut_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutation/annotate_cptac_sample_by_pbrm1_bap1_mutation/20210412.v1/PBRM1_BAP1_Mutation_Status_By_Case.20210412.v1.tsv")
@@ -54,6 +54,13 @@ plotdata_df <- plotdata_df[plotdata_df$Cell_type %in% c('Tumor','PT'),]
 plotdata_df2 <- plotdata_df[, colnames(plotdata_df)[grepl(pattern = "chr", x = colnames(plotdata_df))]]
 plotdata_mat <- scale(x = plotdata_df2)
 rownames(plotdata_mat) <- plotdata_df$Sample
+## re-order rows
+rownames_ordered <- c("C3L-00416-T2","C3L-00908-T1", 
+                      "C3N-01200-T1", "C3L-01313-T1", "C3N-00317-T1","C3N-00437-T1", "C3L-01287-T1",
+                      "C3N-01213-T1","C3L-00079-T1", "C3L-00610-T1", "C3N-00242-T1","C3L-00790-T1","C3L-00583-T1", "C3L-00004-T1", "C3N-00733-T1","C3L-01302-T1", 
+                      "C3L-00448-T1",  "C3L-00917-T1", "C3L-00088-T1", "C3L-00088-T2","C3L-00010-T1", "C3L-00026-T1", "C3N-00495-T1","C3L-00096-T1", 
+                      "C3N-01200-N", "C3L-00088-N")
+plotdata_mat <- plotdata_mat[rownames_ordered,]
 
 # specify colors ----------------------------------------------------------
 ## specify color for NA values
@@ -83,7 +90,8 @@ row_anno_df <- row_anno_df %>%
   mutate(PBRM1_Mut_VAF = as.numeric(str_split_fixed(string = PBRM1_mutation, pattern = "\\(|\\)", n = 3)[,2])) %>%
   mutate(BAP1_Mut_VAF = ifelse(is.na(BAP1_Mut_VAF), 0, BAP1_Mut_VAF)) %>%
   mutate(PBRM1_Mut_VAF = ifelse(is.na(PBRM1_Mut_VAF), 0, PBRM1_Mut_VAF))
-
+rownames(row_anno_df) <- row_anno_df$Sample
+row_anno_df <- row_anno_df[rownames_ordered,]
 row_ha= rowAnnotation(#Cell_type=row_anno_df$Cell_type, 
   BAP1_Mut_VAF=row_anno_df$BAP1_Mut_VAF,
   PBRM1_Mut_VAF=row_anno_df$PBRM1_Mut_VAF,
@@ -93,18 +101,21 @@ row_ha= rowAnnotation(#Cell_type=row_anno_df$Cell_type,
   annotation_width = unit(2, "mm"), show_legend = F)
 
 # make column annotation --------------------------------------------------
-column_ha <- HeatmapAnnotation(Is_PBRM1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_up_df)), col = c("TRUE" = "orange", "FALSE" = "white smoke")),
+column_ha <- HeatmapAnnotation(Is_BAP1_down_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_bap1_down_df)), col = c("TRUE" = "purple", "FALSE" = "white smoke")),
+                               Is_BAP1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_bap1_up_df)), col = c("TRUE" = "purple", "FALSE" = "white smoke")),
                                Is_PBRM1_down_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_down_df)), col = c("TRUE" = "orange", "FALSE" = "white smoke")),
-                               Is_BAP1_down_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_bap1_down_df)), col = c("TRUE" = "purple", "FALSE" = "white smoke")),
-                               Is_BAP1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_bap1_up_df)), col = c("TRUE" = "purple", "FALSE" = "white smoke")))
+                               Is_PBRM1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_up_df)), col = c("TRUE" = "orange", "FALSE" = "white smoke"))
+                               )
 
 # make column split -------------------------------------------------------
 column_split_vec <- ifelse(colnames(plotdata_mat) %in% colnames(acc_pbrm1_down_df), "PBRM1 down peak",
-                           ifelse(colnames(plotdata_mat) %in% colnames(acc_pbrm1_up_df), "PBRM1 up peak", "other"))
+                           ifelse(colnames(plotdata_mat) %in% colnames(acc_pbrm1_up_df), "PBRM1 up peak", 
+                                  ifelse(colnames(plotdata_mat) %in% colnames(acc_bap1_down_df), "BAP1 down peak", "BAP1 up peak")))
 
 # make row split -------------------------------------------------------
 row_split_vec <- row_anno_df$mutation_type
-row_split_factor <- factor(row_split_vec, levels = c('PT','PBRM1 mutated', "Non-mutants", "Both mutated", "BAP1 mutated"))
+row_split_vec[row_split_vec == "Both mutated"] <- "BAP1&PBRM1\nmutated"
+row_split_factor <- factor(row_split_vec, levels = c("BAP1&PBRM1\nmutated", "BAP1 mutated", 'PBRM1 mutated', "Non-mutants", 'PT'))
 
 # plot --------------------------------------------------------------------
 # p=ComplexHeatmap::Heatmap(matrix = plotdata_mat, col = colors_heatmapbody, name = "Relative peak\naccessibility", 
@@ -145,7 +156,7 @@ p=ComplexHeatmap::Heatmap(matrix = plotdata_mat, col = colors_heatmapbody, name 
                           ## rows
                           show_row_names = T,  row_names_gp = gpar(fontsize = 13),
                           show_row_dend=FALSE,  right_annotation=row_ha, row_split = row_split_factor, row_title_rot = 0,
-                          cluster_row_slices=F, 
+                          cluster_row_slices=F, cluster_rows = F,
                           ## columns
                           show_column_names = FALSE, show_column_dend=FALSE, column_title = NULL, top_annotation = column_ha,
                           column_split = column_split_vec, cluster_column_slices=F,
