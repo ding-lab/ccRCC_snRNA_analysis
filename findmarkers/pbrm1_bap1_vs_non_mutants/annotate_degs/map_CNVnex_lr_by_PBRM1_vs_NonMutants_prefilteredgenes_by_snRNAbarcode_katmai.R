@@ -60,7 +60,7 @@ table(barcodes_df$Cell_type.detailed[barcodes_df$keep])
 barcodes_process <- barcodes_df$id_bc[barcodes_df$keep]
 cases_process <- barcodes_df$Case[barcodes_df$keep]
 ## get genes to process
-genes_process <- unique(genes_filtered_df$row.names)
+genes_process <- unique(genes_filtered_df$genesymbol_deg)
 genes_process <- genes_process[genes_process %in% cna_df$gene_name]
 length(genes_process)
 
