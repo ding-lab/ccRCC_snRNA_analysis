@@ -29,19 +29,16 @@ cluster_pass_df <- cellnumber_percluster_df %>%
   mutate(colname_exp = gsub(x = id_cluster_uniq,pattern = "\\-", replacement = "."))
 
 ## add name for the marker groups
-emt_genes_df <- emt_genes_df %>%
-  mutate(Text_Gene_Group = ifelse(Gene_Group2 == "Tumor cells", 
-                                  "Tumor-cell\nmarkers", 
-                                  ifelse(Gene_Group2 %in% c("Epithelial", "Proximal tubule"),
-                                         "Epithelial/\nproximal-tubule\nmarkers", paste0(Gene_Group2, "\nmarkers"))))
-
-genes2filter <- emt_genes_df$Gene
-
+genes_mesenchymal <- gene2pathway_df$GeneSymbol[gene2pathway_df$GeneSet_Name == "HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION"]
+genes_epithelial <- emt_genes_df$Gene[emt_genes_df$Gene_Group2 %in% c("Epithelial", "Proximal tubule")]
+genes2filter <- c(genes_mesenchymal, genes_epithelial)
+  
 # format expression data --------------------------------------------------
 plot_data_long_df <- avgexp_df %>%
   filter(V1 %in% genes2filter) %>%
   melt() %>%
   mutate(id_bycluster_byaliquot = gsub(x = variable, pattern = "SCT.", replacement = "")) %>%
+  dplyr::filter(id_bycluster_byaliquot %in% cluster_pass_df$colname_exp) %>%
   mutate(easyid_column = str_split_fixed(string = id_bycluster_byaliquot, pattern = "_", n = 2)[,1]) %>%
   mutate(cluster_name = str_split_fixed(string = id_bycluster_byaliquot, pattern = "_", n = 2)[,2])
 ## filter out non-tumor and NA tumor cluster
@@ -49,8 +46,13 @@ plot_data_long_df <- plot_data_long_df %>%
   filter(!(cluster_name %in% c("", "CNA")))
 ## make matrix
 plot_data_wide_df <- dcast(data = plot_data_long_df, formula = V1 ~ id_bycluster_byaliquot, value.var = "value")
-plot_data_mat <- as.matrix(plot_data_wide_df[,-1])
-rownames(plot_data_mat) <- plot_data_wide_df$V1
+plot_data_raw_mat <- as.matrix(plot_data_wide_df[,-1])
+## add row names
+rownames(plot_data_raw_mat) <- plot_data_wide_df$V1
+## scale by row
+plot_data_mat <- t(apply(plot_data_raw_mat, 1, scale))
+rownames(plot_data_mat) <- rownames(plot_data_raw_mat)
+colnames(plot_data_mat) <- colnames(plot_data_raw_mat)
 
 # filter genes based on variation -----------------------------------------
 sd_bygene_df <- data.frame(SD = apply(plot_data_mat,1, sd, na.rm = TRUE), gene = rownames(plot_data_mat))

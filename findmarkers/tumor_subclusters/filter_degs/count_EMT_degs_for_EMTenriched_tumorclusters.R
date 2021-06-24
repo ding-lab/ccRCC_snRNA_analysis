@@ -21,7 +21,7 @@ deg_all_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findma
 metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
 ## input by cluster enrichment assignment
 enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210624.v1/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
-## input immune genes
+## input  genes
 gene2pathway_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/pathway/map_genes2pathway_w_avgexp_sct_data/20210414.v1/TumorCluster.DEG2Pathway.tsv")
 
 # count -------------------------------------------------------------------
