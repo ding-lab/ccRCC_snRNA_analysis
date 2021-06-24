@@ -42,7 +42,7 @@ cna_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/WGS_CNV
 ## input snRNA sample set
 metadata_df <- fread("./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv", data.table = F)
 ## input the barcode info
-barcodes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_33aliquots/20210423.v1/33Aliquot.Barcode2CellType.20210423.v1.tsv")
+barcodes_df <- fread(data.table = F, input = "./Data_Freezes/V2/snRNA/Cell_Type_Assignment/33Aliquot.Barcode2CellType.20210423.v1.tsv")
 ## input prefiltered genes to test
 genes_filtered_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/pbrm1_bap1_vs_non_mutants/findmarker_LR_wCNV_all_PBRM1_tumorcells_vs_NonMutant_cells_on_katmai/20210624.v1/LR.logfc.threshold0.min.pct0.1.min.diff.pct0.AssayRNA.tsv")
 
