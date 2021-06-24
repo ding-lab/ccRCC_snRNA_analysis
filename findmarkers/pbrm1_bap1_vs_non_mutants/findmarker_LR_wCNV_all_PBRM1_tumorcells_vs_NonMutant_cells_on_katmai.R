@@ -49,7 +49,7 @@ idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sam
 ## input PBRM1 and BAP1 classification
 mut_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutation/annotate_cptac_sample_by_pbrm1_bap1_mutation/20210310.v1/PBRM1_BAP1_Mutation_Status_By_Case.20210310.v1.tsv")
 ## input CNV value per barcode per gene
-cnv_per_feature_df=readRDS('./Resources/Analysis_Results/findmarkers/bap1_vs_pbrm1_nonmutant/annotate_degs/map_CNVnex_lr_by_PBRM1prefilteredgenes_by_snRNAbarcode/20210615.v1/Barcode2BAP1PrefilteredGene.CNV.20210615.v1.RDS')
+cnv_per_feature_df=readRDS('./Resources/Analysis_Results/findmarkers/pbrm1_bap1_vs_non_mutants/annotate_degs/map_CNVnex_lr_by_PBRM1_vs_NonMutants_prefilteredgenes_by_snRNAbarcode_katmai/20210624.v1/Barcode2PBRM1_vs_NonMutants_PrefilteredGene_CNV.20210624.v1.RDS')
 
 # set parameters for findmarkers ------------------------------------------
 logfc.threshold.run <- 0
@@ -70,13 +70,13 @@ features=colnames(cnv_per_feature_df)
 
 # preprocess the Seurat object meta data---------------------------------------------
 ## get aliquot ids for the two groups
-cases_group1 <- mut_df$Case[mut_df$mutation_category_sim %in% c("Both mutated", "PBRM1 mutated")];
-cases_group1 <- cases_group1[cases_group1 %in% idmetadata_df$Case[idmetadata_df$snRNA_available]] ## 9 PBRM1-mutated cases, 2 BAP1 & PBRM1 mutated cases
+cases_group1 <- mut_df$Case[mut_df$mutation_category_sim %in% c("PBRM1 mutated")];
+cases_group1 <- cases_group1[cases_group1 %in% idmetadata_df$Case[idmetadata_df$snRNA_available]] ## 9 PBRM1-mutated cases
 aliquots_group1 <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available & (idmetadata_df$Case %in% cases_group1) & idmetadata_df$Sample_Type == "Tumor"]
-aliquots_group1 ## 13 samples
-cases_group2 <- mut_df$Case[mut_df$mutation_category_sim %in% c("Non-mutants", "BAP1 mutated")]; cases_group2 <- cases_group2[!(cases_group2 %in% c("C3L-00359"))]
+aliquots_group1 ## 10 samples
+cases_group2 <- mut_df$Case[mut_df$mutation_category_sim %in% c("Non-mutants")]; cases_group2 <- cases_group2[!(cases_group2 %in% c("C3L-00359"))]
 aliquots_group2 <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available & idmetadata_df$Case %in% cases_group2 & idmetadata_df$Sample_Type == "Tumor"]
-aliquots_group2 ## 17 samples
+aliquots_group2 ## 9 samples
 BC <- srat@meta.data %>% rownames
 ## get original barcode
 srat@meta.data$original_barcode <- BC %>% strsplit("_") %>% lapply("[[",1) %>% unlist
