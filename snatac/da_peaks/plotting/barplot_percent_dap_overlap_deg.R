@@ -24,10 +24,11 @@ plotdata_df <- data.frame(peak2gene_type = c("Promoter peak", "Promoter peak", "
 p <- ggplot()
 p <- p + geom_bar(data = plotdata_df, mapping = aes(x = peak2gene_type, y = No_peaks, fill = Peak_for_differentially_expressed_gene), stat = "identity")
 # p <- p + geom_text(data = plotdata_df, mapping = aes(x = peak2gene_type, y = 0.5, label = peak2gene_type), angle = 90, hjust = "bottom", size = 3)
-p <- p + scale_fill_manual(values = c("TRUE" = brewer.pal(n = 9, name = "Set1")[3], "FALSE" = brewer.pal(n = 12, name = "Set3")[12]))
-p <- p + theme_classic(base_size = 12)
+p <- p + scale_fill_manual(values = c("TRUE" = brewer.pal(n = 12, name = "Set3")[5], "FALSE" = brewer.pal(n = 12, name = "Set3")[12]))
+p <- p + theme_classic(base_size = 14)
 p <- p + theme(axis.title.x = element_blank(),
-               axis.text.x = element_text(angle = 15, vjust = 1, hjust = 1))
+               axis.text.x = element_text(angle = 15, vjust = 1, hjust = 1),
+               legend.title = element_text(size = 12))
 # p <- p + theme(legend.position = "")
 p
 file2write <- paste0(dir_out, "No_peaks_de.pdf")

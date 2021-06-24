@@ -17,9 +17,10 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input cell type per barcode table
-barcode2celltype_df <- fread(input = "./Data Freezes/V1/snRNA/Cell_Type_Assignment/31Aliquot.Barcode2CellType.20201027.v1.tsv", data.table = F)
+# barcode2celltype_df <- fread(input = "./Data_Freezes/V1/snRNA/Cell_Type_Assignment/31Aliquot.Barcode2CellType.20201027.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Data_Freezes/V2/snRNA/Cell_Type_Assignment/33Aliquot.Barcode2CellType.20210423.v1.tsv", data.table = F)
 ## input srat object
-srat <- readRDS(file = "./Data Freezes/V1/snRNA/Merged_Seurat_Objects/C3N-01200.Tumor_Segments.Merged.20200319.v1.RDS")
+srat <- readRDS(file = "./Data_Freezes/V1/snRNA/Merged_Seurat_Objects/C3N-01200.Tumor_Segments.Merged.20200319.v1.RDS")
 ## input id meta data table
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
 ## input cell type markers
@@ -82,51 +83,54 @@ p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5
                strip.text.x = element_text(angle = 0, vjust = 0.5, size = 12), 
                strip.text.y = element_text(angle = 0, vjust = 0.5))
 p <- p + theme(axis.title = element_blank())
+p <- p + guides(size = guide_legend(title.position = "top", 
+                                    nrow = 1, label.theme = element_text(size = 14)))
 # p <- p + ggtitle(paste0(aliquot_show, " Macrophages"))
 p <- p + labs(colour = "Expression value")
 p <- p + theme(legend.position = "bottom")
-file2write <- paste0(dir_out, aliquot_show, ".CellTypeMarkerExp.Scaled.png")
-png(file = file2write, width = 800, height = 500, res = 150)
-print(p)
-dev.off()
+# file2write <- paste0(dir_out, aliquot_show, ".CellTypeMarkerExp.Scaled.png")
+# png(file = file2write, width = 800, height = 500, res = 150)
+# print(p)
+# dev.off()
 file2write <- paste0(dir_out, aliquot_show, ".CellTypeMarkerExp.Scaled.pdf")
+# pdf(file2write, width = 4, height = 2.5, useDingbats = F)
 pdf(file2write, width = 4, height = 2.5, useDingbats = F)
 print(p)
 dev.off()
-file2write <- paste0(dir_out, aliquot_show, ".CellTypeMarkerExp.Scaled.legend.pdf")
-pdf(file2write, width = 8, height = 4, useDingbats = F)
-print(p)
-dev.off()
+# file2write <- paste0(dir_out, aliquot_show, ".CellTypeMarkerExp.Scaled.legend.pdf")
+# pdf(file2write, width = 8, height = 4, useDingbats = F)
+# print(p)
+# dev.off()
 
-# plot not scaled -------------------------------------------------------------
-plotdata_df <- expdata_df
-expvalue_top <- quantile(x = plotdata_df$avg.exp, probs = 0.95)
-plotdata_df <- plotdata_df %>%
-  mutate(expvalue_plot = ifelse(avg.exp >= expvalue_top, expvalue_top, avg.exp))
-
-## add facet
-plotdata_df$gene_group <- paste0(plyr::mapvalues(plotdata_df$features.plot, from = gene2celltype_df$Gene, to = as.vector(gene2celltype_df$Gene_Group)), 
-                                  " Markers")
-plotdata_df$id <- factor(x = as.vector(plotdata_df$id), levels =rev(c("C3N-01200-T1","C3N-01200-T2","C3N-01200-T3")))
-
-p <- ggplot()
-p <- p + geom_point(data = plotdata_df, mapping = aes(x = features.plot, y = id, color = expvalue_plot, size = pct.exp), shape = 16)
-p <- p + scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(n = 9, name = "Spectral")[1:5]), guide = guide_legend(direction = "horizontal", nrow = 2, byrow = T))
-p <- p + scale_size_continuous(range = c(0, 8), name="% Expressed", guide = guide_legend(direction = "horizontal"))
-p <- p + facet_grid(.~gene_group, scales = "free", space = "free", drop = T)
-p <- p + theme(axis.text.x = element_text(angle = 90, face = "bold", size = 10))
-p <- p + theme(axis.text.y = element_text( face = "bold", size = 12))
-p <- p + theme(panel.spacing = unit(0, "lines"), panel.grid.major = element_line(colour = "grey80"), 
-               panel.border = element_rect(color = "black", fill = NA, size = 0.5),
-               panel.background = element_blank())
-p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5), 
-               strip.text.x = element_text(angle = 0, vjust = 0.5, size = 12, face = "bold"), 
-               strip.text.y = element_text(angle = 0, vjust = 0.5))
-p <- p + theme(axis.title = element_blank())
-# p <- p + ggtitle(paste0(aliquot_show, " Macrophages"))
-p <- p + labs(colour = "Expression value")
-p <- p + theme(legend.position = "bottom")
-file2write <- paste0(dir_out, aliquot_show, ".CellTypeMarkerExp.NotScaled.png")
-png(file = file2write, width = 800, height = 500, res = 150)
-print(p)
-dev.off()
+# # plot not scaled -------------------------------------------------------------
+# plotdata_df <- expdata_df
+# expvalue_top <- quantile(x = plotdata_df$avg.exp, probs = 0.95)
+# plotdata_df <- plotdata_df %>%
+#   mutate(expvalue_plot = ifelse(avg.exp >= expvalue_top, expvalue_top, avg.exp))
+# 
+# ## add facet
+# plotdata_df$gene_group <- paste0(plyr::mapvalues(plotdata_df$features.plot, from = gene2celltype_df$Gene, to = as.vector(gene2celltype_df$Gene_Group)), 
+#                                   " Markers")
+# plotdata_df$id <- factor(x = as.vector(plotdata_df$id), levels =rev(c("C3N-01200-T1","C3N-01200-T2","C3N-01200-T3")))
+# 
+# p <- ggplot()
+# p <- p + geom_point(data = plotdata_df, mapping = aes(x = features.plot, y = id, color = expvalue_plot, size = pct.exp), shape = 16)
+# p <- p + scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(n = 9, name = "Spectral")[1:5]), guide = guide_legend(direction = "horizontal", nrow = 2, byrow = T))
+# p <- p + scale_size_continuous(range = c(0, 8), name="% Expressed", guide = guide_legend(direction = "horizontal"))
+# p <- p + facet_grid(.~gene_group, scales = "free", space = "free", drop = T)
+# p <- p + theme(axis.text.x = element_text(angle = 90, face = "bold", size = 10))
+# p <- p + theme(axis.text.y = element_text( face = "bold", size = 12))
+# p <- p + theme(panel.spacing = unit(0, "lines"), panel.grid.major = element_line(colour = "grey80"), 
+#                panel.border = element_rect(color = "black", fill = NA, size = 0.5),
+#                panel.background = element_blank())
+# p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5), 
+#                strip.text.x = element_text(angle = 0, vjust = 0.5, size = 12, face = "bold"), 
+#                strip.text.y = element_text(angle = 0, vjust = 0.5))
+# p <- p + theme(axis.title = element_blank())
+# # p <- p + ggtitle(paste0(aliquot_show, " Macrophages"))
+# p <- p + labs(colour = "Expression value")
+# p <- p + theme(legend.position = "bottom")
+# file2write <- paste0(dir_out, aliquot_show, ".CellTypeMarkerExp.NotScaled.png")
+# png(file = file2write, width = 800, height = 500, res = 150)
+# print(p)
+# dev.off()

@@ -55,6 +55,16 @@ row_split_factor <- factor(plotdata_df$Cell_type, levels = c('PT','Tumor'))
 column_split_vec <- ifelse(colnames(plotdata_mat) %in% colnames(acc_up_df), "Up peaks", "Down peaks")
 column_split_factor <- factor(x = column_split_vec, levels = c("Down peaks", "Up peaks"))
 
+# specify colors ----------------------------------------------------------
+## specify color for NA values
+color_na <- "grey50"
+## colors for gene set scores
+summary(as.numeric(unlist(plotdata_mat)))
+color_red <- RColorBrewer::brewer.pal(n = 5, name = "Set1")[1]
+color_blue <- RColorBrewer::brewer.pal(n = 5, name = "Set1")[2]
+colors_heatmapbody = colorRamp2(c(-2, 0, 2), 
+                                c(color_blue, "white", color_red))
+
 # make row annotation -----------------------------------------------------
 ## get BAP1 mutated cases
 cases_bap1 <- mut_df$Case[mut_df$mutation_category_sim %in% c("BAP1 mutated", "Both mutated")]
@@ -72,15 +82,6 @@ row_ha= rowAnnotation(#Cell_type=row_anno_df$Cell_type,
                                Cell_type=c('PT'='#1B9E77','Tumor'='#E7298A')), 
                       annotation_width = unit(3, "mm"))
 
-# specify colors ----------------------------------------------------------
-## specify color for NA values
-color_na <- "grey50"
-## colors for gene set scores
-summary(as.numeric(unlist(plotdata_mat)))
-color_red <- RColorBrewer::brewer.pal(n = 5, name = "Set1")[1]
-color_blue <- RColorBrewer::brewer.pal(n = 5, name = "Set1")[2]
-colors_heatmapbody = colorRamp2(c(-2, 0, 2), 
-                                c(color_blue, "white", color_red))
 
 # plot --------------------------------------------------------------------
 x=Heatmap(matrix = plotdata_mat, name='Peak\naccessibility', col = colors_heatmapbody,
