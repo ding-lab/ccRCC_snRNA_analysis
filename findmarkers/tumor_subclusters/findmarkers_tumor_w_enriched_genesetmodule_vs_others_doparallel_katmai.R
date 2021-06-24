@@ -23,7 +23,10 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 1
+no_cores <- 25
+# version_tmp <- "maxCores_minus1"
+version_tmp <- paste0(no_cores, "Cores")
+# version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -76,8 +79,9 @@ head(srat@meta.data$id_aliquot_barcode)
 cat("finish adding unique id for each barcode in the seurat object!\n")
 
 # for each aliquot, input seurat object and fetch data and write data --------------------
-markers_wilcox_df <- NULL
-for (module_tmp in modules_process) {
+registerDoParallel(cores = no_cores)
+start_time <- Sys.time()
+markers_wilcox_list<-foreach(module_tmp=modules_process) %dopar% {
   file2write <- paste0(dir_out,
                        module_tmp, ".TumorManualCluster.DEGs.Wilcox.Minpct", min.pct.run, 
                        ".Logfc", logfc.threshold.run,
@@ -108,7 +112,19 @@ for (module_tmp in modules_process) {
     ## write output
     write.table(x = deg_df, file = file2write, sep = "\t", quote = F, row.names = F)
     cat("finish writing the result!\n\n")
+  } else {
+    deg_df <- fread(data.table = F, input = file2write)
   }
 }
+end_time <- Sys.time()
+end_time - start_time 
+markers_wilcox_df <- do.call(rbind.data.frame, markers_wilcox_list)
 
+# write output ------------------------------------------------------------
+file2write <- paste0(dir_out,
+                     "4Module.TumorManualCluster.DEGs.Wilcox.Minpct", min.pct.run, 
+                     ".Logfc", logfc.threshold.run,
+                     ".min.diff.pct", min.diff.pct.run,
+                     ".tsv")
+write.table(x = markers_wilcox_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
