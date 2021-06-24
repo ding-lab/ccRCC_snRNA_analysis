@@ -34,6 +34,7 @@ dir.create(dir_out)
 library(future)
 plan("multiprocess", workers = 4)
 options(future.globals.maxSize = 7 * 1024^3) # for 7 Gb RAM
+library(doParallel)
 
 # input dependencies ------------------------------------------------------
 ## input enriched gene set module assignment per tumor cluster
