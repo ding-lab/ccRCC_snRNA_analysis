@@ -29,8 +29,9 @@ cluster_pass_df <- cellnumber_percluster_df %>%
   mutate(colname_exp = gsub(x = id_cluster_uniq,pattern = "\\-", replacement = "."))
 
 ## add name for the marker groups
-genes_mesenchymal <- gene2pathway_df$GeneSymbol[gene2pathway_df$GeneSet_Name == "HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION"]
 genes_epithelial <- emt_genes_df$Gene[emt_genes_df$Gene_Group2 %in% c("Epithelial", "Proximal tubule")]
+genes_mesenchymal <- gene2pathway_df$GeneSymbol[gene2pathway_df$GeneSet_Name == "HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION"]
+genes_mesenchymal <- genes_mesenchymal[!(genes_mesenchymal %in% genes_epithelial)]
 genes2filter <- c(genes_mesenchymal, genes_epithelial)
   
 # format expression data --------------------------------------------------
@@ -46,13 +47,9 @@ plot_data_long_df <- plot_data_long_df %>%
   filter(!(cluster_name %in% c("", "CNA")))
 ## make matrix
 plot_data_wide_df <- dcast(data = plot_data_long_df, formula = V1 ~ id_bycluster_byaliquot, value.var = "value")
-plot_data_raw_mat <- as.matrix(plot_data_wide_df[,-1])
+plot_data_mat <- as.matrix(plot_data_wide_df[,-1])
 ## add row names
-rownames(plot_data_raw_mat) <- plot_data_wide_df$V1
-## scale by row
-plot_data_mat <- t(apply(plot_data_raw_mat, 1, scale))
-rownames(plot_data_mat) <- rownames(plot_data_raw_mat)
-colnames(plot_data_mat) <- colnames(plot_data_raw_mat)
+rownames(plot_data_mat) <- plot_data_wide_df$V1
 
 # filter genes based on variation -----------------------------------------
 sd_bygene_df <- data.frame(SD = apply(plot_data_mat,1, sd, na.rm = TRUE), gene = rownames(plot_data_mat))
