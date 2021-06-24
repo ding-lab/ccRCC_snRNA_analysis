@@ -36,14 +36,14 @@ plan("multiprocess", workers = 4)
 options(future.globals.maxSize = 7 * 1024^3) # for 7 Gb RAM
 
 # input dependencies ------------------------------------------------------
+## input enriched gene set module assignment per tumor cluster
+enriched_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210624.v1/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
 ## input the integrated data
 path_rds <- "./Data_Freezes/V2/snRNA/All_Cells_Merged/33_aliquot_merged_without_anchoring.20210428.v2.RDS"
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 ## input the barcode-manualsubcluster info
 barcode2subclusterid_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_tumorsubclusterid/map_barcode_with_manual_tumorsubcluster_id/20201130.v1/Barcode2TumorSubclusterId.20201130.v1.tsv", data.table = F)
-## input enriched gene set module assignment per tumor cluster
-enriched_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210624.v1/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
 
 # set parameters ----------------------------------------------------------
 ## set min.pct
