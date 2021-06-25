@@ -26,7 +26,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 library(Signac)
 library(ggplot2)
 ## set run id
-version_tmp <- "Promoter"
+version_tmp <- "1"
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -65,6 +65,8 @@ names(colors_celltype) <- c(pieceids_selected, 'C3L-00088-N','C3N-01200-N')
 # process coordinates ------------------------------------------------------------
 ## specify parameters to plot
 peaks_plot <- peaks_df$peak[peaks_df$peak2gene_type == "Promoter"]
+peaks_plot <- peaks_df$peak
+
 # for (peak_plot in c("chr16-66955443-66955943")) {
 for (peak_plot in unique(peaks_plot)) {
 
@@ -74,6 +76,8 @@ for (peak_plot in unique(peaks_plot)) {
   new_st=st-1000
   new_en=en+1000
   peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
+  gene_plot <- peaks_df$Gene[peaks_df$peak == peak_plot]
+  peak2gene_type_plot <- peaks_df$peak2gene_type[peaks_df$peak == peak_plot]
   
   # plot --------------------------------------------------------------------
   cov_plot= Signac::CoveragePlot(
@@ -85,23 +89,25 @@ for (peak_plot in unique(peaks_plot)) {
   cov_plot <- cov_plot + scale_fill_manual(values =  colors_celltype)
   print("Finished cov_plot")
   
-  peak_plot <- Signac::PeakPlot(
+  peak_obj <- Signac::PeakPlot(
     object = atac_subset,
     region = peak_plot_expanded, 
     peaks = StringToGRanges(peak_plot, sep = c("-", "-")))
   print("Finished peak plot")
   
-  gene_plot <- Signac::AnnotationPlot(
+  gene_obj <- Signac::AnnotationPlot(
     object = atac_subset,
     region = peak_plot_expanded)
   
   p <- Signac::CombineTracks(
-    plotlist = list(cov_plot, peak_plot, gene_plot),
+    plotlist = list(cov_plot, peak_obj, gene_obj),
     heights = c(23, 0.5, 1.5))
   print("Finished CombineTracks")
   
   ## write output
-  file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".pdf")
+  file2write <- paste0(dir_out, paste0(gene_plot, collapse = "_"), 
+                       paste0(peak2gene_type_plot, collapse = "_"), 
+                       gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".pdf")
   pdf(file2write, width = 6, height = 9, useDingbats = F)
   print(p)
   dev.off()
