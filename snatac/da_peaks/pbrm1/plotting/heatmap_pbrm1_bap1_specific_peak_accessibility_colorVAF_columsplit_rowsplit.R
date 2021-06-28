@@ -7,7 +7,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 3
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -104,8 +104,8 @@ row_ha= rowAnnotation(#Cell_type=row_anno_df$Cell_type,
 column_ha <- HeatmapAnnotation(Is_BAP1_down_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_bap1_down_df)), col = c("TRUE" = "purple", "FALSE" = "white smoke")),
                                Is_BAP1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_bap1_up_df)), col = c("TRUE" = "purple", "FALSE" = "white smoke")),
                                Is_PBRM1_down_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_down_df)), col = c("TRUE" = "orange", "FALSE" = "white smoke")),
-                               Is_PBRM1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_up_df)), col = c("TRUE" = "orange", "FALSE" = "white smoke"))
-                               )
+                               Is_PBRM1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_up_df)), col = c("TRUE" = "orange", "FALSE" = "white smoke")), 
+                               annotation_name_side = "left", annotation_name_gp = gpar(fontsize = 13))
 
 # make column split -------------------------------------------------------
 column_split_vec <- ifelse(colnames(plotdata_mat) %in% colnames(acc_pbrm1_down_df), "PBRM1 down peak",
@@ -155,7 +155,7 @@ list_lgd = list(
 p=ComplexHeatmap::Heatmap(matrix = plotdata_mat, col = colors_heatmapbody, name = "Peak\naccessibility", 
                           ## rows
                           show_row_names = T,  row_names_gp = gpar(fontsize = 13),
-                          show_row_dend=FALSE,  right_annotation=row_ha, row_split = row_split_factor, row_title_rot = 0,
+                          show_row_dend=FALSE,  left_annotation=row_ha, row_split = row_split_factor, row_title_rot = 0,
                           cluster_row_slices=F, cluster_rows = F,
                           ## columns
                           show_column_names = FALSE, show_column_dend=FALSE, column_title = NULL, top_annotation = column_ha,
@@ -163,6 +163,22 @@ p=ComplexHeatmap::Heatmap(matrix = plotdata_mat, col = colors_heatmapbody, name 
                           ## other
                           show_heatmap_legend = F, use_raster = T)
 file2write <- paste0(dir_out, "PBRM1_specific_peak_accessibility_raster.pdf")
+pdf(file2write,width=12, height=6.5, useDingbats = F)
+draw(object = p,
+     annotation_legend_side = "right", annotation_legend_list = list_lgd)
+dev.off()
+
+p=ComplexHeatmap::Heatmap(matrix = plotdata_mat, col = colors_heatmapbody, name = "Peak\naccessibility", 
+                          ## rows
+                          show_row_names = T,  row_names_gp = gpar(fontsize = 13),
+                          show_row_dend=FALSE,  left_annotation=row_ha, row_split = row_split_factor, row_title_rot = 0,
+                          cluster_row_slices=F, cluster_rows = F,
+                          ## columns
+                          show_column_names = FALSE, show_column_dend=FALSE, column_title = NULL, top_annotation = column_ha,
+                          column_split = column_split_vec, cluster_column_slices=F,
+                          ## other
+                          show_heatmap_legend = F, use_raster = F)
+file2write <- paste0(dir_out, "PBRM1_specific_peak_accessibility.pdf")
 pdf(file2write,width=12, height=6.5, useDingbats = F)
 draw(object = p,
      annotation_legend_side = "right", annotation_legend_list = list_lgd)
