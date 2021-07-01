@@ -108,10 +108,10 @@ for (aliquot_group1_tmp in aliquots_group1) {
     deg_df <- FindMarkers(object = srat, test.use = test_process, ident.1 = group1_findmarkers, ident.2 = group2_findmarkers, only.pos = F,
                           min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
     deg_df$genesymbol_deg <- rownames(deg_df)
-    deg_df$easyid_tumor <- easyid_group1_tmp
-    deg_df$aliquot_tumor <- aliquot_group1_tmp
-    deg_df$cellnumber_tumorcells <- length(which(srat@meta.data$group_findmarkers == group1_findmarkers))
-    deg_df$cellnumber_ptcells <- length(which(srat@meta.data$group_findmarkers == group2_findmarkers))
+    deg_df$easyid_group1 <- easyid_group1_tmp
+    deg_df$aliquot_group1 <- aliquot_group1_tmp
+    deg_df$cellnumber_group1 <- length(which(srat@meta.data$group_findmarkers == group1_findmarkers))
+    deg_df$cellnumber_group2 <- length(which(srat@meta.data$group_findmarkers == group2_findmarkers))
     
     ## write output
     write.table(x = deg_df, file = file2write, sep = "\t", quote = F, row.names = F)
