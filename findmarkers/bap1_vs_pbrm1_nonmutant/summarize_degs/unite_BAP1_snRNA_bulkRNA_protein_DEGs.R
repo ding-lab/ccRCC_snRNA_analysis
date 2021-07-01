@@ -52,8 +52,6 @@ deg_bulkprotein_df <- deg_bulkprotein_df %>%
   rename(FDR.bulkpro = fdr)
 deg_merged_df <- merge(x = deg_merged_df, y = deg_bulkprotein_df, by.x = c("genesymbol_deg"), by.y = c("gene_symbol"), all = T)
 ## order
-deg_merged_df <- deg_merged_df %>%
-  arrange(desc(Num_sig_Up), desc(mean_avg_logFC))
 nrow(deg_merged_df)
 deg_filtered_df1 <- deg_merged_df %>%
   filter(!is.na(Num_up))
@@ -73,3 +71,14 @@ write.table(x = deg_filtered_df1, file = file2write, quote = F, sep = "\t", row.
 file2write <- paste0(dir_out, "BAP1_snRNA_DEGs.Consistent.CNVcorrected.", run_id, ".tsv")
 write.table(x = deg_filtered_df2, file = file2write, quote = F, sep = "\t", row.names = F)
 
+# count -------------------------------------------------------------------
+deg_filtered_df2 %>%
+  filter(!is.na(FDR.bulkRNA) & FDR.bulkRNA < 0.05) %>%
+  filter((BAP1_vs_OtherTumor_snRNA == "Up" & direction.bulkRNA == "Up") | (BAP1_vs_OtherTumor_snRNA == "Down" & direction.bulkRNA == "Down")) %>%
+  nrow()
+
+deg_filtered_df2 %>%
+  filter(!is.na(FDR.bulkRNA) & FDR.bulkRNA < 0.05) %>%
+  filter(!is.na(FDR.bulkpro) & FDR.bulkpro < 0.05) %>%
+  filter((BAP1_vs_OtherTumor_snRNA == "Up" & direction.bulkRNA == "Up" & direction.bulkpro == "Up") | (BAP1_vs_OtherTumor_snRNA == "Down" & direction.bulkRNA == "Down" & direction.bulkpro == "Down")) %>%
+  nrow()

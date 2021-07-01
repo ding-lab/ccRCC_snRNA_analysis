@@ -1,5 +1,3 @@
-# Yige Wu @WashU Jun 2021
-
 # set up libraries and output directory -----------------------------------
 ## set working directory
 dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
@@ -19,21 +17,26 @@ dir.create(dir_out)
 peaks_anno_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/pbrm1/annotate_pbrm1_vs_nonmutant_daps/20210625.v1/PBRM1_DAP2Gene.EnhancerPromoter.20210625.v1.tsv")
 ## input degs
 degs_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/pbrm1_bap1_vs_non_mutants/summarize_degs/unite_PBRM1_vs_NonMutant_snRNA_bulkRNA_protein_DEGs/20210625.v1/PBRM1_snRNA_DEGs.Consistent.CNVcorrected.20210625.v1.tsv")
+## input selected pathways
+gene2pathway_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/pathway/unite_PBRM1_BAP1_vs_NonMutants_DAP_ORA/20210628.v1/PBRM1_BAP1_vs_NonMutants.DAPGene2TopPathway.20210628.v1.tsv")
 
 # annotate and filter peaks ------------------------------------------------------------
 ## merge
 peaks2degs_all_df <- merge(x = peaks_anno_df %>%
-                         rename(avg_log2FC.snATAC = avg_log2FC), 
-                       y = degs_df %>%
+                             rename(avg_log2FC.snATAC = avg_log2FC), 
+                           y = degs_df %>%
                              select(genesymbol_deg, foldchange_type, Num_sig_up.snRNA, Num_sig_down.snRNA, avg_log2FC.snRNA),
                            by.x = c("Gene"), by.y = c("genesymbol_deg"), suffix = c(".snATAC", ".snRNA"), all = T)
 peaks2degs_df <- peaks2degs_all_df %>%
   filter(!is.na(Num_sig_up.snRNA)) %>%
   filter(!is.na(peak2gene_type)) %>%
   arrange(desc(peak2gene_type))
+pathway_dap2deg_df <- merge(x = peaks2degs_df, y = gene2pathway_df, by = c("Gene"), by.y = c("GeneSymbol"))
 
 # write -------------------------------------------------------------------
 file2write <- paste0(dir_out, "PBRM1_vs_NonMutant_DAP2DEG.", run_id, ".tsv")
 write.table(x = peaks2degs_df, file = file2write, quote = F, sep = "\t", row.names = F)
 file2write <- paste0(dir_out, "PBRM1_vs_NonMutant_DAP_DEG_Merged.", run_id, ".tsv")
 write.table(x = peaks2degs_all_df, file = file2write, quote = F, sep = "\t", row.names = F)
+
+

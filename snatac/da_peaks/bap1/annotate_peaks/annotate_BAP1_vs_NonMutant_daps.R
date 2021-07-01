@@ -16,8 +16,8 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input all dap + caps
-peaks_up_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/UP_BAP1_vsNonMutants.Filtered.CNV_corrected.Annotated.20210623.tsv")
-peaks_down_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/DOWN_BAP1_vsNonMutants.Filtered.CNV_corrected.Annotated.20210623.tsv")
+peaks_up_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/UP_BAP1_vsNonMutants.Filtered.CNV_corrected.Annotated.20210624.tsv")
+peaks_down_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/DOWN_BAP1_vsNonMutants.Filtered.CNV_corrected.Annotated.20210624.tsv")
 ## input peak fold changes
 # peak2foldchange_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/BAP1_comparison_Filtered_peaks_byMinPct_MinPctDiff.tsv")
 ## input coaccessiblity results

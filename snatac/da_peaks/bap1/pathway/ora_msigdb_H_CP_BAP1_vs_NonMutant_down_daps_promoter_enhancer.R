@@ -22,7 +22,7 @@ wp2gene1 <- read.gmt("./Resources/Knowledge/Databases/MSigDB/h.all.v7.4.entrez.g
 wp2gene2 <- read.gmt("./Resources/Knowledge/Databases/MSigDB/c2.cp.v7.4.entrez.gmt")
 wp2gene <- rbind(wp2gene1, wp2gene2)
 ## input degs
-daps_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/bap1/annotate_peaks/annotate_BAP1_vs_NonMutant_daps/20210625.v1/BAP1_vs_NonMutant_DAP2Gene.EnhancerPromoter.20210625.v1.tsv")
+daps_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/bap1/annotate_peaks/annotate_BAP1_vs_NonMutant_daps/20210628.v1/BAP1_vs_NonMutant_DAP2Gene.EnhancerPromoter.20210628.v1.tsv")
 ## input background genes
 peaks_background_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/annotate_peaks/annotate_all_peaks_promoters_enhancers/20210625.v1/ccRCC_vs_PT_DAP2Gene.EnhancerPromoter.20210625.v1.tsv") 
 
@@ -68,7 +68,7 @@ dev.off()
 # save output -------------------------------------------------------------
 # store results
 file2write <- paste0(dir_out, "ORA_Results", ".RDS")
-saveRDS(object = enricher_out, file = file2write, compress = T)
+saveRDS(object = enricher_out_pairwise, file = file2write, compress = T)
 ## store results
 file2write <- paste0(dir_out, "ORA_Results", ".tsv")
 write.table(x = enricher_out_all_df, file = file2write, quote = F, row.names = F, sep = "\t")

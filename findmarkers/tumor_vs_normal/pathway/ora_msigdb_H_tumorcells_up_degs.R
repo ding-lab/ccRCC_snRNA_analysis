@@ -1,4 +1,4 @@
-# Yige Wu @WashU Sep 2020
+# Yige Wu @WashU Jun 2021
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -24,9 +24,7 @@ datasets <- listDatasets(ensembl)
 ensembl = useDataset("hsapiens_gene_ensembl",mart=ensembl)
 filters = listFilters(ensembl)
 ## input wikipathway 
-wp2gene1 <- read.gmt("./Resources/Knowledge/Databases/MSigDB/h.all.v7.4.entrez.gmt")
-wp2gene2 <- read.gmt("./Resources/Knowledge/Databases/MSigDB/c2.cp.v7.4.entrez.gmt")
-wp2gene <- rbind(wp2gene1, wp2gene2)
+wp2gene <- read.gmt("./Resources/Knowledge/Databases/MSigDB/h.all.v7.4.entrez.gmt")
 ## input degs
 # deg_all_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/summarize_tumor_vs_pt_DEGs/20210419.v1/Tumor_DEGs.EnoughDataPoints.Consistent.20210419.v1.tsv")
 # deg_all_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/summarize_tumor_vs_pt_DEGs/20210429.v1/Tumor_DEGs.EnoughDataPoints.Consistent.20210429.v1.tsv")
