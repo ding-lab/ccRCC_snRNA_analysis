@@ -82,7 +82,7 @@ tumor_vs_rest_DE_fun <- function(sobj,tumor_ct,sample){
   DE_genes <- FindMarkers(sobj,ident.1=tumor_ct) 
   DE_genes$gene_symbol <- rownames(DE_genes)
   DE_genes$sample_id <- rep(sample,nrow(DE_genes))
-  rownames(DE_genes) <- paste0(DE_genes$sample_id ,".",rownames(DE_genes))
+  rownames(DE_genes) <- paste0(DE_genes$sample_id ,".", DE_genes$gene_symbol)
   return(DE_genes)
 }
 
@@ -164,7 +164,10 @@ tumor_vs_rest_DE_total_list<-foreach(sample_id=samples) %dopar% {
   DE_genes_tmp <- merge(DE_genes_tmp,norm_exp_avg,by="gene_symbol",all.x=TRUE,incomparables = NA,sort=FALSE)
   cat(paste0("Finished adding avg_norm_exp for sample", sample_id, "...\n"))
   
-  rownames(DE_genes_tmp) <- paste0(DE_genes_tmp$sample_id,".",DE_genes_tmp$gene_symbol)
+  # rownames(DE_genes_tmp) <- paste0(DE_genes_tmp$sample_id,".",DE_genes_tmp$gene_symbol)
+  rownames(DE_genes_tmp) <- paste0(sample_id,".",DE_genes_tmp$gene_symbol)
+  cat(paste0("Finished updating rownames for sample", sample_id, "...\n"))
+  
   return(DE_genes_tmp)
 }
 tumor_vs_rest_DE_total <- do.call(rbind.data.frame, tumor_vs_rest_DE_total_list)
