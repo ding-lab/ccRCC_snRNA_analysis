@@ -44,7 +44,7 @@ idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sam
 # input the seurat object and store in a list--------------------------------------------------------
 paths_rds <- NULL
 easy_ids <- NULL
-for (i in 1:nrow(paths_srat2process)) {
+for (i in 1:nrow(paths_srat)) {
   sample_id_tmp <- paths_srat$Aliquot[i]
   easy_id_tmp <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == sample_id_tmp]
   print(easy_id_tmp)
