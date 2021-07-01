@@ -130,7 +130,9 @@ samples <- rds_list_df$V1
 #samples <- samples[!(samples %in% c("ND_083017","ND_090617","Normal_sorted_170531","Normal_sorted_170607"))]
 #no "25183","57075_2" no tumor cells/all tumor cells, "MMY67868" some clusers not assigned
 #tumor_ct="Plasma"
-for (sample_id in samples) {
+registerDoParallel(cores = no_cores)
+start_time <- Sys.time()
+tumor_vs_rest_DE_total_list<-foreach(sample_id=samples) %dopar% {
   cat(paste0("READING SEURAT OBJECT FOR SAMPLE ",sample_id,"...\n"))
   sobj <- readRDS(file = as.vector(subset(rds_list_df,V1==sample_id)$V2))
   #skip the sample if it only has the tumor cells or no any tumor cells
@@ -155,17 +157,39 @@ for (sample_id in samples) {
   norm_exp_avg <- apply(norm_exp,1,mean) %>% as.data.frame
   colnames(norm_exp_avg) <- "avg_norm_exp"
   norm_exp_avg$gene_symbol <- rownames(norm_exp_avg)
- 
+  
   DE_genes_tmp <- merge(DE_genes_tmp,norm_exp_avg,by="gene_symbol",all.x=TRUE,incomparables = NA,sort=FALSE)
   rownames(DE_genes_tmp) <- paste0(DE_genes_tmp$sample_id,".",DE_genes_tmp$gene_symbol)
-  tumor_vs_rest_DE_total <- rbind(tumor_vs_rest_DE_total,DE_genes_tmp)
-   
-  #step2 tumore vs each other cell type -> pairwise comparison
+  return(DE_genes_tmp)
+}
+tumor_vs_rest_DE_total <- do.call(rbind.data.frame, tumor_vs_rest_DE_total_list)
+end_time <- Sys.time()
+end_time - start_time 
+
+start_time <- Sys.time()
+pairwise_DE_total_list<-foreach(sample_id=samples) %dopar% {
+  cat(paste0("READING SEURAT OBJECT FOR SAMPLE ",sample_id,"...\n"))
+  sobj <- readRDS(file = as.vector(subset(rds_list_df,V1==sample_id)$V2))
+  #skip the sample if it only has the tumor cells or no any tumor cells
+  cell.types = as.character(subset(as.data.frame(table(Idents(sobj))),Freq>=3)$Var1)
+  if ((length(cell.types)==1) & (tumor_ct %in% cell.types)) {
+    cat(paste0(sample," Only Contain Tumor Cells So Skip This Sample"))
+    next
+  }
+  if (!(tumor_ct %in% cell.types)) {
+    cat(paste0(sample," Does Not Have Any Tumor Cells So Skip This Sample"))
+    next
+  }
+  
   cat("STEP2 DEG analysis between tumor cells and each other cell population...\n")
   pairwise_DE_tmp <- pairwise_DE_fun(sobj=sobj,tumor_ct=tumor_ct,sample=sample_id)
-  pairwise_DE_total <- rbind(pairwise_DE_total,pairwise_DE_tmp)
+  return(pairwise_DE_tmp)
 }
+pairwise_DE_total <- do.call(rbind.data.frame, pairwise_DE_total_list)
+end_time <- Sys.time()
+end_time - start_time 
 
+## clean up
 tumor_vs_rest_DE_total <- tumor_vs_rest_DE_total[rownames(tumor_vs_rest_DE_total)!="tmp_row",]
 pairwise_DE_total <- pairwise_DE_total[rownames(pairwise_DE_total)!="tmp_row",]
 
