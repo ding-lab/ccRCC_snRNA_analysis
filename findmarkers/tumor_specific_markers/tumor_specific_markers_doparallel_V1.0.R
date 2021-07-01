@@ -82,7 +82,7 @@ tumor_vs_rest_DE_fun <- function(sobj,tumor_ct,sample){
   DE_genes <- FindMarkers(sobj,ident.1=tumor_ct) 
   DE_genes$gene_symbol <- rownames(DE_genes)
   DE_genes$sample_id <- rep(sample,nrow(DE_genes))
-  rownames(DE_genes) <- paste0(sample_id,".",rownames(DE_genes))
+  rownames(DE_genes) <- paste0(DE_genes$sample_id ,".",rownames(DE_genes))
   return(DE_genes)
 }
 
@@ -148,8 +148,8 @@ tumor_vs_rest_DE_total_list<-foreach(sample_id=samples) %dopar% {
   }
   
   #step1 tumore vs all the rest cell types
-  cat(paste0("STEP1 DEG analysis between tumor cells and other cell populations as as whole for sample", sample_id, "...\n"))
-  DE_genes_tmp <- tumor_vs_rest_DE_fun(sobj=sobj,tumor_ct=tumor_ct,sample = sample_id)
+  cat(paste0("STEP1 DEG analysis between tumor cells and other cell populations as as whole for sample ", sample_id, "...\n"))
+  DE_genes_tmp <- tumor_vs_rest_DE_fun(sobj=sobj, tumor_ct=tumor_ct,sample = sample_id)
   cat(paste0("Finished STEP1 for sample", sample_id, "...\n"))
   print(head(DE_genes_tmp))
   #append avg exp of tumor cells to the DE_genes_tmp df
