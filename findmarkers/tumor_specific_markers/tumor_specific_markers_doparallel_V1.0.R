@@ -117,7 +117,7 @@ pairwise_DE_fun <- function(sobj,tumor_ct,sample){
 tumor_vs_rest_DE_total <- as.data.frame(matrix(nrow=1,ncol=8))
 colnames(tumor_vs_rest_DE_total) <- c("p_val","avg_log2FC","pct.1","pct.2","p_val_adj","gene_symbol","sample_id","avg_norm_exp")
 rownames(tumor_vs_rest_DE_total) <- "tmp_row"
-  
+
 pairwise_DE_total<- as.data.frame(matrix(nrow=1,ncol=8))
 colnames(pairwise_DE_total) <- c("p_val","avg_log2FC","pct.1","pct.2","p_val_adj","sample_id","cell_type","gene_symbol")
 rownames(pairwise_DE_total) <- "tmp_row"
@@ -140,37 +140,36 @@ tumor_vs_rest_DE_total_list<-foreach(sample_id=samples) %dopar% {
   cell.types = as.character(subset(as.data.frame(table(Idents(sobj))),Freq>=3)[,1])
   print(cell.types)
   if ((length(cell.types)==1) & (tumor_ct %in% cell.types)) {
-    cat(paste0(sample_id," Only Contain Tumor Cells So Skip This Sample"))
-    next
+    cat(paste0(sample_id," Only Contain Tumor Cells So Skip This Sample...\n"))
+    return(NULL)
+  } else if (!(tumor_ct %in% cell.types)) {
+    cat(paste0(sample_id," Does Not Have Any Tumor Cells So Skip This Sample...\n"))
+    return(NULL)
+  } else {
+    #step1 tumore vs all the rest cell types
+    cat(paste0("STEP1 DEG analysis between tumor cells and other cell populations as as whole for sample ", sample_id, "...\n"))
+    DE_genes_tmp <- tumor_vs_rest_DE_fun(sobj=sobj, tumor_ct=tumor_ct,sample = sample_id)
+    cat(paste0("Finished tumor_vs_rest_DE_fun for sample", sample_id, "...\n"))
+    # print(head(DE_genes_tmp))
+    #append avg exp of tumor cells to the DE_genes_tmp df
+    row_genes <- rownames(DE_genes_tmp) %>% strsplit("[.]") %>% lapply("[",2) %>% unlist 
+    DefaultAssay(sobj)<-"RNA"
+    genes <- intersect(row_genes,GetAssayData(object = sobj) %>% rownames)
+    norm_exp <- GetAssayData(object = sobj)[genes,WhichCells(sobj, idents = tumor_ct)]
+    norm_exp_avg <- apply(norm_exp,1,mean) %>% as.data.frame
+    colnames(norm_exp_avg) <- "avg_norm_exp"
+    norm_exp_avg$gene_symbol <- rownames(norm_exp_avg)
+    
+    DE_genes_tmp <- merge(DE_genes_tmp,norm_exp_avg,by="gene_symbol",all.x=TRUE,incomparables = NA,sort=FALSE)
+    cat(paste0("Finished adding avg_norm_exp for sample ", sample_id, "...\n"))
+    
+    # rownames(DE_genes_tmp) <- paste0(DE_genes_tmp$sample_id,".",DE_genes_tmp$gene_symbol)
+    # print(head(DE_genes_tmp))
+    rownames(DE_genes_tmp) <- paste0(sample_id,".",DE_genes_tmp$gene_symbol)
+    cat(paste0("Finished updating rownames for sample ", sample_id, "...\n"))
+    
+    return(DE_genes_tmp)
   }
-  if (!(tumor_ct %in% cell.types)) {
-    cat(paste0(sample_id," Does Not Have Any Tumor Cells So Skip This Sample"))
-    next
-  }
-  
-  #step1 tumore vs all the rest cell types
-  cat(paste0("STEP1 DEG analysis between tumor cells and other cell populations as as whole for sample ", sample_id, "...\n"))
-  DE_genes_tmp <- tumor_vs_rest_DE_fun(sobj=sobj, tumor_ct=tumor_ct,sample = sample_id)
-  cat(paste0("Finished tumor_vs_rest_DE_fun for sample", sample_id, "...\n"))
-  # print(head(DE_genes_tmp))
-  #append avg exp of tumor cells to the DE_genes_tmp df
-  row_genes <- rownames(DE_genes_tmp) %>% strsplit("[.]") %>% lapply("[",2) %>% unlist 
-  DefaultAssay(sobj)<-"RNA"
-  genes <- intersect(row_genes,GetAssayData(object = sobj) %>% rownames)
-  norm_exp <- GetAssayData(object = sobj)[genes,WhichCells(sobj, idents = tumor_ct)]
-  norm_exp_avg <- apply(norm_exp,1,mean) %>% as.data.frame
-  colnames(norm_exp_avg) <- "avg_norm_exp"
-  norm_exp_avg$gene_symbol <- rownames(norm_exp_avg)
-  
-  DE_genes_tmp <- merge(DE_genes_tmp,norm_exp_avg,by="gene_symbol",all.x=TRUE,incomparables = NA,sort=FALSE)
-  cat(paste0("Finished adding avg_norm_exp for sample ", sample_id, "...\n"))
-  
-  # rownames(DE_genes_tmp) <- paste0(DE_genes_tmp$sample_id,".",DE_genes_tmp$gene_symbol)
-  # print(head(DE_genes_tmp))
-  rownames(DE_genes_tmp) <- paste0(sample_id,".",DE_genes_tmp$gene_symbol)
-  cat(paste0("Finished updating rownames for sample ", sample_id, "...\n"))
-  
-  return(DE_genes_tmp)
 }
 print("Finished step 1 for all samples")
 tumor_vs_rest_DE_total <- do.call(rbind.data.frame, tumor_vs_rest_DE_total_list)
@@ -182,19 +181,17 @@ pairwise_DE_total_list<-foreach(sample_id=samples) %dopar% {
   cat(paste0("READING SEURAT OBJECT FOR SAMPLE ",sample_id,"...\n"))
   sobj <- readRDS(file = as.vector(subset(rds_list_df,V1==sample_id)$V2))
   #skip the sample if it only has the tumor cells or no any tumor cells
-  cell.types = as.character(subset(as.data.frame(table(Idents(sobj))),Freq>=3)[,1])
   if ((length(cell.types)==1) & (tumor_ct %in% cell.types)) {
-    cat(paste0(sample," Only Contain Tumor Cells So Skip This Sample"))
-    next
+    cat(paste0(sample_id," Only Contain Tumor Cells So Skip This Sample...\n"))
+    return(NULL)
+  } else if (!(tumor_ct %in% cell.types)) {
+    cat(paste0(sample_id," Does Not Have Any Tumor Cells So Skip This Sample...\n"))
+    return(NULL)
+  } else {
+    cat("STEP2 DEG analysis between tumor cells and each other cell population...\n")
+    pairwise_DE_tmp <- pairwise_DE_fun(sobj=sobj,tumor_ct=tumor_ct,sample=sample_id)
+    return(pairwise_DE_tmp)
   }
-  if (!(tumor_ct %in% cell.types)) {
-    cat(paste0(sample," Does Not Have Any Tumor Cells So Skip This Sample"))
-    next
-  }
-  
-  cat("STEP2 DEG analysis between tumor cells and each other cell population...\n")
-  pairwise_DE_tmp <- pairwise_DE_fun(sobj=sobj,tumor_ct=tumor_ct,sample=sample_id)
-  return(pairwise_DE_tmp)
 }
 pairwise_DE_total <- do.call(rbind.data.frame, pairwise_DE_total_list)
 end_time <- Sys.time()
