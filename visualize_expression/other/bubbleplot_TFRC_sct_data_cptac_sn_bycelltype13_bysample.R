@@ -18,8 +18,9 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the average expression
-exp_wide_df <- fread(data.table = F, input = "./Resources/Analysis_Results/average_expression/avgexp_sct_data_bycelltype13_katmai/20210506.v1/33_aliquot_merged.avgexp.SCT.data.bycelltype13.20210506.v1.tsv")
-exp_wide_df <- fread(data.table = F, input = "./Resources/Analysis_Results/average_expression/avgexp_sct_data_bycelltype13_katmai//20210506.v1/33_aliquot_merged.avgexp.SCT.data.bycelltype13.20210506.v1.tsv")
+exp_wide_df <- fread(data.table = F, input = "./Resources/Analysis_Results/average_expression/avgexp_sct_data_bycelltype13_bysample_katmai/20210701.v1/33_aliquot_merged.avgexp.SCT.data.bycelltype13_bysample.20210701.v1.tsv")
+## input meta data
+idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
 
 # identify genes to plot -------------------------------------------------
 genes_plot <- "TFRC"
@@ -35,13 +36,18 @@ plotdata_df <- melt(data = plotdata_wide_df)
 summary(plotdata_df$value)
 x_cap <- 5
 plotdata_df <- plotdata_df %>%
-  mutate(cell_group.columnname = gsub(x = variable, pattern = "SCT\\.", replacement = "")) %>%
+  mutate(id_sample_cell_group = gsub(x = variable, pattern = "SCT\\.", replacement = "")) %>%
+  mutate(aliquot = str_split_fixed(string = id_sample_cell_group, pattern = "_", n = 2)[,1]) %>%
+  mutate(cell_group.columnname = str_split_fixed(string = id_sample_cell_group, pattern = "_", n = 2)[,2]) %>%
   mutate(x_plot = ifelse(value > x_cap, x_cap, value))
 
 plotdata_df$cell_group <- mapvalues(x = plotdata_df$cell_group.columnname, 
                                     from = cellgroup_label_df$cell_type13.columnname,
                                     to = as.vector(cellgroup_label_df$cell_type13))
-plotdata_df$y_plot <- factor(x = plotdata_df$V1, levels = rev(genes_plot))
+plotdata_df$id_sample <- mapvalues(x = plotdata_df$aliquot, 
+                                    from = idmetadata_df$Aliquot.snRNA,
+                                    to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
+plotdata_df$y_plot <- plotdata_df$id_sample
 plotdata_df <- plotdata_df %>%
   filter(!(cell_group %in% c("Unknown", "Immune others", "Normal epithelial cells")))
 ## make colors
