@@ -1,4 +1,5 @@
 # Yige Wu @WashU Sep 2020
+# Yige Wu @WashU Jun 2021
 ## use RNA assay according to https://github.com/satijalab/seurat/issues/2646
 
 # set up libraries and output directory -----------------------------------
@@ -27,39 +28,44 @@ source("./ccRCC_snRNA_analysis/variables.R")
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
-dir_out <- "./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/PBRM1_BAP1_vs_NonMutants_Tumorcells/"
+dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
+library(future)
+plan("multiprocess", workers = 5)
+options(future.globals.maxSize = 5 * 1024^3) # for 5 Gb RAM
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
-path_rds <- "./Resources/Analysis_Results/merging/RunPCA_UMAP_clustering_32_aliquot/20210318.v1/32_aliquot.Merged.20210318.v1.RDS"
+path_rds <- "./Data_Freezes/V2/snRNA/All_Cells_Merged/33_aliquot_merged_without_anchoring.20210428.v2.RDS"
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 ## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_32aliquots/20210308.v1/32Aliquot.Barcode2CellType.20210308.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Data_Freezes/V2/snRNA/Cell_Type_Assignment/33Aliquot.Barcode2CellType.20210423.v1.tsv", data.table = F)
 cat("finish reading the barcode-to-cell type table!\n")
 ## input idemta data
-idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210322.v1/meta_data.20210322.v1.tsv")
+idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
 ## input PBRM1 and BAP1 classification
 mut_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutation/annotate_cptac_sample_by_pbrm1_bap1_mutation/20210310.v1/PBRM1_BAP1_Mutation_Status_By_Case.20210310.v1.tsv")
 
 # set parameters for findmarkers ------------------------------------------
 logfc.threshold.run <- 0
 min.pct.run <- 0.1
-min.diff.pct.run <- 0.1
+min.diff.pct.run <- 0
 ## spcify assay
+test_process <- "wilcox"
 assay_process <- "RNA"
-cat(paste0("Assay: ", assay_process, "\n"))
-cat("###########################################\n")
+DefaultAssay(srat) <- assay_process
 ## specify cell groups to compare
 group1_findmarkers <- "PBRM1/BAP1-mutant Tumor cells"
 group2_findmarkers <- "Non-mutant Tumor cells"
 
 # preprocess ----------------------------------------
 cases_nonmutants <- mut_df$Case[mut_df$mutation_category_sim == "Non-mutants"]
-aliquots_group2 <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available & idmetadata_df$Case %in% cases_nonmutants & idmetadata_df$Sample_Type == "Tumor"]
+# easyids_group2 <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$snRNA_available & idmetadata_df$Case %in% cases_nonmutants & idmetadata_df$Sample_Type == "Tumor"]
+# easyids_group2
+aliquots_group2 <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available & idmetadata_df$Case %in% cases_nonmutants & idmetadata_df$Sample_Type == "Tumor" & !(idmetadata_df$Case %in% c("C3L-00359"))]
 aliquots_group2
-aliquots_group1 <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available & !(idmetadata_df$Case %in% cases_nonmutants) & idmetadata_df$Sample_Type == "Tumor"]
+aliquots_group1 <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available & !(idmetadata_df$Case %in% cases_nonmutants) & idmetadata_df$Sample_Type == "Tumor" & !(idmetadata_df$Case %in% c("C3L-00359"))]
 aliquots_group1
 
 # preprocess the Seurat object meta data---------------------------------------------
@@ -76,6 +82,12 @@ cat("finish adding unique id for each barcode in the seurat object!\n")
 # run findallmarkers by tumor------------------------------------------------------
 for (aliquot_group1_tmp in aliquots_group1) {
   easyid_group1_tmp <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == aliquot_group1_tmp]
+  file2write <- paste0(dir_out, easyid_group1_tmp, ".", test_process, 
+                       ".logfc.threshold", logfc.threshold.run, 
+                       ".min.pct", min.pct.run,
+                       ".min.diff.pct", min.diff.pct.run,
+                       ".Assay", assay_process,
+                       ".tsv")
   file2write <- paste0(dir_out,
                        easyid_group1_tmp, ".vs_NonMutants_Tumorcells.tsv")
   if (!file.exists(file2write)) {
@@ -93,7 +105,7 @@ for (aliquot_group1_tmp in aliquots_group1) {
     print(table(srat@meta.data$group_findmarkers))
     Idents(srat) <- "group_findmarkers" 
     ## run findmarkers
-    deg_df <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = group1_findmarkers, ident.2 = group2_findmarkers, only.pos = F,
+    deg_df <- FindMarkers(object = srat, test.use = test_process, ident.1 = group1_findmarkers, ident.2 = group2_findmarkers, only.pos = F,
                           min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
     deg_df$genesymbol_deg <- rownames(deg_df)
     deg_df$easyid_tumor <- easyid_group1_tmp
