@@ -138,12 +138,13 @@ tumor_vs_rest_DE_total_list<-foreach(sample_id=samples) %dopar% {
   sobj <- readRDS(file = as.vector(subset(rds_list_df,V1==sample_id)$V2))
   #skip the sample if it only has the tumor cells or no any tumor cells
   cell.types = as.character(subset(as.data.frame(table(Idents(sobj))),Freq>=3)[,1])
+  print(cell.types)
   if ((length(cell.types)==1) & (tumor_ct %in% cell.types)) {
-    cat(paste0(sample," Only Contain Tumor Cells So Skip This Sample"))
+    cat(paste0(sample_id," Only Contain Tumor Cells So Skip This Sample"))
     next
   }
   if (!(tumor_ct %in% cell.types)) {
-    cat(paste0(sample," Does Not Have Any Tumor Cells So Skip This Sample"))
+    cat(paste0(sample_id," Does Not Have Any Tumor Cells So Skip This Sample"))
     next
   }
   
@@ -165,12 +166,13 @@ tumor_vs_rest_DE_total_list<-foreach(sample_id=samples) %dopar% {
   cat(paste0("Finished adding avg_norm_exp for sample ", sample_id, "...\n"))
   
   # rownames(DE_genes_tmp) <- paste0(DE_genes_tmp$sample_id,".",DE_genes_tmp$gene_symbol)
-  print(head(DE_genes_tmp))
+  # print(head(DE_genes_tmp))
   rownames(DE_genes_tmp) <- paste0(sample_id,".",DE_genes_tmp$gene_symbol)
   cat(paste0("Finished updating rownames for sample ", sample_id, "...\n"))
   
   return(DE_genes_tmp)
 }
+print("Finished step 1 for all samples")
 tumor_vs_rest_DE_total <- do.call(rbind.data.frame, tumor_vs_rest_DE_total_list)
 end_time <- Sys.time()
 end_time - start_time 
