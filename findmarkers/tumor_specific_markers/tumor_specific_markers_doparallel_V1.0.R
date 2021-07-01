@@ -150,8 +150,8 @@ tumor_vs_rest_DE_total_list<-foreach(sample_id=samples) %dopar% {
   #step1 tumore vs all the rest cell types
   cat(paste0("STEP1 DEG analysis between tumor cells and other cell populations as as whole for sample ", sample_id, "...\n"))
   DE_genes_tmp <- tumor_vs_rest_DE_fun(sobj=sobj, tumor_ct=tumor_ct,sample = sample_id)
-  cat(paste0("Finished STEP1 for sample", sample_id, "...\n"))
-  print(head(DE_genes_tmp))
+  cat(paste0("Finished tumor_vs_rest_DE_fun for sample", sample_id, "...\n"))
+  # print(head(DE_genes_tmp))
   #append avg exp of tumor cells to the DE_genes_tmp df
   row_genes <- rownames(DE_genes_tmp) %>% strsplit("[.]") %>% lapply("[",2) %>% unlist 
   DefaultAssay(sobj)<-"RNA"
@@ -162,11 +162,12 @@ tumor_vs_rest_DE_total_list<-foreach(sample_id=samples) %dopar% {
   norm_exp_avg$gene_symbol <- rownames(norm_exp_avg)
   
   DE_genes_tmp <- merge(DE_genes_tmp,norm_exp_avg,by="gene_symbol",all.x=TRUE,incomparables = NA,sort=FALSE)
-  cat(paste0("Finished adding avg_norm_exp for sample", sample_id, "...\n"))
+  cat(paste0("Finished adding avg_norm_exp for sample ", sample_id, "...\n"))
   
   # rownames(DE_genes_tmp) <- paste0(DE_genes_tmp$sample_id,".",DE_genes_tmp$gene_symbol)
+  print(head(DE_genes_tmp))
   rownames(DE_genes_tmp) <- paste0(sample_id,".",DE_genes_tmp$gene_symbol)
-  cat(paste0("Finished updating rownames for sample", sample_id, "...\n"))
+  cat(paste0("Finished updating rownames for sample ", sample_id, "...\n"))
   
   return(DE_genes_tmp)
 }
