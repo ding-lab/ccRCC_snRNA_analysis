@@ -89,9 +89,9 @@ tumor_vs_rest_DE_fun <- function(sobj,tumor_ct,sample){
 pairwise_DE_fun <- function(sobj,tumor_ct,sample){
   cell.types=as.character(subset(as.data.frame(table(Idents(sobj))),Freq>=3)$Var1)
   cat("cell types include: ",paste(cell.types,sep=","),"\n")
-  non_tumor_ct <- cell.types[!(cell.types %in% c(tumor_ct,"unknown"))]
+  non_tumor_ct <- cell.types[!(cell.types %in% c(tumor_ct,"Unknown"))]
   pairwise_DE <- as.data.frame(matrix(nrow=1,ncol=8))
-  colnames(pairwise_DE) <- c("p_val","avg_logFC","pct.1","pct.2","p_val_adj","sample_id","cell_type","gene_symbol")
+  colnames(pairwise_DE) <- c("p_val","avg_log2FC","pct.1","pct.2","p_val_adj","sample_id","cell_type","gene_symbol")
   rownames(pairwise_DE) <- "tmp_row"
   DefaultAssay(sobj)<-"RNA"
   for (ct in non_tumor_ct) {
@@ -112,11 +112,11 @@ pairwise_DE_fun <- function(sobj,tumor_ct,sample){
 #####################################################################
 #generate initial dataframe for merge
 tumor_vs_rest_DE_total <- as.data.frame(matrix(nrow=1,ncol=8))
-colnames(tumor_vs_rest_DE_total) <- c("p_val","avg_logFC","pct.1","pct.2","p_val_adj","gene_symbol","sample_id","avg_norm_exp")
+colnames(tumor_vs_rest_DE_total) <- c("p_val","avg_log2FC","pct.1","pct.2","p_val_adj","gene_symbol","sample_id","avg_norm_exp")
 rownames(tumor_vs_rest_DE_total) <- "tmp_row"
   
 pairwise_DE_total<- as.data.frame(matrix(nrow=1,ncol=8))
-colnames(pairwise_DE_total) <- c("p_val","avg_logFC","pct.1","pct.2","p_val_adj","sample_id","cell_type","gene_symbol")
+colnames(pairwise_DE_total) <- c("p_val","avg_log2FC","pct.1","pct.2","p_val_adj","sample_id","cell_type","gene_symbol")
 rownames(pairwise_DE_total) <- "tmp_row"
 
 # For each sample, read object and run step1, step2 
@@ -178,7 +178,7 @@ write.table(pairwise_DE_total,paste0(out_path,"/",tumor_ct,"_vs_others_pairwise_
 ###step3: filtering
 ##########################################################################
 p_val_adj_filter <- 0.05
-avg_logFC_filter <- 0
+avg_log2FC_filter <- 0
 ################################
 #########EXAMPLE################
 ###             count FC>0 p<0.05?
@@ -186,7 +186,7 @@ avg_logFC_filter <- 0
 ###PMEL 47491   3     3    3       <- will be kept 
 #################################
 #lower the threshold, allow one more cell types to be significant highly expressed with plasma
-tmp <- pairwise_DE_total %>% dplyr::select(sample_id,gene_symbol,avg_logFC,p_val_adj) %>% dplyr::group_by(sample_id,gene_symbol) %>% dplyr::summarise(significance_count=sum(p_val_adj<p_val_adj_filter),pos_logFC_count=sum(avg_logFC>0),count=length(sample_id)) %>% filter(significance_count==count & pos_logFC_count==count) %>% as.data.frame
+tmp <- pairwise_DE_total %>% dplyr::select(sample_id,gene_symbol,avg_log2FC,p_val_adj) %>% dplyr::group_by(sample_id,gene_symbol) %>% dplyr::summarise(significance_count=sum(p_val_adj<p_val_adj_filter),pos_logFC_count=sum(avg_log2FC>0),count=length(sample_id)) %>% filter(significance_count==count & pos_logFC_count==count) %>% as.data.frame
 tmp$gene_symbol=factor(tmp$gene_symbol,levels=unique(tmp$gene_symbol))
 
 gene_threshold <- unname(quantile(table(tmp$gene_symbol),0.50)) # for a certain marker, it must be reported in more than 50% of samples
@@ -194,7 +194,7 @@ DE_genes_filter_1 <- names(table(tmp$gene_symbol))[table(tmp$gene_symbol)>=gene_
 
 ###FILTER 2: Compare tumor cells with other cell types as a whole for each sample
 ## filter DE_genes_filter_1 by the presence within DE gene list(when compare plasma vs non plasma)
-tmp <- tumor_vs_rest_DE_total %>% dplyr::select(gene_symbol,avg_logFC,p_val_adj) %>% dplyr::group_by(gene_symbol) %>% dplyr::summarise(significance_count=sum(p_val_adj<p_val_adj_filter),pos_logFC_count=sum(avg_logFC>avg_logFC_filter),count=length(gene_symbol)) %>% as.data.frame
+tmp <- tumor_vs_rest_DE_total %>% dplyr::select(gene_symbol,avg_log2FC,p_val_adj) %>% dplyr::group_by(gene_symbol) %>% dplyr::summarise(significance_count=sum(p_val_adj<p_val_adj_filter),pos_logFC_count=sum(avg_log2FC>avg_log2FC_filter),count=length(gene_symbol)) %>% as.data.frame
 tmp <- tmp %>% dplyr::filter(pos_logFC_count/count> 0.90 & significance_count/count> 0.75) 
 sample_count_threshold <- unname(quantile(tmp$count,0.75)) #threshold top 25%
 DE_genes_filter_2 <- tmp %>% dplyr::filter(count>=sample_count_threshold) %>% .$gene_symbol %>% as.character
@@ -203,11 +203,11 @@ DE_genes_filter_2 <- tmp %>% dplyr::filter(count>=sample_count_threshold) %>% .$
 DE_genes_filtered <- intersect(DE_genes_filter_1,DE_genes_filter_2)
 cat(paste0(length(DE_genes_filtered)," genes were found to be tumor specific\n"))
 
-### sort genes by avg_logFC: summary table is from DEG between tumor cells and other cell populations as as whole
-tmp <- tumor_vs_rest_DE_total %>% dplyr::filter(gene_symbol %in% DE_genes_filtered) %>% dplyr::group_by(gene_symbol) %>% dplyr::summarise(avg_logFC=mean(avg_logFC)) %>% as.data.frame
-DE_genes_filtered <- tmp[rev(order(tmp$avg_logFC)),] %>% .$gene_symbol 
+### sort genes by avg_log2FC: summary table is from DEG between tumor cells and other cell populations as as whole
+tmp <- tumor_vs_rest_DE_total %>% dplyr::filter(gene_symbol %in% DE_genes_filtered) %>% dplyr::group_by(gene_symbol) %>% dplyr::summarise(avg_log2FC=mean(avg_log2FC)) %>% as.data.frame
+DE_genes_filtered <- tmp[rev(order(tmp$avg_log2FC)),] %>% .$gene_symbol 
 write.table(DE_genes_filtered,paste0(out_path,"/",tumor_ct,"_specific_DEG.txt"),sep="\t",col.names=FALSE,row.names=FALSE,quote = FALSE)
-#DE_genes_filtered_highranking<-tmp[rev(order(tmp$avg_logFC)),] %>% filter(avg_logFC>0.75) %>% .$gene_symbol %>% as.character
+#DE_genes_filtered_highranking<-tmp[rev(order(tmp$avg_log2FC)),] %>% filter(avg_log2FC>0.75) %>% .$gene_symbol %>% as.character
 
 ######################################################################
 ###cell surface markers(Annotate genes with GO term plasma memberane)
@@ -219,7 +219,7 @@ DE_genes_filtered_surface <- intersect(DE_genes_filtered,plasma_membrane_genes)
 cat(paste0(length(DE_genes_filtered_surface)," genes were found on the cell surface based on GO term\n"))
 
 #####################################################################################################################
-###Append the information of FC and adjusted p value to the DE_genes_filtered data frame, p_val_adj and avg_logFC are from DE analysis of tumor vs the rest as a whole
+###Append the information of FC and adjusted p value to the DE_genes_filtered data frame, p_val_adj and avg_log2FC are from DE analysis of tumor vs the rest as a whole
 #####################################################################################################################
 DE_genes_filtered_df <- as.data.frame(DE_genes_filtered)
 
@@ -229,7 +229,7 @@ exp_vector <- c()
 freq_vector <- c()
 sample_vector <- c()
 for (gene in DE_genes_filtered_df$DE_genes_filtered){
-  fc <- mean(subset(tumor_vs_rest_DE_total,gene_symbol==gene)$avg_logFC)
+  fc <- mean(subset(tumor_vs_rest_DE_total,gene_symbol==gene)$avg_log2FC)
   fdr <- mean(subset(tumor_vs_rest_DE_total,gene_symbol==gene)$p_val_adj)
   exp <- mean(subset(tumor_vs_rest_DE_total,gene_symbol==gene)$avg_norm_exp)  
   freq <- length(unique(subset(tumor_vs_rest_DE_total,gene_symbol==gene)$sample_id))/length(unique(tumor_vs_rest_DE_total $sample_id))
@@ -241,7 +241,7 @@ for (gene in DE_genes_filtered_df$DE_genes_filtered){
   sample_vector <- c(sample_vector,sample)
 }
 DE_genes_filtered_df$p_val_adj <- fdr_vector
-DE_genes_filtered_df$avg_logFC <- fc_vector
+DE_genes_filtered_df$avg_log2FC <- fc_vector
 DE_genes_filtered_df$avg_norm_exp <- exp_vector
 DE_genes_filtered_df$sample_freq <- freq_vector
 DE_genes_filtered_df$samples <- sample_vector
@@ -254,7 +254,7 @@ DE_genes_filtered_df$GO_surface[is.na(DE_genes_filtered_df$GO_surface)] <- "Non-
 colnames(DE_genes_filtered_df)[1] <- "Gene"
 
 cat("SORT THE TABLE BY AVERAGE LOG FOLD CHANGE...\n")
-DE_genes_filtered_df <- DE_genes_filtered_df[order(DE_genes_filtered_df$avg_logFC,decreasing = TRUE),] #sort by avg_logFC
+DE_genes_filtered_df <- DE_genes_filtered_df[order(DE_genes_filtered_df$avg_log2FC,decreasing = TRUE),] #sort by avg_log2FC
 
 ################################################
 ###Cellular Loation Annotation from Cell Surface Protein atlas

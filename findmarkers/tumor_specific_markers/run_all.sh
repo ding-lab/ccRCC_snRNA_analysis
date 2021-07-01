@@ -3,13 +3,20 @@
 ### MARKER DISCOVER AND CELLULAR LOCATION ANNOTATION
 ###########################################################
 # STEP1 
-Rscript tumor_specific_markers_V1.0.R -r /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Scripts/V8/automate_test/rds_list.txt -o /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Scripts/V8/automate_test/ -c Plasma  -s /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Data/Cell_Surface_Protein_Atlas_S2_File.txt -p /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Data/Human_Protein_Atlas_subcellular_location.txt 
+OUT_DIR=/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/findmarkers/tumor_specific_markers/tumor_specific_markers/20210701.v1/
+mkdir -p ${OUT_DIR}
+Rscript tumor_specific_markers_V1.0.R \
+	-r /diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/individual_sample/write_individual_srat_obj_rm_doublets/20210701.v1/Seurat_Object_Paths.DoubletRemoved.20210701.v1.tsv \
+	-o ${OUT_DIR} \
+	-c "Tumor cells" \
+	-s /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Data/Cell_Surface_Protein_Atlas_S2_File.txt \
+	-p /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Data/Human_Protein_Atlas_subcellular_location.txt >& ${OUT_DIR}_$(date +%Y%m%d%H%M%S).log& 
+
+exit
 
 ###########################################################
 ### GTEX TISSUE SPECIFICITY TEST
 ###########################################################
-OUT_DIR=/diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Scripts/V8/automate_test/
-mkdir -p ${OUT_DIR}
 ####################################################
 ### step0 parse the GTEX table to get meta.data
 ####################################################
