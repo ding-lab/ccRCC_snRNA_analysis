@@ -67,6 +67,7 @@ if (is.null(opt$hpa)){
 rds_list <- opt$rds_path
 out_path <- opt$output_path
 tumor_ct <- opt$cell_type
+print(paste0("cell type of interest: ", tumor_ct))
 cspa_file <- opt$cspa
 hpa_file <- opt$hpa
 
