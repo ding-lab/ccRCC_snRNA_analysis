@@ -19,15 +19,27 @@ degs_ccRCC_vs_pt_df <- fread(data.table = F, input = "./Resources/Analysis_Resul
 ## input tumor-specific DEGs with surface annotation
 # degs_ccRCC_vs_others_df
 degs_ccRCC_vs_others_surface_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/tumor_specific_markers/20210701.v1/ccRCC_cells_specific_DEG_with_surface_annotations_from_3DB.txt")
+degs_ccRCC_vs_others_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/tumor_specific_markers/20210701.v1/Tumor cells_vs_combined_others_DE.txt")
 
-# merge -------------------------------------------------------------------
-
-
+# process selected genes -------------------------------------------------------------------
+len_allsamples <- length(unique(degs_ccRCC_vs_others_df$sample_id))
+degs_ccRCC_vs_others_sum_df <- degs_ccRCC_vs_others_df %>%
+  group_by(gene_symbol) %>%
+  summarise(avg_log2FC.mean.TumorcellsvsNontumor = mean(avg_log2FC), avg_norm_exp = mean(avg_norm_exp), sample_freq = length(sample_id)/len_allsamples) %>%
+  rename(Gene = gene_symbol) %>%
+  filter(Gene %in% c("CA9")) %>%
+  mutate(GO_surface = NA) %>%
+  mutate(CSPA_category = NA) %>%
+  mutate(HPA_Reliability = NA)
 
 # filter ------------------------------------------------------------------
-degs_ccRCC_vs_otherspt_surface_df <- merge(x = degs_ccRCC_vs_others_surface_df %>%
-                                             rename(avg_log2FC.mean.TumorcellsvsNontumor = avg_log2FC) %>%
-                                             select(Gene, avg_log2FC.mean.TumorcellsvsNontumor, avg_norm_exp, sample_freq, GO_surface, CSPA_category, HPA_Reliability), 
+degs_ccRCC_vs_others_merged_df <- rbind(degs_ccRCC_vs_others_sum_df,
+                                        degs_ccRCC_vs_others_surface_df %>%
+                                          rename(avg_log2FC.mean.TumorcellsvsNontumor = avg_log2FC) %>%
+                                          select(Gene, avg_log2FC.mean.TumorcellsvsNontumor, avg_norm_exp, sample_freq, GO_surface, CSPA_category, HPA_Reliability) %>%
+                                          filter(GO_surface == "Surface" | (!is.na(HPA_Reliability) & HPA_Reliability %in% c("Approved", "Enhanced", "Supported"))))
+
+degs_ccRCC_vs_otherspt_surface_df <- merge(x = degs_ccRCC_vs_others_merged_df, 
                                            y = degs_ccRCC_vs_pt_df %>%
                                              rename(pct.allTumorcells = pct.1.allTumorcellsvsPT) %>%
                                              rename(pct.allPTcells = pct.2.allTumorcellsvsPT) %>%
@@ -39,13 +51,14 @@ degs_ccRCC_vs_otherspt_surface_df <- merge(x = degs_ccRCC_vs_others_surface_df %
                                                     Num_sig_up.allTumorcellsvsPT, Num_sig_down.allTumorcellsvsPT, log2FC.bulkRNA, FDR.bulkRNA, log2FC.bulkpro, FDR.bulkpro), 
                                            by.x = "Gene", by.y = "genesymbol_deg", all.x = T)
 degs_ccRCC_vs_otherspt_surface_filtered_df <- degs_ccRCC_vs_otherspt_surface_df %>%
-  filter(GO_surface == "Surface" | (!is.na(HPA_Reliability) & HPA_Reliability %in% c("Approved", "Enhanced", "Supported"))) %>%
   filter(Num_sig_up.allTumorcellsvsPT >= 15 & Num_sig_down.allTumorcellsvsPT == 0)
   
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "ccRCC_markers.Surface.", run_id, ".tsv")
 write.table(x = degs_ccRCC_vs_otherspt_surface_filtered_df, file = file2write, quote = F, sep = "\t", row.names = F)
+file2write <- paste0(dir_out, "ccRCC_markers.Surface.", run_id, ".csv")
+write.table(x = degs_ccRCC_vs_otherspt_surface_filtered_df, file = file2write, quote = F, sep = ",", row.names = F)
 
 # degs_ccRCC_vs_others_surface_df %>%
 #   filter(GO_surface == "Surface" | (!is.na(HPA_Reliability) & HPA_Reliability %in% c("Approved", "Enhanced", "Supported"))) %>%
