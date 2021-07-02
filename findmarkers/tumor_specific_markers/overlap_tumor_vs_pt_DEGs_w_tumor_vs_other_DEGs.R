@@ -25,15 +25,28 @@ degs_ccRCC_vs_others_surface_df <- fread(data.table = F, input = "./Resources/An
 
 
 # filter ------------------------------------------------------------------
-degs_ccRCC_vs_otherspt_surface_df <- merge(x = degs_ccRCC_vs_others_surface_df, y = degs_ccRCC_vs_pt_df, by.x = "Gene", by.y = "genesymbol_deg", all.x = T)
+degs_ccRCC_vs_otherspt_surface_df <- merge(x = degs_ccRCC_vs_others_surface_df %>%
+                                             rename(avg_log2FC.mean.TumorcellsvsNontumor = avg_log2FC) %>%
+                                             select(Gene, avg_log2FC.mean.TumorcellsvsNontumor, avg_norm_exp, sample_freq, GO_surface, CSPA_category, HPA_Reliability), 
+                                           y = degs_ccRCC_vs_pt_df %>%
+                                             rename(pct.allTumorcells = pct.1.allTumorcellsvsPT) %>%
+                                             rename(pct.allPTcells = pct.2.allTumorcellsvsPT) %>%
+                                             rename(Num_sig_up.allTumorcellsvsPT = Num_sig_up) %>%
+                                             rename(Num_sig_down.allTumorcellsvsPT = Num_sig_down) %>%
+                                             rename(log2FC.bulkRNA = logFC.bulkRNA) %>%
+                                             rename(log2FC.bulkpro = meddiff_exp.bulkpro) %>%
+                                             select(genesymbol_deg, avg_log2FC.allTumorcellsvsPT, pct.allTumorcells, pct.allPTcells,
+                                                    Num_sig_up.allTumorcellsvsPT, Num_sig_down.allTumorcellsvsPT, log2FC.bulkRNA, FDR.bulkRNA, log2FC.bulkpro, FDR.bulkpro), 
+                                           by.x = "Gene", by.y = "genesymbol_deg", all.x = T)
 degs_ccRCC_vs_otherspt_surface_filtered_df <- degs_ccRCC_vs_otherspt_surface_df %>%
   filter(GO_surface == "Surface" | (!is.na(HPA_Reliability) & HPA_Reliability %in% c("Approved", "Enhanced", "Supported"))) %>%
-  filter(Num_sig_up >= 15 & Num_sig_down == 0)
+  filter(Num_sig_up.allTumorcellsvsPT >= 15 & Num_sig_down.allTumorcellsvsPT == 0)
+  
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "ccRCC_markers.Surface.", run_id, ".tsv")
 write.table(x = degs_ccRCC_vs_otherspt_surface_filtered_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
-degs_ccRCC_vs_others_surface_df %>%
-  filter(GO_surface == "Surface" | (!is.na(HPA_Reliability) & HPA_Reliability %in% c("Approved", "Enhanced", "Supported"))) %>%
-  nrow()
+# degs_ccRCC_vs_others_surface_df %>%
+#   filter(GO_surface == "Surface" | (!is.na(HPA_Reliability) & HPA_Reliability %in% c("Approved", "Enhanced", "Supported"))) %>%
+#   nrow()
