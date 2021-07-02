@@ -10,7 +10,8 @@ source("./ccRCC_snRNA_analysis/plotting.R")
 source("./ccRCC_snRNA_analysis/plotting_variables.R")
 
 ## set run id
-version_tmp <- "Cap5"
+x_cap <- 50
+version_tmp <- paste0("Cap", x_cap)
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -39,7 +40,16 @@ cellgroup_label_df <- data.frame(cell_type13 = c("B-cells", "CD4+ T-cells", "CD8
                                                  "Proximal tubule", "Loop of Henle", "Distal convoluted tubule", 'Principle cells', "Intercalated cells", "Podocytes"))
 cellgroup_label_df <- cellgroup_label_df %>%
   mutate(cell_type13.columnname = gsub(x = cell_type13, pattern = "\\-|\\+| ", replacement = "."))
-x_cap <- 5
+## count cells
+cellcount_df <- barcode2celltype_df %>%
+  select(orig.ident, Cell_group_w_epithelialcelltypes) %>%
+  table() %>%
+  as.data.frame()
+cellcount_df$cell_group.columnname <- mapvalues(x = cellcount_df$Cell_group_w_epithelialcelltypes, from = cellgroup_label_df$cell_type13, to = as.vector(cellgroup_label_df$cell_type13.columnname))
+cellcount_df <- cellcount_df %>%
+  mutate(id_sample_cell_group = paste0(orig.ident, "_", cell_group.columnname)) %>%
+  mutate(keep = (Freq >= 10))
+ids_sample_cell_group_keep <- cellcount_df$id_sample_cell_group[cellcount_df$keep]
 
 # identify genes to plot -------------------------------------------------
 gene_plot <- gene_plot_df$Gene[1]
@@ -54,7 +64,8 @@ for (gene_plot in unique(gene_plot_df$Gene)) {
     mutate(aliquot = str_split_fixed(string = id_sample_cell_group, pattern = "_", n = 2)[,1]) %>%
     mutate(cell_group.columnname = str_split_fixed(string = id_sample_cell_group, pattern = "_", n = 2)[,2]) %>%
     # mutate(x_plot = value)
-    mutate(x_plot = ifelse(value > x_cap, x_cap, value))
+    mutate(x_plot = ifelse(value > x_cap, x_cap, value)) %>%
+    filter(id_sample_cell_group %in% ids_sample_cell_group_keep)
   
   plotdata_df$cell_group <- mapvalues(x = plotdata_df$cell_group.columnname, 
                                       from = cellgroup_label_df$cell_type13.columnname,
@@ -62,6 +73,8 @@ for (gene_plot in unique(gene_plot_df$Gene)) {
   plotdata_df$id_sample <- mapvalues(x = plotdata_df$aliquot, 
                                      from = idmetadata_df$Aliquot.snRNA,
                                      to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
+  ## add cell count
+  
   plotdata_df$y_plot <- plotdata_df$id_sample
   plotdata_df <- plotdata_df %>%
     filter(!(cell_group %in% c("Unknown", "Immune others", "Normal epithelial cells")))

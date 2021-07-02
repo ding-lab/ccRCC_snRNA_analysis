@@ -32,7 +32,7 @@ dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
 library(future)
 plan("multiprocess", workers = 5)
-options(future.globals.maxSize = 5 * 1024^3) # for 5 Gb RAM
+options(future.globals.maxSize = 10 * 1024^3) # for 5 Gb RAM
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
@@ -66,7 +66,9 @@ cases_nonmutants <- mut_df$Case[mut_df$mutation_category_sim == "Non-mutants"]
 aliquots_group2 <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available & idmetadata_df$Case %in% cases_nonmutants & idmetadata_df$Sample_Type == "Tumor" & !(idmetadata_df$Case %in% c("C3L-00359"))]
 aliquots_group2
 aliquots_group1 <- idmetadata_df$Aliquot.snRNA[idmetadata_df$snRNA_available & !(idmetadata_df$Case %in% cases_nonmutants) & idmetadata_df$Sample_Type == "Tumor" & !(idmetadata_df$Case %in% c("C3L-00359"))]
-aliquots_group1
+## process C3N-00437-T1 first
+aliquots_group1 <- unique(c("CPT0012550012", aliquots_group1))
+
 
 # preprocess the Seurat object meta data---------------------------------------------
 BC <- srat@meta.data %>% rownames
