@@ -52,53 +52,52 @@ cellcount_df <- cellcount_df %>%
 ids_sample_cell_group_keep <- cellcount_df$id_sample_cell_group[cellcount_df$keep]
 
 # identify genes to plot -------------------------------------------------
-gene_plot <- gene_plot_df$Gene[1]
-for (gene_plot in "CA9") {
+genes_plot <- c("CA9", "ENPP3", "CP")
 # for (gene_plot in unique(gene_plot_df$Gene)) {
-  # make plot data ----------------------------------------------------------
-  plotdata_wide_df <- exp_wide_df %>%
-    filter(V1 %in% gene_plot)
-  plotdata_df <- melt(data = plotdata_wide_df)
-  summary(plotdata_df$value)
-  plotdata_df <- plotdata_df %>%
-    mutate(id_sample_cell_group = gsub(x = variable, pattern = "SCT\\.", replacement = "")) %>%
-    mutate(aliquot = str_split_fixed(string = id_sample_cell_group, pattern = "_", n = 2)[,1]) %>%
-    mutate(cell_group.columnname = str_split_fixed(string = id_sample_cell_group, pattern = "_", n = 2)[,2]) %>%
-    # mutate(x_plot = value)
-    mutate(x_plot = ifelse(value > x_cap, x_cap, value)) %>%
-    filter(id_sample_cell_group %in% ids_sample_cell_group_keep)
-  
-  plotdata_df$cell_group <- mapvalues(x = plotdata_df$cell_group.columnname, 
-                                      from = cellgroup_label_df$cell_type13.columnname,
-                                      to = as.vector(cellgroup_label_df$cell_type13))
-  plotdata_df$id_sample <- mapvalues(x = plotdata_df$aliquot, 
-                                     from = idmetadata_df$Aliquot.snRNA,
-                                     to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
-  ## add cell count
-  
-  plotdata_df$y_plot <- plotdata_df$id_sample
-  plotdata_df <- plotdata_df %>%
-    filter(!(cell_group %in% c("Unknown", "Immune others", "Normal epithelial cells")))
-  
-  # plot --------------------------------------------------------------------
-  p <- ggplot(data = plotdata_df, mapping = aes(x = y_plot, y = x_plot, fill = cell_group, color = "white"))
-  p <- p + geom_dotplot(binaxis='y', stackdir='center', position=position_dodge(0.8), alpha = 0.7)
-  p <- p + scale_fill_manual(values = colors_cellgroup[unique(plotdata_df$cell_group)])
-  p <- p + scale_color_manual(values = c("white" = NA))
-  p <- p + theme_classic(base_size = 12)
-  p <- p + coord_flip()
-  p <- p + ylab("Normalized expression")
-  p <- p + theme(panel.grid.major.y = element_line(size=.1, color="black" ))
-  p <- p + theme(axis.text.y = element_text(size = 12), axis.title.y = element_blank())
-  p <- p + theme(axis.text.x = element_text(size = 12), axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"), ends = "last")))
-  p <- p + ggtitle(label = paste0(gene_plot, " sn Expression"))
-  # file2write <- paste0(dir_out, gene_plot, ".png")
-  # png(file2write, width = 800, height = 800, res = 150)
-  # print(p)
-  # dev.off()
-  
-  file2write <- paste0(dir_out, gene_plot, ".pdf")
-  pdf(file2write, width = 6, height = 6, useDingbats = F)
-  print(p)
-  dev.off()
-}
+# make plot data ----------------------------------------------------------
+plotdata_wide_df <- exp_wide_df %>%
+  filter(V1 %in% genes_plot)
+plotdata_df <- melt(data = plotdata_wide_df)
+summary(plotdata_df$value)
+plotdata_df <- plotdata_df %>%
+  mutate(id_sample_cell_group = gsub(x = variable, pattern = "SCT\\.", replacement = "")) %>%
+  mutate(aliquot = str_split_fixed(string = id_sample_cell_group, pattern = "_", n = 2)[,1]) %>%
+  mutate(cell_group.columnname = str_split_fixed(string = id_sample_cell_group, pattern = "_", n = 2)[,2]) %>%
+  # mutate(x_plot = value)
+  mutate(x_plot = ifelse(V1 == "CP" & value > 10, 10, value)) %>%
+  filter(id_sample_cell_group %in% ids_sample_cell_group_keep)
+
+plotdata_df$cell_group <- mapvalues(x = plotdata_df$cell_group.columnname, 
+                                    from = cellgroup_label_df$cell_type13.columnname,
+                                    to = as.vector(cellgroup_label_df$cell_type13))
+plotdata_df$id_sample <- mapvalues(x = plotdata_df$aliquot, 
+                                   from = idmetadata_df$Aliquot.snRNA,
+                                   to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
+## add cell count
+
+plotdata_df$y_plot <- plotdata_df$id_sample
+plotdata_df <- plotdata_df %>%
+  filter(!(cell_group %in% c("Unknown", "Immune others", "Normal epithelial cells")))
+
+# plot --------------------------------------------------------------------
+p <- ggplot(data = plotdata_df, mapping = aes(x = y_plot, y = x_plot, fill = cell_group, color = "white"))
+p <- p + geom_dotplot(binaxis='y', stackdir='center', position=position_dodge(0.8), alpha = 0.7)
+p <- p + scale_fill_manual(values = colors_cellgroup[unique(plotdata_df$cell_group)])
+p <- p + guides(fill = guide_legend(override.aes = list(size = 5)))
+p <- p + scale_color_manual(values = c("white" = NA))
+p <- p + theme_classic(base_size = 12)
+p <- p + coord_flip()
+p <- p + facet_grid(cols = vars(V1), scales = "free_x")
+p <- p + ylab("Normalized expression")
+p <- p + theme(panel.grid.major.y = element_line(size=.1, color="black" ), strip.text = element_text(size = 15))
+p <- p + theme(axis.text.y = element_text(size = 12), axis.title.y = element_blank())
+p <- p + theme(axis.text.x = element_text(size = 12), axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"), ends = "last")))
+# file2write <- paste0(dir_out, gene_plot, ".png")
+# png(file2write, width = 800, height = 800, res = 150)
+# print(p)
+# dev.off()
+
+file2write <- paste0(dir_out, paste0(genes_plot, collapse = "_"), ".pdf")
+pdf(file2write, width = 10, height = 6, useDingbats = F)
+print(p)
+dev.off()

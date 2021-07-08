@@ -25,7 +25,7 @@ get_yes_no <- function(response_string) {
 }
 
 # input sample mapping file -----------------------------------------------
-clinical_sup_df <- readxl::read_excel("./Resources/Clinical_Data/CCRCC_July2020_clinical_data.xlsx", sheet = "Specimen")
+clinical_sup_df <- readxl::read_excel("./Resources/Clinical_Data/CCRCC_June2021_clinical_data.xlsx", sheet = "Specimen")
 colnames_clinical_df <- data.frame(colnames_clinical = colnames(clinical_sup_df))
 colnames(clinical_sup_df)
 # input the snRNA sample matrix -------------------------------------------

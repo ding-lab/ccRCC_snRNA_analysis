@@ -47,31 +47,54 @@ plotdata_df$cell_group <- mapvalues(x = plotdata_df$cell_group.columnname,
 plotdata_df$id_sample <- mapvalues(x = plotdata_df$aliquot, 
                                     from = idmetadata_df$Aliquot.snRNA,
                                     to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
-plotdata_df$y_plot <- plotdata_df$id_sample
+ids_samples_sorted <- plotdata_df %>%
+  filter(cell_group == "Macrophages") %>%
+  arrange(desc(x_plot))
+ids_samples_sorted <- ids_samples_sorted$id_sample
+ids_samples_sorted <- c(ids_samples_sorted[!(ids_samples_sorted %in% c("C3N-01200-N", "C3L-00088-N"))], c("C3N-01200-N", "C3L-00088-N"))
+plotdata_df$y_plot <- factor(x = plotdata_df$id_sample, levels = rev(ids_samples_sorted))
 plotdata_df <- plotdata_df %>%
   filter(!(cell_group %in% c("Unknown", "Immune others", "Normal epithelial cells")))
 ## make colors
-colors_cellgroup <- c("#E7298A", "#1B9E77", "#7570B3","#000000", "#E69F00", "#56B4E9", "#F0E442", "#0072B2", "#D55E00","#CC79A7", "#B2DF8A", "#FB9A99","grey50")
-names(colors_cellgroup) <- c("Tumor cells", "Normal epithelial cells", "Immune others", "B-cells", "CD4+ T-cells", "CD8+ T-cells", "Macrophages", "DC", "NK cells","Endothelial cells", "Myofibroblasts", "Fibroblasts","Unknown")
+# colors_cellgroup <- c("#E7298A", "#1B9E77", "#7570B3","#000000", "#E69F00", 
+#                       "#56B4E9","#F0E442", "#0072B2", "#D55E00","#CC79A7", "#B2DF8A", "#FB9A99","grey50")
+colors_cellgroup <- c("#E7298A", "#1B9E77", "#7570B3","#000000", "#E69F00", 
+                      "#56B4E9","#FF7F00", "#0072B2", "#F0E442","#CC79A7", "#B2DF8A", "#FB9A99","grey50")
+names(colors_cellgroup) <- c("Tumor cells", "Normal epithelial cells", "Immune others", "B-cells", "CD4+ T-cells", 
+                             "CD8+ T-cells", "Macrophages", "DC", "NK cells","Endothelial cells", "Myofibroblasts", "Fibroblasts","Unknown")
 
 # plot --------------------------------------------------------------------
-p <- ggplot(data = plotdata_df, mapping = aes(x = y_plot, y = x_plot, fill = cell_group, color = "white"))
+# p <- ggplot(data = plotdata_df, mapping = aes(x = y_plot, y = x_plot, fill = cell_group, color = "white"))
+# p <- p + geom_dotplot(binaxis='y', stackdir='center', position=position_dodge(0.8), alpha = 0.7)
+# p <- p + scale_fill_manual(values = colors_cellgroup[unique(plotdata_df$cell_group)])
+# p <- p + scale_color_manual(values = c("white" = NA))
+# p <- p + theme_classic(base_size = 12)
+# p <- p + coord_flip()
+# p <- p + ylab("Normalized expression")
+# p <- p + theme(panel.grid.major.y = element_line(size=.1, color="black" ))
+# p <- p + scale_y_reverse()
+# p <- p + scale_x_discrete(position = "top")
+# p <- p + theme(legend.position = "left")
+# p <- p + theme(axis.text.y = element_text(size = 12), axis.title.y = element_blank())
+# p <- p + theme(axis.text.x = element_text(size = 12))
+# p <- p + theme(axis.text.x = element_text(size = 12), axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"), ends = "first")))
+# p <- p + ggtitle(label = paste0("Human ccRCC sn Expression"))
+
+p <- ggplot(data = plotdata_df, mapping = aes(x = y_plot, y = x_plot, fill = cell_group, color = as.character(cell_group == "Macrophages")))
 p <- p + geom_dotplot(binaxis='y', stackdir='center', position=position_dodge(0.8), alpha = 0.7)
 p <- p + scale_fill_manual(values = colors_cellgroup[unique(plotdata_df$cell_group)])
-p <- p + scale_color_manual(values = c("white" = NA))
+p <- p + scale_color_manual(values = c("TRUE" = "black", "FALSE" = NA))
 p <- p + theme_classic(base_size = 12)
 p <- p + coord_flip()
 p <- p + ylab("Normalized expression")
 p <- p + theme(panel.grid.major.y = element_line(size=.1, color="black" ))
-p <- p + scale_y_reverse()
-p <- p + scale_x_discrete(position = "top")
-p <- p + theme(legend.position = "left")
 p <- p + theme(axis.text.y = element_text(size = 12), axis.title.y = element_blank())
-p <- p + theme(axis.text.x = element_text(size = 12), axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"), ends = "first")))
-p <- p + ggtitle(label = paste0("Human ccRCC sn Expression"))
-file2write <- paste0(dir_out, "LigandGenes2", ".png")
+p <- p + theme(axis.text.x = element_text(size = 12), axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"), ends = "last")))
+file2write <- paste0(dir_out, "TFRC", ".png")
 png(file2write, width = 800, height = 800, res = 150)
 print(p)
 dev.off()
-
-
+file2write <- paste0(dir_out, "TFRC", ".pdf")
+pdf(file2write, width = 7.5, height = 5.5, useDingbats = F)
+print(p)
+dev.off()

@@ -10,6 +10,12 @@ source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 library(survival)
 library(survminer)
+## set run id
+version_tmp <- 1
+run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
+## set output directory
+dir_out <- paste0(makeOutDir(), run_id, "/")
+dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input protein data
@@ -29,35 +35,23 @@ exp_data_df <- (exp_data_df - exp_df$ReferenceIntensity)
 colnames(exp_data_df) <- metadata_filtered_df$CASE_ID
 
 # specify gene to test ----------------------------------------------------
-gene_test <- "ANGPT2"
-genes_process <- c("HK1", "HK2", "HK3", "GPI", "PFKP", "PFKL", "PFKM", "ALDOB", "ALDOA", "ALDOC", "TPI1", "GAPDH", "PGK1", "PGK2",
-                   "PGAM1", "PGAM2", "ENO1", "ENO2", "ENO3", "PKM", "PKLR", "LDHA", "LDHB", "LDHC", "LDHD",
-                   "PDK1", "PDK2", "PDK3", "PDK4", "PDP1", "PDP2", "DLAT", "DLD", "PDHA1", "PDHA2", "PDHB",
-                   "ACO2", "IDH2", "OGDH", "SDHB", "SDHC", "SDHD", "FH", "MDH2",
-                   "ACLY", "ACACA", "FASN",
-                   "PGM1", "PGM2", "UGP2", "GYS1", "PYGL", "GBE1")
+genes_process_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210702.v1/ccRCC_markers.Surface.20210702.v1.tsv")
+genes_process <- genes_process_df$Gene
+genes_process <- genes_process[genes_process %in% exp_df$Index]
 
 for (gene_test in genes_process) {
-  ## set run id
-  # version_tmp <- 1
-  run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", gene_test)
-  ## set output directory
-  dir_out <- paste0(makeOutDir(), run_id, "/")
-  dir.create(dir_out)
   
   # make combined data and test ------------------------------------------------------
   ## filter specific protein data
   exp_test_wide_df <- exp_data_df[exp_df$Index == gene_test,]
   testdata_df <- data.frame(CASE_ID = metadata_filtered_df$CASE_ID, Expression = unlist(exp_test_wide_df))
   testdata_df <- merge(x = testdata_df, y = survival_df, by = c("CASE_ID"), all.x = T)
-  quantile_test <- 0.9
-  cutoff_exp <- quantile(x = testdata_df$Expression, probs = quantile_test, na.rm = T)
-  table(testdata_df$Expression > cutoff_exp)
-  min(testdata_df$survival_time)
+  cutoff_exp_low <- quantile(x = testdata_df$Expression, probs = 0.35, na.rm = T); cutoff_exp_low
+  cutoff_exp_high <- quantile(x = testdata_df$Expression, probs = 0.65, na.rm = T); cutoff_exp_high
   testdata_df <- testdata_df %>%
-    mutate(Expression_group = ifelse(Expression < cutoff_exp, "Exp Low", "Exp high")) %>%
+    mutate(Expression_group = ifelse(Expression < cutoff_exp_low, "Exp Low", ifelse(Expression > cutoff_exp_high, "Exp high", "Exp medium"))) %>%
     mutate(EFS_censor = (with_new_event == "Tumor Free")) %>%
-    mutate(EFS = (survival_time + 9))
+    mutate(EFS = (survival_time + 9)/365)
   ## EFS_censor == 0 with event; == 1 without event
   ## test
   testdata_comp_df <- testdata_df %>%
@@ -66,19 +60,16 @@ for (gene_test in genes_process) {
   
   
   # plot --------------------------------------------------------------------
-  file2write <- paste0(dir_out, gene_test, ".Quantle", quantile_test, ".pdf")
-  # file2write <- paste0(dir_out, "CES3.Quantle0.25.pdf")
-  pdf(file2write, width = 6, height = 6, useDingbats = F)
   res <- ggsurvplot(fit_efs,
                     data = testdata_comp_df,
                     conf.int = TRUE,
                     surv.median.line = "hv", pval = TRUE,
-                    # legend.title = "wgii category",
-                    # legend.labs = c("High", "Low"),
+                    legend.title = "bulk protein level",
+                    legend.labs = c("High", "Low", "Medium"),
                     legend = "top",
                     xlab = "Time (years)",
                     ylab = "Overall Survival",
-                    palette = c("#D95F02", "#1B9E77"),
+                    # palette = c("#D95F02", "#1B9E77"),
                     ggtheme = theme_survminer(base_size = 12,
                                               base_family = "",
                                               font.main = c(12, "plain", "black"),
@@ -94,8 +85,9 @@ for (gene_test in genes_process) {
                     risk.table.col = "strata", # Change risk table color by groups
                     linetype = "strata") # Change line type by groups
   res$table <- res$table + theme(axis.line = element_blank())
-  res$plot <- res$plot + labs(title = paste0("Survival Curves (", gene_test, " protein high vs. low)"))
+  res$plot <- res$plot + labs(title = paste0("Survival Curves by ", gene_test, " bulk protein level"))
+  file2write <- paste0(dir_out, gene_test, ".png")
+  png(file2write, width = 600, height = 800, res = 150)
   print(res)
   dev.off()
-  
 }
