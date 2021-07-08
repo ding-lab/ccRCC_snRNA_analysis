@@ -19,8 +19,6 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input the average expression
 exp_wide_df <- fread(data.table = F, input = "./Resources/Analysis_Results/average_expression/avgexp_PDAC_sct_data_bycelltypefinal_bysample_katmai/20210708.v1/PDAC.avgexp.SCT.data.cell_type_final.bysample.20210708.v1.tsv")
-## input genes
-gene_plot_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210702.v1/ccRCC_markers.Surface.20210702.v1.tsv")
 
 # preprocess --------------------------------------------------------------
 ## make colors
@@ -40,9 +38,7 @@ colors_cellgroup <- Polychrome::palette36.colors(n = length(unique(plotdata_df$c
 names(colors_cellgroup) <- unique(plotdata_df$cell_group)
 
 # identify genes to plot -------------------------------------------------
-gene_plot <- gene_plot_df$Gene[1]
-# for (gene_plot in "CA9") {
-for (gene_plot in unique(gene_plot_df$Gene)) {
+for (gene_plot in "TFRC") {
   # make plot data ----------------------------------------------------------
   plotdata_wide_df <- exp_wide_df %>%
     filter(V1 %in% gene_plot)
@@ -60,14 +56,14 @@ for (gene_plot in unique(gene_plot_df$Gene)) {
   
   ## sort by expression
   ids_samples_sorted <- plotdata_df %>%
-    filter(cell_group == "PDAC") %>%
+    filter(cell_group == "Macrophage") %>%
     arrange(desc(x_plot))
   ids_samples_sorted <- ids_samples_sorted$id_sample
   plotdata_df$y_plot <- factor(x = plotdata_df$id_sample, levels = rev(ids_samples_sorted))
   
   
   # plot --------------------------------------------------------------------
-  p <- ggplot(data = plotdata_df, mapping = aes(x = y_plot, y = x_plot, fill = cell_group, color = as.character(cell_group == "PDAC")))
+  p <- ggplot(data = plotdata_df, mapping = aes(x = y_plot, y = x_plot, fill = cell_group, color = as.character(cell_group == "Macrophage")))
   p <- p + geom_dotplot(binaxis='y', stackdir='center', position=position_dodge(0.8), alpha = 0.7)
   p <- p + scale_fill_manual(values = colors_cellgroup[unique(plotdata_df$cell_group)])
   p <- p + scale_color_manual(values = c("TRUE" = "black", "FALSE" = NA))
@@ -82,9 +78,9 @@ for (gene_plot in unique(gene_plot_df$Gene)) {
   png(file2write, width = 1000, height = 1200, res = 150)
   print(p)
   dev.off()
-  # 
-  # file2write <- paste0(dir_out, "PDAC_", gene_plot, ".pdf")
-  # pdf(file2write, width = 7.5, height = 7, useDingbats = F)
-  # print(p)
-  # dev.off()
+
+  file2write <- paste0(dir_out, "PDAC_", gene_plot, ".pdf")
+  pdf(file2write, width = 7.5, height = 7.5, useDingbats = F)
+  print(p)
+  dev.off()
 }

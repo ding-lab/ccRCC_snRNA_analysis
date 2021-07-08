@@ -18,9 +18,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the average expression
-exp_wide_df <- fread(data.table = F, input = "./Resources/Analysis_Results/average_expression/avgexp_PDAC_sct_data_bycelltypefinal_bysample_katmai/20210708.v1/PDAC.avgexp.SCT.data.cell_type_final.bysample.20210708.v1.tsv")
-## input genes
-gene_plot_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210702.v1/ccRCC_markers.Surface.20210702.v1.tsv")
+exp_wide_df <- fread(data.table = F, input = "./Resources/Analysis_Results/average_expression/averexp_BRCA_scRNA_bycelltype_bysample_katmai/20210708.v1/BRCA.avgexp.SCT.data.cell_type.byPiece_ID.20210708.v1.tsv")
 
 # preprocess --------------------------------------------------------------
 ## make colors
@@ -40,9 +38,7 @@ colors_cellgroup <- Polychrome::palette36.colors(n = length(unique(plotdata_df$c
 names(colors_cellgroup) <- unique(plotdata_df$cell_group)
 
 # identify genes to plot -------------------------------------------------
-gene_plot <- gene_plot_df$Gene[1]
-# for (gene_plot in "CA9") {
-for (gene_plot in unique(gene_plot_df$Gene)) {
+for (gene_plot in "TFRC") {
   # make plot data ----------------------------------------------------------
   plotdata_wide_df <- exp_wide_df %>%
     filter(V1 %in% gene_plot)
@@ -59,15 +55,15 @@ for (gene_plot in unique(gene_plot_df$Gene)) {
   # plotdata_df$y_plot <- plotdata_df$id_sample
   
   ## sort by expression
-  ids_samples_sorted <- plotdata_df %>%
-    filter(cell_group == "PDAC") %>%
+  ids_samples_sorted_df <- plotdata_df %>%
+    filter(cell_group == "Mono_Macro") %>%
     arrange(desc(x_plot))
-  ids_samples_sorted <- ids_samples_sorted$id_sample
+  ids_samples_sorted <- unique(plotdata_df$id_sample)
+  ids_samples_sorted <- c(ids_samples_sorted_df$id_sample, ids_samples_sorted[!(ids_samples_sorted %in% ids_samples_sorted_df$id_sample)])
   plotdata_df$y_plot <- factor(x = plotdata_df$id_sample, levels = rev(ids_samples_sorted))
   
-  
   # plot --------------------------------------------------------------------
-  p <- ggplot(data = plotdata_df, mapping = aes(x = y_plot, y = x_plot, fill = cell_group, color = as.character(cell_group == "PDAC")))
+  p <- ggplot(data = plotdata_df, mapping = aes(x = y_plot, y = x_plot, fill = cell_group, color = as.character(cell_group == "Mono_Macro")))
   p <- p + geom_dotplot(binaxis='y', stackdir='center', position=position_dodge(0.8), alpha = 0.7)
   p <- p + scale_fill_manual(values = colors_cellgroup[unique(plotdata_df$cell_group)])
   p <- p + scale_color_manual(values = c("TRUE" = "black", "FALSE" = NA))
@@ -77,14 +73,14 @@ for (gene_plot in unique(gene_plot_df$Gene)) {
   p <- p + theme(panel.grid.major.y = element_line(size=.1, color="black" ))
   p <- p + theme(axis.text.y = element_text(size = 8), axis.title.y = element_blank())
   p <- p + theme(axis.text.x = element_text(size = 12), axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"), ends = "last")))
-  p <- p + ggtitle(label = paste0(gene_plot, " sn Expression in PDAC"))
-  file2write <- paste0(dir_out, "PDAC_", gene_plot, ".png")
-  png(file2write, width = 1000, height = 1200, res = 150)
-  print(p)
-  dev.off()
-  # 
-  # file2write <- paste0(dir_out, "PDAC_", gene_plot, ".pdf")
-  # pdf(file2write, width = 7.5, height = 7, useDingbats = F)
+  p <- p + ggtitle(label = paste0(gene_plot, " sn Expression in BRCA"))
+  # file2write <- paste0(dir_out, "BRCA_", gene_plot, ".png")
+  # png(file2write, width = 1000, height = 1200, res = 150)
   # print(p)
   # dev.off()
+
+  file2write <- paste0(dir_out, "BRCA_", gene_plot, ".pdf")
+  pdf(file2write, width = 7, height = 5.5, useDingbats = F)
+  print(p)
+  dev.off()
 }

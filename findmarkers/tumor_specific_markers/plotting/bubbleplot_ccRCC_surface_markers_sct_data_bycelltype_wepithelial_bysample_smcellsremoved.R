@@ -8,9 +8,8 @@ source("./ccRCC_snRNA_analysis//load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 source("./ccRCC_snRNA_analysis/plotting_variables.R")
-
 ## set run id
-x_cap <- 5
+x_cap <- Inf
 version_tmp <- paste0("Cap", x_cap)
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
@@ -74,31 +73,46 @@ for (gene_plot in "CA9") {
   plotdata_df$id_sample <- mapvalues(x = plotdata_df$aliquot, 
                                      from = idmetadata_df$Aliquot.snRNA,
                                      to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
-  ## add cell count
   
-  plotdata_df$y_plot <- plotdata_df$id_sample
+  plotdata_df <- plotdata_df %>%
+    filter(id_sample != "C3L-00359-T1")
+  # plotdata_df$y_plot <- plotdata_df$id_sample
+  # plotdata_df <- plotdata_df %>%
+  #   filter(!(cell_group %in% c("Unknown", "Immune others", "Normal epithelial cells")))
+  ## sort by expression
+  ids_samples_sorted <- plotdata_df %>%
+    filter(cell_group == "Tumor cells") %>%
+    arrange(desc(x_plot))
+  ids_samples_sorted <- ids_samples_sorted$id_sample
+  ids_samples_sorted <- c(ids_samples_sorted[!(ids_samples_sorted %in% c("C3N-01200-N", "C3L-00088-N"))], c("C3N-01200-N", "C3L-00088-N"))
   plotdata_df <- plotdata_df %>%
     filter(!(cell_group %in% c("Unknown", "Immune others", "Normal epithelial cells")))
+  plotdata_df$y_plot <- factor(x = plotdata_df$id_sample, levels = rev(ids_samples_sorted))
+  
   
   # plot --------------------------------------------------------------------
-  p <- ggplot(data = plotdata_df, mapping = aes(x = y_plot, y = x_plot, fill = cell_group, color = "white"))
+  p <- ggplot(data = plotdata_df, mapping = aes(x = y_plot, y = x_plot, fill = cell_group, color = as.character(cell_group == "Tumor cells")))
+  # p <- ggplot(data = plotdata_df, mapping = aes(x = y_plot, y = x_plot, fill = cell_group, color = "white"))
   p <- p + geom_dotplot(binaxis='y', stackdir='center', position=position_dodge(0.8), alpha = 0.7)
-  p <- p + scale_fill_manual(values = colors_cellgroup[unique(plotdata_df$cell_group)])
-  p <- p + scale_color_manual(values = c("white" = NA))
+  p <- p + scale_fill_manual(values = colors_cellgroup)
+  # p <- p + scale_fill_manual(values = colors_cellgroup[unique(plotdata_df$cell_group)])
+  p <- p + scale_color_manual(values = c("TRUE" = "black", "FALSE" = NA))
   p <- p + theme_classic(base_size = 12)
   p <- p + coord_flip()
   p <- p + ylab("Normalized expression")
   p <- p + theme(panel.grid.major.y = element_line(size=.1, color="black" ))
   p <- p + theme(axis.text.y = element_text(size = 12), axis.title.y = element_blank())
   p <- p + theme(axis.text.x = element_text(size = 12), axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"), ends = "last")))
-  p <- p + ggtitle(label = paste0(gene_plot, " sn Expression"))
+  p <- p + ggtitle(label = paste0(gene_plot, " sn expression in ccRCC"))
+  p <- p + guides(fill = guide_legend(ncol = 2))
+  
   # file2write <- paste0(dir_out, gene_plot, ".png")
-  # png(file2write, width = 800, height = 800, res = 150)
+  # png(file2write, width = 1100, height = 800, res = 150)
   # print(p)
   # dev.off()
   
   file2write <- paste0(dir_out, gene_plot, ".pdf")
-  pdf(file2write, width = 6, height = 6, useDingbats = F)
+  pdf(file2write, width = 7.5, height = 6, useDingbats = F)
   print(p)
   dev.off()
 }

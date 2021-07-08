@@ -51,7 +51,7 @@ print("Finish running AverageExpression!\n")
 cat("###########################################\n")
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "PDAC.", "avgexp.", assay_process, ".", slot_process, ".", "cell_type.byPiece_ID.", run_id, ".tsv")
+file2write <- paste0(dir_out, "BRCA.", "avgexp.", assay_process, ".", slot_process, ".", "cell_type.byPiece_ID.", run_id, ".tsv")
 write.table(aliquot.averages, file = file2write, quote = F, sep = "\t", row.names = T)
 cat("Finished saving the output\n")
 cat("###########################################\n")

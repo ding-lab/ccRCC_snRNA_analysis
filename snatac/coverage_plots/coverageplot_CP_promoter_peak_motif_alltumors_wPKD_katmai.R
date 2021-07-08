@@ -24,7 +24,6 @@ setwd(dir_base)
 library(Signac)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
-library(ggplot2)
 ## set run id
 version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -41,9 +40,14 @@ peak2motif_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Dat
 ## input peak fold changes
 peak2fcs_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/DA_peaks_Tumor_vs_PT_affected_byCNV_removed.tsv")
 ## specify parameters to plot
-peak_plot <- c("chr16-67170198-67170698")
-motif_plot <- "HIF1A"
-topn_plot <- 4
+peak_plot_df <- peak2motif_df %>%
+  filter(Gene == "CP" & Peak_Type == "Promoter") %>%
+  filter(motif.name == "MXI1")# %>%
+  # select(Peak) %>%
+  # unique()
+peak_plot <- c("chr3-149179908-149180408")
+motif_plot <- "MXI1"
+topn_plot <- 24
 
 # preprocess samples to show ----------------------------------------------
 peak2fcs_tmp_df <- peak2fcs_df %>%
@@ -55,7 +59,14 @@ peak2fcs_long_tmp_df <- peak2fcs_long_tmp_df %>%
 pieceids_selected <- head(x = peak2fcs_long_tmp_df$pieceid, topn_plot)
 
 # preprocess ATAC object --------------------------------------------------
-atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_selected) | cell_type=='PT' & Piece_ID %in% c('C3L-00088-N','C3N-01200-N') | Piece_ID %in% c("K1103044"))
+head(atac@meta.data)
+atac_subset=subset(atac,(cell_type.v20210611 %in% c('Tumor') & Piece_ID %in% pieceids_selected) | cell_type.v20210611=='PT' & Piece_ID %in% c('C3L-00088-N','C3N-01200-N', "K1103044", "K1301462", "K1301463FB", "K1900070_1FB"))
+## make colors
+
+color_tumorcell <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[4]
+color_pt <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[1]
+colors_celltype <- c(rep(x = color_tumorcell, length(pieceids_selected)), rep(x = color_pt, 6))
+names(colors_celltype) <- c(pieceids_selected, 'C3L-00088-N','C3N-01200-N', "K1103044", "K1301462", "K1301463FB", "K1900070_1FB")
 
 # process coordinates ------------------------------------------------------------
 chr=strsplit(x = peak_plot, split = "\\-")[[1]][1]
@@ -68,15 +79,9 @@ peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
 motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == peak_plot & peak2motif_df$motif.name == motif_plot & peak2motif_df$Peak_Type == "Promoter"]; motif_coord <- unique(motif_coord)
 ## change atac ident
 # print(head(atac@meta.data))
-Idents(atac_subset)=factor(atac_subset$Piece_ID,levels=c(pieceids_selected, 'C3L-00088-N','C3N-01200-N', "K1103044"))
+Idents(atac_subset)=factor(atac_subset$Piece_ID, levels=c(pieceids_selected, 'C3L-00088-N','C3N-01200-N', "K1103044", "K1301462", "K1301463FB", "K1900070_1FB"))
 
 # plot --------------------------------------------------------------------
-## make colors
-color_tumorcell <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[4]
-color_pt <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[1]
-colors_celltype <- c(rep(x = color_tumorcell, 24), rep(x = color_pt, 6))
-names(colors_celltype) <- c(peak2fcs_long_tmp_df$pieceid, 'C3L-00088-N','C3N-01200-N', "K1103044", "K1301462", "K1301463FB", "K1900070_1FB")
-
 cov_plot= Signac::CoveragePlot(
   object = atac_subset,
   region = peak_plot_expanded,
@@ -86,7 +91,7 @@ cov_plot= Signac::CoveragePlot(
 cov_plot <- cov_plot + scale_fill_manual(values =  colors_celltype)
 print("Finished cov_plot")
 
-peak_plot <- Signac::PeakPlot(
+peakplot_obj <- Signac::PeakPlot(
   object = atac_subset,
   region = peak_plot_expanded, 
   peaks = StringToGRanges(peak_plot, sep = c("-", "-")))
@@ -103,8 +108,8 @@ gene_plot <- Signac::AnnotationPlot(
   region = peak_plot_expanded)
 
 p <- Signac::CombineTracks(
-  plotlist = list(cov_plot, peak_plot, motif_plot, gene_plot),
-  heights = c(7, 0.5, 0.5, 1.5))
+  plotlist = list(cov_plot, peakplot_obj, motif_plot, gene_plot),
+  heights = c(15, 0.5, 0.5, 1.5))
 print("Finished CombineTracks")
 
 ## write output
@@ -113,7 +118,7 @@ print("Finished CombineTracks")
 # print(p)
 # dev.off()
 file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".", motif_plot, ".pdf")
-pdf(file2write, width = 6, height = 5)
+pdf(file2write, width = 6, height = 15)
 print(p)
 dev.off()
 
