@@ -35,7 +35,25 @@ path_rds <- "/diskmnt/Projects/HTAN_analysis_2/BRCA/Analyses/Dan/Reannotation/HT
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 
-# test --------------------------------------------------------------------
-print(srat@meta.data[1:5,])
+## spcify assay
+assay_process <- "SCT"
+slot_process <- "data"
+cat(paste0("Assay: ", assay_process, "\n"))
 
-print(Idents(srat))
+# set ident ---------------------------------------------------------------
+srat@meta.data$Cell_group <- paste0(srat@meta.data$Piece_ID, "_", srat@meta.data$cell_type)
+unique(srat@meta.data$Cell_group)
+Idents(srat) <- "Cell_group" 
+
+# run average expression --------------------------------------------------
+aliquot.averages <- AverageExpression(srat, assays = assay_process, slot = slot_process)
+print("Finish running AverageExpression!\n")
+cat("###########################################\n")
+
+# write output ------------------------------------------------------------
+file2write <- paste0(dir_out, "PDAC.", "avgexp.", assay_process, ".", slot_process, ".", "cell_type.byPiece_ID.", run_id, ".tsv")
+write.table(aliquot.averages, file = file2write, quote = F, sep = "\t", row.names = T)
+cat("Finished saving the output\n")
+cat("###########################################\n")
+
+
