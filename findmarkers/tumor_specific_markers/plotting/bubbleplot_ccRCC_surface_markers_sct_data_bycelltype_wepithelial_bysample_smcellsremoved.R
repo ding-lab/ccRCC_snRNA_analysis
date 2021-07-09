@@ -52,7 +52,7 @@ ids_sample_cell_group_keep <- cellcount_df$id_sample_cell_group[cellcount_df$kee
 
 # identify genes to plot -------------------------------------------------
 gene_plot <- gene_plot_df$Gene[1]
-for (gene_plot in "CA9") {
+for (gene_plot in "HIF1A") {
 # for (gene_plot in unique(gene_plot_df$Gene)) {
   # make plot data ----------------------------------------------------------
   plotdata_wide_df <- exp_wide_df %>%
