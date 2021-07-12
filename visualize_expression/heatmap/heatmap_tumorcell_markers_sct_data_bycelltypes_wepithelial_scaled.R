@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -29,16 +29,24 @@ plot_data_df <- avgexp_df %>%
   rename(gene = V1) %>%
   filter(gene %in% genes_filter)
 ## filter the columns and make data matrix
-plot_data_mat <- as.matrix(plot_data_df[,-1])
-## add gene name
-rownames(plot_data_mat) <- plot_data_df$gene
-## order by genes
-plot_data_mat %>% head()
+plot_data_raw_mat <- as.matrix(plot_data_df[,-1])
+## add row names
+rownames(plot_data_raw_mat) <- plot_data_df$gene
+## scale by row
+plot_data_mat <- t(apply(plot_data_raw_mat, 1, scale))
+rownames(plot_data_mat) <- rownames(plot_data_raw_mat)
+colnames(plot_data_mat) <- colnames(plot_data_raw_mat)
+## filter column
+colnames_plot <- colnames(plot_data_mat)
+colnames_plot <- colnames_plot[!(grepl(x = colnames_plot, pattern = "Unknown"))]
+colnames_plot <- colnames_plot[!(grepl(x = colnames_plot, pattern = "others"))]
+plot_data_mat <- plot_data_mat[,colnames_plot]
+## filter rows based on the average expression
+genes_plot <- rownames(plot_data_mat)
+genes_plot <- genes_plot[!(genes_plot %in% c("PIK3CB", "ARHGEF28", "PTGER3", "PARD3", "GNG12", "EFNA5", "SPIRE1", "LIFR", "PKP4", "SORBS1", "PTPRM", "FBXO16", "PAM"))]
 
 # get dimension names -----------------------------------------------------
-genes_plot <- rownames(plot_data_mat)
-genes_plot
-celltypes_plot <- colnames(plot_data_mat)
+
 
 # specify colors ----------------------------------------------------------
 ## specify color for NA values
@@ -53,6 +61,10 @@ colors_heatmapbody = colorRamp2(c(-1.5,
                                   0, 
                                   1.5), 
                                 c(color_blue, "white", color_red))
+colors_heatmapbody = colorRamp2(c(-1.5, 
+                                  0, 
+                                  seq(from = 0.5, to = 4, by = 0.5)), 
+                                c(color_blue, "white", RColorBrewer::brewer.pal(n = 8, name = "YlOrRd")))
 # colors_heatmapbody = colorRamp2(seq(from = 0, to = 9, by = 1), 
 #                                 c("white", RColorBrewer::brewer.pal(n = 9, name = "YlOrRd")))
 ## make colors for bulk protein values
@@ -72,7 +84,7 @@ colors_bulkpro <- colorRamp2(c(-1,
 p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat, 
                              col = colors_heatmapbody, na_col = color_na, border = "black",
                              ## row
-                             show_row_names = T, row_names_side = "left", row_names_gp = gpar(fontface = "italic", fontsize = 15),
+                             show_row_names = T, row_names_side = "left", row_names_gp = gpar(fontface = "italic", fontsize = 8),
                              show_row_dend = F, cluster_rows = T,
                              ## column
                              show_column_names = T, column_names_side = "bottom",
@@ -84,13 +96,13 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
 p
 ## make legend
 list_lgd = list(
-  Legend(title = "snRNA expression", title_gp = gpar(fontsize = 12),
+  Legend(title = "Scaled snRNA expression", title_gp = gpar(fontsize = 12),
          col_fun = colors_heatmapbody, 
          legend_width = unit(3, "cm"),
          direction = "horizontal"))
 
 ## save heatmap as png
-png(filename = paste0(dir_out, "ligandreceptorgenes", ".png"), 
+png(filename = paste0(dir_out, "heatmap", ".png"), 
     width = 600, height = 1000, res = 150)
 draw(object = p, 
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)

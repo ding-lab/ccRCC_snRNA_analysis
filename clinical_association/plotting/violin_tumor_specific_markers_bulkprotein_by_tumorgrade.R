@@ -48,9 +48,9 @@ genes_process <- genes_process[genes_process %in% exp_df$Index]
 
 # plot by seperating G1 and G2 --------------------------------------------
 # my_comparisons <- list(c("G1", "G3"),c("G1", "G4"), c("G2", "G3"), c("G2", "G4"))
-# for (gene_test in genes_process) {
+# for (gene_tmp in genes_process) {
 #   ## filter specific protein data
-#   exp_test_wide_df <- exp_data_df[exp_df$Index == gene_test,]
+#   exp_test_wide_df <- exp_data_df[exp_df$Index == gene_tmp,]
 #   plot_data_df <- data.frame(CASE_ID = metadata_filtered_df$CASE_ID, Expression = unlist(exp_test_wide_df))
 #   plot_data_df$Histologic_Grade <- mapvalues(x = plot_data_df$CASE_ID, from = specimen_clinical_filtered_df$Case, to = as.vector(specimen_clinical_filtered_df$Histologic_Grade))
 #   
@@ -71,7 +71,7 @@ genes_process <- genes_process[genes_process %in% exp_df$Index]
 #   p <- p + theme(legend.position = "none")
 #   p <- p + theme(axis.title.x = element_blank())
 #   p <- p + ylab("Bulk protein abundance")
-#   file2write <- paste0(dir_out, gene_test, ".png")
+#   file2write <- paste0(dir_out, gene_tmp, ".png")
 #   png(file2write, width = 600, height = 600, res = 150)
 #   print(p)
 #   dev.off()
@@ -79,16 +79,29 @@ genes_process <- genes_process[genes_process %in% exp_df$Index]
 
 # plot by cell group ------------------------------------------------------
 my_comparisons <- list(c("G1/2", "G3"),c("G3", "G4"),c("G1/2", "G4"))
-for (gene_test in "CP") {
-# for (gene_test in genes_process) {
+for (gene_tmp in c("UBE2D2", "CP")) {
+  # for (gene_tmp in genes_process) {
   ## filter specific protein data
-  exp_test_wide_df <- exp_data_df[exp_df$Index == gene_test,]
+  exp_test_wide_df <- exp_data_df[exp_df$Index == gene_tmp,]
   plot_data_df <- data.frame(CASE_ID = metadata_filtered_df$CASE_ID, Expression = unlist(exp_test_wide_df))
   plot_data_df$Histologic_Grade <- mapvalues(x = plot_data_df$CASE_ID, from = specimen_clinical_filtered_df$Case, to = as.vector(specimen_clinical_filtered_df$Histologic_Grade))
   
   plot_data_df <- plot_data_df %>%
     mutate(x_plot = ifelse(Histologic_Grade %in% c("G1", "G2"), "G1/2", Histologic_Grade)) %>%
     mutate(y_plot = Expression)
+  
+  number_tumors_df <- plot_data_df %>%
+    select(CASE_ID, x_plot) %>%
+    unique() %>%
+    select(x_plot) %>%
+    table() %>%
+    as.data.frame() %>%
+    rename(x_plot = '.')
+  number_G12 <- number_tumors_df$Freq[number_tumors_df$x_plot == "G1/2"]; x_G12 <- paste0("G1/2 (", number_G12, ")")
+  number_G3 <- number_tumors_df$Freq[number_tumors_df$x_plot == "G3"]; x_G3 <- paste0("G3 (", number_G3, ")")
+  number_G4 <- number_tumors_df$Freq[number_tumors_df$x_plot == "G4"]; x_G4 <- paste0("G4 (", number_G4, ")")
+  
+  
   ## plot
   p = ggplot(plot_data_df, aes(x=x_plot, y=y_plot))
   p = p + geom_violin(aes(fill = x_plot),  color = NA, alpha = 1)
@@ -98,16 +111,20 @@ for (gene_test in "CP") {
                              mapping = aes(x = x_plot, y = y_plot, label = ..p.signif..), comparisons = my_comparisons,
                              symnum.args = symnum.args,
                              hide.ns = F, method = "wilcox.test")
-  p <- p + theme_classic(base_size = 12)
-  p <- p + theme(legend.position = "none")
-  p <- p + theme(axis.title.x = element_blank(), axis.title.y = element_text(size = 9))
-  p <- p + ylab("Protein level (bulk proteomics)")
-  # file2write <- paste0(dir_out, gene_test, ".G12combined.png")
+  p <- p + ylab("Expression level") + xlab(label = "Tumor grade (number of tumors)")
+  p <- p + ggtitle(label = paste0(gene_tmp, " protein "), subtitle = "bulk proteomics")
+  p <- p + scale_x_discrete(breaks = c("G1/2", "G3", "G4"), 
+                            labels = c(x_G12, x_G3, x_G4))
+  # compute lower and upper whiskers
+  p <- p + theme_classic(base_size = 9)
+  p <- p + theme(legend.position = "none", title = element_text(size = 9))
+  p <- p + theme(axis.title = element_text(size = 8), axis.text = element_text(size = 8, color = "black"))
+  # file2write <- paste0(dir_out, gene_tmp, ".G12combined.png")
   # png(file2write, width = 600, height = 600, res = 150)
   # print(p)
   # dev.off()
   
-  file2write <- paste0(dir_out, gene_test, ".G12combined.pdf")
+  file2write <- paste0(dir_out, gene_tmp, ".G12combined.pdf")
   pdf(file2write, width = 2, height = 2, useDingbats = F)
   print(p)
   dev.off()

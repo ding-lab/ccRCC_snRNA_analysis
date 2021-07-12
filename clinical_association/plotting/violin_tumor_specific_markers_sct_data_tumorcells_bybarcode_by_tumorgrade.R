@@ -36,7 +36,6 @@ barcode_mapping_df <- barcode_mapping_df %>%
   arrange(barcode_merged)
 exp_df <- exp_df[barcode_mapping_df$barcode_merged,]
 
-
 # # plot by seperating G1 and G2 --------------------------------------------
 # my_comparisons <- list(c("G1", "G3"),c("G1", "G4"), c("G2", "G3"), c("G2", "G4"))
 # for (gene_tmp in colnames(exp_df)) {
@@ -71,13 +70,16 @@ my_comparisons <- list(c("G1/2", "G3"),c("G3", "G4"),c("G1/2", "G4"))
 # path_log <- paste0(dir_out, "G12_Combined_FoldChanges.txt")
 path_log <- paste0(dir_out, "G12_Combined_T_test.txt")
 sink(path_log)
-for (gene_tmp in "MGST1") {
+for (gene_tmp in c("UBE2D2", "CP")) {
 # for (gene_tmp in colnames(exp_df)) {
   ## make plot data
   plot_data_df <- data.frame(barcode_merged = rownames(exp_df), expression = exp_df[,gene_tmp])
   plot_data_df$Histologic_Grade <- barcode_mapping_df$Histologic_Grade
+  plot_data_df$easy_id <- barcode_mapping_df$easy_id
+  
   # plot_data_df$easy_id <- barcode_mapping_df$easy_id
   plot_data_df <- plot_data_df %>%
+    filter(easy_id != "C3L-00359-T1") %>%
     mutate(x_plot = ifelse(Histologic_Grade %in% c("G1", "G2"), "G1/2", Histologic_Grade)) %>%
     mutate(y_plot = expression)
   ## plot
@@ -89,11 +91,13 @@ for (gene_tmp in "MGST1") {
                              mapping = aes(x = x_plot, y = y_plot, label = ..p.signif..), comparisons = my_comparisons,
                              symnum.args = symnum.args,
                              hide.ns = F, method = "wilcox.test")
+  p <- p + ylab("Expression level") + xlab(label = "Tumor grade (number of tumors)")
+  p <- p + ggtitle(label = paste0(gene_tmp, " expression "), subtitle = "snRNA-seq")
+  p <- p + scale_x_discrete(breaks = c("G1/2", "G3", "G4"), labels = c("G1/2 (12)", "G3 (10)", "G4 (8)"))
   # compute lower and upper whiskers
-  p <- p + theme_classic(base_size = 12)
-  p <- p + theme(legend.position = "none")
-  p <- p + theme(axis.title.x = element_blank(), axis.title.y = element_text(size = 9))
-  p <- p + ylab("Expression level (snRNA-seq)")
+  p <- p + theme_classic(base_size = 9)
+  p <- p + theme(legend.position = "none", title = element_text(size = 9))
+  p <- p + theme(axis.title = element_text(size = 8), axis.text = element_text(size = 8, color = "black"))
   # file2write <- paste0(dir_out, gene_tmp, ".G12combined.png")
   # png(file2write, width = 600, height = 600, res = 150)
   # print(p)
@@ -119,6 +123,11 @@ for (gene_tmp in "MGST1") {
 }
 sink()
 
+plot_data_df %>%
+  select(easy_id, Histologic_Grade) %>%
+  unique() %>%
+  select(Histologic_Grade) %>%
+  table()
 
 
 
