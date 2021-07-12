@@ -51,16 +51,19 @@ barcodes_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/
 ## get barcodes to process
 barcodes_df <- barcodes_df %>%
   rename(id_bc = V1) %>%
-  rename(Cell_type = cell_type)
+  rename(Cell_type = cell_type) %>%
+  rename(Sample = dataset)
   # mutate(id_bc = paste0(Sample, "_", Barcode))
 barcodes_df$Case <- mapvalues(x = barcodes_df$Sample, from = metadata_df$Aliquot.snRNA, to = as.vector(metadata_df$Case))
+table(barcodes_df$Case)
 barcodes_df$Sample_type <- mapvalues(x = barcodes_df$Sample, from = metadata_df$Aliquot.snRNA, to = as.vector(metadata_df$Sample_Type))
-# table(barcodes_df$Cell_type)
+table(barcodes_df$Sample_type)
 # barcodes_df %>%
 #   filter(Sample_type == "Tumor" & Cell_type == "PT")
-barcodes_process <- barcodes_df$id_bc[barcodes_df$Cell_type %in% c("Tumor", "PT")]
-cases_process <- barcodes_df$Case[barcodes_df$Cell_type %in% c("Tumor", "PT")]
-celltypes_process <- barcodes_df$Cell_type[barcodes_df$Cell_type %in% c("Tumor", "PT")]
+idx_process <- (barcodes_df$Sample_type == "Tumor" & barcodes_df$Cell_type == "Tumor") | (barcodes_df$Sample_type == "Normal" & barcodes_df$Cell_type == "PT")
+barcodes_process <- barcodes_df$id_bc[idx_process]
+cases_process <- barcodes_df$Case[idx_process]
+celltypes_process <- barcodes_df$Cell_type[idx_process]
 ## get genes to process
 peak2gene_filtered_df <- peak2gene_df %>%
   filter(peak %in% peaks_df$peak) %>%
