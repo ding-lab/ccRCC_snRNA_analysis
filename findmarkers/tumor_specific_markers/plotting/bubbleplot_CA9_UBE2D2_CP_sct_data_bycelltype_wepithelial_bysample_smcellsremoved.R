@@ -74,6 +74,7 @@ plotdata_df$id_sample <- mapvalues(x = plotdata_df$aliquot,
                                    to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
 ids_samples_sorted <- plotdata_df %>%
   filter(cell_group == "Tumor cells") %>%
+  filter(V1 == "CA9") %>%
   arrange(desc(x_plot))
 ids_samples_sorted <- unique(ids_samples_sorted$id_sample)
 ids_samples_sorted <- c(ids_samples_sorted[!(ids_samples_sorted %in% c("C3N-01200-N", "C3L-00088-N"))], c("C3N-01200-N", "C3L-00088-N"))
@@ -94,7 +95,7 @@ p <- p + theme_classic(base_size = 12)
 p <- p + coord_flip()
 p <- p + facet_grid(cols = vars(V1), scales = "free_x")
 p <- p + ylab("Normalized expression")
-p <- p + theme(panel.grid.major.y = element_line(size=.1, color="grey50" ), strip.text = element_text(size = 15))
+p <- p + theme(panel.grid.major.y = element_line(size=.1, color="grey50" ), strip.text = element_text(size = 15), strip.background = element_blank())
 p <- p + theme(axis.text.y = element_text(size = 10), axis.title.y = element_blank())
 p <- p + theme(axis.text.x = element_text(size = 10), axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"), ends = "last")))
 # file2write <- paste0(dir_out, gene_plot, ".png")

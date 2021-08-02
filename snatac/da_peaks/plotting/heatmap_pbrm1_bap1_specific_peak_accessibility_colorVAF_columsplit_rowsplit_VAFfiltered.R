@@ -7,7 +7,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 3
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -15,10 +15,15 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input accessibility data
-acc_pbrm1_down_df=fread(data.table = F, input = './Resources/snATAC_Processed_Data/Differential_Peaks/PBRM1_Specific/Accessibility/DOWN_PBRM1mutants_vs_nonMutans.Accessibility.20210623.tsv')
-acc_pbrm1_up_df=fread(data.table = F, input ='./Resources/snATAC_Processed_Data/Differential_Peaks/PBRM1_Specific/Accessibility/UP_PBRM1mutants_vs_nonMutans.Accessibility.20210623.tsv')
-acc_bap1_down_df=fread(data.table = F, input = './Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/Accessibility/DOWN_BAP1mutants_vs_nonMutans.Accessibility.20210624.tsv')
-acc_bap1_up_df=fread(data.table = F, input ='./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/Accessibility/UP_BAP1mutants_vs_nonMutans.Accessibility.20210624.tsv')
+# acc_pbrm1_down_df=fread(data.table = F, input = './Resources/snATAC_Processed_Data/Differential_Peaks/PBRM1_Specific/Accessibility/DOWN_PBRM1mutants_vs_nonMutans.Accessibility.20210623.tsv')
+# acc_pbrm1_up_df=fread(data.table = F, input ='./Resources/snATAC_Processed_Data/Differential_Peaks/PBRM1_Specific/Accessibility/UP_PBRM1mutants_vs_nonMutans.Accessibility.20210623.tsv')
+# acc_bap1_down_df=fread(data.table = F, input = './Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/Accessibility/DOWN_BAP1mutants_vs_nonMutans.Accessibility.20210624.tsv')
+# acc_bap1_up_df=fread(data.table = F, input ='./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/Accessibility/UP_BAP1mutants_vs_nonMutans.Accessibility.20210624.tsv')
+
+acc_pbrm1_down_df=fread(data.table = F, input = './Resources/snATAC_Processed_Data/Differential_Peaks/PBRM1_Specific/Accessibility/DOWN_PBRM1mutants_vs_nonMutans.Accessibility.20210713.tsv')
+acc_pbrm1_up_df=fread(data.table = F, input ='./Resources/snATAC_Processed_Data/Differential_Peaks/PBRM1_Specific/Accessibility/UP_PBRM1mutants_vs_nonMutans.Accessibility.20210713.tsv')
+acc_bap1_down_df=fread(data.table = F, input = './Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/Accessibility/DOWN_BAP1mutants_vs_nonMutans.Accessibility.20210713.tsv')
+acc_bap1_up_df=fread(data.table = F, input ='./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/Accessibility/UP_BAP1mutants_vs_nonMutans.Accessibility.20210713.tsv')
 
 ## input sample category
 mut_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutation/annotate_cptac_sample_by_pbrm1_bap1_mutation/20210412.v1/PBRM1_BAP1_Mutation_Status_By_Case.20210412.v1.tsv")
@@ -48,9 +53,9 @@ plotdata_df$ID=paste(plotdata_df$Group.1,plotdata_df$Group.2,sep='_')
 ## change row names
 rownames(plotdata_df)=plotdata_df$ID
 ## filter by row names
-plotdata_df <- plotdata_df[!(rownames(plotdata_df) %in% c('C3L-00088-N_Tumor','C3N-01200-N_Tumor', "C3L-01287-T1_Tumor")),]
 colnames(plotdata_df)[2:3]=c('Sample','Cell_type')
-plotdata_df <- plotdata_df[plotdata_df$Cell_type %in% c('Tumor','PT'),]
+plotdata_df <- plotdata_df %>%
+  filter((Cell_type == "PT" & grepl(pattern = "\\-N", x = Sample)) | (Cell_type == "Tumor" & !grepl(pattern = "\\-N", x = Sample)))
 plotdata_df2 <- plotdata_df[, colnames(plotdata_df)[grepl(pattern = "chr", x = colnames(plotdata_df))]]
 plotdata_mat <- scale(x = plotdata_df2)
 rownames(plotdata_mat) <- plotdata_df$Sample
@@ -59,7 +64,7 @@ rownames_ordered <- c("C3L-00416-T2","C3L-00908-T1",
                       "C3N-01200-T1", "C3L-01313-T1", "C3N-00317-T1","C3N-00437-T1", #"C3L-01287-T1",
                       "C3N-01213-T1","C3L-00079-T1", "C3L-00610-T1", "C3N-00242-T1","C3L-00790-T1","C3L-00583-T1", "C3L-00004-T1", "C3N-00733-T1","C3L-01302-T1", 
                       "C3L-00448-T1",  "C3L-00917-T1", "C3L-00088-T1", "C3L-00088-T2","C3L-00010-T1", "C3L-00026-T1", "C3N-00495-T1","C3L-00096-T1", 
-                      "C3N-01200-N", "C3L-00088-N")
+                      "C3N-01200-N", "C3L-00088-N", "C3L-00079-N", "C3N-00242-N")
 plotdata_mat <- plotdata_mat[rownames_ordered,]
 
 # specify colors ----------------------------------------------------------

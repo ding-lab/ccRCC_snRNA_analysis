@@ -38,7 +38,8 @@ colors_cellgroup <- Polychrome::palette36.colors(n = length(unique(plotdata_df$c
 names(colors_cellgroup) <- unique(plotdata_df$cell_group)
 
 # identify genes to plot -------------------------------------------------
-for (gene_plot in "TFRC") {
+for (gene_plot in c("TF", "TFR2")) {
+# for (gene_plot in c("TFRC", "HIF1A", "EPAS1", "SLC11A1", "SLC40A1")) {
   # make plot data ----------------------------------------------------------
   plotdata_wide_df <- exp_wide_df %>%
     filter(V1 %in% gene_plot)

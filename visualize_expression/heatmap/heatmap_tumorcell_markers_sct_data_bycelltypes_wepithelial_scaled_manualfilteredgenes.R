@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -98,6 +98,7 @@ log2fc_bulkrna_vec <- mapvalues(x = genes_plot, from = genes_process_df$Gene, to
 log2fc_bulkpro_vec <- mapvalues(x = genes_plot, from = genes_process_df$Gene, to = as.vector(genes_process_df$log2FC.bulkpro)); log2fc_bulkpro_vec <- as.numeric(log2fc_bulkpro_vec)
 ## get if each gene is druggable
 isdruggable_vec <- mapvalues(x = genes_plot, from = genes_process_df$Gene, to = as.vector(genes_process_df$is_druggable))
+isdruggable_vec[genes_plot == "ENPP3"] <- "TRUE"
 ## annotate unscaled expression
 orig_avgexp_vec <- rowMeans(x = plot_data_raw_mat, na.rm = T)
 ## get mean SD
@@ -108,8 +109,8 @@ row_anno_obj <- rowAnnotation(ccRCCvsNontumor_snRNA = anno_simple(x = log2fc_tum
                               ccRCCvsNAT_bulkRNA = anno_simple(x = log2fc_bulkrna_vec, col = colors_snRNA_fc), 
                               ccRCCvsNAT_bulkProtein = anno_simple(x = log2fc_bulkpro_vec, col = colors_snRNA_fc), 
                               is_druggable = anno_simple(x = isdruggable_vec, col = colors_yesno), 
-                              unscaled_snRNA_exp = anno_simple(x = orig_avgexp_vec, col = colors_unscaledexp), 
-                              SD_tumorcluster_snRNA_exp = anno_simple(x = sd_vec, col = colors_sd),
+                              unscaled_snRNA_exp = anno_simple(x = orig_avgexp_vec, col = colors_unscaledexp),
+                              # SD_tumorcluster_snRNA_exp = anno_simple(x = sd_vec, col = colors_sd),
                               annotation_name_side = "bottom", annotation_name_gp = gpar(fontsize = 10), annotation_width = unit(20, "mm"))
 
 
@@ -132,6 +133,23 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              show_heatmap_legend = F)
 p
 ## make legend
+# list_lgd = list(
+#   Legend(title = "Scaled snRNA\nexpression", title_gp = gpar(fontsize = 10),
+#          col_fun = colors_heatmapbody, 
+#          legend_width = unit(2, "cm"),
+#          direction = "horizontal"),
+#   Legend(title = "Log2 fold change", title_gp = gpar(fontsize = 10),
+#          col_fun = colors_snRNA_fc, 
+#          legend_width = unit(2, "cm"),
+#          direction = "horizontal"),
+#   Legend(title = "Unscaled snRNA\nexpression", title_gp = gpar(fontsize = 10),
+#          col_fun = colors_unscaledexp, 
+#          legend_width = unit(2, "cm"),
+#          direction = "horizontal"),
+#   Legend(title = "averaged standard deviation\nof snRNA expression", title_gp = gpar(fontsize = 10),
+#          col_fun = colors_sd, 
+#          legend_width = unit(2, "cm"),
+#          direction = "horizontal"))
 list_lgd = list(
   Legend(title = "Scaled snRNA\nexpression", title_gp = gpar(fontsize = 10),
          col_fun = colors_heatmapbody, 
@@ -143,10 +161,6 @@ list_lgd = list(
          direction = "horizontal"),
   Legend(title = "Unscaled snRNA\nexpression", title_gp = gpar(fontsize = 10),
          col_fun = colors_unscaledexp, 
-         legend_width = unit(2, "cm"),
-         direction = "horizontal"),
-  Legend(title = "averaged standard deviation\nof snRNA expression", title_gp = gpar(fontsize = 10),
-         col_fun = colors_sd, 
          legend_width = unit(2, "cm"),
          direction = "horizontal"))
 

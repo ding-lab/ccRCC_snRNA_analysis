@@ -40,6 +40,7 @@ colnames(exp_data_df) <- c(exp_colnames_filtered_df$CASE_ID)
 #3 make colors
 colors_expgroup <- RColorBrewer::brewer.pal(n = 9, name = "YlOrBr")[c(9, 3, 6)]
 # namescolors_expgroup <- c("High", "Low", "Medium")
+colors_expgroup <- RColorBrewer::brewer.pal(n = 9, name = "YlOrBr")[c(9, 6, 3)]
 
 # specify gene to test ----------------------------------------------------
 genes_process_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210702.v1/ccRCC_markers.Surface.20210702.v1.tsv")
@@ -59,7 +60,10 @@ for (gene_test in "CP") {
     filter(CASE_ID != "C3L-00359") %>%
     mutate(Expression_group = ifelse(Expression < cutoff_exp_low, "Low", ifelse(Expression > cutoff_exp_high, "High", "Medium"))) %>%
     mutate(EFS_censor = (with_new_event == "Tumor Free")) %>%
-    mutate(EFS = (survival_time + 9)/365)
+    mutate(EFS = (survival_time + 9)/365) %>%
+    arrange(CASE_ID, desc(Expression))
+  testdata_df <- testdata_df[!duplicated(testdata_df$CASE_ID),]
+  
   ## EFS_censor == 0 with event; == 1 without event
   ## test
   testdata_comp_df <- testdata_df %>%
@@ -74,7 +78,8 @@ for (gene_test in "CP") {
                     conf.int = TRUE,
                     surv.median.line = "hv", pval = TRUE,
                     legend.title = paste0(gene_test, " expression\n(snRNA-seq)"),
-                    legend.labs = c("High", "Low", "Medium"),
+                    # legend.labs = c("High", "Low", "Medium"),
+                    legend.labs = c("High", "Medium", "Low"),
                     legend = "top",
                     xlab = "Time (years)",
                     ylab = "Overall Survival",
