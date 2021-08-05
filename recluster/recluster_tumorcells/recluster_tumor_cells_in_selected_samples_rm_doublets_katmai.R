@@ -1,5 +1,6 @@
 # Yige Wu @WashU Nov 2020
-## for each individual sample, isolating tumor cells assigned from the integrated data and re-do clustering
+## these samples are newly added samples so tumor-cell-only clustering take place after taking out the doublets
+## the previous tumor-cell-only clustering did not take out the doublets for minimal manual work (assignment of the tumor clusters)
 
 # set up libraries and output directory -----------------------------------
 ## getting the path to the current script
