@@ -37,7 +37,7 @@ cat("finish reading the barcode-to-tumorsubcluster table!\n")
 barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20210729.v1/scrublet.united_outputs.20210729.v1.tsv", data.table = F)
 ## input id meta data
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
-## input the integrated data
+## input the integrated data (doublets removed)
 path_rds <- "./Resources/Analysis_Results/merging/merge_35_samples/20210802.v1/RCC.35samples.Merged.20210802.v1.RDS"
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
@@ -58,7 +58,7 @@ metadata_df <- metadata_df %>%
 barcode2tumorsubcluster_df <- barcode2tumorsubcluster_df %>%
   mutate(aliquot_barcode = paste0(orig.ident, "_", barcode))
 barcode2scrublet_df <- barcode2scrublet_df %>%
-  mutate(aliquot_barcode = paste0(Aliquot, "_", Barcodes)) %>%
+  mutate(aliquot_barcode = paste0(Aliquot, "_", Barcode)) %>%
   filter(predicted_doublet)
 ### add new column for tumor cluster name
 tmp <- mapvalues(x = metadata_df$aliquot_barcode, from = barcode2tumorsubcluster_df$aliquot_barcode, to = as.vector(barcode2tumorsubcluster_df$Cluster_Name))
