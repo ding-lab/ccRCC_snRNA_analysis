@@ -17,9 +17,9 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input barcode2seurat cluster info
-barcode2seuratcluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/fetch_data/fetchdata_individual_tumorcellreclustered_on_katmai/20201127.v1/MetaData_TumorCellOnlyReclustered.20201127.v1.tsv")
+barcode2seuratcluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/fetch_data/fetchdata_individual_tumorcellreclustered_on_katmai/20210805.v1/MetaData_TumorCellOnlyReclustered.20210805.v1.tsv")
 ## input the cell to cell type table
-sratcluster2manualcluster_df <- readxl::read_xlsx(path = "./Resources/snRNA_Processed_Data/Tumor_Subclusters/Individual.TumorSeuratCluster2Manual.20201127.v1.xlsx")
+sratcluster2manualcluster_df <- readxl::read_xlsx(path = "./Resources/snRNA_Processed_Data/Tumor_Subclusters/Individual.TumorSeuratCluster2Manual.20210805.v1.xlsx")
 
 # get barcode2manualcluster -----------------------------------------------
 barcode2manualcluster_df <- merge(x = barcode2seuratcluster_df %>%
