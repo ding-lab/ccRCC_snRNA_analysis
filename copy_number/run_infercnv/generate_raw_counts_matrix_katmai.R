@@ -51,7 +51,7 @@ for (snRNA_aliquot_id_tmp in c("CPT0012280004", "CPT0012550012")) {
   
   if (!file.exists(path_infercnv_counts_out)) {
     ## input the seurat object
-    seurat_obj_path <- srat_paths_df$Path_katmai[srat_paths_df$Aliquot.snRNA == snRNA_aliquot_id_tmp]
+    seurat_obj_path <- srat_paths_df$Path_katmai_seurat_object[srat_paths_df$Aliquot.snRNA == snRNA_aliquot_id_tmp]
     seurat_object <- readRDS(file = seurat_obj_path)
     
     ## get raw read count matrix
