@@ -17,11 +17,11 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the barcode-to-tumorsubcluster table
-barcode2tumorsubcluster_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_tumorsubclusterid/map_barcode_with_manual_tumorsubcluster_id/20201130.v1/Barcode2TumorSubclusterId.20201130.v1.tsv", data.table = F)
-barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20200902.v1/scrublet.run20200902_adj_cutoff.united_outputs.tsv", data.table = F)
+barcode2tumorsubcluster_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_tumorsubclusterid/map_barcode_with_manual_tumorsubcluster_id/20210805.v1/Barcode2TumorSubclusterId.20210805.v1.tsv", data.table = F)
+barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20210729.v1/scrublet.united_outputs.20210729.v1.tsv", data.table = F)
 
 # count -------------------------------------------------------------------
-barcode_merged_df <- merge(x = barcode2tumorsubcluster_df, y = barcode2scrublet_df, by.x = c("orig.ident", "barcode"), by.y = c("Aliquot", "Barcodes"), all.x = T)
+barcode_merged_df <- merge(x = barcode2tumorsubcluster_df, y = barcode2scrublet_df, by.x = c("orig.ident", "barcode"), by.y = c("Aliquot", "Barcode"), all.x = T)
 cellnumber_percluster_df <- barcode_merged_df %>%
   filter(!predicted_doublet) %>%
   mutate(id_cluster_uniq = Cluster_Name) %>%
