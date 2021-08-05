@@ -15,13 +15,13 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the average expression calculated (SCT)
-avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/avgeexp_tumorcells_sct_data_by_manualcluster_rm_doublets_on_katmai/20210413.v1/AverageExpression_ByManualTumorSubcluster.20210413.v1.tsv", data.table = F)
+avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/avgeexp_tumorcells_sct_data_by_manualcluster_rm_doublets_on_katmai/20210805.v1/AverageExpression_ByManualTumorSubcluster.20210805.v1.tsv", data.table = F)
 ## input emt score pre-calculated
 emt_scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_emt_scores_tumorcells_per_manual_tumorcluster_scaled/20201201.v1/EMT_scores_by_manual_tumorcluster.20201201.v1.tsv")
 ## input cell number per cluster
-cellnumber_percluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/count_cellnumber_per_manual_cluster_rm_doublet/20210413.v1/CellNumberPerTumorManualCluster.20210413.v1.tsv")
+cellnumber_percluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/count/count_cellnumber_per_manual_cluster_rm_doublet/20210805.v1/CellNumberPerTumorManualCluster.20210805.v1.tsv")
 ## input by cluster enrichment assignment
-enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210624.v1/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
+enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210805.v1/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
 
 # preprocess-------------------------------------------------
 ## specify genes to filter 
@@ -101,9 +101,6 @@ row_split_factor <- factor(x = row_split_vec, levels = c("Mesenchymal\nmarkers",
 
 # make column annotation --------------------------------------------------
 ## make cutoff for the EMT-potential-high
-emt_scores_df <- emt_scores_df %>%
-  mutate(easyid_cluster = paste0(Sample_id, "_", Cluster_id))
-emt_group_vec <- mapvalues(x = columnnames_plot, from = emt_scores_df$easyid_cluster, to = as.vector(emt_scores_df$EMT_potential))
 scores_mesenchymal <- mapvalues(x = columnnames_plot, from = emt_scores_df$easyid_cluster, to = as.vector(emt_scores_df$Score_mesenchymal)); scores_mesenchymal <- as.numeric(scores_mesenchymal)
 scores_epithelial <- mapvalues(x = columnnames_plot, from = emt_scores_df$easyid_cluster, to = as.vector(emt_scores_df$Score_epithelial)); scores_epithelial <- as.numeric(scores_epithelial)
 ## make 
@@ -120,7 +117,6 @@ texts_highlight <- columnnames_plot[index_highlight];
 colanno_obj = HeatmapAnnotation(link = anno_mark(at = index_highlight, labels = texts_highlight, labels_gp = gpar(fontsize = 15), side = "top"),
                                 EMTEnriched = anno_simple(x = emt_enriched_vec, col = colors_emtenriched[emt_enriched_vec], height = unit(1, "cm")),
                                 EMTScore = anno_simple(x = emt_scores_vec, col = colors_emtscores, height = unit(0.75, "cm")),
-                                # EMTPotential = anno_simple(x = emt_group_vec, col = colors_emtgroups[emt_group_vec], height = unit(1, "cm")),
                                 # MesenchymalScore = anno_simple(x = scores_mesenchymal, col = colors_scores_mesenchymal, height = unit(0.75, "cm")),
                                 # EpithelialScore = anno_simple(x = scores_epithelial, col = colors_scores_epithelial, height = unit(0.75, "cm")),
                                 annotation_name_gp = gpar(fontsize = 20, fontface = "bold"), annotation_name_side = "left")

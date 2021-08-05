@@ -37,7 +37,6 @@ dir.create(dir_infercnv_counts)
 # input dependencies ------------------------------------------------
 ## input paths to the seurat objects
 srat_paths_df <- fread(input = "./Resources/Analysis_Results/data_summary/write_individual_srat_object_paths/20210729.v1/Seurat_Object_Paths.20210729.v1.tsv", data.table = F)
-srat_paths_df$Path_seurat_object
 ## input doublet prediction
 barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20210729.v1/scrublet.united_outputs.20210729.v1.tsv", data.table = F)
 
@@ -45,8 +44,8 @@ barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite
 tab_gene_order_symbol = read.delim(file = "./Resources/snRNA_Processed_Data/InferCNV/inputs/gencode_v21_gen_pos.MatchCellRangerFeatures.NoDuplicates.20191005.v1.txt", header = FALSE,stringsAsFactors = FALSE)
 
 # write raw counts matrix -------------------------------------------------
-for (snRNA_aliquot_id_tmp in c("CPT0012280004", "CPT0012550012")) {
-# for (snRNA_aliquot_id_tmp in unique(srat_paths_df$Aliquot.snRNA)) {
+# for (snRNA_aliquot_id_tmp in c("CPT0012280004", "CPT0012550012")) {
+for (snRNA_aliquot_id_tmp in unique(srat_paths_df$Aliquot)) {
   path_infercnv_counts_out <- paste0(dir_infercnv_counts, snRNA_aliquot_id_tmp, ".RNA_Count.tsv")
   
   if (!file.exists(path_infercnv_counts_out)) {

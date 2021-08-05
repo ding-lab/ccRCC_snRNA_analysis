@@ -22,12 +22,14 @@ dir_infercnv_inputs <- paste0(dir_infercnv, "inputs/")
 dir.create(dir_infercnv_inputs)
 dir_infercnv_annotation <- paste0(dir_infercnv_inputs, "annotations_file/")
 dir.create(dir_infercnv_annotation)
-dir_infercnv_annotation_out <- paste0(dir_infercnv_annotation, "Individual.", run_id, "/")
+dir_infercnv_annotation_out <- paste0(dir_infercnv_annotation, "run.", "20210805", "/")
 dir.create(dir_infercnv_annotation_out)
 
 # input barcode 2 cell type table -----------------------------------------
 ## input barcode to cell type info
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups/20201130.v1/31Aliquot.Barcode2CellType.20201130.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_35aliquots/20210802.v1/35Aliquot.Barcode2CellType.20210802.v1.tsv", data.table = F)
+## input doublet info
+barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20210729.v1/scrublet.united_outputs.20210729.v1.tsv", data.table = F)
 
 # write annotation files -------------------------------------------------
 for (snRNA_aliquot_id_tmp in unique(barcode2celltype_df$orig.ident)) {
@@ -39,6 +41,13 @@ for (snRNA_aliquot_id_tmp in unique(barcode2celltype_df$orig.ident)) {
       filter(orig.ident == snRNA_aliquot_id_tmp) %>%
       mutate(infercnv_group = ifelse(Cell_group5 %in% c("Tumor cells", "Unknown"), "Obs", "Ref")) %>%
       select(individual_barcode, infercnv_group)
+    
+    if (snRNA_aliquot_id_tmp %in% barcode2scrublet_df$Aliquot) {
+      barcodes_doublet <- barcode2scrublet_df$Barcode[barcode2scrublet_df$Aliquot == snRNA_aliquot_id_tmp & barcode2scrublet_df$predicted_doublet]
+      anno_tab <- anno_tab %>%
+        filter(!(individual_barcode %in% barcodes_doublet))
+    }
+    
     write.table(x = anno_tab, file = path_annotations_file_out, quote = F, sep = "\t", row.names = F, col.names = F)
   }
 }
