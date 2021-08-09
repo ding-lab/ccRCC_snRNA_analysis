@@ -38,7 +38,8 @@ srat <- readRDS(file = path_rds)
 print("Finish reading the RDS file!\n")
 
 # fetch data --------------------------------------------------------------
-umap_data <- Seurat::FetchData(object = srat, vars = c("orig.ident", "ident", "UMAP_1", "UMAP_2"))
+print(head(srat@meta.data))
+umap_data <- Seurat::FetchData(object = srat, vars = c("orig.ident", "ident", "UMAP_1", "UMAP_2", "seurat_clusters"))
 umap_data$barcode <- rownames(umap_data)
 
 # write output ------------------------------------------------------------
