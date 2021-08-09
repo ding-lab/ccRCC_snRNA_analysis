@@ -44,8 +44,6 @@ slot_process <- "data"
 cat(paste0("Assay: ", assay_process, "\n"))
 
 # set ident ---------------------------------------------------------------
-barcode2celltype_df <- barcode2celltype_df %>%
-  mutate(id_cell = paste0(orig.ident, "_", individual_barcode))
 srat@meta.data$individual_barcode <- str_split_fixed(string = rownames(srat@meta.data), pattern = "_", n = 2)[,1]
 ## check if the individual_barcode is mapped right
 srat@meta.data %>% head()
