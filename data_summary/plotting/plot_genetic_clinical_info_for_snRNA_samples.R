@@ -10,7 +10,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -22,7 +22,7 @@ id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_m
 ## input te bulk genomics/methylation events
 bulk_sn_omicsprofile_df <- fread(input = "./Resources/Analysis_Results/data_summary/merge_bulk_sn_profiles/20210504.v1/bulk_sn_omics_profile.20210504.v1.tsv", data.table = F)
 ## input clinical info
-specimen_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/extract_specimen_clinical_data/20200717.v1/snRNA_ccRCC_Specimen_Clinicl_Data.20200717.v1.tsv")
+specimen_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/clinical/extract_specimen_clinical_data/20200717.v1/snRNA_ccRCC_Specimen_Clinicl_Data.20200717.v1.tsv")
 
 # merge data --------------------------------------------------------------
 ## filter samples with either snRNA data
@@ -147,6 +147,10 @@ top_col_anno = HeatmapAnnotation(snRNA_Availability = anno_simple(x = as.charact
                                                          gp = gpar(col = color_gridline), 
                                                          simple_anno_size = unit(3, "mm"),
                                                          col = c("TRUE" = "#e7298a", "FALSE" = "white")),
+                                 MTOR = anno_simple(x = as.character(!(top_col_anno_df$Mut.MTOR == "None" | top_col_anno_df$Mut.MTOR == "Silent")),
+                                                    gp = gpar(col = color_gridline), 
+                                                    simple_anno_size = unit(3, "mm"),
+                                                    col = c("TRUE" = "#e7298a", "FALSE" = "white")),
                                  PTEN = anno_simple(x = as.character(!(top_col_anno_df$Mut.PTEN == "None" | top_col_anno_df$Mut.PTEN == "Silent")),
                                                         gp = gpar(col = color_gridline), 
                                                         simple_anno_size = unit(3, "mm"),

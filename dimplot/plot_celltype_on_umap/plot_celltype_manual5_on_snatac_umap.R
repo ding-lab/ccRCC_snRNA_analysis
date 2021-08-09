@@ -20,7 +20,7 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input cell type per barcode table
 # barcode2celltype_df <- fread(input = "../ccRCC_snATAC/Resources/snATAC_Processed_Data/Barcode_Annotation/UMAP/UMAP_data_13_snATAC_Normal_epithelialCells_reclustered.20201209.tsv", data.table = F)
-barcode2celltype_df <- fread(input = "./Resources/snATAC_Processed_Data/Barcode_Annotation/26_snATAC.ManualReviwed.UMAP_data.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/snATAC_Processed_Data/Barcode_Annotation/28_snATAC.ManualReviwed.UMAP_data.20210709.tsv", data.table = F)
 
 # plot for cell group----------------------------------------------------------
 table(barcode2celltype_df$cell_type)

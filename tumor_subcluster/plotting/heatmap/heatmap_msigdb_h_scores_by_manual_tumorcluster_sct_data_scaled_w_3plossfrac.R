@@ -15,13 +15,13 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input meta data
-id_metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210322.v1/meta_data.20210322.v1.tsv")
+id_metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
 ## input pathway scores
-scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_msigdb_top_geneset_scores/20210419.v1/MSigDB.Hallmark.tsv")
+scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_msigdb_geneset_scores/20210805.v1/MSigDB.Hallmark.tsv")
 ## input by cluster enrichment assignment
-enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210624.v1/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
+enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210805.v1/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
 ## input CNV data
-cnv_df <- fread(data.table = F, input = "./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/cnv_fraction_in_tumorcells_per_manualcluster_rm_doublets/20210427.v1/fraction_of_tumorcells_with_cnv_by_gene_by_3state.per_manualsubcluster.20210427.v1.tsv")
+cnv_df <- fread(data.table = F, input = "./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/cnv_fraction_in_tumorcells_per_manualcluster_rm_doublets/20210806.v1/fraction_of_tumorcells_with_cnv_by_gene_by_3state.per_manualsubcluster.20210806.v1.tsv")
 
 # preprocess --------------------------------------------------------------
 ## group gene sets into modules
@@ -78,12 +78,12 @@ cnv_plot_long_df <- cnv_df %>%
   mutate(cluster_name = gsub(x = tumor_subcluster, pattern = "\\-", replacement = ".")) %>%
   filter(cluster_name %in% colnames_plot) %>%
   group_by(cluster_name) %>%
-  summarise(Frac_3ploss = max(Fraction))
+  summarise(Fraction_3p_Loss = max(Fraction))
 enrich_plot_df <- enrich_df[, c("cluster_name", "Cell_cycle", "Immune", "EMT", "mTOR")]
 colnames(enrich_plot_df) <- c("cluster_name", paste0(c("Cell_cycle", "Immune_signaling", "EMT", "mTOR"), "_Module_Enriched"))
 ## merge data
 colanno_df <- merge(x = enrich_plot_df, y = cnv_plot_long_df, by = c("cluster_name"), all.x = T)
-colanno_df$Frac_3ploss[is.na(colanno_df$Frac_3ploss)] <- 0
+colanno_df$Fraction_3p_Loss[is.na(colanno_df$Fraction_3p_Loss)] <- 0
 rownames(colanno_df) <- colanno_df$cluster_name
 colanno_df <- colanno_df[colnames_plot,-1]
 ## make colors
@@ -92,7 +92,7 @@ for (colname_tmp in colnames(enrich_plot_df)[-1]) {
   colanno_df[, colname_tmp] <- as.character(colanno_df[, colname_tmp])
   colors_scores_list[[colname_tmp]] <- colors_isenriched
 }
-colors_scores_list[["Frac_3ploss"]] <- colorRamp2(seq(0, 1, 0.2), 
+colors_scores_list[["Fraction_3p_Loss"]] <- colorRamp2(seq(0, 1, 0.2), 
                                                   c("white", brewer.pal(n = 6, name = "Blues")[-1]))
 colanno_obj = HeatmapAnnotation(df = colanno_df, col = colors_scores_list,
                                 annotation_name_gp = gpar(fontsize = 14), annotation_name_side = "left", show_legend = F)
@@ -113,7 +113,7 @@ list_lgd = list(
   Legend(labels = names(colors_isenriched), labels_gp = gpar(fontsize = 14),
          title = "Expression enriched", title_gp = gpar(fontsize = 14),
          legend_gp = gpar(fill = colors_isenriched), border = NA),
-  Legend(col_fun = colors_scores_list[["Frac_3ploss"]], 
+  Legend(col_fun = colors_scores_list[["Fraction_3p_Loss"]], 
          title = "% tumor cells with 3p loss", 
          title_gp = gpar(fontsize = 14),
          labels_gp = gpar(fontsize = 14),
@@ -136,8 +136,19 @@ dev.off()
 
 
 # plot with column name ---------------------------------------------------
+p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat, 
+                             col = colors_heatmapbody,
+                             na_col = color_na, #border = "black",
+                             ## row
+                             show_row_names = T, row_names_gp = gpar(fontsize = 14), row_names_side = "left",
+                             show_row_dend = F, cluster_row_slices = T, row_labels = rowlabels_plot,
+                             ## column
+                             show_column_dend = F, cluster_columns = F,
+                             top_annotation = colanno_obj,
+                             show_column_names = T, column_names_side = "top", column_names_gp = gpar(fontsize = 5),
+                             show_heatmap_legend = F)
 file2write <- paste0(dir_out, "GeneSetScores", ".png")
-png(file2write, width = 1200, height = 600, res = 150)
+png(file2write, width = 1300, height = 900, res = 150)
 draw(object = p, 
      annotation_legend_side = "top", annotation_legend_list = list_lgd)
 dev.off()

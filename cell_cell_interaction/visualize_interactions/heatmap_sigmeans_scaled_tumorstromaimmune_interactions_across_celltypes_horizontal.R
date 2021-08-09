@@ -40,6 +40,8 @@ plot_data_df <- summary_df %>%
   filter(!(Cell_type.target %in% c("CD4 T-cells", "CD4 CTL"))) %>%
   mutate(interacting_pair_directed = paste0(gene.source, "_", gene.target)) %>%
   arrange(desc(paired_celltypes_group), desc(avg_sig_mean))
+file2write <- paste0(dir_out, "ccRCC_sn_interactions_selected.", run_id, ".tsv")
+write.table(x = plot_data_df, file = file2write, sep = "\t", row.names = F, quote = F)
 plot_data_wide_df <- dcast(data = plot_data_df, formula = celltypes.source2target ~ interacting_pair_directed, value.var = "avg_sig_mean")
 plot_data_mat <- as.matrix(plot_data_wide_df[, -1])
 rownames(plot_data_mat) <- plot_data_wide_df$celltypes.source2target

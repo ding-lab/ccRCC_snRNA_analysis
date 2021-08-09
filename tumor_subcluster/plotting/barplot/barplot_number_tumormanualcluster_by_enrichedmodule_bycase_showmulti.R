@@ -22,7 +22,8 @@ enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_s
 # make plot data ----------------------------------------------------------
 plotdata_df <- enrich_df %>%
   mutate(sample = str_split_fixed(string = cluster_name, pattern = "_", n = 2)[,1]) %>%
-  mutate(sample = gsub(x = sample, pattern = "\\.", replacement = "-")) %>%
+  mutate(sample = gsub(x = sample_text, pattern = "\\.", replacement = "-")) %>%
+  # mutate(sample = gsub(x = sample_text, pattern = "\\.", replacement = "-")) %>%
   mutate(case = paste0(str_split_fixed(string = sample, pattern = "\\.", n = 3)[,1], "-", str_split_fixed(string = sample, pattern = "\\.", n = 3)[,2])) %>%
   mutate(cluster_enrich_type = ifelse(EMT, "EMT",
                                       ifelse(Cell_cycle, "Cell_cycle",
@@ -58,9 +59,9 @@ p <- p + scale_fill_manual(values = colors_enrich_type)
 p <- p + scale_pattern_fill_manual(values = colors_enrich_type)
 p <- p + scale_pattern_density_manual(values = c("NA" = 0, "Cell_cycle"=0.5, "Immune"=0.5, "mTOR" = 0.5))
 p <- p + theme_classic(base_size = 17)
-p <- p + theme(axis.text.x = element_text(angle = 90,hjust=0.95,vjust=0.2, size = 17), axis.line.x = element_blank(), axis.ticks.x = element_blank())
+p <- p + theme(axis.text.x = element_text(angle = 90,hjust=0.95,vjust=0.2, size = 17, color = "black"), axis.line.x = element_blank(), axis.ticks.x = element_blank())
 p <- p + theme(axis.title.x = element_blank(), axis.ticks.x = element_blank(), axis.line.y = element_blank())
-p <- p + theme(axis.text.y = element_text(size = 17), axis.ticks.y = element_blank())
+p <- p + theme(axis.text.y = element_text(size = 17, color = "black"), axis.ticks.y = element_blank())
 p <- p + scale_y_continuous(breaks = seq(0, 10, 2))
 p <- p + ylab("Number of tumor subclusters/sample")
 file2write <- paste0(dir_out, "barplot.pdf")
