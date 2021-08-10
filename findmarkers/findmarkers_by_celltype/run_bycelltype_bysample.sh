@@ -10,7 +10,7 @@ CELL_TYPE_Print="Loop_of_Henle"
 OUT_DIR=${OUT_DIR1}${CELL_TYPE_Print}/
 mkdir -p ${OUT_DIR}
 Rscript celltype_specific_markers_doparallel_V1.0.R \
--r /diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/individual_sample/write_individual_srat_obj_rm_doublets/20210701.v1/Seurat_Object_Paths.DoubletRemoved.20210701.v1.tsv \
+-r /diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Data_Freezes/V2/snRNA/Individual_Seurat_Objects/Seurat_Object_Paths.DoubletRemoved.20210810.v1.tsv \
 -o ${OUT_DIR} \
 -c "Loop of Henle" \
 -s /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Data/Cell_Surface_Protein_Atlas_S2_File.txt \
