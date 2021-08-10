@@ -53,21 +53,27 @@ plotdata_df <- merge(x = plotdata_x_df %>%
 
 # plot --------------------------------------------------------------------
 p <- ggplot()
-p <- ggscatter(data = plotdata_df, x = "value.x", y = "value.y",
+p <- ggscatter(data = plotdata_df, x = "value.x", y = "value.y", size = 0.5,
                add = "reg.line",  # Add regressin line
                add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
                conf.int = TRUE # Add confidence interval
 )
 # Add correlation coefficient
-p <- p + stat_cor(method = "spearman", 
-                  label.x = quantile(x = plotdata_df$value.x, probs = 0.75, na.rm = T), 
-                  label.y = quantile(x = plotdata_df$value.y, probs = 0.75, na.rm = T))
+p <- p + stat_cor(method = "pearson", 
+                  label.x = quantile(x = plotdata_df$value.x, probs = 0.05, na.rm = T), 
+                  label.y = quantile(x = plotdata_df$value.y, probs = 0.99, na.rm = T))
 p <- p + xlab(paste0(gene_x, " expression in ", celltype_x))
 p <- p + ylab(paste0(gene_y, " expression in ", celltype_y))
-p <- p + theme(legend.position = "bottom")
+p <- p + theme_classic(base_size = 9)
+p <- p + theme(legend.position = "top", title = element_text(size = 9))
 p <- p + guides(color = guide_legend(title = NULL, ncol = 4, label.theme = element_text(size = 8)))
-file2write <- paste0(dir_out, celltype_x, "_", gene_x, ".", 
-                     celltype_y, "_", gene_y, ".png")
-png(file2write, width = 800, height = 800, res = 150)
+p <- p + theme(axis.title = element_text(size = 8), axis.text = element_text(size = 8, color = "black"))
+# file2write <- paste0(dir_out, celltype_x, "_", gene_x, ".", 
+#                      celltype_y, "_", gene_y, ".png")
+# png(file2write, width = 800, height = 800, res = 150)
+# print(p)
+# dev.off()
+file2write <- paste0(dir_out, gene_x, "~", gene_y,".pdf")
+pdf(file2write, width = 2, height = 1.9, useDingbats = F)
 print(p)
 dev.off()

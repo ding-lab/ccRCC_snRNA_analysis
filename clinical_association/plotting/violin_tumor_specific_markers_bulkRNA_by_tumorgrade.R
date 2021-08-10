@@ -79,7 +79,7 @@ genes_process <- genes_process[genes_process %in% exp_df$gene_name]
 
 # plot by cell group ------------------------------------------------------
 my_comparisons <- list(c("G1/2", "G3"),c("G3", "G4"),c("G1/2", "G4"))
-for (gene_tmp in c("UBE2D2", "CP")) {
+for (gene_tmp in c("UBE2D2", "CP", "NDRG1", "KCTD3", "MGST1", "PCSK6")) {
   # for (gene_tmp in genes_process) {
   ## filter specific protein data
   exp_test_wide_df <- exp_data_df[exp_df$gene_name == gene_tmp,]
