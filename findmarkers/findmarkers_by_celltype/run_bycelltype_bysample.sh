@@ -5,17 +5,17 @@
 # STEP1 
 OUT_DIR1=/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/run_bycelltype_bysample/
 mkdir -p ${OUT_DIR1}
-CELL_TYPE="Loop of Henle"
-CELL_TYPE_Print="Loop_of_Henle"
+CELL_TYPE="Proximal tubule"
+CELL_TYPE_Print="Proximal_tubule"
 OUT_DIR=${OUT_DIR1}${CELL_TYPE_Print}/
 mkdir -p ${OUT_DIR}
 Rscript celltype_specific_markers_doparallel_V1.0.R \
 -r /diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Data_Freezes/V2/snRNA/Individual_Seurat_Objects/Seurat_Object_Paths.DoubletRemoved.20210810.v1.tsv \
 -o ${OUT_DIR} \
--c "Loop of Henle" \
+-c "Proximal tubule" \
 -s /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Data/Cell_Surface_Protein_Atlas_S2_File.txt \
 -p /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Data/Human_Protein_Atlas_subcellular_location.txt >& ${OUT_DIR}Log.$(date +%Y%m%d%H%M%S).log&
-exit
+# exit
 
 ###########################################################
 ### GTEX TISSUE SPECIFICITY TEST
@@ -49,7 +49,7 @@ GTEX_DIR=/diskmnt/Datasets/GTEX_tpm
 ###########################################################
 ###HPA Protein test
 ###########################################################
-python3 HPA_Protein_filtering.py -p /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Data/HPA_normal_tissue.tsv -o ${OUT_DIR} -t /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Data/HPA_Tissue_type_matching.txt -g ${OUT_DIR}/${CELL_TYPE}_specific_DEG_with_surface_annotations_from_3DB.txt
+python3 HPA_Protein_filtering.py -p /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Data/HPA_normal_tissue.tsv -o ${OUT_DIR} -t /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Data/HPA_Tissue_type_matching.txt -g ${OUT_DIR}/${CELL_TYPE_Print}_specific_DEG_with_surface_annotations_from_3DB.txt
 
 ############################################################
 ###Adding tissue specificty prediction from GTEX and HPA

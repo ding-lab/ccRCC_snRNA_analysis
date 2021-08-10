@@ -206,8 +206,8 @@ pairwise_DE_total$cell_type <- sub(" ", "_", pairwise_DE_total$cell_type)
 rownames(pairwise_DE_total) <- sub(" ", "_",rownames(pairwise_DE_total))
 
 cat("SAVING THE DEG ANALYSIS RESULTS TO TEXT FILES...\n")
-write.table(tumor_vs_rest_DE_total,paste0(out_path,"/",tumor_ct,"_vs_combined_others_DE.txt"),sep="\t",col.names=TRUE,row.names=TRUE,quote = FALSE)
-write.table(pairwise_DE_total,paste0(out_path,"/",tumor_ct,"_vs_others_pairwise_DE.txt"),sep="\t",col.names=TRUE,row.names=TRUE,quote = FALSE)
+write.table(tumor_vs_rest_DE_total,paste0(out_path,"/",gsub(x = tumor_ct, pattern = " ", replacement = "_"),"_vs_combined_others_DE.txt"),sep="\t",col.names=TRUE,row.names=TRUE,quote = FALSE)
+write.table(pairwise_DE_total,paste0(out_path,"/",gsub(x = tumor_ct, pattern = " ", replacement = "_"),"_vs_others_pairwise_DE.txt"),sep="\t",col.names=TRUE,row.names=TRUE,quote = FALSE)
 
 ##########################################################################
 ###step3: filtering
@@ -241,7 +241,7 @@ cat(paste0(length(DE_genes_filtered)," genes were found to be tumor specific\n")
 ### sort genes by avg_log2FC: summary table is from DEG between tumor cells and other cell populations as as whole
 tmp <- tumor_vs_rest_DE_total %>% dplyr::filter(gene_symbol %in% DE_genes_filtered) %>% dplyr::group_by(gene_symbol) %>% dplyr::summarise(avg_log2FC=mean(avg_log2FC)) %>% as.data.frame
 DE_genes_filtered <- tmp[rev(order(tmp$avg_log2FC)),] %>% .$gene_symbol 
-write.table(DE_genes_filtered,paste0(out_path,"/",tumor_ct,"_specific_DEG.txt"),sep="\t",col.names=FALSE,row.names=FALSE,quote = FALSE)
+write.table(DE_genes_filtered,paste0(out_path,"/", gsub(x = tumor_ct, pattern = " ", replacement = "_"),"_specific_DEG.txt"),sep="\t",col.names=FALSE,row.names=FALSE,quote = FALSE)
 #DE_genes_filtered_highranking<-tmp[rev(order(tmp$avg_log2FC)),] %>% filter(avg_log2FC>0.75) %>% .$gene_symbol %>% as.character
 
 ######################################################################
@@ -308,9 +308,9 @@ HPA <- read.table(hpa_file,header=TRUE,stringsAsFactors = FALSE,fill=TRUE,sep="\
 HPA_subset <- filter(HPA,grepl("Plasma_membrane",Main_location))  #Gene_name,Reliability
 DE_genes_filtered_df$HPA_Reliability <-  HPA_subset$Reliability[match(DE_genes_filtered_df$Gene,HPA_subset$Gene_name)]
 
-write.table(DE_genes_filtered_df,paste0(out_path,"/",tumor_ct,"_specific_DEG_with_surface_annotations_from_3DB.txt"),sep="\t",col.names=TRUE,row.names=FALSE,quote = FALSE)
+write.table(DE_genes_filtered_df,paste0(out_path,"/",gsub(x = tumor_ct, pattern = " ", replacement = "_"),"_specific_DEG_with_surface_annotations_from_3DB.txt"),sep="\t",col.names=TRUE,row.names=FALSE,quote = FALSE)
 
 #Gene list for GTEX tissue specificity testing
-write.table(DE_genes_filtered_df$Gene,paste0(out_path,"/",tumor_ct,"_specific_DEG_with_surface_annotations_from_3DB_gene_list.txt"),sep="\t",col.names=FALSE,row.names=FALSE,quote = FALSE)
+write.table(DE_genes_filtered_df$Gene,paste0(out_path,"/",gsub(x = tumor_ct, pattern = " ", replacement = "_"),"_specific_DEG_with_surface_annotations_from_3DB_gene_list.txt"),sep="\t",col.names=FALSE,row.names=FALSE,quote = FALSE)
 
 cat("RESULT IS SAVED IN ",paste0(out_path,"/",tumor_ct,"_specific_DEG_with_surface_annotations_from_3DB.txt"),"\n")
