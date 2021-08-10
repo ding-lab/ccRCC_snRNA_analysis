@@ -12,7 +12,7 @@ mkdir -p ${OUT_DIR}
 Rscript celltype_specific_markers_doparallel_V1.0.R \
 -r /diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/individual_sample/write_individual_srat_obj_rm_doublets/20210701.v1/Seurat_Object_Paths.DoubletRemoved.20210701.v1.tsv \
 -o ${OUT_DIR} \
--c ${CELL_TYPE} \
+-c "Loop of Henle" \
 -s /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Data/Cell_Surface_Protein_Atlas_S2_File.txt \
 -p /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Data/Human_Protein_Atlas_subcellular_location.txt >& ${OUT_DIR}Log.$(date +%Y%m%d%H%M%S).log&
 exit
