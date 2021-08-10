@@ -90,7 +90,7 @@ tumor_vs_rest_DE_fun <- function(sobj,tumor_ct,sample){
 ###step 2: pairwise DE analysis function for compairing between a given cell type and each other cell type
 #####################################################################
 pairwise_DE_fun <- function(sobj,tumor_ct,sample){
-  cell.types=as.character(subset(as.data.frame(table(Idents(sobj))),Freq>=3)$Var1)
+  cell.types=as.character(subset(as.data.frame(table(Idents(sobj))),Freq>=50)$Var1)
   cat("cell types include: ",paste(cell.types,sep=","),"\n")
   non_tumor_ct <- cell.types[!(cell.types %in% c(tumor_ct,"Unknown"))]
   pairwise_DE <- as.data.frame(matrix(nrow=1,ncol=8))
@@ -137,7 +137,7 @@ tumor_vs_rest_DE_total_list<-foreach(sample_id=samples) %dopar% {
   cat(paste0("READING SEURAT OBJECT FOR SAMPLE ",sample_id,"...\n"))
   sobj <- readRDS(file = as.vector(subset(rds_list_df,V1==sample_id)$V2))
   #skip the sample if it only has the tumor cells or no any tumor cells
-  cell.types = as.character(subset(as.data.frame(table(Idents(sobj))),Freq>=3)[,1])
+  cell.types = as.character(subset(as.data.frame(table(Idents(sobj))),Freq>=50)[,1])
   print(cell.types)
   if ((length(cell.types)==1) & (tumor_ct %in% cell.types)) {
     cat(paste0(sample_id," Only Contain Tumor Cells So Skip This Sample...\n"))
