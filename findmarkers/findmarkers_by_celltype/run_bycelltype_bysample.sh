@@ -15,7 +15,7 @@ Rscript celltype_specific_markers_doparallel_V1.0.R \
 -c "Proximal tubule" \
 -s /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Data/Cell_Surface_Protein_Atlas_S2_File.txt \
 -p /diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Data/Human_Protein_Atlas_subcellular_location.txt >& ${OUT_DIR}Log.$(date +%Y%m%d%H%M%S).log&
-# exit
+exit
 
 ###########################################################
 ### GTEX TISSUE SPECIFICITY TEST
