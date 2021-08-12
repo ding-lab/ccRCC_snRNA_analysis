@@ -16,8 +16,10 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-dam_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Enriched_Motifs/Score_difference.Tumor_Normal_comparison.20210509.tsv")
-dam_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Enriched_Motifs/Motif_scores_Tumor_samples_vs_PT.20210715.tsv")
+# dam_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Enriched_Motifs/Score_difference.Tumor_Normal_comparison.20210509.tsv")
+dam_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Enriched_Motifs/Score_difference.Tumor_Normal_comparison.20210715.tsv")
+dam_df1 <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Enriched_Motifs/Motif_scores_Tumor_samples_vs_PT.20210715.tsv")
+dam_df2 <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Enriched_Motifs/DOWN_Motif_scores_Tumor_samples_vs_PT.20210720.v2.tsv")
 
 # set plotting parameters -------------------------------------------------
 ## set y bottom threshold
@@ -31,13 +33,16 @@ color_red <- RColorBrewer::brewer.pal(n = 4, name = "Set1")[1]
 color_blue <- RColorBrewer::brewer.pal(n = 4, name = "Set1")[2]
 
 # make data for plotting --------------------------------------------------
+# dam_df$Count_up <- mapvalues(x = dam_df$TF_Name, from = dam_df1$V1, to = as.vector(dam_df1$Count_up)); dam_df$Count_up[dam_df$Count_up == dam_df$TF_Name] <- "0"; dam_df$Count_up <- as.numeric(dam_df$Count_up)
+# dam_df$Count_down <- mapvalues(x = dam_df$TF_Name, from = dam_df2$V1, to = as.vector(dam_df2$Count_down)); dam_df$Count_down[dam_df$Count_down == dam_df$TF_Name] <- "0"; dam_df$Count_down <- as.numeric(dam_df$Count_down)
+
 dam_sig_df <- dam_df %>%
-  mutate(log10_pvalue = -log10(pvalue)) %>%
+  mutate(log10_pvalue = -log10(FDR)) %>%
   mutate(log10_pvalue_capped = ifelse(is.infinite(log10_pvalue), 150, log10_pvalue)) %>%
   filter(FDR < 0.05)
 
 plot_data_df <- dam_df %>%
-  mutate(log10_pvalue = -log10(pvalue)) %>%
+  mutate(log10_pvalue = -log10(FDR)) %>%
   mutate(log10_pvalue_capped = ifelse(is.infinite(log10_pvalue), 150, log10_pvalue)) %>%
   group_by(TF_Name) %>%
   summarise(Num_sig_up = length(which(diff > 0 & FDR < 0.05)), Num_sig_down = length(which(diff < 0 & FDR < 0.05)),
@@ -69,12 +74,12 @@ p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_tf) & x_plot > 
                          mapping = aes(x = x_plot, y = y_plot, label = text_tf), 
                          color = "black", alpha = 1, size = 5, #fontface = "bold",
                          segment.size = 0.2, segment.alpha = 0.5, min.segment.length = 0,
-                         xlim = c(0, NA))
+                         xlim = c(0, NA), max.overlaps = Inf)
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_tf) & x_plot < 0),
                          mapping = aes(x = x_plot, y = y_plot, label = text_tf), 
                          color = "black", alpha = 1, size = 5, #fontface = "bold",
                          segment.size = 0.2, segment.alpha = 0.5, min.segment.length = 0,
-                         xlim = c(NA, 0), ylim = c(75, NA))
+                         xlim = c(NA, 0), ylim = c(75, NA), max.overlaps = Inf)
 p <- p + scale_size_area(max_size = 4)
 p <- p + theme_classic()
 p <- p + xlab("Motif score difference for\nccRCC cells vs. PT cells")
@@ -87,3 +92,4 @@ file2write <- paste0(dir_out, "volcano.nolegend.", "pdf")
 pdf(file2write, width = 5.5, height = 5, useDingbats = F)
 print(p)
 dev.off()
+
