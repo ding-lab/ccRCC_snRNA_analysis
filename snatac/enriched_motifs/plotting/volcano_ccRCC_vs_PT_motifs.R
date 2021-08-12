@@ -17,6 +17,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 dam_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Enriched_Motifs/Score_difference.Tumor_Normal_comparison.20210509.tsv")
+dam_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Enriched_Motifs/Motif_scores_Tumor_samples_vs_PT.20210715.tsv")
 
 # set plotting parameters -------------------------------------------------
 ## set y bottom threshold
