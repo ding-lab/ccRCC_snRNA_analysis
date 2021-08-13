@@ -102,8 +102,9 @@ expvalue_top <- quantile(x = plotdata_df$avg.exp, probs = 0.95)
 plotdata_df <- plotdata_df %>%
   mutate(expvalue_plot = ifelse(avg.exp >= expvalue_top, expvalue_top, avg.exp))
 plotdata_df$gene_cell_type2 <- plyr::mapvalues(plotdata_df$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type2)
+plotdata_df$gene_cell_type2 <- factor(x = plotdata_df$gene_cell_type2, levels = c("PT S1/S2", "PT S2", "PT S3"))
+
 plotdata_df$cell_type <- plyr::mapvalues(x = plotdata_df$id, from = count_bycellgroup_keep_df$cell_group, to = as.vector(count_bycellgroup_keep_df$cell_type))
-plotdata_df$cell_type <- factor(x = plotdata_df$cell_type, levels = c("PT S1/S2", "PT S2", "PT S3"))
 p <- ggplot()
 p <- p + geom_point(data = plotdata_df, mapping = aes(x = features.plot, y = id, color = expvalue_plot, size = pct.exp), shape = 16)
 # p <- p +scale_color_gradient2(midpoint=median(plotdata_df$avg.exp, na.rm = T), low="blue", mid="white",
@@ -131,7 +132,7 @@ dev.off()
 p <- DotPlot(object = srat, features = genes2plot_filtered, col.min = 0, assay = "RNA")
 p$data$gene_cell_type2 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type2)
 p$data$cell_type <- plyr::mapvalues(x = p$data$id, from = count_bycellgroup_keep_df$cell_group, to = as.vector(count_bycellgroup_keep_df$cell_type))
-p$data$cell_type <- factor(x = p$data$cell_type, levels = c("PT S1/S2", "PT S2", "PT S3"))
+p$data$gene_cell_type2 <- factor(x = p$data$gene_cell_type2, levels = c("PT S1/S2", "PT S2", "PT S3"))
 
 # p <- p + facet_grid(.~gene_cell_type_group + gene_cell_type1 + gene_cell_type2 + gene_cell_type3 + gene_cell_type4, scales = "free", space = "free", drop = T)
 p <- p + facet_grid(cell_type~gene_cell_type2, scales = "free", space = "free", drop = T)
