@@ -25,7 +25,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -117,10 +117,10 @@ p <- p + theme(panel.spacing = unit(0, "lines"), panel.grid.major = element_line
 p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5), 
                strip.text.x = element_text(angle = 0, vjust = 0.5),
                strip.text.y = element_text(angle = 0, vjust = 0.5),
-               axis.text.x = element_text(size = 10, angle = 90))
+               axis.text.x = element_text(size = 10, angle=90,hjust=0.95,vjust=0.2))
 p <- p + theme(legend.position = "bottom")
 file2write <- paste0(dir_out, "CellTypeMarkerExp.NotScaled.png")
-png(file = file2write, width = 3000, height = 4000, res = 150)
+png(file = file2write, width = 3500, height = 4000, res = 150)
 print(p)
 dev.off()
 
@@ -138,10 +138,10 @@ p <- p + theme(panel.spacing = unit(0, "lines"), panel.grid.major = element_line
 p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5),
                strip.text.x = element_text(angle = 0, vjust = 0.5),
                strip.text.y = element_text(angle = 0, vjust = 0.5),
-               axis.text.x = element_text(size = 10, angle = 90))
+               axis.text.x = element_text(size = 10, angle=90,hjust=0.95,vjust=0.2))
 p <- p + theme(legend.position = "bottom")
 file2write <- paste0(dir_out, "CellTypeMarkerExp.Scaled.png")
-png(file = file2write, width = 3000, height = 4000, res = 150)
+png(file = file2write, width = 3500, height = 4000, res = 150)
 print(p)
 dev.off()
 
