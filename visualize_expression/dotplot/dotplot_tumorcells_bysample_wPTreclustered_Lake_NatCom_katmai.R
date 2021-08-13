@@ -25,7 +25,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 5
+version_tmp <- 2s
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -103,6 +103,7 @@ plotdata_df <- plotdata_df %>%
   mutate(expvalue_plot = ifelse(avg.exp >= expvalue_top, expvalue_top, avg.exp))
 plotdata_df$gene_cell_type2 <- plyr::mapvalues(plotdata_df$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type2)
 plotdata_df$cell_type <- plyr::mapvalues(x = plotdata_df$id, from = count_bycellgroup_keep_df$cell_group, to = as.vector(count_bycellgroup_keep_df$cell_type))
+plotdata_df$cell_type <- factor(x = plotdata_df$cell_type, levels = c("PT S1/S2", "PT S2", "PT S3"))
 p <- ggplot()
 p <- p + geom_point(data = plotdata_df, mapping = aes(x = features.plot, y = id, color = expvalue_plot, size = pct.exp), shape = 16)
 # p <- p +scale_color_gradient2(midpoint=median(plotdata_df$avg.exp, na.rm = T), low="blue", mid="white",
@@ -122,7 +123,7 @@ p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5
                axis.text.x = element_text(size = 10, angle=90,hjust=0.95,vjust=0.2))
 p <- p + theme(legend.position = "bottom")
 file2write <- paste0(dir_out, "CellTypeMarkerExp.NotScaled.png")
-png(file = file2write, width = 800, height = 2000, res = 150)
+png(file = file2write, width = 1200, height = 2000, res = 150)
 print(p)
 dev.off()
 
@@ -130,6 +131,7 @@ dev.off()
 p <- DotPlot(object = srat, features = genes2plot_filtered, col.min = 0, assay = "RNA")
 p$data$gene_cell_type2 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type2)
 p$data$cell_type <- plyr::mapvalues(x = p$data$id, from = count_bycellgroup_keep_df$cell_group, to = as.vector(count_bycellgroup_keep_df$cell_type))
+p$data$cell_type <- factor(x = p$data$cell_type, levels = c("PT S1/S2", "PT S2", "PT S3"))
 
 # p <- p + facet_grid(.~gene_cell_type_group + gene_cell_type1 + gene_cell_type2 + gene_cell_type3 + gene_cell_type4, scales = "free", space = "free", drop = T)
 p <- p + facet_grid(cell_type~gene_cell_type2, scales = "free", space = "free", drop = T)
@@ -143,7 +145,7 @@ p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5
                axis.text.x = element_text(size = 10, angle=90,hjust=0.95,vjust=0.2))
 p <- p + theme(legend.position = "bottom")
 file2write <- paste0(dir_out, "CellTypeMarkerExp.Scaled.png")
-png(file = file2write, width = 800, height = 2000, res = 150)
+png(file = file2write, width = 1200, height = 2000, res = 150)
 print(p)
 dev.off()
 
