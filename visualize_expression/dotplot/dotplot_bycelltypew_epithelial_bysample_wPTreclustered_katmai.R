@@ -40,7 +40,7 @@ print("Finish reading RDS file")
 barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_byepithelialcelltypes_bysample_wPTreclustered/20210809.v1/Barcode_byEpithelialCelltypes_BySample.20210809.v1.tsv", data.table = F)
 cat("finish reading the barcode-to-cell type table!\n")
 ## input cell type markers
-gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_Markers/Human.Gene2CellType.20210223.tsv")
+gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_Markers/Human.Gene2CellType.20210813.tsv")
 
 ## spcify assay
 assay_process <- "SCT"
@@ -65,9 +65,11 @@ count_bycellgroup_df <- barcode2celltype_df %>%
   select(cell_group) %>%
   table() %>%
   as.data.frame() %>%
-  rename(cell_group = ".")
+  rename(cell_group = ".") %>%
+  mutate(cell_type = str_split_fixed(string = cell_group, pattern = "_", n = 2)[,1])
 count_bycellgroup_keep_df <- count_bycellgroup_df %>%
   filter(Freq >= 50) %>%
+  filter(cell_type %in% c("Distal convoluted tubule", "EMT tumor cells", "Fibroblasts", "Intercalated cells", "Loop of Henle", "Myofibroblasts", "Podocytes", "Principle cells", "Proximal tubule", "PT", "Tumor cells")) %>%
   filter(!grepl(x = cell_group, pattern = "Unknown"))
 cellgroups_keep <- count_bycellgroup_keep_df$cell_group; cellgroups_keep <- as.vector(cellgroups_keep)
 srat <- subset(x = srat, idents = cellgroups_keep)
@@ -117,8 +119,8 @@ p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5
                strip.text.y = element_text(angle = 0, vjust = 0.5),
                axis.text.x = element_text(size = 10, angle = 90))
 p <- p + theme(legend.position = "bottom")
-file2write <- paste0(dir_out, aliquot_show, ".CellTypeMarkerExp.NotScaled.png")
-png(file = file2write, width = 3000, height = 1200, res = 150)
+file2write <- paste0(dir_out, "CellTypeMarkerExp.NotScaled.png")
+png(file = file2write, width = 3000, height = 4000, res = 150)
 print(p)
 dev.off()
 
@@ -138,8 +140,8 @@ p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5
                strip.text.y = element_text(angle = 0, vjust = 0.5),
                axis.text.x = element_text(size = 10, angle = 90))
 p <- p + theme(legend.position = "bottom")
-file2write <- paste0(dir_out, aliquot_show, ".CellTypeMarkerExp.Scaled.png")
-png(file = file2write, width = 3000, height = 1200, res = 150)
+file2write <- paste0(dir_out, "CellTypeMarkerExp.Scaled.png")
+png(file = file2write, width = 3000, height = 4000, res = 150)
 print(p)
 dev.off()
 
