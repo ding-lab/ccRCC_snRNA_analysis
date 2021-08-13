@@ -69,7 +69,7 @@ count_bycellgroup_keep_df <- count_bycellgroup_df %>%
   filter(Freq >= 50) %>%
   filter(!grepl(x = cell_group, pattern = "Unknown"))
 cellgroups_keep <- count_bycellgroup_keep_df$cell_group; cellgroups_keep <- as.vector(cellgroups_keep)
-srat <- subset(x = srat, Idents = cellgroups_keep)
+srat <- subset(x = srat, idents = cellgroups_keep)
 dim(srat)
 
 # prepare data ------------------------------------------------------------
