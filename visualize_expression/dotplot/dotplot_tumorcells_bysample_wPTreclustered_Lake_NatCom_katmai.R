@@ -25,7 +25,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -40,7 +40,7 @@ print("Finish reading RDS file")
 barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_byepithelialcelltypes_bysample_wPTreclustered/20210809.v1/Barcode_byEpithelialCelltypes_BySample.20210809.v1.tsv", data.table = F)
 cat("finish reading the barcode-to-cell type table!\n")
 ## input cell type markers
-gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_Markers/Human.Gene2CellType.20210813.tsv")
+gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_Markers/Human.Gene2CellType.20210817.tsv")
 
 ## spcify assay
 assay_process <- "SCT"
@@ -77,9 +77,10 @@ dim(srat)
 
 # prepare data ------------------------------------------------------------
 gene2celltype_df <- gene2celltype_df %>%
-  filter(Gene %in% c("ACSM2B", "SLC5A12", "PTH1R", "SORCS1", "DLGAP1", "DCDC2", "ACSM3", "CLSTN2", "CFH", "KCNT2", "PDZK1IP1", "MT1G", "GATM", "SLC3A1", "SPP1", "AQP1", "S100A6", "FGA", "FGB")) %>%
+  filter(Gene %in% c("LRP2", "SLC5A12", "ACSM3", "GATM", "SLC3A1")) %>%
+  # filter(Gene %in% c("ACSM2B", "SLC5A12", "PTH1R", "SORCS1", "DLGAP1", "DCDC2", "ACSM3", "CLSTN2", "CFH", "KCNT2", "PDZK1IP1", "MT1G", "GATM", "SLC3A1", "SPP1", "AQP1", "S100A6", "FGA", "FGB")) %>%
   select(Gene, Cell_Type2)
-gene2celltype_df$Cell_Type2[gene2celltype_df$Gene == "S100A6"] <- "PT S3"
+# gene2celltype_df$Cell_Type2[gene2celltype_df$Gene == "S100A6"] <- "PT S3"
 ## get the genes within the cell type marker table
 genes2plot <-  intersect(gene2celltype_df$Gene, srat@assays$RNA@counts@Dimnames[[1]])
 genes2plot <- unique(genes2plot)
@@ -124,7 +125,8 @@ p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5
                axis.text.x = element_text(size = 10, angle=90,hjust=0.95,vjust=0.2))
 p <- p + theme(legend.position = "bottom")
 file2write <- paste0(dir_out, "CellTypeMarkerExp.NotScaled.png")
-png(file = file2write, width = 1200, height = 2000, res = 150)
+png(file = file2write, width = 800, height = 2000, res = 150)
+# png(file = file2write, width = 1200, height = 2000, res = 150)
 print(p)
 dev.off()
 
@@ -146,7 +148,7 @@ p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5
                axis.text.x = element_text(size = 10, angle=90,hjust=0.95,vjust=0.2))
 p <- p + theme(legend.position = "bottom")
 file2write <- paste0(dir_out, "CellTypeMarkerExp.Scaled.png")
-png(file = file2write, width = 1200, height = 2000, res = 150)
+png(file = file2write, width = 800, height = 2000, res = 150)
 print(p)
 dev.off()
 
