@@ -40,7 +40,7 @@ print("Finish reading RDS file")
 cat("Start running FindVariableFeatures\n")
 DefaultAssay(object = srat) <- "SCT"
 srat <- FindVariableFeatures(object = srat, selection.method = "vst", nfeatures = 3000, verbose = T)
-var_features_df <- data.frame(gene = srat@assays$RNA@var.features)
+var_features_df <- data.frame(gene = srat@assays$SCT@var.features)
 cat("###########################################\n")
 
 # write output ------------------------------------------------------------
