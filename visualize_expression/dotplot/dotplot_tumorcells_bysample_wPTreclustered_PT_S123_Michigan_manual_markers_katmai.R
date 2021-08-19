@@ -78,12 +78,13 @@ dim(srat)
 # prepare data ------------------------------------------------------------
 gene2celltype_df <- gene2celltype_df %>%
   filter(Gene %in% c("LRP2", "SLC5A12", "ACSM3", "GATM", "SLC3A1", "GLYAT", "ITGB8", "ALPK2", "CFH", "KLK6", "KRT19", "ALDOB", "PDZK1IP1")) %>%
-  # filter(Gene %in% c("ACSM2B", "SLC5A12", "PTH1R", "SORCS1", "DLGAP1", "DCDC2", "ACSM3", "CLSTN2", "CFH", "KCNT2", "PDZK1IP1", "MT1G", "GATM", "SLC3A1", "SPP1", "AQP1", "S100A6", "FGA", "FGB")) %>%
   select(Gene, Cell_Type2)
 gene2celltype_df$Cell_Type2[gene2celltype_df$Gene %in% c("KRT19", "LRP2", "ALDOB", "PDZK1IP1")] <- "PT"
 gene2celltype_df$Cell_Type2[gene2celltype_df$Gene %in% c("GLYAT")] <- "PT-A"
-genes2celltype_add_df <- data.frame(Gene = c("CYP24A1"), Cell_Type2 = c("Other"))
+genes2celltype_add_df <- data.frame(Gene = c("CYP24A1", "HKDC1", "SLC26A3", "NDC80"))
+genes2celltype_add_df$Cell_Type2 <- "Other"
 gene2celltype_df <- rbind(gene2celltype_df, genes2celltype_add_df)
+
 ## get the genes within the cell type marker table
 genes2plot <-  intersect(gene2celltype_df$Gene, srat@assays$RNA@counts@Dimnames[[1]])
 genes2plot <- unique(genes2plot)
@@ -106,7 +107,7 @@ expvalue_top <- quantile(x = plotdata_df$avg.exp, probs = 0.95)
 plotdata_df <- plotdata_df %>%
   mutate(expvalue_plot = ifelse(avg.exp >= expvalue_top, expvalue_top, avg.exp))
 plotdata_df$gene_cell_type2 <- plyr::mapvalues(plotdata_df$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type2)
-plotdata_df$gene_cell_type2 <- factor(x = plotdata_df$gene_cell_type2, levels = c("PT", "PT S1", "PT S1/S2", "PT S2", "PT S3", "PT-A", "PT-B", "PT-C"))
+plotdata_df$gene_cell_type2 <- factor(x = plotdata_df$gene_cell_type2, levels = c("PT", "PT S1", "PT S1/S2", "PT S2", "PT S3", "PT-A", "PT-B", "PT-C", "Other"))
 
 plotdata_df$cell_type <- plyr::mapvalues(x = plotdata_df$id, from = count_bycellgroup_keep_df$cell_group, to = as.vector(count_bycellgroup_keep_df$cell_type))
 p <- ggplot()
@@ -137,7 +138,7 @@ dev.off()
 p <- DotPlot(object = srat, features = genes2plot_filtered, col.min = 0, assay = "RNA")
 p$data$gene_cell_type2 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type2)
 p$data$cell_type <- plyr::mapvalues(x = p$data$id, from = count_bycellgroup_keep_df$cell_group, to = as.vector(count_bycellgroup_keep_df$cell_type))
-p$data$gene_cell_type2 <- factor(x = p$data$gene_cell_type2, levels = c("PT", "PT S1", "PT S1/S2", "PT S2", "PT S3", "PT-A", "PT-B", "PT-C"))
+p$data$gene_cell_type2 <- factor(x = p$data$gene_cell_type2, levels = c("PT", "PT S1", "PT S1/S2", "PT S2", "PT S3", "PT-A", "PT-B", "PT-C", "Other"))
 
 # p <- p + facet_grid(.~gene_cell_type_group + gene_cell_type1 + gene_cell_type2 + gene_cell_type3 + gene_cell_type4, scales = "free", space = "free", drop = T)
 p <- p + facet_grid(cell_type~gene_cell_type2, scales = "free", space = "free", drop = T)
