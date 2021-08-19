@@ -40,7 +40,7 @@ print("Finish reading RDS file")
 barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_byepithelialcelltypes_bysample_wPTreclustered/20210809.v1/Barcode_byEpithelialCelltypes_BySample.20210809.v1.tsv", data.table = F)
 cat("finish reading the barcode-to-cell type table!\n")
 ## input cell type markers
-gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_Markers/Human.Gene2CellType.20210817.v2.tsv")
+gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_Markers/Human.Gene2CellType.20210819.tsv")
 
 ## spcify assay
 assay_process <- "SCT"
@@ -77,10 +77,12 @@ dim(srat)
 
 # prepare data ------------------------------------------------------------
 gene2celltype_df <- gene2celltype_df %>%
-  filter(Gene %in% c("LRP2", "SLC5A12", "ACSM3", "GATM", "SLC3A1", "SLC7A13", "SLC38A3", "SLC6A13", "SLC5A2")) %>%
+  filter(Gene %in% c("LRP2", "SLC5A12", "ACSM3", "GATM", "SLC3A1", "GLYAT", "ITGB8", "ALPK2", "CFH", "KLK6", "KRT19", "ALDOB", "PDZK1IP1")) %>%
   # filter(Gene %in% c("ACSM2B", "SLC5A12", "PTH1R", "SORCS1", "DLGAP1", "DCDC2", "ACSM3", "CLSTN2", "CFH", "KCNT2", "PDZK1IP1", "MT1G", "GATM", "SLC3A1", "SPP1", "AQP1", "S100A6", "FGA", "FGB")) %>%
   select(Gene, Cell_Type2)
-# gene2celltype_df$Cell_Type2[gene2celltype_df$Gene == "S100A6"] <- "PT S3"
+gene2celltype_df$Cell_Type2[gene2celltype_df$Gene %in% c("KRT19", "LRP2", "ALDOB", "PDZK1IP1")] <- "PT"
+gene2celltype_df$Cell_Type2[gene2celltype_df$Gene %in% c("GLYAT")] <- "PT-A"
+
 ## get the genes within the cell type marker table
 genes2plot <-  intersect(gene2celltype_df$Gene, srat@assays$RNA@counts@Dimnames[[1]])
 genes2plot <- unique(genes2plot)
@@ -103,7 +105,7 @@ expvalue_top <- quantile(x = plotdata_df$avg.exp, probs = 0.95)
 plotdata_df <- plotdata_df %>%
   mutate(expvalue_plot = ifelse(avg.exp >= expvalue_top, expvalue_top, avg.exp))
 plotdata_df$gene_cell_type2 <- plyr::mapvalues(plotdata_df$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type2)
-plotdata_df$gene_cell_type2 <- factor(x = plotdata_df$gene_cell_type2, levels = c("PT S1", "PT S1/S2", "PT S2", "PT S3"))
+plotdata_df$gene_cell_type2 <- factor(x = plotdata_df$gene_cell_type2, levels = c("PT", "PT S1", "PT S1/S2", "PT S2", "PT S3", "PT-A", "PT-B", "PT-C"))
 
 plotdata_df$cell_type <- plyr::mapvalues(x = plotdata_df$id, from = count_bycellgroup_keep_df$cell_group, to = as.vector(count_bycellgroup_keep_df$cell_type))
 p <- ggplot()
@@ -125,7 +127,7 @@ p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5
                axis.text.x = element_text(size = 10, angle=90,hjust=0.95,vjust=0.2))
 p <- p + theme(legend.position = "bottom")
 file2write <- paste0(dir_out, "CellTypeMarkerExp.NotScaled.png")
-png(file = file2write, width = 1200, height = 2000, res = 150)
+png(file = file2write, width = 1300, height = 2000, res = 150)
 # png(file = file2write, width = 1200, height = 2000, res = 150)
 print(p)
 dev.off()
@@ -134,7 +136,7 @@ dev.off()
 p <- DotPlot(object = srat, features = genes2plot_filtered, col.min = 0, assay = "RNA")
 p$data$gene_cell_type2 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type2)
 p$data$cell_type <- plyr::mapvalues(x = p$data$id, from = count_bycellgroup_keep_df$cell_group, to = as.vector(count_bycellgroup_keep_df$cell_type))
-p$data$gene_cell_type2 <- factor(x = p$data$gene_cell_type2, levels = c("PT S1", "PT S1/S2", "PT S2", "PT S3"))
+p$data$gene_cell_type2 <- factor(x = p$data$gene_cell_type2, levels = c("PT", "PT S1", "PT S1/S2", "PT S2", "PT S3", "PT-A", "PT-B", "PT-C"))
 
 # p <- p + facet_grid(.~gene_cell_type_group + gene_cell_type1 + gene_cell_type2 + gene_cell_type3 + gene_cell_type4, scales = "free", space = "free", drop = T)
 p <- p + facet_grid(cell_type~gene_cell_type2, scales = "free", space = "free", drop = T)
@@ -148,7 +150,7 @@ p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5
                axis.text.x = element_text(size = 10, angle=90,hjust=0.95,vjust=0.2))
 p <- p + theme(legend.position = "bottom")
 file2write <- paste0(dir_out, "CellTypeMarkerExp.Scaled.png")
-png(file = file2write, width = 1200, height = 2000, res = 150)
+png(file = file2write, width = 1500, height = 2000, res = 150)
 print(p)
 dev.off()
 
