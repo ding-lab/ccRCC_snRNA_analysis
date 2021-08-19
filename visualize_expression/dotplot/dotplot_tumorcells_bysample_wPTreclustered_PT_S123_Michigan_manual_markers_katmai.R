@@ -77,8 +77,9 @@ dim(srat)
 
 # prepare data ------------------------------------------------------------
 gene2celltype_df <- gene2celltype_df %>%
-  filter(Gene %in% c("LRP2", "SLC5A12", "ACSM3", "GATM", "SLC3A1", "GLYAT", "ITGB8", "ALPK2", "CFH", "KLK6", "KRT19", "ALDOB", "PDZK1IP1")) %>%
-  select(Gene, Cell_Type2)
+  filter(Gene %in% c("LRP2", "SLC5A12", "SLC5A2", "ACSM3", "CA4", "GATM", "SLC3A1", "GLYAT", "ITGB8", "ALPK2", "CFH", "KLK6", "KRT19", "ALDOB", "PDZK1IP1", "SLC7A13")) %>%
+  select(Gene, Cell_Type2) %>%
+  mutate(Cell_Type2 = gsub(pattern = "PT S", replacement = "S", x = Cell_Type2))
 gene2celltype_df$Cell_Type2[gene2celltype_df$Gene %in% c("KRT19", "LRP2", "ALDOB", "PDZK1IP1")] <- "PT"
 gene2celltype_df$Cell_Type2[gene2celltype_df$Gene %in% c("GLYAT")] <- "PT-A"
 genes2celltype_add_df <- data.frame(Gene = c("CYP24A1", "HKDC1", "SLC26A3", "NDC80"))
