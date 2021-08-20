@@ -88,7 +88,7 @@ barcode2celltype_df <- barcode2celltype_df %>%
   mutate(id_aliquot_barcode = paste0(orig.ident, "_", individual_barcode)) %>%
   mutate(group_findmarkers = ifelse(Cell_group5 == "Tumor cells" & orig.ident %in% aliquots_group1, 
                                     group1_findmarkers, 
-                                    ifelse(Cell_group5 == "Tumor cells" & orig.ident %in% aliquots_group2, aliquots_group2, "Others")))
+                                    ifelse(Cell_group5 == "Tumor cells" & orig.ident %in% aliquots_group2, group2_findmarkers, "Others")))
 ## map group label
 srat@meta.data$group_findmarkers <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$group_findmarkers), warn_missing = F)
 cat("finish adding group labels\n")
@@ -100,8 +100,8 @@ deg_df <- FindMarkers(object = srat, test.use = test_process, ident.1 = group1_f
                       min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
 cat("finish FindMarkers\n")
 deg_df$genesymbol_deg <- rownames(deg_df)
-deg_df$cellnumber_tumorcells <- length(which(srat@meta.data$group_findmarkers == group1_findmarkers))
-deg_df$cellnumber_ptcells <- length(which(srat@meta.data$group_findmarkers == group2_findmarkers))
+deg_df$cellnumber <- length(which(srat@meta.data$group_findmarkers == group1_findmarkers))
+deg_df$cellnumber <- length(which(srat@meta.data$group_findmarkers == group2_findmarkers))
 
 ## write output
 file2write <- paste0(dir_out, "Male_vs_Female", ".ccRCC.", test_process, 
