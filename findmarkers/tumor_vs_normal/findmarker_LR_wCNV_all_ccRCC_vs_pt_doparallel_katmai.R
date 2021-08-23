@@ -120,17 +120,17 @@ latent.vars <- FetchData(
   cells = c(cells.1, cells.2)
 )
 latent.vars$barcode_merged <- rownames(latent.vars)
-print(head(latent.vars))
+# print(head(latent.vars))
 # head(latent.vars$id_aliquot_barcode[!(latent.vars$id_aliquot_barcode %in% rownames(cnv_per_feature_df))])
 latent.vars <- cbind(latent.vars, cnv_per_feature_df[latent.vars$id_aliquot_barcode,])
 rownames(latent.vars) <- latent.vars$barcode_merged
 latent.vars <- latent.vars[rownames(group.info), , drop = FALSE]
-print(head(latent.vars))
+# print(head(latent.vars))
 cat("finish preparing latent.vars\n")
 
 ## test special symbol change
 cat("printing special symbols in latent.vars\n")
-colnames(latent.vars)[grepl(pattern = "\\-|\\_", x = rownames(latent.vars))]
+colnames(latent.vars)[grepl(pattern = "\\-|\\_", x = colnames(latent.vars))]
 cat("printing special symbols in data.use\n")
 rownames(data.use)[grepl(pattern = "\\-|\\_", x = rownames(data.use))]
 colnames(latent.vars)=gsub('-','_',colnames(latent.vars))
