@@ -47,10 +47,10 @@ cat("finish reading the barcode-to-cell type table!\n")
 ## input idemta data
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
 ## input CNV value per barcode per gene
-cnv_per_feature_df=readRDS('./Resources/Analysis_Results/findmarkers/tumor_vs_normal/annotate_deg/map_CNVnex_lr_by_filteredgenes_by_snRNAbarcode/20210823.v1/Barcode2Gene.CNV.20210823.v1.RDS')
+cnv_per_feature_df=readRDS('./Resources/Analysis_Results/findmarkers/tumor_vs_normal/annotate_deg/map_CNVnex_lr_by_filteredgenes_by_snRNAbarcode_katmai/20210823.v1/Barcode2Gene.CNV.20210823.v1.RDS')
 
 # set parameters for findmarkers ------------------------------------------
-logfc.threshold.run <- 0.1
+logfc.threshold.run <- 0
 min.pct.run <- 0.1
 min.diff.pct.run <- 0.1
 ## spcify assay
@@ -128,7 +128,7 @@ cat("finish preparing latent.vars\n")
 
 ## test special symbol change
 cat("printing special symbols in latent.vars\n")
-colnames(latent.vars)[grepl(pattern = "\\-|\\_", x = rownames(latent.vars))]
+colnames(latent.vars)[grepl(pattern = "\\-|\\_", x = colnames(latent.vars))]
 cat("printing special symbols in data.use\n")
 rownames(data.use)[grepl(pattern = "\\-|\\_", x = rownames(data.use))]
 colnames(latent.vars)=gsub('-','_',colnames(latent.vars))

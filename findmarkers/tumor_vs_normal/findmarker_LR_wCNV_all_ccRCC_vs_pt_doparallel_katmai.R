@@ -52,7 +52,7 @@ idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sam
 cnv_per_feature_df=readRDS('./Resources/Analysis_Results/findmarkers/tumor_vs_normal/annotate_deg/map_CNVnex_lr_by_filteredgenes_by_snRNAbarcode_katmai/20210823.v1/Barcode2Gene.CNV.20210823.v1.RDS')
 
 # set parameters for findmarkers ------------------------------------------
-logfc.threshold.run <- 0.1
+logfc.threshold.run <- 0
 min.pct.run <- 0.1
 min.diff.pct.run <- 0.1
 ## spcify assay
@@ -141,6 +141,8 @@ cat("finish changing special symbols in data.use\n")
 # run test ----------------------------------------------------------------
 registerDoParallel(cores = no_cores)
 start_time <- Sys.time()
+cat(paste0("start processing ", nrow(data.use), " genes\n"))
+
 p_val_list<-foreach(x = rownames(data.use)) %dopar% {
   print(x)
   model.data <- cbind(GENE = data.use[x,], group.info, latent.vars)
@@ -162,7 +164,9 @@ file2write <- paste0(dir_out, "Pvalues.RDS")
 saveRDS(object = p_val_list, file = file2write, compress = T)
 
 to.return <- do.call(rbind.data.frame, p_val_list)
-to.return <- as.data.frame(to.return)
+to.return <- data.frame()
+cat("finish do.call\n")
+
 to.return$genesymbol <- rownames(data.use)
 to.return$p_val=as.numeric(as.character(unlist(to.return$p_val)))
 to.return$FDR=p.adjust(to.return$p_val,method='fdr')
