@@ -17,28 +17,28 @@ thisFile <- function() {
 }
 path_this_script <- thisFile()
 ## set working directory
-dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
 # dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 dir_out1 <- "./Resources/snRNA_Processed_Data/Differentially_Expressed_Genes/Tumorcells_vs_PTcells/"
 dir_out <- paste0(dir_out1, run_id, "/"); dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-## input the integrated data
-path_rds <- "./Resources/Analysis_Results/merging/33_aliquot_merging_without_anchoring/20210428.v2/33_aliquot_merged_without_anchoring.20210428.v2.RDS"
-srat <- readRDS(file = path_rds)
-print("Finish reading RDS file")
 ## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_33aliquots/20210423.v1/33Aliquot.Barcode2CellType.20210423.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_35aliquots/20210802.v1/35Aliquot.Barcode2CellType.20210802.v1.tsv", data.table = F)
 cat("finish reading the barcode-to-cell type table!\n")
 ## input idemta data
-idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
+idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
+## input the integrated data (doublets removed)
+path_rds <- "./Resources/Analysis_Results/merging/merge_35_samples/20210802.v1/RCC.35samples.Merged.20210802.v1.RDS"
+srat <- readRDS(file = path_rds)
+print("Finish reading RDS file")
 
 # set parameters for findmarkers ------------------------------------------
 logfc.threshold.run <- 0
