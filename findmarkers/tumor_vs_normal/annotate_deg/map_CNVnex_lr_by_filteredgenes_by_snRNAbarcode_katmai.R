@@ -65,8 +65,6 @@ cases_process <- barcodes_df$Case[barcodes_df$keep]
 celltypes_process <- barcodes_df$Cell_group_w_epithelialcelltypes[barcodes_df$keep]
 table(celltypes_process)
 ## get genes to process
-genes_filtered_df <- genes_filtered_df %>%
-  filter(easyid_tumor != "C3L-00359-T1")
 genes_process <- unique(genes_filtered_df$genesymbol_deg)
 genes_process <- genes_process[genes_process %in% cna_df$gene_name]
 length(genes_process)
