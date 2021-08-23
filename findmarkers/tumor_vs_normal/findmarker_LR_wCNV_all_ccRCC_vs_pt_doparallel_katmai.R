@@ -157,8 +157,13 @@ p_val_list<-foreach(x = rownames(data.use)) %dopar% {
   lrtest <- lrtest(model1, model2)
   return(lrtest$Pr[2])
 }
-p_val <- unlist(p_val_list)
-to.return <- data.frame(p_val, row.names = rownames(data.use))
+## write output
+file2write <- paste0(dir_out, "Pvalues.RDS")
+saveRDS(object = p_val_list, file = file2write, compress = T)
+
+to.return <- do.call(rbind.data.frame, p_val_list)
+to.return <- as.data.frame(to.return)
+to.return$genesymbol <- rownames(data.use)
 to.return$p_val=as.numeric(as.character(unlist(to.return$p_val)))
 to.return$FDR=p.adjust(to.return$p_val,method='fdr')
 
