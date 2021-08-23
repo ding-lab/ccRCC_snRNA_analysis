@@ -36,7 +36,7 @@ library(future)
 # plan("multiprocess", workers = 4)
 options(future.globals.maxSize = 9 * 1024^3) # for 9 Gb RAM
 library(doParallel)
-no_cores <- 25
+no_cores <- 20
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
@@ -49,7 +49,7 @@ cat("finish reading the barcode-to-cell type table!\n")
 ## input idemta data
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
 ## input CNV value per barcode per gene
-cnv_per_feature_df=readRDS('./Resources/Analysis_Results/findmarkers/tumor_vs_normal/annotate_deg/map_CNVnex_lr_by_filteredgenes_by_snRNAbarcode/20210823.v1/Barcode2Gene.CNV.20210823.v1.RDS')
+cnv_per_feature_df=readRDS('./Resources/Analysis_Results/findmarkers/tumor_vs_normal/annotate_deg/map_CNVnex_lr_by_filteredgenes_by_snRNAbarcode_katmai/20210823.v1/Barcode2Gene.CNV.20210823.v1.RDS')
 
 # set parameters for findmarkers ------------------------------------------
 logfc.threshold.run <- 0.1
