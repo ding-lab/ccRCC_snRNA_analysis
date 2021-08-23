@@ -33,8 +33,10 @@ run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
 library(future)
-plan("multiprocess", workers = 4)
+# plan("multiprocess", workers = 4)
 options(future.globals.maxSize = 9 * 1024^3) # for 9 Gb RAM
+library(doParallel)
+no_cores <- 25
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
@@ -137,31 +139,25 @@ rownames(data.use)=gsub('-','_',rownames(data.use))
 cat("finish changing special symbols in data.use\n")
 
 # run test ----------------------------------------------------------------
-my.sapply <- ifelse(
-  nbrOfWorkers() == 1,
-  #  test = verbose && nbrOfWorkers() == 1,
-  yes = pbsapply,
-  no = future_sapply
-)
-p_val <- my.sapply(
-  X = rownames(x = data.use),
-  FUN = function(x) {
-    print(x)
-    model.data <- cbind(GENE = data.use[x,], group.info, latent.vars)
-    fmla <- as.formula(object = paste(
-      "group ~ GENE +",
-      paste(c(x), collapse = "+")
-    ))
-    fmla2 <- as.formula(object = paste(
-      "group ~",
-      paste(c(x), collapse = "+")
-    ))
-    model1 <- glm(formula = fmla, data = model.data, family = "binomial")
-    model2 <- glm(formula = fmla2, data = model.data, family = "binomial")
-    lrtest <- lrtest(model1, model2)
-    return(lrtest$Pr[2])
-  }
-)
+registerDoParallel(cores = no_cores)
+start_time <- Sys.time()
+p_val_list<-foreach(x = rownames(data.use)) %dopar% {
+  print(x)
+  model.data <- cbind(GENE = data.use[x,], group.info, latent.vars)
+  fmla <- as.formula(object = paste(
+    "group ~ GENE +",
+    paste(c(x), collapse = "+")
+  ))
+  fmla2 <- as.formula(object = paste(
+    "group ~",
+    paste(c(x), collapse = "+")
+  ))
+  model1 <- glm(formula = fmla, data = model.data, family = "binomial")
+  model2 <- glm(formula = fmla2, data = model.data, family = "binomial")
+  lrtest <- lrtest(model1, model2)
+  return(lrtest$Pr[2])
+}
+p_val <- unlist(p_val_list)
 to.return <- data.frame(p_val, row.names = rownames(data.use))
 to.return$p_val=as.numeric(as.character(unlist(to.return$p_val)))
 to.return$FDR=p.adjust(to.return$p_val,method='fdr')
