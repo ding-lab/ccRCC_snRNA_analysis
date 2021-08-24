@@ -30,7 +30,7 @@ run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
 library(future)
-plan("multiprocess", workers = 5)
+plan("multiprocess", workers = 3)
 options(future.globals.maxSize = 10 * 1024^3) # for 5 Gb RAM
 
 # input dependencies ------------------------------------------------------
@@ -47,7 +47,8 @@ idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sam
 # set parameters for findmarkers ------------------------------------------
 logfc.threshold.run <- 0
 min.pct.run <- 0.1
-min.diff.pct.run <- 0.1
+# min.diff.pct.run <- 0.1
+min.diff.pct.run <- 0
 ## spcify assay
 assay_process <- "RNA"
 DefaultAssay(srat) <- assay_process

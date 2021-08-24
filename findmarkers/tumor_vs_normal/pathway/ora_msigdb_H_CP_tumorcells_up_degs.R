@@ -30,7 +30,7 @@ wp2gene <- rbind(wp2gene1, wp2gene2)
 ## input degs
 # deg_all_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/summarize_tumor_vs_pt_DEGs/20210419.v1/Tumor_DEGs.EnoughDataPoints.Consistent.20210419.v1.tsv")
 # deg_all_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/summarize_tumor_vs_pt_DEGs/20210429.v1/Tumor_DEGs.EnoughDataPoints.Consistent.20210429.v1.tsv")
-deg_all_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/unite_tumor_vs_normal_snRNA_individual_and_CNVcorrected_DEGs/20210608.v1/Consistent.Tumor_vs_PT_DEGs.CNVcorrected.20210608.v1.tsv")
+deg_all_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/unite_tumor_vs_normal_snRNA_individual_and_CNVcorrected_DEGs/20210824.v1/Consistent.Tumor_vs_PT_DEGs.CNVcorrected.20210824.v1.tsv")
 
 # convert gene symbol to entrez ids ---------------------------------------
 deg_df <- deg_all_df %>%

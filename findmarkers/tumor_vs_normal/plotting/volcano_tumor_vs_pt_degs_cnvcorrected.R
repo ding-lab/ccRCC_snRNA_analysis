@@ -9,14 +9,15 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 3
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/unite_tumor_vs_normal_snRNA_individual_and_CNVcorrected_DEGs/20210608.v1/Tumor_vs_PT_DEGs.with.CNVcorrection.20210608.v1.tsv")
+# deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/unite_tumor_vs_normal_snRNA_individual_and_CNVcorrected_DEGs/20210608.v1/Tumor_vs_PT_DEGs.with.CNVcorrection.20210608.v1.tsv")
+deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/unite_tumor_vs_normal_snRNA_individual_and_CNVcorrected_DEGs/20210824.v1/Tumor_vs_PT_DEGs.with.CNVcorrection.20210824.v1.tsv")
 
 # set plotting parameters -------------------------------------------------
 color_purple <- RColorBrewer::brewer.pal(n = 4, name = "Set1")[4]
@@ -29,7 +30,7 @@ plot_data_df <- deg_df %>%
   mutate(log10FDR = -log10(FDR.CNVcorrected)) %>%
   mutate(foldchange_type = ifelse(FDR.CNVcorrected < 0.05, ifelse(avg_log2FC.allTumorcellsvsPT > 0  & Num_down == 0 & Num_sig_up >= 15, "consistently higher in ccRCC cells",
                                   ifelse(avg_log2FC.allTumorcellsvsPT < 0  & Num_up == 0 & Num_sig_down >= 15, "consistently lower in ccRCC cells", "insignificant")), "insignificant")) %>%
-  mutate(size_plot = abs(Num_sig_up - Num_sig_down)/24) %>%
+  # mutate(size_plot = abs(Num_sig_up - Num_sig_down)/24) %>%
   mutate(x_plot = ifelse(avg_log2FC.allTumorcellsvsPT < -3, -3, ifelse(avg_log2FC.allTumorcellsvsPT > 3, 3,  avg_log2FC.allTumorcellsvsPT))) %>%
   # mutate(x_plot = ifelse(avg_log2FC.allTumorcellsvsPT < -2.5, -2.5, ifelse(avg_log2FC.allTumorcellsvsPT > 2.5, 2.5,  avg_log2FC.allTumorcellsvsPT))) %>%
   mutate(y_plot = ifelse(log10FDR > 350, 350, log10FDR)) %>%

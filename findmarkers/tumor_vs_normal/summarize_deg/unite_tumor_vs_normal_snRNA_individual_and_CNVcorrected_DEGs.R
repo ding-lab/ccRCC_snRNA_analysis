@@ -15,8 +15,8 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-deg_ind_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/summarize_tumor_vs_pt_DEGs/20210429.v1/Tumor_DEGs.20210429.v1.tsv")
-deg_cnvcor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/annotate_deg/format_alltumor_vs_pt_CNV_corrected_degs/20210608.v1/LR.logfc.threshold0.1.min.pct0.1.min.diff.pct0.1.AssayRNA.tsv")
+deg_ind_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/summarize_individual_tumor_vs_pt_DEGs/20210824.v1/Tumor_DEGs.20210824.v1.tsv")
+deg_cnvcor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/annotate_deg/format_alltumor_vs_pt_CNV_corrected_degs/20210824.v1/LR.logfc.threshold0.min.pct0.1.min.diff.pct0.1.AssayRNA.tsv")
 
 # overlap -----------------------------------------------------------------
 ## preprocess CNV corrected degs
