@@ -15,7 +15,7 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-degs_ccRCC_vs_pt_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/unite_tumor_vs_normal_snRNA_bulkRNA_protein_DEGs/20210608.v1/Tumor_vs_PT_DEGs.United.snRNA.bulkRNA.Protein.20210608.v1.tsv")
+degs_ccRCC_vs_pt_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/unite_tumor_vs_normal_snRNA_bulkRNA_protein_DEGs/20210824.v1/Tumor_vs_PT_DEGs.United.snRNA.bulkRNA.Protein.20210824.v1.tsv")
 ## input tumor-specific DEGs with surface annotation
 # degs_ccRCC_vs_others_df
 degs_ccRCC_vs_others_surface_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/tumor_specific_markers/20210701.v1/ccRCC_cells_specific_DEG_with_surface_annotations_from_3DB.txt")
@@ -71,6 +71,8 @@ file2write <- paste0(dir_out, "ccRCC_markers.Surface.", run_id, ".tsv")
 write.table(x = markers_merged_filtered_df, file = file2write, quote = F, sep = "\t", row.names = F)
 file2write <- paste0(dir_out, "ccRCC_markers.Surface.", run_id, ".csv")
 write.table(x = markers_merged_filtered_df, file = file2write, quote = F, sep = ",", row.names = F)
+file2write <- paste0(dir_out, "ccRCC_vs_NonTumorcells.merge.ccRCC_vs_PT.", run_id, ".csv")
+write.table(x = markers_merged_df, file = file2write, quote = F, sep = ",", row.names = F)
 
 # degs_ccRCC_vs_others_surface_df %>%
 #   filter(GO_surface == "Surface" | (!is.na(HPA_Reliability) & HPA_Reliability %in% c("Approved", "Enhanced", "Supported"))) %>%
