@@ -42,8 +42,8 @@ Idents(atac)=atac$Piece_ID
 ## input motif-peak mapping result
 peak2motif_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Motifs_Mapped_to_Peaks/Motifs_matched.DEG_associated_Peaks.Motif_annotation.20210517.v1.tsv")
 ## input peak fold changes
-peak2fcs_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/DA_peaks_Tumor_vs_PT_affected_byCNV_removed.tsv")
-
+# peak2fcs_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/DA_peaks_Tumor_vs_PT_affected_byCNV_removed.tsv")
+peak2fcs_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/UP_Tumor_vsPT.Filtered.CNV_corrected.Annotated.20210811.tsv")
 ## specify parameters to plot
 peak_plot <- c("chr15-72228266-72228766")
 motif_plot <- "RBPJ"
@@ -52,7 +52,7 @@ topn_plot <- 24
 # preprocess samples to show ----------------------------------------------
 peak2fcs_tmp_df <- peak2fcs_df %>%
   filter(peak == peak_plot)
-peak2fcs_long_tmp_df <- melt(data = peak2fcs_tmp_df, measure.vars = colnames(peak2fcs_tmp_df)[grepl(pattern = "avg_lnFC", x = colnames(peak2fcs_tmp_df))])
+peak2fcs_long_tmp_df <- melt(data = peak2fcs_tmp_df, measure.vars = colnames(peak2fcs_tmp_df)[grepl(pattern = "_Signif_avg_lnFC", x = colnames(peak2fcs_tmp_df))])
 peak2fcs_long_tmp_df <- peak2fcs_long_tmp_df %>%
   arrange(desc(value)) %>%
   mutate(pieceid = str_split_fixed(string = variable, pattern = "_", n = 2)[,1])
@@ -75,8 +75,8 @@ motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == peak_plot & peak2
 # print(head(atac@meta.data))
 Idents(atac_subset)=factor(atac_subset$Piece_ID, levels=c(pieceids_selected,'C3L-00088-N','C3N-01200-N', "C3L-00079-N", "C3N-00242-N"))
 ## make colors
-color_tumorcell <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[4]
-color_pt <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[1]
+color_tumorcell <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[4]
+color_pt <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[1]
 colors_celltype <- c(rep(x = color_tumorcell, 24), rep(x = color_pt, 4))
 names(colors_celltype) <- c(pieceids_selected, 'C3L-00088-N','C3N-01200-N', "C3L-00079-N", "C3N-00242-N")
 

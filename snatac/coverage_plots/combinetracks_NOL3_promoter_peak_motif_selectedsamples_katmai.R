@@ -58,7 +58,7 @@ pieceids_selected <- head(x = peak2fcs_long_tmp_df$pieceid, topn_plot)
 # preprocess ATAC object --------------------------------------------------
 Idents(atac)=atac$Piece_ID
 atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_selected) | cell_type=='PT' & Piece_ID %in% sampleids_nat)
-atac_subset@meta.data$Piece_ID <- factor(x = atac_subset@meta.data$Piece_ID, levels = c(pieceids_selected, sampleids_nat))
+Idents(atac_subset)=factor(atac_subset$Piece_ID, levels=c(pieceids_selected,'C3L-00088-N','C3N-01200-N', "C3L-00079-N", "C3N-00242-N"))
 
 # process coordinates ------------------------------------------------------------
 chr=strsplit(x = peak_plot, split = "\\-")[[1]][1]
