@@ -36,7 +36,6 @@ dir.create(dir_out)
 ## input the merged object
 # atac=readRDS(paste('/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/3.Merge_snATAC/Merge.PKDSamples.v.20210609/26_ccRCC_4PKD_snATAC_ccRCC_peaks.20210611.rds.gz',sep=''))
 atac=readRDS(paste('/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/3.Merge_snATAC/Merge.SelectPeaks.v.20210706/28_ccRCC_snATAC.selectedPeaks.chromvar.cicero.v3.20210725.rds',sep=''))
-Idents(atac)=atac$Piece_ID
 ## input motif-peak mapping result
 peak2motif_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Motifs_Mapped_to_Peaks/Motifs_matched.DEG_associated_Peaks.Motif_annotation.20210517.v1.tsv")
 ## input peak fold changes
@@ -57,7 +56,9 @@ peak2fcs_long_tmp_df <- peak2fcs_long_tmp_df %>%
 pieceids_selected <- head(x = peak2fcs_long_tmp_df$pieceid, topn_plot)
 
 # preprocess ATAC object --------------------------------------------------
+Idents(atac)=atac$Piece_ID
 atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_selected) | cell_type=='PT' & Piece_ID %in% sampleids_nat)
+atac_subset@meta.data$Piece_ID <- factor(x = atac_subset@meta.data$Piece_ID, levels = c(pieceids_selected, sampleids_nat))
 
 # process coordinates ------------------------------------------------------------
 chr=strsplit(x = peak_plot, split = "\\-")[[1]][1]
@@ -70,7 +71,6 @@ peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
 motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == peak_plot & peak2motif_df$motif.name == motif_plot & peak2motif_df$Peak_Type == "Promoter"]; motif_coord <- unique(motif_coord)
 ## change atac ident
 # print(head(atac@meta.data))
-atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_selected) | cell_type=='PT' & Piece_ID %in% sampleids_nat)
 
 # plot --------------------------------------------------------------------
 ## make colors
@@ -88,7 +88,7 @@ cov_plot= Signac::CoveragePlot(
 cov_plot <- cov_plot + scale_fill_manual(values =  colors_celltype)
 print("Finished cov_plot")
 
-peak_plot <- Signac::PeakPlot(
+peak_plot_obj <- Signac::PeakPlot(
   object = atac_subset,
   region = peak_plot_expanded, 
   peaks = StringToGRanges(peak_plot, sep = c("-", "-")))
@@ -105,7 +105,7 @@ gene_plot <- Signac::AnnotationPlot(
   region = peak_plot_expanded)
 
 p <- Signac::CombineTracks(
-  plotlist = list(cov_plot, peak_plot, motif_plot, gene_plot),
+  plotlist = list(cov_plot, peak_plot_obj, motif_plot, gene_plot),
   heights = c(7, 0.5, 0.5, 1))
 print("Finished CombineTracks")
 
