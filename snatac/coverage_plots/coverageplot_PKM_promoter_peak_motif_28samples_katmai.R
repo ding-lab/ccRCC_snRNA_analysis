@@ -61,6 +61,9 @@ pieceids_selected <- head(x = peak2fcs_long_tmp_df$pieceid, topn_plot)
 # preprocess ATAC object --------------------------------------------------
 head(atac@meta.data)
 atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_selected) | cell_type=='PT' & Piece_ID %in% c('C3L-00088-N','C3N-01200-N', "C3L-00079-N", "C3N-00242-N"))
+## change atac ident
+# print(head(atac@meta.data))
+Idents(atac_subset)=factor(atac_subset$Piece_ID, levels=c(pieceids_selected,'C3L-00088-N','C3N-01200-N', "C3L-00079-N", "C3N-00242-N"))
 
 # process coordinates ------------------------------------------------------------
 chr=strsplit(x = peak_plot, split = "\\-")[[1]][1]
@@ -70,10 +73,7 @@ new_st=st-1000
 new_en=en+1000
 peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
 ## process motif coordinates
-motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == peak_plot & peak2motif_df$motif.name == motif_plot & peak2motif_df$Peak_Type == "Promoter"]; motif_coord <- unique(motif_coord)
-## change atac ident
-# print(head(atac@meta.data))
-Idents(atac_subset)=factor(atac_subset$Piece_ID, levels=c(pieceids_selected,'C3L-00088-N','C3N-01200-N', "C3L-00079-N", "C3N-00242-N"))
+motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == "chr15-72230151-72230651" & peak2motif_df$motif.name == motif_plot & peak2motif_df$Peak_Type == "Promoter"]; motif_coord <- unique(motif_coord)
 ## make colors
 color_tumorcell <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[4]
 color_pt <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[1]
@@ -89,7 +89,7 @@ p=Signac::CoveragePlot(
   ranges=StringToGRanges(motif_coord, sep = c("-", "-")),
   ranges.title = paste(motif_plot,"\nmotif",sep=''),
   links=FALSE)
-p <- p + scale_fill_manual(values =  colors_celltype)
+# p <- p + scale_fill_manual(values =  colors_celltype)
 
 ## write output
 # file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".", motif_plot, ".png")
