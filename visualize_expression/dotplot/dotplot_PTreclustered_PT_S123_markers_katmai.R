@@ -148,8 +148,7 @@ p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5
                strip.text.y = element_blank(),
                axis.text.x = element_text(size = 10, angle=90,hjust=0.95,vjust=0.2), axis.title = element_blank())
 p <- p + theme(legend.position = "bottom")
-p <- p + scale_color_gradientn(guide = guide_colourbar(title = NULL))
-
+p <- p + scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(n = 9, name = "Spectral")[1:5]), guide = guide_legend(direction = "horizontal", title = NULL))
 file2write <- paste0(dir_out, "CellTypeMarkerExp.Scaled.png")
 png(file = file2write, width = 1200, height = 1000, res = 150)
 print(p)
