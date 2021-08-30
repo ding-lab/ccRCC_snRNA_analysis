@@ -25,7 +25,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 3
+version_tmp <- 4
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -139,7 +139,8 @@ p$data$gene_cell_type2 <- plyr::mapvalues(p$data$features.plot, from = gene2cell
 p$data$cell_type <- plyr::mapvalues(x = p$data$id, from = count_bycellgroup_keep_df$cell_group, to = as.vector(count_bycellgroup_keep_df$cell_type))
 p$data$gene_cell_type2 <- factor(x = p$data$gene_cell_type2, levels = c("PT", "S1", "S1/S2", "S2", "S3", "PT-A", "PT-B", "PT-C", "Other"))
 p <- p + facet_grid(cell_type~gene_cell_type2, scales = "free", space = "free", drop = T)
-
+p <- p + scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(n = 9, name = "Spectral")[1:5]), guide = guide_colourbar(direction = "horizontal", title = NULL))
+p <- p + scale_size_continuous(breaks = c(25, 50, 75, 100), guide = guide_legend(direction = "horizontal", title = NULL, nrow = 2, byrow = T))
 p <- p + theme(panel.spacing = unit(0, "lines"), panel.grid.major = element_line(colour = "grey80"),
                panel.border = element_rect(color = "black", fill = NA, size = 0.5),
                panel.background = element_blank())
@@ -147,14 +148,13 @@ p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5
                strip.text.x = element_text(angle = 0, vjust = 0.5),
                strip.text.y = element_blank(),
                axis.text.x = element_text(size = 10, angle=90,hjust=0.95,vjust=0.2), axis.title = element_blank())
-p <- p + theme(legend.position = "bottom")
-p <- p + scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(n = 9, name = "Spectral")[1:5]), guide = guide_colorbar(direction = "horizontal", title = NULL))
+p <- p + theme(legend.position = "right", legend.box = "vertical")
 file2write <- paste0(dir_out, "CellTypeMarkerExp.Scaled.png")
 png(file = file2write, width = 1200, height = 1000, res = 150)
 print(p)
 dev.off()
 file2write <- paste0(dir_out, "CellTypeMarkerExp.Scaled.pdf")
-pdf(file = file2write, width = 3.5, height = 5, useDingbats = F)
+pdf(file = file2write, width = 5, height = 4, useDingbats = F)
 print(p)
 dev.off()
 
