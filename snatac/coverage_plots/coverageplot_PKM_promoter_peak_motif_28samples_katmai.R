@@ -1,5 +1,6 @@
 # Yige Wu @WashU May 2021
 ## source activate ccrcc_snrna
+## 2021-08-27 right now the RBPJ motif is not there
 
 # set up libraries and output directory -----------------------------------
 ## getting the path to the current script
@@ -76,7 +77,7 @@ peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
 motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == "chr15-72230151-72230651" & peak2motif_df$motif.name == motif_plot & peak2motif_df$Peak_Type == "Promoter"]; motif_coord <- unique(motif_coord)
 ## make colors
 color_tumorcell <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[4]
-color_pt <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[1]
+color_pt <- RColorBrewer::brewer.pal(n = 8, name        = "Dark2")[1]
 colors_celltype <- c(rep(x = color_tumorcell, 24), rep(x = color_pt, 4))
 names(colors_celltype) <- c(pieceids_selected, 'C3L-00088-N','C3N-01200-N', "C3L-00079-N", "C3N-00242-N")
 

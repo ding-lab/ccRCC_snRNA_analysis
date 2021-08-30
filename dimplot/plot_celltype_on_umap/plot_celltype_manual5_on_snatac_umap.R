@@ -36,6 +36,7 @@ colors_tmp2 <- c(colors_cellgroup14[c("Transitional cells", "Normal epithelial c
 names(colors_tmp2) <- c("EMT tumor cells", "PT", "Loop of Henle", "Distal convoluted tubule", 'Principle cells', 
                         "Intercalated cells", "Podocytes", "Endothelial cells", "Unknown")
 colors_tmp <- c(colors_tmp1, colors_tmp2)
+colors_tmp["Distal convoluted tubule"] <- brewer.pal(n = 8, name = "Paired")[8]
 swatch(colors_tmp)
 
 p <- ggplot()
@@ -56,7 +57,7 @@ p <- p + theme(legend.position="bottom")
 p
 ## save as pdf
 file2write <- paste0(dir_out, "cellgroup_on_umap.", ".pdf")
-pdf(file = file2write, width = 8, height = 10, useDingbats = F)
+pdf(file = file2write, width = 8, height = 9, useDingbats = F)
 print(p)
 dev.off()
 ## save as png
