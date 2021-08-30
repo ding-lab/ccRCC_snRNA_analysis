@@ -41,12 +41,12 @@ Idents(atac)=atac$Piece_ID
 ## input cell type annotation
 # barcode2celltype_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Barcode_Annotation/28_ccRCC_snATAC_ManualReviwed.v2.20210709.tsv")
 ## input motif-peak mapping result
-peak2motif_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Motifs_Mapped_to_Peaks/Motifs_matched.DEG_associated_Peaks.Motif_annotation.20210517.v1.tsv")
+peak2motif_df <- fread(data.table = F, input = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/3.Merge_snATAC/Merge.SelectPeaks.v.20210706/peaks/Motifs_matched.28_snATAC_merged.object.20210827.tsv")
 ## input peak fold changes
 # peak2fcs_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/DA_peaks_Tumor_vs_PT_affected_byCNV_removed.tsv")
 peak2fcs_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/UP_Tumor_vsPT.Filtered.CNV_corrected.Annotated.20210811.tsv")
 ## specify parameters to plot
-peak_plot <- c("chr15-72228266-72228766")
+peak_plot <- c("chr15-72222291-72222791")
 motif_plot <- "RBPJ"
 topn_plot <- 24
 
@@ -74,7 +74,7 @@ new_st=st-1000
 new_en=en+1000
 peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
 ## process motif coordinates
-motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == "chr15-72230151-72230651" & peak2motif_df$motif.name == motif_plot & peak2motif_df$Peak_Type == "Promoter"]; motif_coord <- unique(motif_coord)
+motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == "chr15-72230151-72230651" & peak2motif_df$motif.name == motif_plot]; motif_coord <- unique(motif_coord)
 ## make colors
 color_tumorcell <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[4]
 color_pt <- RColorBrewer::brewer.pal(n = 8, name        = "Dark2")[1]
