@@ -112,8 +112,8 @@ p <- ggplot()
 p <- p + geom_point(data = plotdata_df, mapping = aes(x = features.plot, y = id, color = expvalue_plot, size = pct.exp), shape = 16)
 # p <- p +scale_color_gradient2(midpoint=median(plotdata_df$avg.exp, na.rm = T), low="blue", mid="white",
 #                               high="red", space ="Lab" )
-p <- p + scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(n = 9, name = "Spectral")[1:5]), guide = guide_colourbar(direction = "horizontal"))
-p <- p + scale_size_continuous(breaks = c(25, 50, 75, 100), guide = guide_legend(direction = "horizontal",  nrow = 2, byrow = T))
+p <- p + scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(n = 9, name = "Spectral")[1:5]), guide = guide_colourbar(title = NULL, direction = "horizontal"))
+p <- p + scale_size_continuous(breaks = c(25, 50, 75, 100), guide = guide_legend(direction = "horizontal",  nrow = 1, byrow = T, title = NULL))
 p <- p + facet_grid(cell_type~gene_cell_type2, scales = "free", space = "free", drop = T)
 p <- p + theme(panel.spacing = unit(0, "lines"), panel.grid.major = element_line(colour = "grey80"), 
                panel.border = element_rect(color = "black", fill = NA, size = 0.5),
@@ -129,7 +129,7 @@ png(file = file2write, width = 1200, height = 1000, res = 150)
 print(p)
 dev.off()
 file2write <- paste0(dir_out, "CellTypeMarkerExp.NotScaled.pdf")
-pdf(file = file2write, width = 3.5, height = 4, useDingbats = F)
+pdf(file = file2write, width = 4, height = 3.5, useDingbats = F)
 print(p)
 dev.off()
 
