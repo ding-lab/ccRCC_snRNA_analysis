@@ -25,7 +25,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -129,7 +129,7 @@ png(file = file2write, width = 1200, height = 1000, res = 150)
 print(p)
 dev.off()
 file2write <- paste0(dir_out, "CellTypeMarkerExp.NotScaled.pdf")
-pdf(file = file2write, width = 4, height = 3.5, useDingbats = F)
+pdf(file = file2write, width = 4, height = 3, useDingbats = F)
 print(p)
 dev.off()
 
@@ -154,7 +154,7 @@ png(file = file2write, width = 1200, height = 1000, res = 150)
 print(p)
 dev.off()
 file2write <- paste0(dir_out, "CellTypeMarkerExp.Scaled.pdf")
-pdf(file = file2write, width = 5, height = 4, useDingbats = F)
+pdf(file = file2write, width = 5, height = 3.5, useDingbats = F)
 print(p)
 dev.off()
 
