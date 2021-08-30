@@ -25,7 +25,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 5
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -66,10 +66,13 @@ count_bycellgroup_df <- barcode2celltype_df %>%
   table() %>%
   as.data.frame() %>%
   rename(cell_group = ".") %>%
-  mutate(cell_type = str_split_fixed(string = cell_group, pattern = "_", n = 2)[,1])
+  mutate(cell_type = str_split_fixed(string = cell_group, pattern = "_", n = 2)[,1]) %>%
+  mutate(PT_cluster = str_split_fixed(string = cell_group, pattern = "_", n = 2)[,2])
 count_bycellgroup_keep_df <- count_bycellgroup_df %>%
   filter(Freq >= 50) %>%
   filter(cell_type %in% c("PT")) %>%
+  filter(!(PT_cluster %in% c("C15", "C9"))) %>%
+  mutate(PT_clustergroup = ifelse(PT_cluster %in% c("C8", "C5", "C13", "C0"), "strong", "weak")) %>%
   filter(!grepl(x = cell_group, pattern = "Unknown"))
 cellgroups_keep <- count_bycellgroup_keep_df$cell_group; cellgroups_keep <- as.vector(cellgroups_keep)
 srat <- subset(x = srat, idents = cellgroups_keep)
@@ -104,14 +107,13 @@ plotdata_df <- plotdata_df %>%
   mutate(expvalue_plot = ifelse(avg.exp >= expvalue_top, expvalue_top, avg.exp))
 plotdata_df$gene_cell_type2 <- plyr::mapvalues(plotdata_df$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type2)
 plotdata_df$gene_cell_type2 <- factor(x = plotdata_df$gene_cell_type2, levels = c("PT", "S1", "S1/S2", "S2", "S3", "PT-A", "PT-B", "PT-C", "Other"))
-
-plotdata_df$cell_type <- plyr::mapvalues(x = plotdata_df$id, from = count_bycellgroup_keep_df$cell_group, to = as.vector(count_bycellgroup_keep_df$cell_type))
+plotdata_df$cell_type <- plyr::mapvalues(x = plotdata_df$id, from = count_bycellgroup_keep_df$cell_group, to = as.vector(count_bycellgroup_keep_df$PT_clustergroup))
 p <- ggplot()
 p <- p + geom_point(data = plotdata_df, mapping = aes(x = features.plot, y = id, color = expvalue_plot, size = pct.exp), shape = 16)
 # p <- p +scale_color_gradient2(midpoint=median(plotdata_df$avg.exp, na.rm = T), low="blue", mid="white",
 #                               high="red", space ="Lab" )
-p <- p + scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(n = 9, name = "Spectral")[1:5]), guide = guide_colourbar(direction = "horizontal", title = NULL))
-p <- p + scale_size_continuous(breaks = c(25, 50, 75, 100), guide = guide_legend(direction = "horizontal", title = NULL, nrow = 2, byrow = T))
+p <- p + scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(n = 9, name = "Spectral")[1:5]), guide = guide_colourbar(direction = "horizontal"))
+p <- p + scale_size_continuous(breaks = c(25, 50, 75, 100), guide = guide_legend(direction = "horizontal",  nrow = 2, byrow = T))
 p <- p + facet_grid(cell_type~gene_cell_type2, scales = "free", space = "free", drop = T)
 p <- p + theme(panel.spacing = unit(0, "lines"), panel.grid.major = element_line(colour = "grey80"), 
                panel.border = element_rect(color = "black", fill = NA, size = 0.5),
@@ -127,14 +129,14 @@ png(file = file2write, width = 1200, height = 1000, res = 150)
 print(p)
 dev.off()
 file2write <- paste0(dir_out, "CellTypeMarkerExp.NotScaled.pdf")
-pdf(file = file2write, width = 3.5, height = 5, useDingbats = F)
+pdf(file = file2write, width = 3.5, height = 4, useDingbats = F)
 print(p)
 dev.off()
 
 # plot scaled -------------------------------------------------------------
 p <- DotPlot(object = srat, features = genes2plot_filtered, col.min = 0, assay = "RNA")
 p$data$gene_cell_type2 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type2)
-p$data$cell_type <- plyr::mapvalues(x = p$data$id, from = count_bycellgroup_keep_df$cell_group, to = as.vector(count_bycellgroup_keep_df$cell_type))
+p$data$cell_type <- plyr::mapvalues(x = p$data$id, from = count_bycellgroup_keep_df$cell_group, to = as.vector(count_bycellgroup_keep_df$PT_clustergroup))
 p$data$gene_cell_type2 <- factor(x = p$data$gene_cell_type2, levels = c("PT", "S1", "S1/S2", "S2", "S3", "PT-A", "PT-B", "PT-C", "Other"))
 p <- p + facet_grid(cell_type~gene_cell_type2, scales = "free", space = "free", drop = T)
 p <- p + scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(n = 9, name = "Spectral")[1:5]), guide = guide_colourbar(direction = "horizontal", title = NULL))
