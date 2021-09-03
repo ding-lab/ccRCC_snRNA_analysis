@@ -58,7 +58,9 @@ plot_data_filtered_df <- plot_data_df %>%
   filter(TF %in% c(tfs_emt_tumorcells, tfs_tumorcells))
 tfs_right <- plot_data_filtered_df$TF[!(plot_data_filtered_df$Is_FOSJUN) & plot_data_filtered_df$x_plot > 0 & plot_data_filtered_df$mean_score2 > 0 & plot_data_filtered_df$TF %in% tfs_emt_tumorcells] %>%
   head(19)
-tfs_right <- c(tfs_right, "JDP2")
+# tfs_right <- c(tfs_right, "JDP2")
+tfs_right <- c(tfs_right, "ATF2", "JUN(var.2)")
+
 tfs_left <- plot_data_filtered_df$TF[!(plot_data_filtered_df$Is_FOSJUN) & plot_data_filtered_df$x_plot < 0 & plot_data_filtered_df$mean_score1 > 0 & plot_data_filtered_df$TF %in% tfs_tumorcells] %>%
   tail(20)
 tfs_left
@@ -84,7 +86,7 @@ p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_TF) & x_plot > 
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_TF) & x_plot < 0), max.overlaps = Inf,
                          mapping = aes(x = x_plot, y = y_plot, label = text_TF), 
                          color = "black", force = 4, alpha = 0.8, size = 5, segment.size = 0.2, segment.alpha = 0.5, xlim = c(-6.5, 0.5))
-# p <- p + xlim(-5, 5)
+p <- p + ylim(0, 150)
 p <- p + xlim(-6, 6)
 p <- p + theme_classic()
 p <- p + xlab("Motif score difference")
