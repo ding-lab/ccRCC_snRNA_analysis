@@ -31,7 +31,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the barcode-to-tumorsubcluster table
-barcode2cellgroup_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_by_tumorcellmanualcluster_PTcluster_othersbysample/20210903.v1/Barcode_TumorPTLOH_Reclustered.20210903.v1.tsv", data.table = F)
+barcode2cellgroup_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_by_tumorcellmanualcluster_PTLOHclustes/20210903.v1/Barcode_byEpithelialCelltypes_BySample.20210903.v1.tsv", data.table = F)
 # nrow(barcode2cellgroup_df)
 cat("finish reading the barcode-to-tumorsubcluster table!\n")
 barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20210729.v1/scrublet.united_outputs.20210729.v1.tsv", data.table = F)
