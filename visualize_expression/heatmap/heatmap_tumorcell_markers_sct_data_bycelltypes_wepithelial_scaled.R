@@ -17,8 +17,8 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the average expression calculated (SCT)
-avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/avgexp_sct_data_bycelltypew_epithelial_katmai/20210709.v1/33_aliquot_merged.avgexp.SCT.data.Cell_group_w_epithelialcelltypes.20210709.v1.tsv", data.table = F)
-genes_process_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210702.v1/ccRCC_markers.Surface.20210702.v1.tsv")
+avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/avgexp_sct_data_bycelltypew_epithelial_katmai/20210907.v1/35_aliquot_merged.avgexp.SCT.data.Cell_group_w_epithelialcelltypes.20210907.v1.tsv", data.table = F)
+genes_process_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210824.v1/ccRCC_markers.Surface.20210824.v1.tsv")
 
 # specify pairs to filter -------------------------------------------------
 genes_filter <- genes_process_df$Gene
@@ -43,9 +43,7 @@ colnames_plot <- colnames_plot[!(grepl(x = colnames_plot, pattern = "others"))]
 plot_data_mat <- plot_data_mat[,colnames_plot]
 ## filter rows based on the average expression
 genes_plot <- rownames(plot_data_mat)
-genes_plot <- genes_plot[!(genes_plot %in% c("PIK3CB", "ARHGEF28", "PTGER3", "PARD3", "GNG12", "EFNA5", "SPIRE1", "LIFR", "PKP4", "SORBS1", "PTPRM", "FBXO16", "PAM"))]
-
-# get dimension names -----------------------------------------------------
+# genes_plot <- genes_plot[!(genes_plot %in% c("PIK3CB", "ARHGEF28", "PTGER3", "PARD3", "GNG12", "EFNA5", "SPIRE1", "LIFR", "PKP4", "SORBS1", "PTPRM", "FBXO16", "PAM"))]
 
 
 # specify colors ----------------------------------------------------------

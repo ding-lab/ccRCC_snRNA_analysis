@@ -32,11 +32,11 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
-path_rds <- "./Data_Freezes/V2/snRNA/All_Cells_Merged/33_aliquot_merged_without_anchoring.20210428.v2.RDS"
+path_rds <- "./Resources/Analysis_Results/merging/merge_35_samples/20210802.v1/RCC.35samples.Merged.20210802.v1.RDS"
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 ## input the barcode-cell-type table
-barcode2celltype_df <- fread(input = "./Data_Freezes/V2/snRNA/Cell_Type_Assignment/33Aliquot.Barcode2CellType.20210423.v1.tsv", data.table = F)
+barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_35aliquots/20210802.v1/35Aliquot.Barcode2CellType.20210802.v1.tsv", data.table = F)
 cat("finish reading the barcode-to-cell type table!\n")
 ## spcify assay
 assay_process <- "SCT"
@@ -62,7 +62,7 @@ print("Finish running AverageExpression!\n")
 cat("###########################################\n")
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "33_aliquot_merged.", "avgexp.", assay_process, ".", slot_process, ".", "Cell_group_w_epithelialcelltypes", run_id, ".tsv")
+file2write <- paste0(dir_out, "35_aliquot_merged.", "avgexp.", assay_process, ".", slot_process, ".", "Cell_group_w_epithelialcelltypes", run_id, ".tsv")
 write.table(aliquot.averages, file = file2write, quote = F, sep = "\t", row.names = T)
 cat("Finished saving the output\n")
 cat("###########################################\n")
