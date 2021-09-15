@@ -32,7 +32,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input seurat object
-srat <- readRDS(file = "../ccRCC_ST/Processed_Data/Seurat/Outputs/TWFU-HT293N1-S1H3A3N1Z1_1Bmn1_1/TWFU-HT293N1-S1H3A3N1Z1_1Bmn1_1_processed_multiomic.rds")
+srat <- readRDS(file = "../ccRCC_ST/Processed_Data/Seurat/Outputs/TWFU-HT293N1-S1H3A3N1Z1_1Bmn1_1_5.0/TWFU-HT293N1-S1H3A3N1Z1_1Bmn1_1_5.0_processed_multiomic.rds")
 ## input cell type markers
 gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Gene_Lists/Immune/Cell_state_markers.txt")
 
