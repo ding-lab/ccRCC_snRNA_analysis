@@ -98,6 +98,7 @@ peaks2probes_cor_df %>%
   nrow()
 peaks2probes_cor_df %>%
   filter(peak2gene_type == "Promoter" & !is.na(avg_log2FC.snATAC)) %>%
+  filter(avg_log2FC.snATAC < 0) %>%
   filter(!is.na(fdr.methyl) & fdr.methyl < 0.05) %>%
   filter(avg_log2FC.methyl > 0) %>%
   select(peak) %>%

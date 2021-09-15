@@ -50,6 +50,6 @@ deg_epithelia_df <- deg_sig_df %>%
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "EMTModuleEnriched.EMTDEGs.Filtered.tsv")
 write.table(x = deg_int_filtered_df, file = file2write, quote = F, sep = "\t", row.names = F)
-file2write <- paste0(dir_out, "EMTModuleDown.EpithelialPTDEGs.Filtered.tsv")
-write.table(x = deg_int_filtered_df, file = file2write, quote = F, sep = "\t", row.names = F)
+file2write <- paste0(dir_out, "EMTModuleDown.EpithelialPT_DEGs.Filtered.tsv")
+write.table(x = deg_epithelia_df, file = file2write, quote = F, sep = "\t", row.names = F)
 

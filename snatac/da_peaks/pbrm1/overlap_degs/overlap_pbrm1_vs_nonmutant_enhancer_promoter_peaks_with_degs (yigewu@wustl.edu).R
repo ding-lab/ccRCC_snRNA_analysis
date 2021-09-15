@@ -39,9 +39,6 @@ file2write <- paste0(dir_out, "PBRM1_vs_NonMutant_DAP_DEG_Merged.", run_id, ".ts
 write.table(x = peaks2degs_all_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
 # summarize ---------------------------------------------------------------
-degs_df %>%
-  filter(!is.na(avg_log2FC.snRNA)) %>%
-  nrow()
 peaks_anno_df %>%
   filter(peak2gene_type == "Promoter") %>%
   select(peak, DAP_direction) %>%
@@ -79,12 +76,12 @@ peaks_anno_df %>%
 # 2   Up  263
 peaks2degs_df %>%
   filter(peak2gene_type == "Enhancer") %>%
-  filter(DAP_direction == "Up") %>%
-  filter(foldchange_type == "consistently higher in PBRM1-mutants") %>%
+  filter(DAP_direction == "Down") %>%
+  filter(foldchange_type == "consistently lower in PBRM1-mutants") %>%
   select(peak) %>%
   unique() %>%
   nrow()
-27/263
+
 peaks2degs_df %>%
   filter(peak2gene_type == "Enhancer") %>%
   filter(DAP_direction == "Down") %>%
@@ -92,4 +89,4 @@ peaks2degs_df %>%
   select(peak) %>%
   unique() %>%
   nrow()
-5/24
+
