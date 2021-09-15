@@ -24,7 +24,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -32,7 +32,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input seurat object
-srat <- readRDS(file = "../ccRCC_ST/Processed_Data/Seurat/Outputs/TWFU-HT293N1-S1H3A3N1Z1_1Bmn1_1/TWFU-HT293N1-S1H3A3N1Z1_1Bmn1_1_processed_multiomic.rds")
+srat <- readRDS(file = "../ccRCC_ST/Processed_Data/Seurat/Outputs/TWFU-HT293N1-S1H3A3N1Z1_1Bmn1_1_5.0/TWFU-HT293N1-S1H3A3N1Z1_1Bmn1_1_5.0_processed_multiomic.rds")
 ## input cell type markers
 gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_Markers/Human.Gene2CellType.20210819.tsv")
 
