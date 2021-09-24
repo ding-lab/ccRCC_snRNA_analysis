@@ -77,7 +77,7 @@ cat("finish adding the simple barcode!\n")
 srat@meta.data$id_aliquot_barcode <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$original_barcode)
 head(srat@meta.data$id_aliquot_barcode)
 cat("finish adding unique id for each barcode in the seurat object!\n")
-srat@meta.data$group_findmarkers <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2info_df$id_aliquot_barcode, to = as.vector(barcode2info_df$group_findmarkers), warn_missing = F)
+srat@meta.data$group_findmarkers <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2subclusterid_df$id_aliquot_barcode, to = as.vector(barcode2subclusterid_df$group_findmarkers), warn_missing = F)
 table(srat@meta.data$group_findmarkers)
 
 # run findmarkers ---------------------------------------------------------
