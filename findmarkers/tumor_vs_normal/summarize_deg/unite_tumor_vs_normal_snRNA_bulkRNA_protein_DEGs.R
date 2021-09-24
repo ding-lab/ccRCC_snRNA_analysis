@@ -18,7 +18,7 @@ dir.create(dir_out)
 # deg_snRNA_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/summarize_tumor_vs_pt_DEGs/20210429.v1/Tumor_DEGs.20210429.v1.tsv")
 deg_snRNA_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/summarize_individual_tumor_vs_pt_DEGs/20210824.v1/Tumor_DEGs.20210824.v1.tsv")
 deg_bulkRNA_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/expression/edgeR/run_deg_analysis/run_tumor_vs_NAT_deg_on_cptac_ccRCC_discovery_cases/20210419.v1/Tumor_vs_NAT.glmQLFTest.OutputTables.tsv")
-deg_bulkprotein_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/expression/compare_bulk_protein_tumor_vs_normal/20200728.v1/Bulk_Protein_Tumor_vs_Normal.Wilcox.20200728.v1.tsv")
+deg_bulkprotein_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/expression/protein/compare_bulk_protein_tumor_vs_normal/20200728.v1/Bulk_Protein_Tumor_vs_Normal.Wilcox.20200728.v1.tsv")
 # deg_cnvcor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/annotate_deg/format_alltumor_vs_pt_CNV_corrected_degs/20210608.v1/LR.logfc.threshold0.1.min.pct0.1.min.diff.pct0.1.AssayRNA.tsv")
 deg_cnvcor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/annotate_deg/format_alltumor_vs_pt_CNV_corrected_degs/20210824.v1/LR.logfc.threshold0.min.pct0.1.min.diff.pct0.1.AssayRNA.tsv")
 

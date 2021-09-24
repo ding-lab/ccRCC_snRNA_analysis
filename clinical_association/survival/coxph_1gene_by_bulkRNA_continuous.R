@@ -19,42 +19,36 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input protein data
-exp_df <- fread(data.table = F, input = "./Resources/Analysis_Results/average_expression/avgexp_sct_data_bycelltype13_bysample_katmai/20210701.v1/33_aliquot_merged.avgexp.SCT.data.bycelltype13_bysample.20210701.v1.tsv")
+exp_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/mRNA/CPTAC_ccRCC_discovery_tumor_mRNA_FPKM_UQ_log2_v1.0.tsv")
 ## input bulk meta data
-metadata_df <- fread("./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
+metadata_bulk_df <- fread("./Resources/Bulk_Processed_Data/Case_ID/CPTAC_ccRCC_discovery_caseID_v1.0.tsv")
 ## input survival ddata
 survival_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/clinical/extract_cptac_discovery_ccRCC_survival_time/20210621.v1/CPTAC_Discovery_ccRCC_Survival_Time20210621.v1.tsv")
 
-# reformat data -----------------------------------------------------------
-exp_colnames_df <- data.frame(colname = colnames(exp_df))
-exp_colnames_df <- exp_colnames_df %>%
-  mutate(id_sample_cell_group = gsub(x = colname, pattern = "SCT\\.", replacement = "")) %>%
-  mutate(aliquot = str_split_fixed(string = id_sample_cell_group, pattern = "_", n = 2)[,1]) %>%
-  mutate(cell_group.columnname = str_split_fixed(string = id_sample_cell_group, pattern = "_", n = 2)[,2])
-exp_colnames_filtered_df <- exp_colnames_df %>%
-  filter(cell_group.columnname == "Tumor.cells")
-exp_data_df <- exp_df[, c(exp_colnames_filtered_df$colname)]
+# make combined data and test ------------------------------------------------------
+metadata_filtered_df <- metadata_bulk_df %>%
+  filter(Histologic_Type == "Clear cell renal cell carcinoma") %>%
+  mutate(Sample_ID = paste0(CASE_ID, "-T"))
+## subset data
+exp_data_df <- exp_df[, metadata_filtered_df$Sample_ID]
 ## rename columns
-exp_colnames_filtered_df$CASE_ID <- mapvalues(x = exp_colnames_filtered_df$aliquot, from = metadata_df$Aliquot.snRNA, to = as.vector(metadata_df$Case))
-colnames(exp_data_df) <- c(exp_colnames_filtered_df$CASE_ID)
+colnames(exp_data_df) <- metadata_filtered_df$CASE_ID
 #3 make colors
 colors_expgroup <- RColorBrewer::brewer.pal(n = 9, name = "YlOrBr")[c(9, 3, 6)]
-# namescolors_expgroup <- c("High", "Low", "Medium")
-colors_expgroup <- RColorBrewer::brewer.pal(n = 9, name = "YlOrBr")[c(9, 6, 3)]
+
 
 # specify gene to test ----------------------------------------------------
 genes_process_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210824.v1/ccRCC_markers.Surface.20210824.v1.tsv")
 genes_process <- genes_process_df$Gene
 genes_process <- genes_process[!(genes_process %in% c("DPP6", "CPNE8", "EFNA5", "MGLL", "SPIRE1", "SPIRE1", "PLCB1", "OSMR", "SORBS1", "ANO6", "EPB41", "PAM", "RHEX"))]
 
-pvalues_wald_vec <- NULL
-coef_vec <- NULL
+result_list <- list()
 # for (gene_test in "CP") {
 for (gene_test in genes_process) {
   # make combined data and test ------------------------------------------------------
   ## filter specific protein data
-  exp_test_wide_df <- exp_data_df[exp_df$V1 == gene_test,]
-  testdata_df <- data.frame(CASE_ID = exp_colnames_filtered_df$CASE_ID, Expression = unlist(exp_test_wide_df))
+  exp_test_wide_df <- exp_data_df[exp_df$gene_name == gene_test,]
+  testdata_df <- data.frame(CASE_ID = metadata_filtered_df$CASE_ID, Expression = unlist(exp_test_wide_df))
   testdata_df <- merge(x = testdata_df, y = survival_df, by = c("CASE_ID"), all.x = T)
   cutoff_exp_low <- quantile(x = testdata_df$Expression, probs = 0.35, na.rm = T); cutoff_exp_low
   cutoff_exp_high <- quantile(x = testdata_df$Expression, probs = 0.65, na.rm = T); cutoff_exp_high
@@ -75,8 +69,15 @@ for (gene_test in genes_process) {
   
   fit_efs <- coxph(formula = Surv(EFS, EFS_censor == 0) ~ Expression, data = testdata_comp_df)
   fit_efs_sum <- summary(fit_efs)
-  pvalues_wald_vec <- c(pvalues_wald_vec, fit_efs_sum$waldtest["pvalue"])
-  coef_vec <- c(coef_vec, fit_efs_sum$coefficients[1, "coef"])
+  result_list[[gene_test]] <- c(gene_test,
+                                fit_efs_sum$waldtest["pvalue"], fit_efs_sum$logtest["pvalue"], fit_efs_sum$sctest["pvalue"], 
+                                fit_efs_sum$concordance[1],
+                                fit_efs_sum$coefficients[1, "coef"])
 }
-cox_result_df <- data.frame(gene_symbol = genes_process, coef = coef_vec, pvalue_ward = pvalues_wald_vec)
+cox_result_df <- do.call(rbind.data.frame, result_list)
+colnames(cox_result_df) <- c("genesymbol", "pvalue.wald", "pvalue.lr", "pvalue.logrank", "concordance", "coef")
+
+# write output ------------------------------------------------------------
+file2write <- paste0(dir_out, "Cox_1gene.bulkRNA.continuous_variable.", run_id, ".tsv")
+write.table(x = cox_result_df, file = file2write, quote = F, sep = "\t", row.names = F)
 

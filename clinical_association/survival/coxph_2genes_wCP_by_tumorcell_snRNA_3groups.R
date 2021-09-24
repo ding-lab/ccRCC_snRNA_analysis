@@ -43,39 +43,51 @@ colors_expgroup <- RColorBrewer::brewer.pal(n = 9, name = "YlOrBr")[c(9, 3, 6)]
 colors_expgroup <- RColorBrewer::brewer.pal(n = 9, name = "YlOrBr")[c(9, 6, 3)]
 
 # specify gene to test ----------------------------------------------------
-genes_process_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210824.v1/ccRCC_markers.Surface.20210824.v1.tsv")
-genes_process <- genes_process[!(genes_process %in% c("DPP6", "CPNE8", "EFNA5", "MGLL", "SPIRE1", "SPIRE1", "PLCB1", "OSMR", "SORBS1", "ANO6", "EPB41", "PAM"))]
+gene2_process <- c("CA9", "SNAP25", "EPHA6", "SHISA9", "ABLIM3", "PHKA2", "UBE2D2")
 
-pvalues_wald_vec <- NULL
-coef_vec <- NULL
-for (gene_test in "CP") {
-# for (gene_test in genes_process) {
-  # make combined data and test ------------------------------------------------------
-  ## filter specific protein data
-  exp_test_wide_df <- exp_data_df[exp_df$V1 == gene_test,]
-  testdata_df <- data.frame(CASE_ID = exp_colnames_filtered_df$CASE_ID, Expression = unlist(exp_test_wide_df))
+result_list <- list()
+# for (gene_test in "CP") {
+for (gene2_tmp in gene2_process) {
+  genes_process_tmp <- c("CP", gene2_tmp)
+  exp_test_wide_df <- exp_data_df[exp_df$V1 %in% genes_process_tmp,]
+  testdata_df <- data.frame(t(exp_test_wide_df))
+  colnames(testdata_df) <- c("Expression.gene1", "Expression.gene2")
+  testdata_df$CASE_ID <- colnames(exp_test_wide_df)
   testdata_df <- merge(x = testdata_df, y = survival_df, by = c("CASE_ID"), all.x = T)
-  cutoff_exp_low <- quantile(x = testdata_df$Expression, probs = 0.35, na.rm = T); cutoff_exp_low
-  cutoff_exp_high <- quantile(x = testdata_df$Expression, probs = 0.65, na.rm = T); cutoff_exp_high
   
   testdata_df <- testdata_df %>%
     filter(CASE_ID != "C3L-00359") %>%
-    mutate(Expression_group = ifelse(Expression < cutoff_exp_low, "Low", ifelse(Expression > cutoff_exp_high, "High", "Medium"))) %>%
+    mutate(Expression_group.gene1 = ifelse(Expression.gene1 < quantile(x = testdata_df$Expression.gene1, probs = 0.35, na.rm = T), "Low", 
+                                           ifelse(Expression.gene1 > quantile(x = testdata_df$Expression.gene1, probs = 0.65, na.rm = T), "High", "Medium"))) %>%
+    mutate(Expression_group.gene2 = ifelse(Expression.gene2 < quantile(x = testdata_df$Expression.gene2, probs = 0.35, na.rm = T), "Low", 
+                                           ifelse(Expression.gene2 > quantile(x = testdata_df$Expression.gene2, probs = 0.65, na.rm = T), "High", "Medium"))) %>%
     mutate(EFS_censor = (with_new_event == "Tumor Free")) %>%
     mutate(EFS = (survival_time + 9)/365) %>%
-    arrange(CASE_ID, desc(Expression))
+    arrange(CASE_ID, desc(Expression_group.gene1))
   testdata_df <- testdata_df[!duplicated(testdata_df$CASE_ID),]
   
   ## EFS_censor == 0 with event; == 1 without event
   ## test
-  testdata_comp_df <- testdata_df %>%
-    filter(!is.na(EFS_censor) & !is.na(EFS) & !is.na(Expression_group))
-  testdata_comp_df$Expression_group <- factor(x = testdata_comp_df$Expression_group, levels = c("High", "Medium", "Low"))
+  testdata_comp_df <- testdata_df %>% 
+    filter(!is.na(EFS_censor) & !is.na(EFS))
+  testdata_comp_df$Expression_group.gene1 <- factor(x = testdata_comp_df$Expression_group.gene1, levels = c("High", "Medium", "Low"))
   
-  fit_efs <- coxph(formula = Surv(EFS, EFS_censor == 0) ~ Expression, data = testdata_comp_df)
+  fit_efs <- coxph(formula = Surv(EFS, EFS_censor == 0) ~ Expression_group.gene1 + Expression_group.gene2, data = testdata_comp_df)
   fit_efs_sum <- summary(fit_efs)
-  pvalues_wald_vec <- c(pvalues_wald_vec, fit_efs_sum$waldtest["pvalue"])
-  coef_vec <- c(coef_vec, fit_efs_sum$coefficients["coef"])
+  result_list[[gene2_tmp]] <- c(genes_process_tmp,
+                                fit_efs_sum$waldtest["pvalue"], fit_efs_sum$logtest["pvalue"], fit_efs_sum$sctest["pvalue"], 
+                                fit_efs_sum$concordance[1],fit_efs_sum$concordance[2],
+                                fit_efs_sum$coefficients[1,1], fit_efs_sum$coefficients[2,1], fit_efs_sum$coefficients[3,1], fit_efs_sum$coefficients[4,1])
 }
-cox_result_df <- data.frame(gene_symbol = genes_process, coef = coef_vec, pvalue_wald = pvalues_wald_vec)
+cox_result_df <- do.call(rbind.data.frame, result_list)
+colnames(cox_result_df) <- c("genesymbol1", "genesymbol2", "pvalue.wald", "pvalue.lr", "pvalue.logrank", 
+                             "concordance", "se.concordance",
+                             "coef.gene1.medium", "coef.gene1.low", "coef.gene2.low", "coef.gene2.medium")
+cox_result_df$concordance <- as.numeric(cox_result_df$concordance)
+cox_result_df$se.concordance <- as.numeric(cox_result_df$se.concordance)
 
+cox_result_df <- cox_result_df %>%
+  mutate(CI.low.concordance = concordance - 1.96*se.concordance)
+# write output ------------------------------------------------------------
+file2write <- paste0(dir_out, "Cox_2genes.3groups.", run_id, ".tsv")
+write.table(x = cox_result_df, file = file2write, quote = F, sep = "\t", row.names = F)

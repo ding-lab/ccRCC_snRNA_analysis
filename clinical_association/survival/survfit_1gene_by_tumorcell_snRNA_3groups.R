@@ -10,8 +10,9 @@ source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 library(survival)
 library(survminer)
+library(doParallel)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -37,21 +38,24 @@ exp_data_df <- exp_df[, c(exp_colnames_filtered_df$colname)]
 ## rename columns
 exp_colnames_filtered_df$CASE_ID <- mapvalues(x = exp_colnames_filtered_df$aliquot, from = metadata_df$Aliquot.snRNA, to = as.vector(metadata_df$Case))
 colnames(exp_data_df) <- c(exp_colnames_filtered_df$CASE_ID)
+## add id
+exp_colnames_filtered_df$easy_id <- mapvalues(x = exp_colnames_filtered_df$aliquot, from = metadata_df$Aliquot.snRNA, to = as.vector(metadata_df$Aliquot.snRNA.WU))
 #3 make colors
 colors_expgroup <- RColorBrewer::brewer.pal(n = 9, name = "YlOrBr")[c(9, 3, 6)]
 # namescolors_expgroup <- c("High", "Low", "Medium")
 colors_expgroup <- RColorBrewer::brewer.pal(n = 9, name = "YlOrBr")[c(9, 6, 3)]
 
 # specify gene to test ----------------------------------------------------
-genes_process_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210702.v1/ccRCC_markers.Surface.20210702.v1.tsv")
+genes_process_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210824.v1/ccRCC_markers.Surface.20210824.v1.tsv")
 genes_process <- genes_process_df$Gene
+genes_process <- genes_process[!(genes_process %in% c("DPP6", "CPNE8", "EFNA5", "MGLL", "SPIRE1", "SPIRE1", "PLCB1", "OSMR", "SORBS1", "ANO6", "EPB41", "PAM", "RHEX"))]
 
-for (gene_test in "CP") {
-# for (gene_test in genes_process) {
+pvalues_vec <- NULL
+for (gene_test in genes_process) {
   # make combined data and test ------------------------------------------------------
   ## filter specific protein data
   exp_test_wide_df <- exp_data_df[exp_df$V1 == gene_test,]
-  testdata_df <- data.frame(CASE_ID = exp_colnames_filtered_df$CASE_ID, Expression = unlist(exp_test_wide_df))
+  testdata_df <- data.frame(CASE_ID = exp_colnames_filtered_df$CASE_ID, Expression = unlist(exp_test_wide_df), Easy_id = exp_colnames_filtered_df$easy_id)
   testdata_df <- merge(x = testdata_df, y = survival_df, by = c("CASE_ID"), all.x = T)
   cutoff_exp_low <- quantile(x = testdata_df$Expression, probs = 0.35, na.rm = T); cutoff_exp_low
   cutoff_exp_high <- quantile(x = testdata_df$Expression, probs = 0.65, na.rm = T); cutoff_exp_high
@@ -62,7 +66,8 @@ for (gene_test in "CP") {
     mutate(EFS_censor = (with_new_event == "Tumor Free")) %>%
     mutate(EFS = (survival_time + 9)/365) %>%
     arrange(CASE_ID, desc(Expression))
-  testdata_df <- testdata_df[!duplicated(testdata_df$CASE_ID),]
+  testdata_df <- testdata_df[!duplicated(testdata_df$CASE_ID),] ## only keep the highest expression for each case
+  # testdata_df <- testdata_df[grepl(x = testdata_df$Easy_id, pattern = "T1"),]
   
   ## EFS_censor == 0 with event; == 1 without event
   ## test
@@ -70,6 +75,7 @@ for (gene_test in "CP") {
     filter(!is.na(EFS_censor) & !is.na(EFS) & !is.na(Expression_group))
   testdata_comp_df$Expression_group <- factor(x = testdata_comp_df$Expression_group, levels = c("High", "Medium", "Low"))
   fit_efs <- survfit(Surv(EFS, EFS_censor == 0) ~ Expression_group, data = testdata_comp_df)
+  pvalues_vec <- c(pvalues_vec, surv_pvalue(fit_efs)[1,2])
   
   # plot --------------------------------------------------------------------
   res <- ggsurvplot(fit_efs,
@@ -99,14 +105,17 @@ for (gene_test in "CP") {
                     linetype = "strata") # Change line type by groups
   res$table <- res$table + theme(axis.line = element_blank())
   # res$plot <- res$plot + labs(title = paste0("Survival Curves by ", gene_test, " expression (snRNA-seq)"))
-  file2write <- paste0(dir_out, gene_test, ".pdf")
-  pdf(file2write, width = 4, height = 5, useDingbats = F)
-  print(res)
-  dev.off()
-  
-  # file2write <- paste0(dir_out, gene_test, ".png")
-  # png(file2write, width = 600, height = 800, res = 150)
+  # file2write <- paste0(dir_out, gene_test, ".pdf")
+  # pdf(file2write, width = 4, height = 5, useDingbats = F)
   # print(res)
   # dev.off()
   
+  file2write <- paste0(dir_out, gene_test, ".png")
+  png(file2write, width = 600, height = 800, res = 150)
+  print(res)
+  dev.off()
 }
+test_result_df <- data.frame(gene = genes_process, pvalue.logrank = pvalues_vec)
+
+file2write <- paste0(dir_out, "surfit_1gene_by_tumorcell_snRNA_3groups.", run_id, ".tsv")
+write.table(x = test_result_df, file = file2write, quote = F, sep = "\t", row.names = F)

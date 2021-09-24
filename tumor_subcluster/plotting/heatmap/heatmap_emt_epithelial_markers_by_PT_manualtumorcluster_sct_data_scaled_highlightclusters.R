@@ -136,11 +136,11 @@ colanno_df <- data.frame(columnname = columnnames_plot,
                          s123_group = ifelse(scores_s12 >= quantile(scores_s12, 0.9),
                                              ifelse(scores_s3 >=  quantile(scores_s3, 0.9), "mixed S1/2/3\nidentity", "S1/2 enriched"), 
                                              ifelse(scores_s3 >=  quantile(scores_s3, 0.9), "S3 enriched", "weak segmental\nidentity")))
-# ## make highlighted samples
-# index_highlight <- which(columnnames_plot %in% c("C3L.00079.T1_C4", "C3L.00079.T1_C1",  "C3L.00079.T1_C2",  "C3L.00079.T1_C3",  "C3L.00079.T1_C4",
-#                                                  "C3N.01200.T2_C1", "C3N.01200.T2_C2",
-#                                                  "C3N.00242.T1_C1"))
-# texts_highlight <- columnnames_plot[index_highlight];
+## make highlighted samples
+index_highlight <- which(columnnames_plot %in% c("C3L.00079.T1_C4", "C3L.00079.T1_C1",  "C3L.00079.T1_C2",  "C3L.00079.T1_C3",  "C3L.00079.T1_C4",
+                                                 "C3N.01200.T2_C1", "C3N.01200.T2_C2",
+                                                 "C3N.00242.T1_C1"))
+texts_highlight <- columnnames_plot[index_highlight];
 ## make column annotation object
 colanno_obj = HeatmapAnnotation(#link = anno_mark(at = index_highlight, labels = texts_highlight, labels_gp = gpar(fontsize = 15), side = "top"),
   CellType = anno_simple(x = colanno_df$cell_type, col = colors_celltype[colanno_df$cell_type], height = unit(0.5, "cm")),
@@ -151,6 +151,7 @@ colanno_obj = HeatmapAnnotation(#link = anno_mark(at = index_highlight, labels =
   PT_S3_Score = anno_simple(x = scores_s3, col = colors_s3score, height = unit(0.75, "cm")),
   PTSegmentSignature = anno_simple(x = colanno_df$s123_group, col = colors_s123_group[colanno_df$s123_group], height = unit(0.75, "cm")),
   annotation_name_gp = gpar(fontsize = 20, fontface = "bold"), annotation_name_side = "left")
+colanno_obj2 <- HeatmapAnnotation(link = anno_mark(at = index_highlight, labels = texts_highlight, labels_gp = gpar(fontsize = 15), side = "bottom"))
 
 # make column order --------------------------------------------------
 column_order_vec <- order(scores_epithelial, decreasing = T)
@@ -245,11 +246,11 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              ## column
                              show_column_dend = F, cluster_columns = F, cluster_column_slices = F,
                              column_order = column_order_vec, column_split = column_group_factor, column_title_gp = gpar(fontsize = 23),
-                             top_annotation = colanno_obj,
+                             top_annotation = colanno_obj, bottom_annotation = colanno_obj2,
                              show_column_names = F, column_title = NA,
                              show_heatmap_legend = F)
 file2write <- paste0(dir_out, "EMT_Genes_by_tumorcluster", ".pdf")
-pdf(file2write, width = 14, height = 8.5, useDingbats = F)
+pdf(file2write, width = 14, height = 10, useDingbats = F)
 draw(object = p,
      annotation_legend_side = "top", annotation_legend_list = list_lgd)
 dev.off()
