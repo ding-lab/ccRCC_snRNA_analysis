@@ -23,7 +23,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -46,7 +46,7 @@ logfc.threshold.run <- 0
 min.pct.run <- 0.1
 min.diff.pct.run <- 0
 ## spcify assay
-assay_process <- "RNA"
+assay_process <- "SCT"
 cat(paste0("Assay: ", assay_process, "\n"))
 cat("###########################################\n")
 ## tumor-cell cluster enrichment modules
