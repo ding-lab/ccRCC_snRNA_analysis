@@ -29,3 +29,10 @@ run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
+
+# input dependencies ------------------------------------------------------
+## input daps
+peaks_anno_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/emt/annotate_peaks/annotate_EMT_vs_selectedEpithelial_diff_peaks_to_genes/20210927.v1/ccRCC_vs_PT_DAPs.Annotated.20210927.v1.tsv")
+## input peak-to-motif table
+peak2motif_df <- fread(data.table = F, input = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/3.Merge_snATAC/Merge.SelectPeaks.v.20210706/peaks/Motifs_matched.28_snATAC_merged.object.20210827.tsv")
+

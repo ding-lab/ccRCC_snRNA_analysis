@@ -103,7 +103,7 @@ for (peak_plot in unique(plotdata_df$peak)) {
     annotation = F, 
     peaks = F,
     links=FALSE)
-  cov_obj <- cov_obj + scale_fill_manual(values =  colors_tumorgroup)
+  # cov_obj <- cov_obj + scale_fill_manual(values =  colors_tumorgroup)
   print("Finished cov_plot")
   
   peak_plot_obj <- Signac::PeakPlot(
