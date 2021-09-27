@@ -62,8 +62,8 @@ table(atac@meta.data$epithelial_group)
 print("Finished mapping epithelial_group")
 cluster2group_df <- cluster2group_df %>%
   arrange(factor(epithelial_group, levels = c("EMT", "Epithelial-weak", "Epithellal-intermediate", "Epithelial-strong", "other")))
+# atac@meta.data$cell_group=factor(atac@meta.data$cell_group, levels=cluster2group_df$cluster_name.formatted)
 print("Start changing ident")
-atac@meta.data$cell_group=factor(atac@meta.data$cell_group, levels=cluster2group_df$cluster_name.formatted)
 Idents(atac) <- "cell_group"
 print("Finished changing ident")
 
