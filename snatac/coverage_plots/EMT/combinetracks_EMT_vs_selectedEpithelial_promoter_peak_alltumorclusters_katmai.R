@@ -53,7 +53,7 @@ print("Finished mapping cell_group")
 print("Start mapping epithelial group")
 cluster2group_df <- cluster2group_df %>%
   mutate(cluster_name.formatted = gsub(x = cluster_name, pattern = "\\.", replacement = "-")) %>%
-  arrange(epithelial_group)
+  arrange(factor(epithelial_group, levels = c("EMT", "Epithelial-weak", "Epithellal-intermediate", "Epithelial-strong")))
 atac@meta.data$epithelial_group <- mapvalues(x = atac@meta.data$cell_group, from = cluster2group_df$cluster_name.formatted, to = as.vector(cluster2group_df$epithelial_group), warn_missing = F)
 table(atac@meta.data$epithelial_group)
 print("Finished mapping epithelial_group")
