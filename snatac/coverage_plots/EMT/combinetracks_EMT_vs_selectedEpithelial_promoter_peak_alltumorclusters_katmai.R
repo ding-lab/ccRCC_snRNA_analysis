@@ -104,7 +104,7 @@ for (peak_plot in unique(plotdata_df$peak)) {
   
   p <- Signac::CombineTracks(
     plotlist = list(cov_obj, peak_plot_obj, gene_plot_obj),
-    heights = c(7, 0.5, 0.5, 1))
+    heights = c(7, 0.5, 1))
   print("Finished CombineTracks")
   
   ## write output
