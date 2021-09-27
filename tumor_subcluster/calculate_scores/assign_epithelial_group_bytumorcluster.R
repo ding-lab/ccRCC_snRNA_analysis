@@ -20,7 +20,8 @@ epi_scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tum
 
 # make column annotation --------------------------------------------------
 cluster_anno_df <- merge(x = enrich_df %>%
-                           select(cluster_name, EMT), y = epi_scores_df, by = c("cluster_name"))
+                           select(cluster_name, EMT), 
+                         y = epi_scores_df, by = c("cluster_name"), all = T)
 cutoff_epithelial_strong <- quantile(x = cluster_anno_df$score, 0.7)
 cutoff_epithelial_weak <- quantile(x = cluster_anno_df$score, 0.3)
 

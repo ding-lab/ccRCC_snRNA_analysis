@@ -54,13 +54,16 @@ print("Finished mapping cell_group")
 print("Start mapping epithelial group")
 cluster2group_df <- cluster2group_df %>%
   mutate(cluster_name.formatted = gsub(x = cluster_name, pattern = "\\.", replacement = "-"))
+cluster2group_df <- merge(x = data.frame(cluster_name.formatted = unique(barcode2cluster_df$cell_group)), y = cluster2group_df, by = c("cluster_name.formatted"), all.x = T)
+cluster2group_df$epithelial_group[is.na(cluster2group_df$epithelial_group)] <- "other"
 atac@meta.data$epithelial_group <- mapvalues(x = atac@meta.data$cell_group, from = cluster2group_df$cluster_name.formatted, to = as.vector(cluster2group_df$epithelial_group), warn_missing = F)
+atac@meta.data$epithelial_group[atac@meta.data$cell_group == atac@meta.data$epithelial_group] <- "other"
 table(atac@meta.data$epithelial_group)
 print("Finished mapping epithelial_group")
 cluster2group_df <- cluster2group_df %>%
-  arrange(factor(epithelial_group, levels = c("EMT", "Epithelial-weak", "Epithellal-intermediate", "Epithelial-strong")))
+  arrange(factor(epithelial_group, levels = c("EMT", "Epithelial-weak", "Epithellal-intermediate", "Epithelial-strong", "other")))
 print("Start changing ident")
-atac@meta.data$cell_group=factor(atac$cell_group, levels=cluster2group_df$cluster_name.formatted)
+atac@meta.data$cell_group=factor(atac@meta.data$cell_group, levels=cluster2group_df$cluster_name.formatted)
 Idents(atac) <- "cell_group"
 print("Finished changing ident")
 
@@ -73,8 +76,8 @@ rm(atac)
 
 # make colors -------------------------------------------------------------
 ## make colors
-colors_tumorgroup_sim <- RColorBrewer::brewer.pal(n = 5, name = "Set1")[c(1, 2, 3, 4)]
-names(colors_tumorgroup_sim) <- c("EMT", "Epithellal-intermediate", "Epithelial-strong", "Epithelial-weak")
+colors_tumorgroup_sim <- RColorBrewer::brewer.pal(n = 9, name = "Set1")[c(1, 2, 3, 4, 9)]
+names(colors_tumorgroup_sim) <- c("EMT", "Epithellal-intermediate", "Epithelial-strong", "Epithelial-weak", "other")
 colors_tumorgroup <- colors_tumorgroup_sim[cluster2group_df$epithelial_group]
 names(colors_tumorgroup) <- cluster2group_df$cluster_name.formatted
 
@@ -101,6 +104,7 @@ for (peak_plot in unique(plotdata_df$peak)) {
   gene_plot <- plotdata_df$Gene[plotdata_df$peak == peak_plot]
   
   # plot --------------------------------------------------------------------
+  print(paste0("Start processing cov_plot"))
   cov_obj= Signac::CoveragePlot(
     object = atac_subset,
     region = peak_plot_expanded,
