@@ -36,3 +36,9 @@ peaks_anno_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sna
 ## input peak-to-motif table
 peak2motif_df <- fread(data.table = F, input = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/3.Merge_snATAC/Merge.SelectPeaks.v.20210706/peaks/Motifs_matched.28_snATAC_merged.object.20210827.tsv")
 
+# overlap -----------------------------------------------------------------
+peaks_anno_df <- merge(x = peaks_anno_df, y = peak2motif_df, by.x = c("peak"), by.y = c("Peak"), all.x = T)
+
+# write output ------------------------------------------------------------
+file2write <- paste0(dir_out, "EMT_vs_selectedEpithelial_diff_peaks_to_motifs.", run_id, ".tsv")
+write.table(x = peaks_anno_df, file = file2write, sep = "\t", row.names = F, quote = F)
