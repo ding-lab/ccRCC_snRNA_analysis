@@ -43,8 +43,8 @@ barcode2cluster_df <- fread(data.table = F, input = "/diskmnt/Projects/ccRCC_scr
 peaks2degs_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/emt/overlap_degs/overlap_EMT_vs_selectedEpithelial_diff_promoter_peaks_with_degs/20210927.v1/EMT_vs_selectedEpithelialClusters.20210927.v1.tsv")
 
 # preprocess ATAC object --------------------------------------------------
-atac@meta.data$cell_group <- mapvalues(x = rownames(atac@meta.data), from = barcode2cluster_df$sample_barcode, to = as.vector(barcode2cluster_df$cell_group), warn_missing = F)
-print("Finished mapping")
+atac@meta.data$cell_group <- mapvalues(x = rownames(atac), from = barcode2cluster_df$sample_barcode, to = as.vector(barcode2cluster_df$cell_group), warn_missing = F)
+print("Start mapping cell group")
 atac@meta.data$cell_group[atac@meta.data$cell_group == rownames(atac@meta.data)] <- "other"
 table(atac@meta.data$cell_group)
 Idents(atac)=atac$cell_group
