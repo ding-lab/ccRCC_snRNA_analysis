@@ -7,7 +7,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 11
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -32,10 +32,10 @@ emt_genes_df <- data.frame(gene = c("VIM", "FN1", "CDH2", "SERPINE1", "TGFBI",
                                     "SLC5A12", "SLC5A2", 
                                     "SLC13A3", 
                                     "SLC3A1", "SLC16A9", "SLC38A3",
-                                    "PCSK6", "CP"),
+                                    "XIST", "SLC6A3", "SLC28A1", "PTGER3", "ABI3BP", "CIT", "EPB41L4A", "FRMD3"),
                            Text_Gene_Group = c(rep("Mesenchymal\nmarkers", 5),
                                                rep("Epithelial/\nproximal-tubule\nmarkers", 5),
-                                               rep("PT S1/2", 3), rep("PT S3", 3), rep("Tumor-cell markers", 2)))
+                                               rep("PT S1/2", 3), rep("PT S3", 3), rep("other markers", 8)))
 ## add name for the marker groups
 genes2filter <- emt_genes_df$gene
 
@@ -229,7 +229,7 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              show_column_names = T, column_title = NA,
                              show_heatmap_legend = F)
 file2write <- paste0(dir_out, "EMT_Genes_by_tumorcluster", ".png")
-png(file2write, width = 3000, height = 1500, res = 150)
+png(file2write, width = 3000, height = 1800, res = 150)
 draw(object = p, 
      annotation_legend_side = "top", annotation_legend_list = list_lgd)
 dev.off()

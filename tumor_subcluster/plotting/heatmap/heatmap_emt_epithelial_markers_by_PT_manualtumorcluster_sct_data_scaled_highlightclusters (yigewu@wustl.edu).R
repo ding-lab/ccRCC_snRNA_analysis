@@ -7,7 +7,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 11
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -100,7 +100,7 @@ names(colors_celltype) <- c("Tumor cells", "Proximal tubule")
 ## make colors for S1/2/3 group
 colors_s123_group <- c(brewer.pal(n = 9, name = "BuPu")[c(8)], brewer.pal(n = 11, name = "BrBG")[c(2)], 
                        brewer.pal(n = 11, name = "PuOr")[c(11)], brewer.pal(n = 8, name = "Set2")[c(8)])
-names(colors_s123_group) <- c("S1/S2 enriched", "S3 enriched", "mixed S1/S2/S3\nidentity", "weak segmental\nidentity")
+names(colors_s123_group) <- c("S1/2 enriched", "S3 enriched", "mixed S1/2/3\nidentity", "weak segmental\nidentity")
 
 # get row/column ids ----------------------------------------------------------
 columnnames_plot <- colnames(plot_data_mat)
@@ -131,16 +131,17 @@ colanno_df <- data.frame(columnname = columnnames_plot,
                                                    ifelse(scores_epithelial <= quantile(x = scores_epithelial, 0.3),
                                                           ifelse(columnnames_plot %in% enrich_df$cluster_name[enrich_df$EMT], "EMT", "Epithelial-weak"), "Epithellal-intermediate")),
                          # s123_group = ifelse(scores_s12 >= quantile(scores_s12, 0.9),
-                         #                     ifelse(scores_s3 >=  quantile(scores_s3, 0.9), "mixed S1/S2/S3\nidentity", "S1/S2 enriched"), 
+                         #                     ifelse(scores_s3 >=  quantile(scores_s3, 0.9), "mixed S1/2/3\nidentity", "S1/2 enriched"), 
                          #                     ifelse(scores_s3 >=  quantile(scores_s3, 0.9), "S3 enriched", "weak segmental\nidentity")))
                          s123_group = ifelse(scores_s12 >= quantile(scores_s12, 0.9),
-                                             ifelse(scores_s3 >=  quantile(scores_s3, 0.9), "mixed S1/S2/S3\nidentity", "S1/S2 enriched"), 
+                                             ifelse(scores_s3 >=  quantile(scores_s3, 0.9), "mixed S1/2/3\nidentity", "S1/2 enriched"), 
                                              ifelse(scores_s3 >=  quantile(scores_s3, 0.9), "S3 enriched", "weak segmental\nidentity")))
-# ## make highlighted samples
+## make highlighted samples
 # index_highlight <- which(columnnames_plot %in% c("C3L.00079.T1_C4", "C3L.00079.T1_C1",  "C3L.00079.T1_C2",  "C3L.00079.T1_C3",  "C3L.00079.T1_C4",
 #                                                  "C3N.01200.T2_C1", "C3N.01200.T2_C2",
 #                                                  "C3N.00242.T1_C1"))
-# texts_highlight <- columnnames_plot[index_highlight];
+index_highlight <- which(columnnames_plot %in% gsub(x = c("C3L-00079-T1_C4", "C3L-01302-T1_C1","C3L-00088-T2_C1", "C3N-00733-T1_C1", "C3L-00416-T2_C1", "C3L-00010-T1_C1", "C3L-00088-T1_C1"), pattern = "\\-", replacement = "."))
+texts_highlight <- columnnames_plot[index_highlight];
 ## make column annotation object
 colanno_obj = HeatmapAnnotation(#link = anno_mark(at = index_highlight, labels = texts_highlight, labels_gp = gpar(fontsize = 15), side = "top"),
   CellType = anno_simple(x = colanno_df$cell_type, col = colors_celltype[colanno_df$cell_type], height = unit(0.5, "cm")),
@@ -151,6 +152,7 @@ colanno_obj = HeatmapAnnotation(#link = anno_mark(at = index_highlight, labels =
   PT_S3_Score = anno_simple(x = scores_s3, col = colors_s3score, height = unit(0.75, "cm")),
   PTSegmentSignature = anno_simple(x = colanno_df$s123_group, col = colors_s123_group[colanno_df$s123_group], height = unit(0.75, "cm")),
   annotation_name_gp = gpar(fontsize = 20, fontface = "bold"), annotation_name_side = "left")
+colanno_obj2 <- HeatmapAnnotation(link = anno_mark(at = index_highlight, labels = texts_highlight, labels_gp = gpar(fontsize = 15), side = "bottom"))
 
 # make column order --------------------------------------------------
 column_order_vec <- order(scores_epithelial, decreasing = T)
@@ -175,7 +177,7 @@ list_lgd = packLegend(
          title = "Epithelial score", 
          title_gp = gpar(fontsize = 20),
          labels_gp = gpar(fontsize = 20),
-         legend_width = unit(5, "cm"),
+         legend_width = unit(4, "cm"),
          legend_height = unit(4, "cm"),
          direction = "horizontal"),
   Legend(col_fun = colors_emtscores, 
@@ -207,9 +209,9 @@ list_lgd = packLegend(
          title = "snRNA expression", 
          title_gp = gpar(fontsize = 20),
          labels_gp = gpar(fontsize = 20),
-         legend_width = unit(6, "cm"),
+         legend_width = unit(4, "cm"),
          legend_height = unit(4, "cm"),
-         direction = "horizontal"),  column_gap = unit(18, "mm"), direction = "horizontal", max_width = unit(40, "cm"))
+         direction = "horizontal"),  column_gap = unit(18, "mm"), direction = "horizontal", max_width = unit(36, "cm"))
 
 # plot  ------------------------------------------------------------
 p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat, 
@@ -244,13 +246,14 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              cluster_row_slices = F, show_row_dend = F,
                              ## column
                              show_column_dend = F, cluster_columns = F, cluster_column_slices = F,
-                             column_order = column_order_vec, column_split = column_group_factor, column_title_gp = gpar(fontsize = 25),
-                             top_annotation = colanno_obj,
+                             column_order = column_order_vec, column_split = column_group_factor, column_title_gp = gpar(fontsize = 23),
+                             top_annotation = colanno_obj, bottom_annotation = colanno_obj2,
                              show_column_names = F, column_title = NA,
                              show_heatmap_legend = F)
 file2write <- paste0(dir_out, "EMT_Genes_by_tumorcluster", ".pdf")
-pdf(file2write, width = 15, height = 8.5, useDingbats = F)
+pdf(file2write, width = 14, height = 10, useDingbats = F)
 draw(object = p,
      annotation_legend_side = "top", annotation_legend_list = list_lgd)
 dev.off()
+
 

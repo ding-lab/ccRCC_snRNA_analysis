@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -20,26 +20,11 @@ dir.create(dir_out)
 deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/findmarkers_selected_EMTclusters_vs_epithelialclusters_katmai/20210924.v3/Selected_2EMTclusters_vs_5Epithelialclusters.logfc.threshold0.min.pct0.1.min.diff.pct0.AssaySCT.tsv")
 ## input EMT related genes
 gene2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/combine_pt_with_emt_markers_all/20200920.v1/Kidney_Specific_EMT_Genes.20200920.v1.tsv")
-emtgenes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/")
-pathway2genes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/pathway/ora_msigdb_tumor_manualsubcluster_up_degs/20210413.v1/ORA_Results.tsv")
-genes4score_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/filter_degs/filter_tumormanualcluster_EMT_degs/20210908.v1/EMTModuleDown.EpithelialPT_DEGs.Filtered.tsv")
+emtgenes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_emt_genes/20200915.v1/EMT_Genes.20200915.v1.tsv")
 
 # filter the emt genes ----------------------------------------------------
-genesetnames_plot <- "HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION"
-## add name for the marker groups
-# pathway2genes_filtered_df <- pathway2genes_df %>%
-#   # filter(p.adjust < 0.05) %>%
-#   filter(Description %in% genesetnames_plot)
-# 
-# pathway2genes_list <- sapply(pathway2genes_filtered_df$geneID, function(x) {
-#   genes_vec <- str_split(string = x, pattern = "\\/")[[1]]
-#   return(genes_vec)
-# })
-# genes_mesenchymal <- unique(unlist(pathway2genes_list))
 genes_mesenchymal <- emtgenes_df$hgnc_symbol[emtgenes_df$gene_function == "Mesenchymal"]
-genes_mesenchymal <- c(genes_mesenchymal, "CXCR4", "MET", "CD44")
 genes_epithelal <- gene2celltype_df$Gene[gene2celltype_df$Gene_Group2 == "Proximal tubule"]
-# genes_epithelal <- genes4score_df$genesymbol_deg
 genes_filter <- c(genes_mesenchymal, genes_filter)
 genes_filter
 
@@ -66,7 +51,7 @@ plot_data_df <- deg_df %>%
 y_cap <- max(plot_data_df$Log10p_val_adj[!is.infinite(plot_data_df$Log10p_val_adj)])
 plot_data_df <- plot_data_df %>%
   mutate(y_plot = ifelse(Log10p_val_adj >= y_cap, y_cap, Log10p_val_adj)) %>%
-  mutate(text_gene = ifelse((y_plot >= y_bottom) & ((genesymbol %in% genes_mesenchymal) & (x_plot >= x_pos)) | ((genesymbol %in% genes_epithelal) & (x_plot <= x_neg)), genesymbol, NA))
+  mutate(text_gene = ifelse(((y_plot >= y_bottom) & (x_plot >= 1)) | ((x_plot <= x_neg)), genesymbol, NA))
 
 # plot all markers--------------------------------------------------------------------
 ## plot
@@ -76,18 +61,17 @@ p <- p + geom_point(data = subset(plot_data_df, y_plot < y_bottom), mapping = ae
 p <- p + geom_point(data = subset(plot_data_df, x_plot >= 0 & y_plot >= y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = color_right_deep)
 p <- p + geom_point(data = subset(plot_data_df, x_plot <= 0 & y_plot >= y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = color_left_deep)
 p <- p + scale_color_manual(values = c("FDR<0.05 (up)" = "red", "FDR<0.05 (down)" = "blue", "FDR<0.05" = "black", "FDR>=0.05" = "grey80"))
-# p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene)),
-#                          mapping = aes(x = x_plot, y = y_plot, label = text_gene), color = "black", force = 4, fontface = "italic", segment.alpha = 0.5)
-p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot > 0),
-                         mapping = aes(x = x_plot, y = y_plot, label = text_gene),
-                         color = "black", force = 4, fontface = "italic", segment.alpha = 0.5, 
-                         size = 2, max.overlaps = Inf, xlim = c(0, 4))
-p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot < 0),
-                         mapping = aes(x = x_plot, y = y_plot, label = text_gene),
-                         color = "black", force = 4, fontface = "italic", segment.alpha = 0.5, segment.size = 0.2,
-                         size = 2, max.overlaps = Inf, xlim = c(-4, 0), ylim = c(0.5, 310))
+p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene)),
+                         mapping = aes(x = x_plot, y = y_plot, label = text_gene), color = "black", force = 4, fontface = "bold", segment.alpha = 0.5)
+# p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot > 1),
+#                          mapping = aes(x = x_plot, y = y_plot, label = text_gene),
+#                          color = "black", force = 4, fontface = "italic", segment.alpha = 0.5, size = 5, max.overlaps = Inf)
+# p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot < 0),
+#                          mapping = aes(x = x_plot, y = y_plot, label = text_gene),
+#                          color = "black", force = 4, fontface = "italic", segment.alpha = 0.5, segment.size = 0.2,
+#                          size = 5, max.overlaps = Inf, xlim = c(-4, 0), ylim = c(0.5, Inf))
+
 p <- p + theme_classic()
-p <- p + ylim(c(0, 310))
 p <- p + xlab("Log2(Fold-Change)")
 p <- p + ylab("-Log10(P-value-adjusted)")
 p <- p + theme(axis.text = element_text(size = 14, color = "black"),

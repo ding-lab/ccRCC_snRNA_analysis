@@ -7,7 +7,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -136,6 +136,9 @@ colanno_df <- data.frame(columnname = columnnames_plot,
 index_highlight <- which(columnnames_plot %in% c("C3L.00079.T1_C4", "C3L.00079.T1_C1",  "C3L.00079.T1_C2",  "C3L.00079.T1_C3",  "C3L.00079.T1_C4",
                                                  "C3N.01200.T2_C1", "C3N.01200.T2_C2",
                                                  "C3N.00242.T1_C1"))
+index_highlight <- which(columnnames_plot %in% gsub(x = c("C3L-00079-T1_C4", "C3L-01302-T1_C1",
+                                                          "C3L-00088-T2_C1", "C3N-00733-T1_C1", "C3L-00416-T2_C1", "C3L-00010-T1_C1", "C3L-00088-T1_C1"), pattern = "\\-", replacement = "."))
+
 texts_highlight <- columnnames_plot[index_highlight];
 ## make column annotation object
 colanno_obj = HeatmapAnnotation(#link = anno_mark(at = index_highlight, labels = texts_highlight, labels_gp = gpar(fontsize = 15), side = "top"),
