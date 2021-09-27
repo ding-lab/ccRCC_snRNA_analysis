@@ -1,5 +1,6 @@
-# Yige Wu @WashU May 2021
+# Yige Wu @WashU Sep 2021
 ## source activate ccrcc_snrna
+## run ulimit -s unlimited
 
 # set up libraries and output directory -----------------------------------
 ## getting the path to the current script
@@ -102,7 +103,7 @@ for (peak_plot in unique(plotdata_df$peak)) {
     annotation = F, 
     peaks = F,
     links=FALSE)
-  cov_obj <- cov_obj + scale_fill_manual(values =  colors_celltype)
+  cov_obj <- cov_obj + scale_fill_manual(values =  colors_tumorgroup)
   print("Finished cov_plot")
   
   peak_plot_obj <- Signac::PeakPlot(
