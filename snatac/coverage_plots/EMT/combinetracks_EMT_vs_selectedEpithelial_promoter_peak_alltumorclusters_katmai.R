@@ -26,7 +26,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 library(Signac)
 library(ggplot2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -49,8 +49,9 @@ atac@meta.data$cell_group[atac@meta.data$cell_group == rownames(atac@meta.data)]
 table(atac@meta.data$cell_group)
 Idents(atac)=atac$cell_group
 print("Start subsetting")
-atac_subset=subset(atac,(cell_group %in% c("C3L-00079-T1_C4", "C3L-01302-T1_C1",
-                                           "C3L-00088-T2_C1", "C3N-00733-T1_C1", "C3L-00416-T2_C1", "C3L-00010-T1_C1", "C3L-00088-T1_C1")))
+# atac_subset=subset(atac,(cell_group %in% c("C3L-00079-T1_C4", "C3L-01302-T1_C1",
+#                                            "C3L-00088-T2_C1", "C3N-00733-T1_C1", "C3L-00416-T2_C1", "C3L-00010-T1_C1", "C3L-00088-T1_C1")))
+atac_subset=atac
 print("Finished subsetting")
 rm(atac)
 
@@ -73,7 +74,7 @@ for (peak_plot in unique(plotdata_df$peak)) {
   new_st=st-1000
   new_en=en+1000
   peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
-  gene_plot <- plotdata_df$Gene[plotdata_df$peak == peak_plot_expanded]
+  gene_plot <- plotdata_df$Gene[plotdata_df$peak == peak_plot]
   
   # make colors -------------------------------------------------------------
   # ## make colors

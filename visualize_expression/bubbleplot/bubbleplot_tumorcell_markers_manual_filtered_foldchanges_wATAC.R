@@ -28,7 +28,7 @@ genes_filter <- genes_filter[!(genes_filter %in% c("DPP6", "CPNE8", "EFNA5", "MG
 ## make 
 # dataname_snrna <- "Tumor cells vs. non-tumor cells\n(snRNA-seq)"
 dataname_snrna <- "Tumor cells vs. non-tumor cells (snRNA-seq)"
-dataname_snatac <- "Tumor cells vs. non-tumor cells (snRNA-seq)"
+dataname_snatac <- "Tumor cells vs. non-tumor cells (snATAC-seq)"
 dataname_bulk_rna <- "Tumors vs. NATs (bulk RNA-seq)"
 dataname_bulk_protein <- "Tumors vs. NATs (bulk proteomics)"
 
@@ -43,7 +43,7 @@ plotdata_wide_df <- genes_process_df %>%
 plotdata_df <- melt(plotdata_wide_df)
 plotdata_df <- plotdata_df %>%
   mutate(data_type = ifelse(variable == "avg_log2FC.mean.TumorcellsvsNontumor", dataname_snrna,
-                            ifelse(variable == "avg_log2FC.snATAC", dataname_snatac, 
+                            ifelse(variable == "log2FC.snATAC", dataname_snatac, 
                                    ifelse(variable == "log2FC.bulkRNA", dataname_bulk_rna, dataname_bulk_protein)))) %>%
   mutate(foldchange = 2^value) %>%
   mutate(y_plot = Gene)
@@ -51,7 +51,7 @@ summary(plotdata_df$foldchange)
 plotdata_df <- plotdata_df %>%
   mutate(x_plot = ifelse(foldchange >= 10, 10, foldchange))
 plotdata_df$y_plot <- factor(x = plotdata_df$Gene, levels = plotdata_wide_df$Gene)
-plotdata_df$data_type <- factor(x = plotdata_df$data_type, levels = c(dataname_snrna, dataname_bulk_rna, dataname_bulk_protein))
+plotdata_df$data_type <- factor(x = plotdata_df$data_type, levels = c(dataname_snrna, dataname_snatac, dataname_bulk_rna, dataname_bulk_protein))
 
 ## make colors
 display.brewer.all()
@@ -74,7 +74,7 @@ p <- p + theme(panel.grid.major.y = element_line(size=.1, color="black" ))
 p <- p + theme(axis.text.y = element_text(size = 12, color = "black"), axis.title.y = element_blank())
 p <- p + theme(axis.text.x = element_text(size = 12, color = "black"), axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"), ends = "last")))
 p <- p + theme(legend.position = "top")
-p <- p + guides(fill = guide_legend(override.aes = list(size=4), nrow = 3, title = NULL, label.theme = element_text(size = 12)))
+p <- p + guides(fill = guide_legend(override.aes = list(size=4), nrow = 4, title = NULL, label.theme = element_text(size = 12)))
 file2write <- paste0(dir_out, "Foldchanges", ".png")
 png(file2write, width = 600, height = 900, res = 150)
 print(p)
