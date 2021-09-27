@@ -26,7 +26,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 library(Signac)
 library(ggplot2)
 ## set run id
-version_tmp <- 2
+version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -41,19 +41,38 @@ atac=readRDS(paste('/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATA
 barcode2cluster_df <- fread(data.table = F, input = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/12.Transfer_tumorClusters_fromRNA/TumorOnly.RDS.dimplots.RNAClustersReassigned/metadata/RNA_clusters_Tumor_PT_clusters.snATAC.20210917.tsv")
 ## input the peaks to plot
 peaks2degs_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/emt/overlap_degs/overlap_EMT_vs_selectedEpithelial_diff_promoter_peaks_with_degs/20210927.v1/EMT_vs_selectedEpithelialClusters.20210927.v1.tsv")
+## input tumor cluster grouping
+cluster2group_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_epithelial_group_bytumorcluster/20210927.v1/Tumorcluster_EpithelialGroup.20210927.v1.tsv")
 
 # preprocess ATAC object --------------------------------------------------
+print("Start mapping cell_group")
 atac@meta.data$cell_group <- mapvalues(x = rownames(atac@meta.data), from = barcode2cluster_df$sample_barcode, to = as.vector(barcode2cluster_df$cell_group), warn_missing = F)
-print("Finished mapping")
 atac@meta.data$cell_group[atac@meta.data$cell_group == rownames(atac@meta.data)] <- "other"
 table(atac@meta.data$cell_group)
-Idents(atac)=atac$cell_group
+print("Finished mapping cell_group")
+print("Start mapping epithelial group")
+cluster2group_df <- cluster2group_df %>%
+  mutate(cluster_name.formatted = gsub(x = cluster_name, pattern = "\\.", replacement = "-")) %>%
+  arrange(epithelial_group)
+atac@meta.data$epithelial_group <- mapvalues(x = atac@meta.data$cell_group, from = cluster2group_df$cluster_name.formatted, to = as.vector(cluster2group_df$epithelial_group), warn_missing = F)
+table(atac@meta.data$epithelial_group)
+print("Finished mapping epithelial_group")
+
 print("Start subsetting")
 # atac_subset=subset(atac,(cell_group %in% c("C3L-00079-T1_C4", "C3L-01302-T1_C1",
 #                                            "C3L-00088-T2_C1", "C3N-00733-T1_C1", "C3L-00416-T2_C1", "C3L-00010-T1_C1", "C3L-00088-T1_C1")))
 atac_subset=atac
 print("Finished subsetting")
 rm(atac)
+
+Idents(atac_subset)=factor(atac_subset$cell_group, levels=cluster2group_df$cluster_name.formatted)
+
+# make colors -------------------------------------------------------------
+## make colors
+colors_tumorgroup_sim <- RColorBrewer::brewer.pal(n = 5, name = "Set1")[c(1, 2, 3, 4)]
+names(colors_tumorgroup_sim) <- c("EMT", "Epithellal-intermediate", "Epithelial-strong", "Epithelial-weak")
+colors_tumorgroup <- colors_tumorgroup_sim[cluster2group_df$epithelial_group]
+names(colors_tumorgroup) <- cluster2group_df$cluster_name.formatted
 
 # process peaks -----------------------------------------------------------
 plotdata_df <- peaks2degs_df %>%
@@ -76,13 +95,6 @@ for (peak_plot in unique(plotdata_df$peak)) {
   peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
   gene_plot <- plotdata_df$Gene[plotdata_df$peak == peak_plot]
   
-  # make colors -------------------------------------------------------------
-  # ## make colors
-  # color_tumorcell <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[4]
-  # color_pt <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[1]
-  # colors_celltype <- c(rep(x = color_tumorcell, 24), rep(x = color_pt, 6))
-  # names(colors_celltype) <- c(peak2fcs_long_tmp_df$pieceid, sampleids_nat)
-  
   # plot --------------------------------------------------------------------
   cov_obj= Signac::CoveragePlot(
     object = atac_subset,
@@ -90,7 +102,7 @@ for (peak_plot in unique(plotdata_df$peak)) {
     annotation = F, 
     peaks = F,
     links=FALSE)
-  # cov_obj <- cov_obj + scale_fill_manual(values =  colors_celltype)
+  cov_obj <- cov_obj + scale_fill_manual(values =  colors_celltype)
   print("Finished cov_plot")
   
   peak_plot_obj <- Signac::PeakPlot(
