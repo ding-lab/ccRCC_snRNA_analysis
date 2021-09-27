@@ -114,7 +114,7 @@ for (peak_plot in unique(plotdata_df$peak)) {
   # print(p)
   # dev.off()
   file2write <- paste0(dir_out, gene_plot, "_", gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".pdf")
-  pdf(file2write, width = 6, height = 8)
+  pdf(file2write, width = 6, height = 10)
   print(p)
   dev.off()
   rm(p)
