@@ -31,6 +31,7 @@ run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
+options(future.globals.maxSize = 7 * 1024^3) # for 7 Gb RAM
 
 # input dependencies ------------------------------------------------------
 ## input the merged object
@@ -107,4 +108,9 @@ for (peak_plot in unique(plotdata_df$peak)) {
   pdf(file2write, width = 6, height = 8)
   print(p)
   dev.off()
+  rm(p)
+  rm(cov_obj)
+  rm(peak_plot_obj)
+  rm(gene_plot_obj)
+  
 }
