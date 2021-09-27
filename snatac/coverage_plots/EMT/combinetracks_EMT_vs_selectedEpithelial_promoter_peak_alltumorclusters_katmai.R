@@ -53,11 +53,16 @@ table(atac@meta.data$cell_group)
 print("Finished mapping cell_group")
 print("Start mapping epithelial group")
 cluster2group_df <- cluster2group_df %>%
-  mutate(cluster_name.formatted = gsub(x = cluster_name, pattern = "\\.", replacement = "-")) %>%
-  arrange(factor(epithelial_group, levels = c("EMT", "Epithelial-weak", "Epithellal-intermediate", "Epithelial-strong")))
+  mutate(cluster_name.formatted = gsub(x = cluster_name, pattern = "\\.", replacement = "-"))
 atac@meta.data$epithelial_group <- mapvalues(x = atac@meta.data$cell_group, from = cluster2group_df$cluster_name.formatted, to = as.vector(cluster2group_df$epithelial_group), warn_missing = F)
 table(atac@meta.data$epithelial_group)
 print("Finished mapping epithelial_group")
+cluster2group_df <- cluster2group_df %>%
+  arrange(factor(epithelial_group, levels = c("EMT", "Epithelial-weak", "Epithellal-intermediate", "Epithelial-strong")))
+print("Start changing ident")
+atac@meta.data$cell_group=factor(atac$cell_group, levels=cluster2group_df$cluster_name.formatted)
+Idents(atac) <- "cell_group"
+print("Finished changing ident")
 
 print("Start subsetting")
 # atac_subset=subset(atac,(cell_group %in% c("C3L-00079-T1_C4", "C3L-01302-T1_C1",
@@ -65,8 +70,6 @@ print("Start subsetting")
 atac_subset=atac
 print("Finished subsetting")
 rm(atac)
-
-Idents(atac_subset)=factor(atac_subset$cell_group, levels=cluster2group_df$cluster_name.formatted)
 
 # make colors -------------------------------------------------------------
 ## make colors
@@ -84,6 +87,7 @@ plotdata_df <- peaks2degs_df %>%
   unique()
 print("Finished processing peaks")
 
+peak_plot <- "chr3-100914111-100914611"
 for (peak_plot in unique(plotdata_df$peak)) {
   print(paste0("Start processing peak: ", peak_plot))
   
