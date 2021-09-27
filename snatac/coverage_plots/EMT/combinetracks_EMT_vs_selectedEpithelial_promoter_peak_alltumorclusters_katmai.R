@@ -111,7 +111,7 @@ for (peak_plot in unique(plotdata_df$peak)) {
     annotation = F, 
     peaks = F,
     links=FALSE)
-  # cov_obj <- cov_obj + scale_fill_manual(values =  colors_tumorgroup)
+  cov_obj <- cov_obj + scale_fill_manual(values =  colors_tumorgroup)
   print("Finished cov_plot")
   
   peak_plot_obj <- Signac::PeakPlot(
@@ -126,7 +126,7 @@ for (peak_plot in unique(plotdata_df$peak)) {
   
   p <- Signac::CombineTracks(
     plotlist = list(cov_obj, peak_plot_obj, gene_plot_obj),
-    heights = c(7, 0.5, 1))
+    heights = c(9, 0.5, 1))
   print("Finished CombineTracks")
   
   ## write output
