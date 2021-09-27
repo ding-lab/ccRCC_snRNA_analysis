@@ -46,8 +46,11 @@ peaks2degs_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sna
 atac@meta.data$cell_group <- mapvalues(x = rownames(atac), from = barcode2cluster_df$sample_barcode, to = as.vector(barcode2cluster_df$cell_group))
 atac@meta.data$cell_group[atac@meta.data$cell_group == rownames(atac)] <- "other"
 Idents(atac)=atac$cell_group
+print("Start subsetting")
 atac_subset=subset(atac,(cell_group %in% c("C3L-00079-T1_C4", "C3L-01302-T1_C1",
                                            "C3L-00088-T2_C1", "C3N-00733-T1_C1", "C3L-00416-T2_C1", "C3L-00010-T1_C1", "C3L-00088-T1_C1")))
+print("Finished subsetting")
+rm(atac)
 
 # process peaks -----------------------------------------------------------
 plotdata_df <- peaks2degs_df %>%
@@ -56,8 +59,11 @@ plotdata_df <- peaks2degs_df %>%
   filter(highlight == T) %>%
   select(avg_log2FC.snATAC, avg_log2FC.snRNA, Gene, peak) %>%
   unique()
+print("Finished processing peaks")
 
 for (peak_plot in unique(plotdata_df$peak)) {
+  print(paste0("Start processing peak: ", peak_plot))
+  
   # process coordinates ------------------------------------------------------------
   chr=strsplit(x = peak_plot, split = "\\-")[[1]][1]
   st=strsplit(x = peak_plot, split = "\\-")[[1]][2]; st = as.numeric(st)
