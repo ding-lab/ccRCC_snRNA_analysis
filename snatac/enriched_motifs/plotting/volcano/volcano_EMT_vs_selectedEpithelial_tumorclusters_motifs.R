@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -18,8 +18,6 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input degs
 da_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Enriched_Motifs/EMT/Score_difference.EpithelialSelectedClusters_vs_Mesenchymal.20210924.tsv")
-## 
-da_bycelltype_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Enriched_Motifs/Score_difference.EachCellGroup_vsOthers.CPT0001260013.20210701.tsv")
 
 # filter the emt genes ----------------------------------------------------
 da_bycelltype_filtered_df <- da_bycelltype_df %>%

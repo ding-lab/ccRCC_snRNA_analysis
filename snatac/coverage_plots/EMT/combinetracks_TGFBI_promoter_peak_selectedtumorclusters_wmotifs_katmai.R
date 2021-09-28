@@ -27,7 +27,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 library(Signac)
 library(ggplot2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -107,6 +107,7 @@ peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
 gene_plot <- plotdata_df$Gene[plotdata_df$peak == peak_plot]
 motif_coord1 <- plotdata_df$motif_coord[plotdata_df$motif.name == "TWIST1"]
 motif_coord2 <- plotdata_df$motif_coord[plotdata_df$motif.name == "JUN"]
+motif_coords <- plotdata_df$motif_coord[plotdata_df$motif.name %in% c("TWIST1", "JUN")]
 
 # plot --------------------------------------------------------------------
 print(paste0("Start processing cov_plot"))
@@ -132,19 +133,28 @@ gene_plot_obj <- Signac::AnnotationPlot(
   region = peak_plot_expanded)
 # gene_plot_obj <- gene_plot_obj  + theme_classic(base_size = 12)
 
-motif_plot_obj1 <- Signac::PeakPlot(
-  object = atac_subset,
-  region = peak_plot_expanded, 
-  peaks = StringToGRanges(motif_coord1, sep = c("-", "-")))
+# motif_plot_obj1 <- Signac::PeakPlot(
+#   object = atac_subset,
+#   region = peak_plot_expanded, 
+#   peaks = StringToGRanges(motif_coord1, sep = c("-", "-")))
+# 
+# motif_plot_obj2 <- Signac::PeakPlot(
+#   object = atac_subset,
+#   region = peak_plot_expanded, 
+#   peaks = StringToGRanges(motif_coord2, sep = c("-", "-")))
 
-motif_plot_obj2 <- Signac::PeakPlot(
+motif_plot_obj <- Signac::PeakPlot(
   object = atac_subset,
   region = peak_plot_expanded, 
-  peaks = StringToGRanges(motif_coord2, sep = c("-", "-")))
+  peaks = StringToGRanges(motif_coords, sep = c("-", "-")))
+
+# p <- Signac::CombineTracks(
+#   plotlist = list(cov_obj, peak_plot_obj, motif_plot_obj1, motif_plot_obj2, gene_plot_obj),
+#   heights = c(6, 0.3, 0.3, 0.3, 1))
 
 p <- Signac::CombineTracks(
-  plotlist = list(cov_obj, peak_plot_obj, motif_plot_obj1, motif_plot_obj2, gene_plot_obj),
-  heights = c(6, 0.3, 0.3, 0.3, 1))
+  plotlist = list(cov_obj, peak_plot_obj,motif_plot_obj, gene_plot_obj),
+  heights = c(6, 0.3, 1))
 
 print("Finished CombineTracks")
 

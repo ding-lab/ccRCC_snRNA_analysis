@@ -86,9 +86,6 @@ peaks2degs_df <- peaks2degs_df %>%
   mutate(is_knownTFtarget = (id_deg_motif %in% deg2tf_annotated_df$id_deg_motif[!is.na(deg2tf_annotated_df$is_directed)]))
 
 # finalize motifs ----------------------------------------------------------
-## extract the motifs used
-dam_keep_df <- dam_df %>%
-  filter(TF_Name %in% c(dams_mes, dams_epi))
 motif2tf_df <- deg2tf_df %>%
   select(TF_name, genesymbol_tf) %>%
   unique()
@@ -102,6 +99,10 @@ tf2deg_df <- motif2TFdeg_df %>%
 peaks2degs_df$avg_log2FC.tf.snRNA <- mapvalues(x = peaks2degs_df$motif.name, from = tf2deg_df$TF_name, to = as.vector(tf2deg_df$avg_log2FC.tf))
 peaks2degs_df$avg_log2FC.tf.snRNA[peaks2degs_df$avg_log2FC.tf.snRNA == peaks2degs_df$motif.name] <- NA
 peaks2degs_df$avg_log2FC.tf.snRNA <- as.numeric(peaks2degs_df$avg_log2FC.tf.snRNA)
+## extract the motifs used
+dam_keep_df <- dam_df %>%
+  filter(TF_Name %in% c(dams_mes, dams_epi))
+
 
 # divide by mesenchymal and epithelial ------------------------------------
 ## extract mesenchymal-high deg-dap-dam
@@ -123,4 +124,6 @@ file2write <- paste0(dir_out, "Epithelial_up_DEG_DAP_DAM_Overlap.", run_id, ".ts
 write.table(x = peaks2degs_epi_df, file = file2write, quote = F, sep = "\t", row.names = F)
 file2write <- paste0(dir_out, "Mesenchymal_Epithelial_Motifs.", run_id, ".tsv")
 write.table(x = dam_keep_df, file = file2write, quote = F, sep = "\t", row.names = F)
+file2write <- paste0(dir_out, "MotifsTF2Foldchange.snRNA.", run_id, ".tsv")
+write.table(x = tf2deg_df, file = file2write, quote = F, sep = "\t", row.names = F)
 

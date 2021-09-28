@@ -12,7 +12,7 @@ source("./ccRCC_snRNA_analysis/plotting.R")
 library(ggpubr)
 library(ggrepel)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -23,27 +23,28 @@ peaks2degs_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sna
 
 # make plot data ----------------------------------------------------------
 plotdata_df <- peaks2degs_df %>%
-  mutate(avg_log2FC.snATAC = ifelse(is.na(avg_log2FC.snATAC), 0, avg_log2FC.snATAC)) %>%
-  mutate(avg_log2FC.snRNA = ifelse(is.na(avg_log2FC.snRNA), 0, avg_log2FC.snRNA)) %>%
-  select(avg_log2FC.snATAC, avg_log2FC.snRNA, Gene) %>%
+  filter(!is.na(avg_log2FC.snATAC) & !is.na(avg_log2FC.snRNA)) %>%
+  # mutate(avg_log2FC.snATAC = ifelse(is.na(avg_log2FC.snATAC), 0, avg_log2FC.snATAC)) %>%
+  # mutate(avg_log2FC.snRNA = ifelse(is.na(avg_log2FC.snRNA), 0, avg_log2FC.snRNA)) %>%
+  select(avg_log2FC.snATAC, avg_log2FC.snRNA, Gene, peak) %>%
   unique()
+nrow(plotdata_df) ## 1096 gene-peak pairs
+length(unique(plotdata_df$Gene)) ## 1030 genes
+length(unique(plotdata_df$peak)) ## 1096 promoter peaks
 
-# plot highlight genes ----------------------------------------------------
-plotdata_df <- plotdata_df %>%
-  mutate(highlight = (Gene %in% c("PTPRJ", "DLC1")  | (Gene %in% c("SLC38A1", "RAPGEF5", "EPHA6") & avg_log2FC.snATAC > 0) | (Gene == "CES3" & avg_log2FC.snATAC < -1.5)))
-
-p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", color = "peak2gene_type", alpha = 0.8, shape = 16, size = 2.5,
+# plot no genes ----------------------------------------------------
+p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", alpha = 0.8, shape = 16, size = 2.5,
                add = "reg.line", add.params = list(color = "grey50", linetype = 2), # Customize reg. line
                conf.int = F # Add confidence interval
 )
 p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
 p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
-# p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0, size = 4)
-p <- p + geom_text_repel(data = subset(x = plotdata_df, highlight == T), 
-                         mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.snRNA, label = Gene), 
-                         max.overlaps = Inf, size = 6,
-                         segment.size = 0.4, segment.alpha = 0.6, min.segment.length = 0, box.padding = 0.5)
-p <-  p + scale_color_manual(values = colors_peak2genetype)
+p <- p + stat_cor(method = "pearson", label.x = 1, label.y = 1.5, size = 4)
+# p <- p + geom_text_repel(data = subset(x = plotdata_df, highlight == T), 
+#                          mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.snRNA, label = Gene), 
+#                          max.overlaps = Inf, size = 6,
+#                          segment.size = 0.4, segment.alpha = 0.6, min.segment.length = 0, box.padding = 0.5)
+# p <-  p + scale_color_manual(values = colors_peak2genetype)
 p <- p + guides(color = guide_legend(nrow = 1, override.aes = aes(size = 3), label.theme = element_text(size = 14)))
 p <- p + theme(axis.text = element_text(size = 18, color = "black"),
                axis.title = element_text(size = 14),
@@ -52,115 +53,75 @@ p <- p + theme(axis.text = element_text(size = 18, color = "black"),
 # png(file2write, width = 800, height = 900, res = 150)
 # print(p)
 # dev.off()
-file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC.","PTPRJ_CES3",".pdf")
-pdf(file2write, width = 5.5, height = 6, useDingbats = F)
+file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC", ".pdf")
+pdf(file2write, width = 5, height = 5, useDingbats = F)
 print(p)
 dev.off()
 
-# # plot --------------------------------------------------------------------
-p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", color = "peak2gene_type",
-                   add = "reg.line",  # Add regressin line
-                   add.params = list(color = "blue", fill = "lightgray", linetype = 2), # Customize reg. line
-                   conf.int = F # Add confidence interval
+# highlight genes with fold change > 1 ----------------------------------------------------
+plotdata_df <- plotdata_df %>%
+  mutate(highlight = (avg_log2FC.snATAC >= 1 & avg_log2FC.snRNA >= 1) | (avg_log2FC.snATAC <= -1 & avg_log2FC.snRNA <= -1) | (Gene %in% c("VIM", "FN1", "CDH2", "WNT5B")))
+p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", alpha = 0.8, shape = 16, size = 2.5,
+               add = "reg.line", add.params = list(color = "grey50", linetype = 2), # Customize reg. line
+               conf.int = F # Add confidence interval
 )
 p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
 p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
-p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0)
+p <- p + stat_cor(method = "pearson", label.x = 1, label.y = 1.5, size = 4)
+p <- p + geom_text_repel(data = subset(x = plotdata_df, avg_log2FC.snATAC >= 1 & avg_log2FC.snRNA >= 1),
+                         mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.snRNA, label = Gene),
+                         max.overlaps = Inf, size = 5,
+                         segment.size = 0.4, segment.alpha = 0.6, min.segment.length = 0, box.padding = 0.5, color = "red")
+p <- p + geom_text_repel(data = subset(x = plotdata_df, avg_log2FC.snATAC <= -1 & avg_log2FC.snRNA <= -1),
+                         mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.snRNA, label = Gene),
+                         max.overlaps = Inf, size = 5,
+                         segment.size = 0.4, segment.alpha = 0.6, min.segment.length = 0, box.padding = 0.5, color = "blue", xlim = c(-4, -1))
 p <- p + guides(color = guide_legend(nrow = 1, override.aes = aes(size = 3), label.theme = element_text(size = 14)))
-p <- p + theme(axis.text = element_text(size = 14),
+p <- p + theme(axis.text = element_text(size = 18, color = "black"),
                axis.title = element_text(size = 14),
                legend.position = "bottom", legend.box = "horizontal")
-# file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC.",".png")
+p <- p + ylim(c(-4, 4)) + xlim(c(-4, 4))
+# file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC." , "1",".png")
 # png(file2write, width = 800, height = 900, res = 150)
 # print(p)
 # dev.off()
-file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC.",".pdf")
-pdf(file2write, width = 5.5, height = 6, useDingbats = F)
+file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC.1", ".pdf")
+pdf(file2write, width = 5, height = 5, useDingbats = F)
 print(p)
 dev.off()
-# 
-# # plot highlight genes ----------------------------------------------------
-# plotdata_df <- plotdata_df %>%
-#   mutate(highlight = (avg_log2FC.snATAC*avg_log2FC.snRNA >0) & (abs(avg_log2FC.snATAC) > 1 | abs(avg_log2FC.snRNA) > 1))
-# 
-# p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", color = "peak2gene_type",
-#                add = "reg.line",  # Add regressin line
-#                add.params = list(color = "grey50", linetype = 2), # Customize reg. line
-#                conf.int = F # Add confidence interval
-# )
-# p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
-# p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
-# # p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0)
-# p <- p + geom_text_repel(data = subset(x = plotdata_df, highlight == T), 
-#                          mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.snRNA, label = Gene), 
-#                          max.overlaps = Inf, min.segment.length = 0)
-# p <- p + guides(color = guide_legend(nrow = 2))
-# p <- p + theme(axis.text = element_text(size = 14),
-#                axis.title = element_text(size = 14),
-#                legend.position = "bottom", legend.box = "horizontal")
-# file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC." , "1",".png")
-# # png(file2write, width = 800, height = 900, res = 150)
-# # print(p)
-# # dev.off()
-# file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC.","1",".pdf")
-# pdf(file2write, width = 5.5, height = 6, useDingbats = F)
-# print(p)
-# dev.off()
-# 
-# # plot highlight genes ----------------------------------------------------
-# plotdata_df <- plotdata_df %>%
-#   mutate(highlight = (avg_log2FC.snATAC*avg_log2FC.snRNA > 0) & (abs(avg_log2FC.snATAC) > 0.5 & abs(avg_log2FC.snRNA) > 0.5))
-# 
-# p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", color = "peak2gene_type",
-#                add = "reg.line",  # Add regressin line
-#                add.params = list(color = "grey50", linetype = 2), # Customize reg. line
-#                conf.int = F # Add confidence interval
-# )
-# p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
-# p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
-# # p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0)
-# p <- p + geom_text_repel(data = subset(x = plotdata_df, highlight == T), 
-#                          mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.snRNA, label = Gene), 
-#                          max.overlaps = Inf, min.segment.length = 0)
-# p <- p + guides(color = guide_legend(nrow = 2))
-# p <- p + theme(axis.text = element_text(size = 14),
-#                axis.title = element_text(size = 14),
-#                legend.position = "bottom", legend.box = "horizontal")
-# # file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC." , "1",".png")
-# # png(file2write, width = 800, height = 900, res = 150)
-# # print(p)
-# # dev.off()
-# file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC.","0.5",".pdf")
-# pdf(file2write, width = 5.5, height = 6, useDingbats = F)
-# print(p)
-# dev.off()
 
-# # plot highlight genes ----------------------------------------------------
-# plotdata_df <- plotdata_df %>%
-#   mutate(highlight = (Gene %in% c("PTPRJ", "CES3")))
-# 
-# p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", color = "peak2gene_type",
-#                add = "reg.line",  # Add regressin line
-#                add.params = list(color = "grey50", linetype = 2, alpha = 0.8), # Customize reg. line
-#                conf.int = F # Add confidence interval
-# )
-# p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
-# p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
-# p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0, size = 4)
-# p <- p + geom_text_repel(data = subset(x = plotdata_df, highlight == T), 
-#                          mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.snRNA, label = Gene), 
-#                          max.overlaps = Inf, size = 6,
-#                          segment.size = 0.4, segment.alpha = 0.6, min.segment.length = 0)
-# p <- p + guides(color = guide_legend(nrow = 1, override.aes = aes(size = 3), label.theme = element_text(size = 14)))
-# p <- p + theme(axis.text = element_text(size = 14),
-#                axis.title = element_text(size = 14),
-#                legend.position = "bottom", legend.box = "horizontal")
-# # file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC." , "1",".png")
-# # png(file2write, width = 800, height = 900, res = 150)
-# # print(p)
-# # dev.off()
-# file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC.","PTPRJ_CES3",".pdf")
-# pdf(file2write, width = 5.5, height = 6, useDingbats = F)
+# highlight genes with fold change > 1 ----------------------------------------------------
+plotdata_df <- plotdata_df %>%
+  mutate(highlight = ((avg_log2FC.snATAC >= 1 & avg_log2FC.snRNA >= 1) | (avg_log2FC.snATAC <= -1 & avg_log2FC.snRNA <= -1) | (Gene %in% c("VIM", "FN1", "CDH2", "WNT5B"))))
+p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", alpha = 0.8, shape = 16, size = 2.5,
+               add = "reg.line", add.params = list(color = "grey50", linetype = 2), # Customize reg. line
+               conf.int = F # Add confidence interval
+)
+p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
+p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
+p <- p + stat_cor(method = "pearson", label.x = 1, label.y = 1.5, size = 4)
+p <- p + geom_text_repel(data = subset(x = plotdata_df, highlight == T & avg_log2FC.snATAC > 0),
+                         mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.snRNA, label = Gene),
+                         max.overlaps = Inf, size = 5,
+                         segment.size = 0.4, segment.alpha = 0.6, min.segment.length = 0, box.padding = 0.5, color = "red")
+p <- p + geom_text_repel(data = subset(x = plotdata_df, highlight == T & avg_log2FC.snATAC < 0),
+                         mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.snRNA, label = Gene),
+                         max.overlaps = Inf, size = 5,
+                         segment.size = 0.4, segment.alpha = 0.6, min.segment.length = 0, box.padding = 0.5, color = "blue", xlim = c(-4, -1))
+p <- p + guides(color = guide_legend(nrow = 1, override.aes = aes(size = 3), label.theme = element_text(size = 14)))
+p <- p + theme_classic()
+p <- p + theme(axis.text = element_text(size = 18, color = "black"),
+               axis.title = element_text(size = 14),
+               legend.position = "bottom", legend.box = "horizontal")
+p <- p + ylim(c(-4, 4)) + xlim(c(-4, 4))
+p <- p + xlab("Log2(fold change of gene promoter accessiblity)")
+p <- p + ylab("Log2(fold change of gene expression)")
+# file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC." , "1",".png")
+# png(file2write, width = 800, height = 900, res = 150)
 # print(p)
 # dev.off()
+file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC1.wManualAdded", ".pdf")
+pdf(file2write, width = 5, height = 5, useDingbats = F)
+print(p)
+dev.off()
 

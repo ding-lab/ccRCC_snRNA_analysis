@@ -47,7 +47,7 @@ genes_filter
 y_bottom <- -log10(0.05)
 ## colors
 color_right_deep <- RColorBrewer::brewer.pal(n = 9, name = "Set1")[1]
-color_left_deep <- RColorBrewer::brewer.pal(n = 6, name = "Dark2")[4]
+color_left_deep <- RColorBrewer::brewer.pal(n = 9, name = "Set1")[2]
 
 # make data for plotting --------------------------------------------------
 plot_data_df <- deg_df %>%

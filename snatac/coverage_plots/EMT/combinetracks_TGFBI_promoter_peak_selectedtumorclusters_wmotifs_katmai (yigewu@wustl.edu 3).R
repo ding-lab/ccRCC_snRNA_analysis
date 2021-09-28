@@ -27,7 +27,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 library(Signac)
 library(ggplot2)
 ## set run id
-version_tmp <- 2
+version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -43,7 +43,7 @@ barcode2cluster_df <- fread(data.table = F, input = "/diskmnt/Projects/ccRCC_scr
 ## input tumor cluster grouping
 cluster2group_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_epithelial_group_bytumorcluster/20210927.v1/Tumorcluster_EpithelialGroup.20210927.v1.tsv")
 ## input the peaks to plot
-peak2deg_motif_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/emt/filter_motifs/filter_motifs_for_EMT_vs_selectedEpithelial_peaks_for_degs/20210928.v1/Epithelial_up_DEG_DAP_DAM_Overlap.20210928.v1.tsv")
+peak2deg_motif_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/emt/filter_motifs/filter_motifs_for_EMT_vs_selectedEpithelial_peaks_for_degs/20210928.v1/Mesenchymal_up_DEG_DAP_DAM_Overlap.20210928.v1.tsv")
 
 # preprocess ATAC object --------------------------------------------------
 print("Start mapping cell_group")
@@ -85,11 +85,10 @@ names(colors_tumorgroup) <- cluster2group_df$cluster_name.formatted
 # process peaks -----------------------------------------------------------
 plotdata_df <- peak2deg_motif_df %>%
   filter(!is.na(avg_log2FC.snATAC) & !is.na(avg_log2FC.snRNA)) %>%
-  filter(Gene == "EPB41L4A") %>%
-  filter(avg_log2FC.snATAC <= -1 & avg_log2FC.snRNA <= -1) %>%
-  filter(!is.na(avg_log2FC.tf.snRNA) & avg_log2FC.tf.snRNA < 0) %>%
-  # filter(motif.name %in% c("JUN", "TWIST1")) %>%
-  select(avg_log2FC.snATAC, avg_log2FC.snRNA, Gene, peak, motif.name, motif_coord, avg_log2FC.tf.snRNA) %>%
+  filter(Gene == "TGFBI") %>%
+  filter(avg_log2FC.snATAC >= 1 & avg_log2FC.snRNA >= 1) %>%
+  filter(motif.name %in% c("JUN", "TWIST1")) %>%
+  select(avg_log2FC.snATAC, avg_log2FC.snRNA, Gene, peak, motif.name, motif_coord) %>%
   unique()
 print("Finished processing peaks")
 
@@ -106,9 +105,9 @@ new_st=st-1000
 new_en=en+1000
 peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
 gene_plot <- plotdata_df$Gene[plotdata_df$peak == peak_plot]
-motif_coord1 <- plotdata_df$motif_coord[plotdata_df$motif.name == "NFIB"]
-motif_coord2 <- plotdata_df$motif_coord[plotdata_df$motif.name == "NFIA"]
-motif_coords <- plotdata_df$motif_coord[plotdata_df$motif.name %in% c("NFIB", "NFIA")]
+motif_coord1 <- plotdata_df$motif_coord[plotdata_df$motif.name == "TWIST1"]
+motif_coord2 <- plotdata_df$motif_coord[plotdata_df$motif.name == "JUN"]
+motif_coords <- plotdata_df$motif_coord[plotdata_df$motif.name %in% c("TWIST1", "JUN")]
 
 # plot --------------------------------------------------------------------
 print(paste0("Start processing cov_plot"))
@@ -134,28 +133,19 @@ gene_plot_obj <- Signac::AnnotationPlot(
   region = peak_plot_expanded)
 # gene_plot_obj <- gene_plot_obj  + theme_classic(base_size = 12)
 
-# motif_plot_obj1 <- Signac::PeakPlot(
-#   object = atac_subset,
-#   region = peak_plot_expanded, 
-#   peaks = StringToGRanges(motif_coord1, sep = c("-", "-")))
-# 
-# motif_plot_obj2 <- Signac::PeakPlot(
-#   object = atac_subset,
-#   region = peak_plot_expanded, 
-#   peaks = StringToGRanges(motif_coord2, sep = c("-", "-")))
-
-motif_plot_obj <- Signac::PeakPlot(
+motif_plot_obj1 <- Signac::PeakPlot(
   object = atac_subset,
   region = peak_plot_expanded, 
-  peaks = StringToGRanges(motif_coords, sep = c("-", "-")))
+  peaks = StringToGRanges(motif_coord1, sep = c("-", "-")))
 
-# p <- Signac::CombineTracks(
-#   plotlist = list(cov_obj, peak_plot_obj, motif_plot_obj1, motif_plot_obj2, gene_plot_obj),
-#   heights = c(6, 0.3, 0.3, 0.3, 1))
+motif_plot_obj2 <- Signac::PeakPlot(
+  object = atac_subset,
+  region = peak_plot_expanded, 
+  peaks = StringToGRanges(motif_coord2, sep = c("-", "-")))
 
 p <- Signac::CombineTracks(
-  plotlist = list(cov_obj, peak_plot_obj,motif_plot_obj, gene_plot_obj),
-  heights = c(6, 0.3, 1))
+  plotlist = list(cov_obj, peak_plot_obj, motif_plot_obj1, motif_plot_obj2, gene_plot_obj),
+  heights = c(6, 0.3, 0.3, 0.3, 1))
 
 print("Finished CombineTracks")
 

@@ -45,16 +45,9 @@ genes_filter
 # set plotting parameters -------------------------------------------------
 ## set y bottom threshold
 y_bottom <- -log10(0.05)
-## set x limits to distinguish colors
-# x_pos <- 1
-# x_neg <- -1
-x_pos <- log2(1.2)
-x_neg <- -log2(1.2)
 ## colors
-color_right_deep <- RColorBrewer::brewer.pal(n = 12, name = "Paired")[12]
-color_right_pale <- RColorBrewer::brewer.pal(n = 7, name = "Set2")[7]
-color_left_deep <- RColorBrewer::brewer.pal(n = 6, name = "Dark2")[4]
-color_left_pale <- RColorBrewer::brewer.pal(n = 6, name = "Set2")[4]
+color_right_deep <- RColorBrewer::brewer.pal(n = 12, name = "Set1")[1]
+color_left_deep <- RColorBrewer::brewer.pal(n = 6, name = "Set1")[2]
 
 # make data for plotting --------------------------------------------------
 plot_data_df <- deg_df %>%
@@ -63,6 +56,11 @@ plot_data_df <- deg_df %>%
   mutate(x_plot = avg_log2FC)
 ## cap y axis
 y_cap <- max(plot_data_df$Log10p_val_adj[!is.infinite(plot_data_df$Log10p_val_adj)])
+## set x limits to distinguish colors
+x_pos <- log2(1.2)
+x_neg <- -log2(1.2)
+x_pos <- quantile(x = plot_data_df$avg_log2FC, 0.925)
+x_neg <- quantile(x = plot_data_df$avg_log2FC, 0.025)
 plot_data_df <- plot_data_df %>%
   mutate(y_plot = ifelse(Log10p_val_adj >= y_cap, y_cap, Log10p_val_adj)) %>%
   mutate(text_gene = ifelse((y_plot >= y_bottom) & ((genesymbol %in% genes_mesenchymal) & (x_plot >= x_pos)) | ((genesymbol %in% genes_epithelal) & (x_plot <= x_neg)), genesymbol, NA))
@@ -79,14 +77,14 @@ p <- p + scale_color_manual(values = c("FDR<0.05 (up)" = "red", "FDR<0.05 (down)
 #                          mapping = aes(x = x_plot, y = y_plot, label = text_gene), color = "black", force = 4, fontface = "italic", segment.alpha = 0.5)
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot > 0),
                          mapping = aes(x = x_plot, y = y_plot, label = text_gene),
-                         color = "black", force = 4, fontface = "italic", segment.alpha = 0.5, 
-                         size = 5, max.overlaps = Inf, xlim = c(0, 4))
+                         color = "black", force = 4, fontface = "italic", segment.alpha = 0.5, segment.size = 0.2,
+                         size = 5, max.overlaps = Inf, xlim = c(0.1, 4.25))
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot < 0),
                          mapping = aes(x = x_plot, y = y_plot, label = text_gene),
                          color = "black", force = 4, fontface = "italic", segment.alpha = 0.5, segment.size = 0.2,
-                         size = 5, max.overlaps = Inf, xlim = c(-4, 0), ylim = c(0.5, 310))
+                         size = 5, max.overlaps = Inf, xlim = c(-3.9, 0))
 p <- p + theme_classic()
-p <- p + ylim(c(0, 310))
+p <- p + ylim(c(0, 340))
 p <- p + xlab("Log2(Fold-Change)")
 p <- p + ylab("-Log10(P-value-adjusted)")
 p <- p + theme(axis.text = element_text(size = 14, color = "black"),
