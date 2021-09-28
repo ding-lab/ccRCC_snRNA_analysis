@@ -27,7 +27,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 library(Signac)
 library(ggplot2)
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -116,20 +116,21 @@ cov_obj= Signac::CoveragePlot(
   annotation = F, 
   peaks = F,
   links=FALSE)
-cov_obj <- cov_obj + scale_fill_manual(values =  colors_tumorgroup) + theme_classic(base_size = 12) + theme(legend.position = "none")
+cov_obj <- cov_obj + scale_fill_manual(values =  colors_tumorgroup)
+# cov_obj <- cov_obj +  theme_classic(base_size = 12) + theme(legend.position = "none")
 print("Finished cov_plot")
 
 peak_plot_obj <- Signac::PeakPlot(
   object = atac_subset,
   region = peak_plot_expanded, 
   peaks = StringToGRanges(peak_plot, sep = c("-", "-")))
-peak_plot_obj <- peak_plot_obj  + theme_classic(base_size = 12) + theme(legend.position = "none")
+# peak_plot_obj <- peak_plot_obj  + theme_classic(base_size = 12)
 print("Finished peak plot")
 
 gene_plot_obj <- Signac::AnnotationPlot(
   object = atac_subset,
   region = peak_plot_expanded)
-gene_plot_obj <- gene_plot_obj  + theme_classic(base_size = 12) + theme(legend.position = "none")
+# gene_plot_obj <- gene_plot_obj  + theme_classic(base_size = 12)
 
 motif_plot_obj1 <- Signac::PeakPlot(
   object = atac_subset,
