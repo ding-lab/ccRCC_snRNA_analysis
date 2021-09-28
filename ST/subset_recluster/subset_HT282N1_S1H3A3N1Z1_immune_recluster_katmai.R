@@ -51,7 +51,7 @@ dim(srat)
 # reclustering ------------------------------------------------------------
 ## get variably expressed genes
 cat("Start running SCTransform\n")
-srat <- SCTransform(srat, vars.to.regress = c("nCount_RNA","percent.mito"), return.only.var.genes = F)
+srat <- SCTransform(srat, vars.to.regress = c("nCount_RNA","percent.mt","S.Score", "G2M.Score"), return.only.var.genes = F)
 cat("###########################################\n")
 ## keep it consistant with individual processing pipeline
 cat("Start running RunPCA\n")
@@ -82,11 +82,9 @@ png(file2write, width = 800, height = 700, res = 150)
 print(p)
 dev.off()
 
+# prepare data ------------------------------------------------------------
 ## input cell type markers
 gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Gene_Lists/Immune/Cell_state_markers.txt")
-
-
-# prepare data ------------------------------------------------------------
 DefaultAssay(srat) <- "RNA"
 pct_thres <- 15
 avgexp_thres <- 0.1
