@@ -24,7 +24,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -32,14 +32,14 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input seurat object
-srat <- readRDS(file = "../ccRCC_ST/Processed_Data/Seurat/Outputs/TWFU-HT293N1-S1H3A3N1Z1_1Bmn1_1_5.0/TWFU-HT293N1-S1H3A3N1Z1_1Bmn1_1_5.0_processed_multiomic.rds")
+srat <- readRDS(file = "../ccRCC_ST/Processed_Data/Seurat/Outputs/TWFU-HT282N1-S1H3A3N1Z1_1Bmn1_1_5.0/TWFU-HT282N1-S1H3A3N1Z1_1Bmn1_1_5.0_processed_multiomic.rds")
 ## input cell type markers
 gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Gene_Lists/Immune/Cell_state_markers.txt")
 
 # specify thresholds ------------------------------------------------------
 ## filter for genes that are expressed in >25% of one cluster at least
-aliquot_show <- "HT293N1-S1H3A3N1Z1"
-pct_thres <- 10
+aliquot_show <- "HT282N1-S1H3A3N1Z1"
+pct_thres <- 15
 avgexp_thres <- 0.1
 
 # prepare data ------------------------------------------------------------
@@ -90,8 +90,12 @@ dev.off()
 
 # plot scaled -------------------------------------------------------------
 p <- DotPlot(object = srat, features = genes2plot_filtered, col.min = 0, assay = "RNA")
-p$data$gene_cell_type_group <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Gene_set)
-p <- p + facet_grid(.~gene_cell_type_group, scales = "free", space = "free", drop = T)
+p$data$gene_cell_type_group <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type_Group)
+p$data$gene_cell_type1 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type1)
+p$data$gene_cell_type2 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type2)
+p$data$gene_cell_type3 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type3)
+p$data$gene_cell_type4 <- plyr::mapvalues(p$data$features.plot, from = gene2celltype_df$Gene, to = gene2celltype_df$Cell_Type4)
+p <- p + facet_grid(.~gene_cell_type_group + gene_cell_type1 + gene_cell_type2 + gene_cell_type3 + gene_cell_type4, scales = "free", space = "free", drop = T)
 p <- p + theme(panel.spacing = unit(0, "lines"), panel.grid.major = element_line(colour = "grey80"),
                panel.border = element_rect(color = "black", fill = NA, size = 0.5),
                panel.background = element_blank())
@@ -101,6 +105,6 @@ p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5
                axis.text.x = element_text(size = 10, angle = 90))
 p <- p + theme(legend.position = "bottom")
 file2write <- paste0(dir_out, aliquot_show, ".CellTypeMarkerExp.Scaled.png")
-png(file = file2write, width = 2500, height = 800, res = 150)
+png(file = file2write, width = 3000, height = 1200, res = 150)
 print(p)
 dev.off()
