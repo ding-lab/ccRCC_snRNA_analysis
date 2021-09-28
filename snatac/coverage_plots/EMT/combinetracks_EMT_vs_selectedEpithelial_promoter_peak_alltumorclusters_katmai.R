@@ -27,7 +27,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 library(Signac)
 library(ggplot2)
 ## set run id
-version_tmp <- 4
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -61,7 +61,7 @@ atac@meta.data$epithelial_group[atac@meta.data$cell_group == atac@meta.data$epit
 table(atac@meta.data$epithelial_group)
 print("Finished mapping epithelial_group")
 cluster2group_df <- cluster2group_df %>%
-  arrange(factor(epithelial_group, levels = c("EMT", "Epithelial-weak", "Epithellal-intermediate", "Epithelial-strong", "other")))
+  arrange(factor(epithelial_group, levels = c("EMT", "Epithelial-weak", "Epithellal-intermediate", "Epithelial-strong", "other")), score)
 atac@meta.data$cell_group=factor(atac@meta.data$cell_group, levels=c(cluster2group_df$cluster_name.formatted, "other"))
 print("Start changing ident")
 Idents(atac) <- "cell_group"
@@ -70,6 +70,7 @@ print("Finished changing ident")
 print("Start subsetting")
 # atac_subset=subset(atac,(cell_group %in% c("C3L-00079-T1_C4", "C3L-01302-T1_C1",
 #                                            "C3L-00088-T2_C1", "C3N-00733-T1_C1", "C3L-00416-T2_C1", "C3L-00010-T1_C1", "C3L-00088-T1_C1")))
+atac_subset=subset(atac,!(cell_group %in% c("other", cluster2group_df$cluster_name.formatted[cluster2group_df$epithelial_group == "other"])))
 atac_subset=atac
 print("Finished subsetting")
 rm(atac)
@@ -126,7 +127,7 @@ for (peak_plot in unique(plotdata_df$peak)) {
   
   p <- Signac::CombineTracks(
     plotlist = list(cov_obj, peak_plot_obj, gene_plot_obj),
-    heights = c(9, 0.5, 1))
+    heights = c(12, 0.5, 1))
   print("Finished CombineTracks")
   
   ## write output
