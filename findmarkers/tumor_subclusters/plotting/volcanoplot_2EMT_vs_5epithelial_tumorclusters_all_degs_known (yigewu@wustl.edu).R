@@ -80,11 +80,11 @@ p <- p + scale_color_manual(values = c("FDR<0.05 (up)" = "red", "FDR<0.05 (down)
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot > 0),
                          mapping = aes(x = x_plot, y = y_plot, label = text_gene),
                          color = "black", force = 4, fontface = "italic", segment.alpha = 0.5, 
-                         size = 5, max.overlaps = Inf, xlim = c(0, 4))
+                         size = 2, max.overlaps = Inf, xlim = c(0, 4))
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot < 0),
                          mapping = aes(x = x_plot, y = y_plot, label = text_gene),
                          color = "black", force = 4, fontface = "italic", segment.alpha = 0.5, segment.size = 0.2,
-                         size = 5, max.overlaps = Inf, xlim = c(-4, 0), ylim = c(0.5, 310))
+                         size = 2, max.overlaps = Inf, xlim = c(-4, 0), ylim = c(0.5, 310))
 p <- p + theme_classic()
 p <- p + ylim(c(0, 310))
 p <- p + xlab("Log2(Fold-Change)")
