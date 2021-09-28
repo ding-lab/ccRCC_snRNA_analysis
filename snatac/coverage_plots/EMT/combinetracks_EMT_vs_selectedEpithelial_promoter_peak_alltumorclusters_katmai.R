@@ -27,7 +27,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 library(Signac)
 library(ggplot2)
 ## set run id
-version_tmp <- 3
+version_tmp <- 4
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -62,7 +62,7 @@ table(atac@meta.data$epithelial_group)
 print("Finished mapping epithelial_group")
 cluster2group_df <- cluster2group_df %>%
   arrange(factor(epithelial_group, levels = c("EMT", "Epithelial-weak", "Epithellal-intermediate", "Epithelial-strong", "other")))
-# atac@meta.data$cell_group=factor(atac@meta.data$cell_group, levels=cluster2group_df$cluster_name.formatted)
+atac@meta.data$cell_group=factor(atac@meta.data$cell_group, levels=c(cluster2group_df$cluster_name.formatted, "other"))
 print("Start changing ident")
 Idents(atac) <- "cell_group"
 print("Finished changing ident")
