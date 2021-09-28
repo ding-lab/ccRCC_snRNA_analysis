@@ -85,24 +85,6 @@ peaks2degs_df <- peaks2degs_df %>%
   mutate(id_deg_motif = paste0(Gene, "_", motif.name)) %>%
   mutate(is_knownTFtarget = (id_deg_motif %in% deg2tf_annotated_df$id_deg_motif[!is.na(deg2tf_annotated_df$is_directed)]))
 
-# finalize motifs ----------------------------------------------------------
-## extract the motifs used
-dam_keep_df <- dam_df %>%
-  filter(TF_Name %in% c(dams_mes, dams_epi))
-motif2tf_df <- deg2tf_df %>%
-  select(TF_name, genesymbol_tf) %>%
-  unique()
-motif2TFdeg_df <- merge(x = motif2tf_df, y = degs_df, by.x = c("genesymbol_tf"), by.y = c("genesymbol_deg"))
-motif2TFdeg_df$diff_motif.mes_vs_epi <- mapvalues(x = motif2TFdeg_df$TF_name, from = dam_df$TF_Name, to = -as.vector(dam_df$diff))
-motif2TFdeg_df$diff_motif.mes_vs_epi <- as.numeric(motif2TFdeg_df$diff_motif.mes_vs_epi)
-tf2deg_df <- motif2TFdeg_df %>%
-  filter(p_val_adj < 0.05) %>%
-  group_by(TF_name) %>%
-  summarize(avg_log2FC.tf = mean(avg_log2FC))
-peaks2degs_df$avg_log2FC.tf.snRNA <- mapvalues(x = peaks2degs_df$motif.name, from = tf2deg_df$TF_name, to = as.vector(tf2deg_df$avg_log2FC.tf))
-peaks2degs_df$avg_log2FC.tf.snRNA[peaks2degs_df$avg_log2FC.tf.snRNA == peaks2degs_df$motif.name] <- NA
-peaks2degs_df$avg_log2FC.tf.snRNA <- as.numeric(peaks2degs_df$avg_log2FC.tf.snRNA)
-
 # divide by mesenchymal and epithelial ------------------------------------
 ## extract mesenchymal-high deg-dap-dam
 dams_mes <- dam_df$TF_Name[dam_df$FDR < 0.05 & dam_df$diff < 0 & dam_df$mean_score2 > 0]
@@ -115,12 +97,8 @@ peaks2degs_epi_df <- peaks2degs_df %>%
   filter(avg_log2FC.snATAC < 0 & avg_log2FC.snRNA < 0) %>%
   filter(motif.name %in% dams_epi)
 
-
 # write ouput -------------------------------------------------------------
-file2write <- paste0(dir_out, "Mesenchymal_up_DEG_DAP_DAM_Overlap.", run_id, ".tsv")
-write.table(x = peaks2degs_mes_df, file = file2write, quote = F, sep = "\t", row.names = F)
-file2write <- paste0(dir_out, "Epithelial_up_DEG_DAP_DAM_Overlap.", run_id, ".tsv")
-write.table(x = peaks2degs_epi_df, file = file2write, quote = F, sep = "\t", row.names = F)
-file2write <- paste0(dir_out, "Mesenchymal_Epithelial_Motifs.", run_id, ".tsv")
-write.table(x = dam_keep_df, file = file2write, quote = F, sep = "\t", row.names = F)
+file2write <- paste0(dir_out, "")
+
+
 

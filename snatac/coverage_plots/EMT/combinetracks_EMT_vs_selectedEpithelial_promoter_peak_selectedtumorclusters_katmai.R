@@ -27,7 +27,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 library(Signac)
 library(ggplot2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -77,8 +77,8 @@ rm(atac)
 
 # make colors -------------------------------------------------------------
 ## make colors
-colors_tumorgroup_sim <- RColorBrewer::brewer.pal(n = 9, name = "Set1")[c(1, 2, 3, 4, 9)]
-names(colors_tumorgroup_sim) <- c("EMT", "Epithellal-intermediate", "Epithelial-strong", "Epithelial-weak", "other")
+colors_tumorgroup_sim <- RColorBrewer::brewer.pal(n = 9, name = "Set1")[c(1, 5, 4, 2, 9)]
+names(colors_tumorgroup_sim) <- c("EMT",  "Epithelial-weak", "Epithellal-intermediate", "Epithelial-strong", "other")
 colors_tumorgroup <- colors_tumorgroup_sim[cluster2group_df$epithelial_group]
 names(colors_tumorgroup) <- cluster2group_df$cluster_name.formatted
 

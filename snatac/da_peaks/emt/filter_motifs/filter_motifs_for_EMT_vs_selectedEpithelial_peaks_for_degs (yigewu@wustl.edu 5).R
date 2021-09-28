@@ -98,10 +98,7 @@ motif2TFdeg_df$diff_motif.mes_vs_epi <- as.numeric(motif2TFdeg_df$diff_motif.mes
 tf2deg_df <- motif2TFdeg_df %>%
   filter(p_val_adj < 0.05) %>%
   group_by(TF_name) %>%
-  summarize(avg_log2FC.tf = mean(avg_log2FC))
-peaks2degs_df$avg_log2FC.tf.snRNA <- mapvalues(x = peaks2degs_df$motif.name, from = tf2deg_df$TF_name, to = as.vector(tf2deg_df$avg_log2FC.tf))
-peaks2degs_df$avg_log2FC.tf.snRNA[peaks2degs_df$avg_log2FC.tf.snRNA == peaks2degs_df$motif.name] <- NA
-peaks2degs_df$avg_log2FC.tf.snRNA <- as.numeric(peaks2degs_df$avg_log2FC.tf.snRNA)
+  summarize()
 
 # divide by mesenchymal and epithelial ------------------------------------
 ## extract mesenchymal-high deg-dap-dam
