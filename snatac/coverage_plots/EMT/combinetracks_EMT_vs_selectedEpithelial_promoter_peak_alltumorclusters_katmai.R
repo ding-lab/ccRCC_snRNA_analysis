@@ -70,7 +70,9 @@ print("Finished changing ident")
 print("Start subsetting")
 # atac_subset=subset(atac,(cell_group %in% c("C3L-00079-T1_C4", "C3L-01302-T1_C1",
 #                                            "C3L-00088-T2_C1", "C3N-00733-T1_C1", "C3L-00416-T2_C1", "C3L-00010-T1_C1", "C3L-00088-T1_C1")))
-atac_subset=subset(atac,!(cell_group %in% c("other", cluster2group_df$cluster_name.formatted[cluster2group_df$epithelial_group == "other"])))
+# atac_subset=subset(atac,!(cell_group %in% c("other", cluster2group_df$cluster_name.formatted[cluster2group_df$epithelial_group == "other"])))
+clusters_keep <- cluster2group_df$cluster_name.formatted[cluster2group_df$epithelial_group != "other"]
+atac_subset=subset(atac,(cell_group %in% clusters_keep))
 # atac_subset=atac
 print("Finished subsetting")
 rm(atac)

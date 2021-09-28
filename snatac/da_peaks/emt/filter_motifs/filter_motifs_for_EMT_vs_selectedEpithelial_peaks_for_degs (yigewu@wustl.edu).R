@@ -22,8 +22,6 @@ peaks_anno_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sna
 degs_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/findmarkers_selected_EMTclusters_vs_epithelialclusters_katmai/20210924.v3/Selected_2EMTclusters_vs_5Epithelialclusters.logfc.threshold0.min.pct0.1.min.diff.pct0.AssaySCT.tsv")
 ## input degs
 dam_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Enriched_Motifs/EMT/Score_difference.EpithelialSelectedClusters_vs_Mesenchymal.20210924.tsv")
-## input known TF-gene relations
-
 
 # overlap -----------------------------------------------------------------
 peaks2degs_df <- merge(x = peaks_anno_df %>%
@@ -31,12 +29,13 @@ peaks2degs_df <- merge(x = peaks_anno_df %>%
                          filter(p_val_adj < 0.05) %>%
                          mutate(avg_log2FC.Epithelial_vs_Mesenchymal = avg_log2FC) %>%
                          mutate(avg_log2FC = -(avg_log2FC.Epithelial_vs_Mesenchymal)) %>%
-                         select(peak, avg_log2FC, p_val_adj, Gene, Type, peak_distanceToTSS, pct.1, pct.2, motif.name, motif_coord), 
+                         select(peak, avg_log2FC, p_val_adj, Gene, Type, peak_distanceToTSS, pct.1, pct.2), 
                        y = degs_df %>%
                          filter(p_val_adj < 0.05),
                        by.x = c("Gene"), by.y = c("genesymbol_deg"), suffix = c(".snATAC", ".snRNA"))
+dam_sig_df <- dam_df %>%
+  filter(FDR < 0.05)
 ## extract mesenchymal-high deg-dap-dam
-dams_mes <- dam_df$TF_Name[dam_df$FDR < 0.05 & dam_df$diff < 0 & dam_df$mean_score2 > 0]
 peaks2degs_mes_df <- peaks2degs_df %>%
   filter(avg_log2FC.snATAC > 0 & avg_log2FC.snRNA > 0) %>%
-  filter(motif.name %in% dams_mes)
+  filter()
