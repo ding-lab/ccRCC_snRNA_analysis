@@ -42,7 +42,6 @@ table(srat@meta.data$seurat_clusters)
 clusters2process <- c(7)
 cat(paste0("Name of the cell clusters to recluster: ", clusters2process, "\n"))
 cat("###########################################\n")
-resolution_tmp <- 2
 
 # subset ------------------------------------------------------------------
 ## subset to non-doublet
@@ -70,14 +69,14 @@ DefaultAssay(srat) <- "ATAC_MACS2"
 srat <- RunTFIDF(srat)
 srat <- FindTopFeatures(srat, min.cutoff = 'q0')
 srat <- RunSVD(srat)
-srat <- RunUMAP(srat, reduction = 'lsi', dims = opt$pc_first:opt$pc_num, reduction.name = "umap.atac", reduction.key = "atacUMAP_")
+srat <- RunUMAP(srat, reduction = 'lsi', dims = 1:30, reduction.name = "umap.atac", reduction.key = "atacUMAP_")
 
 
 cat("###########################################\n")
 cat("Start running FindNeighbors\n")
 srat <- FindMultiModalNeighbors(srat,
                                 reduction.list = list("pca", "lsi"),
-                                dims.list = list(1:opt$pc_num, opt$pc_first:opt$pc_num))
+                                dims.list = list(30, 1:30))
 srat <- RunUMAP(srat, nn.name = "weighted.nn",
                 reduction.name = "wnn.umap",
                 reduction.key = "wnnUMAP_")
@@ -85,7 +84,7 @@ srat <- FindClusters(srat, graph.name = "wsnn", algorithm = 3, verbose = T)
 
 ## save output
 cat("Start saving the reclustered seurat object\n")
-file2write <- paste0(dir_out, aliquot_show, ".", "Immune.", "Reclustered.", "Res", resolution_tmp, ".RDS")
+file2write <- paste0(dir_out, aliquot_show, ".", "Immune.", "Reclustered.", ".RDS")
 saveRDS(object = srat, file = file2write, compress = T)
 cat("###########################################\n")
 
