@@ -36,6 +36,8 @@ srat <- readRDS(file = "../ccRCC_ST/Processed_Data/Seurat/Outputs/TWFU-HT282N1-S
 print("Finish reading RDS file")
 ## name of the cell group to recluster
 table(srat@meta.data$seurat_clusters)
+# 0   1   2   3   4   5   6   7   8   9  10
+# 776 771 746 365 318 287 242 238 230 134  79
 clusters2process <- c(7)
 cat(paste0("Name of the cell clusters to recluster: ", clusters2process, "\n"))
 cat("###########################################\n")
@@ -45,10 +47,11 @@ resolution_tmp <- 2
 ## subset to non-doublet
 aliquot_show <- "HT282N1-S1H3A3N1Z1"
 ## subset to selected clusters
+DefaultAssay(srat) <- "RNA"
 srat <- subset(srat, idents = clusters2process)
 dim(srat)
 
-# reclustering ------------------------------------------------------------
+# before-clustering processing ------------------------------------------------------------
 ## get variably expressed genes
 cat("Start running SCTransform\n")
 srat <- SCTransform(srat, vars.to.regress = c("nCount_RNA","percent.mt","S.Score", "G2M.Score"), return.only.var.genes = F)
@@ -58,14 +61,27 @@ cat("Start running RunPCA\n")
 srat <- RunPCA(srat, npcs = num_pc, verbose = FALSE)
 cat("###########################################\n")
 cat("Start running RunUMAP\n")
-srat <- RunUMAP(srat, reduction = "pca", dims = 1:num_pc)
+srat <- RunUMAP(srat,  reduction.name = 'umap.rna', reduction.key = 'rnaUMAP_', dims = 1:num_pc)
+
+# ATAC analysis
+# We exclude the first dimension as this is typically correlated with sequencing depth
+DefaultAssay(srat) <- "ATAC_MACS2"
+srat <- RunTFIDF(srat)
+srat <- FindTopFeatures(srat, min.cutoff = 'q0')
+srat <- RunSVD(srat)
+srat <- RunUMAP(srat, reduction = 'lsi', dims = opt$pc_first:opt$pc_num, reduction.name = "umap.atac", reduction.key = "atacUMAP_")
+
+
 cat("###########################################\n")
 cat("Start running FindNeighbors\n")
-srat <- FindNeighbors(srat, reduction = "pca", dims = 1:num_pc, force.recalc = T)
-cat("###########################################\n")
-cat("Start running FindClusters\n")
-srat <- FindClusters(srat, resolution = resolution_tmp)
-cat("###########################################\n")
+srat <- FindMultiModalNeighbors(srat,
+                                reduction.list = list("pca", "lsi"),
+                                dims.list = list(1:opt$pc_num, opt$pc_first:opt$pc_num))
+srat <- RunUMAP(srat, nn.name = "weighted.nn",
+                reduction.name = "wnn.umap",
+                reduction.key = "wnnUMAP_")
+srat <- FindClusters(srat, graph.name = "wsnn", algorithm = 3, verbose = T)
+
 ## save output
 cat("Start saving the reclustered seurat object\n")
 file2write <- paste0(dir_out, aliquot_show, ".", "Immune.", "Reclustered.", "Res", resolution_tmp, ".RDS")
@@ -73,10 +89,7 @@ saveRDS(object = srat, file = file2write, compress = T)
 cat("###########################################\n")
 
 # write dimplot -----------------------------------------------------------
-colors_cluster <- Polychrome::dark.colors(n = length(unique(srat@meta.data$seurat_clusters)))
-names(colors_cluster) <- 0:max(as.numeric(as.vector(srat@meta.data$seurat_clusters)))
 p <- DimPlot(object = srat)
-p <- p + scale_color_manual(values = colors_cluster)
 file2write <- paste0(dir_out, "dimplot.png")
 png(file2write, width = 800, height = 700, res = 150)
 print(p)
