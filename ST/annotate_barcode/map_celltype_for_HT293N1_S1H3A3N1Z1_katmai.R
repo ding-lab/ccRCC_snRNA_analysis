@@ -51,7 +51,8 @@ barcode2celltype_df <- merge(barcode2cluster_df,
                              by.x = c("seurat_clusters"), by.y = c("Cluster"), all.x = T)
 ## format
 barcode2celltype_df <- barcode2celltype_df %>%
-  select(orig.ident, Cell_type.shorter, Cell_type.detailed, 
+  select(orig.ident, seurat_clusters, UMAP_1, UMAP_2,
+         Cell_type.shorter, Cell_type.detailed, 
          Cell_group4, Cell_group5,
          individual_barcode, Comment)
 
