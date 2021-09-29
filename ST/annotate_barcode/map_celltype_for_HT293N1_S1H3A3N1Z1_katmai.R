@@ -40,7 +40,9 @@ cluster2celltype_df <- readxl::read_excel(path = "./Resources/snRNA_Processed_Da
 aliquot_show <- "HT293N1_S1H3A3N1Z1"
 
 # map cell type to barcode ------------------------------------------------
-barcode2cluster_df <- FetchData(object = srat, vars = c("UMAP_1", "UMAP_2", "orig.ident", "seurat_clusters"))
+DefaultAssay(srat) <- "RNA"
+# barcode2cluster_df <- FetchData(object = srat, vars = c("UMAP_1", "UMAP_2", "orig.ident", "seurat_clusters"))
+barcode2cluster_df <- srat@meta.data
 #nrow(barcode2cluster_df)
 barcode2cluster_df$individual_barcode <- rownames(barcode2cluster_df)
 #unique(barcode2cluster_df$seurat_clusters)
