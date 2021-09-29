@@ -31,13 +31,15 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input seurat object
-srat <- readRDS(file = "./Resources/Analysis_Results/ST/subset_recluster/subset_HT282N1_S1H3A3N1Z1_immune_recluster_katmai/20210928.v1/HT282N1-S1H3A3N1Z1.Immune.Reclustered.Res2.RDS")
+srat <- readRDS(file = "../ccRCC_ST/Processed_Data/Seurat/Outputs/TWFU-HT293N1-S1H3A3N1Z1_1Bmn1_1_5.0/TWFU-HT293N1-S1H3A3N1Z1_1Bmn1_1_5.0_processed_multiomic.rds")
 ## input cluster2celltype
-cluster2celltype_df <- readxl::read_excel(path = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Individual_AllClusters/HT282N1-S1H3A3N1Z1.C7reclustered.092821.xlsx")
+cluster2celltype_df <- readxl::read_excel(path = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Individual_AllClusters/HT293N1_S1H3A3N1Z1.xlsx")
+## input the barcod2celltype info to replace
+barcode2celltype_replace_df <- fread(data.table = F, input = "./Resources/Analysis_Results/ST/annotate_barcode/map_celltype_for_HT282N1_S1H3A3N1Z1_C7reclustered_katmai/20210928.v1/")
 
 # subset ------------------------------------------------------------------
 ## subset to non-doublet
-aliquot_show <- "HT282N1_S1H3A3N1Z1.C7"
+aliquot_show <- "HT282N1_S1H3A3N1Z1"
 
 # map cell type to barcode ------------------------------------------------
 DefaultAssay(srat) <- "RNA"
@@ -58,6 +60,15 @@ barcode2celltype_df <- barcode2celltype_df %>%
          Cell_type.shorter, Cell_type.detailed, 
          Cell_group4, Cell_group5,
          individual_barcode, Comment)
+
+# replace -----------------------------------------------------------------
+## replace
+barcode2celltype_df <- rbind(barcode2celltype_df %>%
+                               filter(!(individual_barcode %in% barcode2celltype_replace_df$individual_barcode)),
+                             barcode2celltype_replace_df)
+table(barcode2celltype_df$Cell_group13)
+table(barcode2celltype_df$Cell_type.shorter)
+table(barcode2celltype_df$Cell_type.detailed)
 
 # group detailed immune cell types into major immune cell groups ----------
 barcode2celltype_df$Cell_group13 <- barcode2celltype_df$Cell_type.shorter
