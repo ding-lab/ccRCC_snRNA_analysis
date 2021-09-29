@@ -17,7 +17,7 @@ thisFile <- function() {
 path_this_script <- thisFile()
 ## set working directory
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
-# dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -33,7 +33,7 @@ dir.create(dir_out)
 ## input seurat object
 srat <- readRDS(file = "../ccRCC_ST/Processed_Data/Seurat/Outputs/TWFU-HT293N1-S1H3A3N1Z1_1Bmn1_1_5.0/TWFU-HT293N1-S1H3A3N1Z1_1Bmn1_1_5.0_processed_multiomic.rds")
 ## input cluster2celltype
-cluster2celltype_df <- readxl::read_excel(path = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Individual_AllClusters/HT293N1_S1H3A3N1Z1.xlsx")
+cluster2celltype_df <- readxl::read_excel(path = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Individual_AllClusters/HT282N1-S1H3A3N1Z1.091521.xlsx")
 ## input the barcod2celltype info to replace
 barcode2celltype_replace_df <- fread(data.table = F, input = "./Resources/Analysis_Results/ST/annotate_barcode/map_celltype_for_HT282N1_S1H3A3N1Z1_C7reclustered_katmai/20210928.v1/HT282N1_S1H3A3N1Z1.C7.Barcode2CellType.20210928.v1.tsv")
 
