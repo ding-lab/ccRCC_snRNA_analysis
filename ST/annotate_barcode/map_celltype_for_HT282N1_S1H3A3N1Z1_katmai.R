@@ -22,8 +22,9 @@ setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
+library(Signac)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -45,6 +46,7 @@ aliquot_show <- "HT282N1_S1H3A3N1Z1"
 DefaultAssay(srat) <- "RNA"
 # barcode2cluster_df <- FetchData(object = srat, vars = c("UMAP_1", "UMAP_2", "orig.ident", "seurat_clusters"))
 barcode2cluster_df <- srat@meta.data
+table(srat@meta.data$seurat_clusters)
 #nrow(barcode2cluster_df)
 barcode2cluster_df$individual_barcode <- rownames(barcode2cluster_df)
 #unique(barcode2cluster_df$seurat_clusters)
