@@ -16,8 +16,8 @@ thisFile <- function() {
 }
 path_this_script <- thisFile()
 ## set working directory
+# dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
-dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
