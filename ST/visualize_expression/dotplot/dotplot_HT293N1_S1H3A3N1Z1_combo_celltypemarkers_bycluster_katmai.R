@@ -24,7 +24,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -38,7 +38,7 @@ gene2celltype_df <- fread(data.table = F, input = "./Resources/Knowledge/Kidney_
 
 # specify thresholds ------------------------------------------------------
 ## filter for genes that are expressed in >25% of one cluster at least
-aliquot_show <- "HT293N1-S1H3A3N1Z"
+aliquot_show <- "HT293N1-S1H3A3N1Z1"
 pct_thres <- 15
 avgexp_thres <- 0.1
 

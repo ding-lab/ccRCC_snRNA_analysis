@@ -15,7 +15,8 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the average expression calculated (SCT)
-avgexp_df <- fread(input = "./Resources/snATAC_Processed_Data/Gene_Activity/AverageGeneActivity_ByTumorPTLOHSubcluster.v2.20210917.tsv", data.table = F)
+avgexp_df1 <- fread(input = "./Resources/snATAC_Processed_Data/Gene_Activity/AverageGeneActivity_ByTumorPTLOHSubcluster.v2.20210917.tsv", data.table = F)
+avgexp_df2 <- fread(input = "./Resources/snATAC_Processed_Data/Gene_Activity/AverageGeneActivity.ccRCC_markers.Surface.20210928.tsv", data.table = F)
 # ## input by cluster enrichment assignment
 enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/gene_activity/calculate_scores/calculate_msigdb_geneset_scores_wgeneactivity/20210921.v1/MSigDB.Hallmark.tsv")
 ## input score pre-calculated
@@ -42,6 +43,7 @@ emt_genes_df <- data.frame(gene = c("VIM", "FN1", "CDH2", "SERPINE1", "TGFBI",
 genes2filter <- emt_genes_df$gene
 
 # format expression data --------------------------------------------------
+avgexp_df <- rbind()
 plot_data_long_df <- avgexp_df %>%
   filter(V1 %in% genes2filter) %>%
   melt() %>%
