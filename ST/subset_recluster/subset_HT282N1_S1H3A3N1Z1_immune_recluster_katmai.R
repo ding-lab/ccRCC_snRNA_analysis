@@ -37,9 +37,6 @@ srat <- readRDS(file = "../ccRCC_ST/Processed_Data/Seurat/Outputs/TWFU-HT282N1-S
 print("Finish reading RDS file")
 ## name of the cell group to recluster
 table(srat@meta.data$seurat_clusters)
-## if you don't load Signac
-# 0   1   2   3   4   5   6   7   8   9  10
-# 776 771 746 365 318 287 242 238 230 134  79
 ## If you load Signac 
 # 0   1   2   3   4   5   6   7   8   9  10
 # 591 577 504 488 470 253 164 108  84  62  35
