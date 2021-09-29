@@ -79,6 +79,7 @@ table(barcode2celltype_df$Cell_group_w_epithelialcelltypes)
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, aliquot_show, ".Barcode2CellType.", run_id, ".tsv")
 write.table(x = barcode2celltype_df, file = file2write, quote = F, sep = "\t", row.names = F)
+rownames(barcode2celltype_df) <- barcode2celltype_df$individual_barcode
 srat@meta.data <- barcode2celltype_df
 file2write <- paste0(dir_out, aliquot_show, ".multiomic.celltypeannotated.", run_id, ".RDS")
 saveRDS(object = srat, file = file2write, compress = T)
