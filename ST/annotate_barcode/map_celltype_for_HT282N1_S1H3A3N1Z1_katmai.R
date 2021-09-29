@@ -35,7 +35,7 @@ srat <- readRDS(file = "../ccRCC_ST/Processed_Data/Seurat/Outputs/TWFU-HT293N1-S
 ## input cluster2celltype
 cluster2celltype_df <- readxl::read_excel(path = "./Resources/snRNA_Processed_Data/Cell_Type_Assignment/Individual_AllClusters/HT293N1_S1H3A3N1Z1.xlsx")
 ## input the barcod2celltype info to replace
-barcode2celltype_replace_df <- fread(data.table = F, input = "./Resources/Analysis_Results/ST/annotate_barcode/map_celltype_for_HT282N1_S1H3A3N1Z1_C7reclustered_katmai/20210928.v1/")
+barcode2celltype_replace_df <- fread(data.table = F, input = "./Resources/Analysis_Results/ST/annotate_barcode/map_celltype_for_HT282N1_S1H3A3N1Z1_C7reclustered_katmai/20210928.v1/HT282N1_S1H3A3N1Z1.C7.Barcode2CellType.20210928.v1.tsv")
 
 # subset ------------------------------------------------------------------
 ## subset to non-doublet
