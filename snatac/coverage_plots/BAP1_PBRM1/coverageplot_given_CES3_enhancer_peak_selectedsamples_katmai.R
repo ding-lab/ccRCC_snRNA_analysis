@@ -26,7 +26,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -67,7 +67,8 @@ chr=strsplit(x = peak_plot, split = "\\-")[[1]][1]
 st=strsplit(x = peak_plot, split = "\\-")[[1]][2]; st = as.numeric(st)
 en=strsplit(x = peak_plot, split = "\\-")[[1]][3]; en = as.numeric(en)
 new_st=st-1000
-new_en=en+1000
+# new_en=en+1000
+new_en=en+6000
 peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
 ## change atac ident
 # print(head(atac@meta.data))
