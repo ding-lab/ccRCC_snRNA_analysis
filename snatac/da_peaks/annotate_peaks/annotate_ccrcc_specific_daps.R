@@ -16,8 +16,10 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input all dap + caps
-peaks_up_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/DA_peaks_Tumor_vs_PT_affected_byCNV_removed.tsv")
-peaks_down_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/DOWN_DA_peaks_Tumor_vs_PT_affected_byCNV_removed.tsv")
+# peaks_up_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/DA_peaks_Tumor_vs_PT_affected_byCNV_removed.tsv")
+peaks_up_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/UP_Tumor_vsPT.Filtered.CNV_corrected.Annotated.20210811.tsv")
+# peaks_down_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/DOWN_DA_peaks_Tumor_vs_PT_affected_byCNV_removed.tsv")
+peaks_down_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/DOWN_Tumor_vsPT.Filtered.CNV_corrected.Annotated.20210811")
 ## input peak fold changes
 peak2gene_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Peak_Annotation/All_peaks_annotated_26snATAC_merged_obj.20210607.tsv")
 ## input coaccessiblity results

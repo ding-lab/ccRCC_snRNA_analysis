@@ -15,9 +15,9 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-peaks_anno_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/annotate_peaks/annotate_ccrcc_specific_daps/20210618.v1/ccRCC_vs_PT_DAP2Gene.EnhancerPromoter.20210618.v1.tsv")
+peaks_anno_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/annotate_peaks/annotate_ccrcc_vs_pt_promoter_daps/20211004.v1/ccRCC_vs_PTDAPs.Annotated.Promoter.20211004.v1.tsv")
 ## input degs
-degs_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/unite_tumor_vs_normal_snRNA_individual_and_CNVcorrected_DEGs/20210608.v1/Consistent.Tumor_vs_PT_DEGs.CNVcorrected.20210608.v1.tsv")
+degs_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_vs_normal/summarize_deg/unite_tumor_vs_normal_snRNA_individual_and_CNVcorrected_DEGs/20210824.v1/Consistent.Tumor_vs_PT_DEGs.CNVcorrected.20210824.v1.tsv")
 
 # annotate and filter peaks ------------------------------------------------------------
 peaks2degs_df <- merge(x = peaks_anno_df, 

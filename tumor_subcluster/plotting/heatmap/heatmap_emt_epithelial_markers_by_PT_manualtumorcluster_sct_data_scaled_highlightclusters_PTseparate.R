@@ -19,7 +19,7 @@ avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/avge
 ## input cell number per cluster
 cellnumber_percluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/count/count_cellnumber_per_manual_cluster_rm_doublet/20210805.v1/CellNumberPerTumorManualCluster.20210805.v1.tsv")
 ## input score pre-calculated
-emt_scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_epithelial_group_bytumorcluster/20210928.v2/Tumorcluster_EpithelialGroup.20210928.v2.tsv")
+emt_scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_epithelial_group_bytumorcluster/20210929.v1/Tumorcluster_EpithelialGroup.20210929.v1.tsv")
 s12_scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_PTS12_scores_wPT/20210908.v1/PTS12Score.tsv")
 s3_scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_PTS3_scores_wPT/20210908.v1/PTS12Score.tsv")
 ## input clinical info
@@ -27,14 +27,16 @@ clinical_specimen_df <- fread(data.table = F, input = "./Resources/Analysis_Resu
 
 # preprocess-------------------------------------------------
 ## specify genes to filter 
-emt_genes_df <- data.frame(gene = c("VIM", "FN1", "CDH2", "SERPINE1", "TGFBI",
-                                    "LRP2", "CUBN", "SLC17A3", "GATM", "GLYAT",
+emt_genes_df <- data.frame(gene = c("VIM", "SERPINE1", "TGFBI",
+                                    "FN1", #"CDH2",
+                                    "LRP2", "CUBN", "GLYAT",
+                                    # "SLC17A3", "GATM", 
                                     "SLC5A12", "SLC5A2", 
                                     "SLC13A3", 
                                     "SLC3A1", "SLC16A9", "SLC38A3",
                                     "CA9", "PCSK6", "CP"),
-                           Text_Gene_Group = c(rep("Mesenchymal\nmarkers", 5),
-                                               rep("Epithelial/\nproximal-tubule\nmarkers", 5),
+                           Text_Gene_Group = c(rep("Mesenchymal\nmarkers", 4),
+                                               rep("Epithelial/\nproximal-tubule\nmarkers", 3),
                                                rep("PT S1/2", 3), 
                                                rep("PT S3", 3),
                                                rep("Tumor-cell\nmarkers", 3)))
@@ -46,7 +48,7 @@ plot_data_long_df <- avgexp_df %>%
   filter(V1 %in% genes2filter) %>%
   melt() %>%
   mutate(id_bycluster_byaliquot = gsub(x = variable, pattern = "SCT.", replacement = "")) %>%
-  dplyr::filter((id_bycluster_byaliquot %in% enrich_df$cluster_name) | (grepl(x = id_bycluster_byaliquot, pattern = "PT"))) %>%
+  dplyr::filter((id_bycluster_byaliquot %in% emt_scores_df$cluster_name) | (grepl(x = id_bycluster_byaliquot, pattern = "PT"))) %>%
   mutate(easyid_column = str_split_fixed(string = id_bycluster_byaliquot, pattern = "_", n = 2)[,1]) %>%
   mutate(cluster_name = str_split_fixed(string = id_bycluster_byaliquot, pattern = "_", n = 2)[,2])
 ## filter out non-tumor and NA tumor cluster
@@ -97,8 +99,8 @@ colors_s12score <- colorRamp2(c(-67.47553, 0, 67.47553),
 colors_s3score <- colorRamp2(c(-59.14322, 0, 59.14322), 
                              c("white", brewer.pal(n = 11, name = "BrBG")[c(6,2)]))
 ## make colors for cell type
-colors_celltype <- colors_cellgroup14[c("Tumor cells", "Normal epithelial cells")]
-names(colors_celltype) <- c("Tumor cells", "Proximal tubule")
+colors_tumorgroup_sim <- c(RColorBrewer::brewer.pal(n = 9, name = "Set1")[c(1, 5, 4, 2)],  colors_cellgroup14[c("Normal epithelial cells")])
+names(colors_tumorgroup_sim) <- c("EMT",  "Epi-L", "Epi-M", "Epi-H", "PT")
 ## make colors for S1/2/3 group
 colors_s123_group <- c(brewer.pal(n = 9, name = "BuPu")[c(8)], brewer.pal(n = 11, name = "BrBG")[c(2)], 
                        brewer.pal(n = 11, name = "PuOr")[c(11)], brewer.pal(n = 8, name = "Set2")[c(8)])
@@ -117,7 +119,7 @@ rownames_plot <- rownames(plot_data_mat)
 # make row split ----------------------------------------------------------
 row_split_vec <- mapvalues(x = rownames_plot, from = emt_genes_df$gene, to = as.vector(emt_genes_df$Text_Gene_Group))
 row_split_vec
-row_split_factor <- factor(x = row_split_vec, levels = c("Tumor-cell\nmarkers", "Epithelial/\nproximal-tubule\nmarkers", "Mesenchymal\nmarkers", "PT S1/2", "PT S3"))
+row_split_factor <- factor(x = row_split_vec, levels = c("Tumor-cell\nmarkers", "Epithelial/\nproximal-tubule\nmarkers", "PT S1/2", "PT S3", "Mesenchymal\nmarkers"))
 
 # make column annotation --------------------------------------------------
 ## make
@@ -133,46 +135,44 @@ colanno_df <- data.frame(columnname = columnnames_plot,
                                              ifelse(scores_s3 >=  quantile(scores_s3, 0.9), "S3 enriched", "weak segmental\nidentity")))
 colanno_df <- merge(x = colanno_df, y = emt_scores_df, by.x = c("columnname"), by.y = c("cluster_name"), all.x = T)
 colanno_df <- colanno_df %>%
-  mutate(easy_id = gsub(x = str_split_fixed(string = columnname, pattern = "_", n = 2)[,1], pattern = "\\.", replacement = "-"))
+  mutate(easy_id = gsub(x = str_split_fixed(string = columnname, pattern = "_", n = 2)[,1], pattern = "\\.", replacement = "-")) %>%
+  mutate(text_id = paste0("P", gsub(x = substring(columnname, 6), pattern = "\\.", replacement = "")))
 colanno_df$Histologic_Grade <- mapvalues(x = colanno_df$easy_id, from = clinical_specimen_df$Aliquot.snRNA.WU, to = as.vector(clinical_specimen_df$Histologic_Grade))
 colanno_df$Histologic_Grade[colanno_df$Histologic_Grade == "PT"] <- "NAT"
 emt_scores_vec <- mapvalues(x = columnnames_plot, from = colanno_df$columnname, to = as.vector(colanno_df$EMT_score)); emt_scores_vec <- as.numeric(emt_scores_vec)
-scores_epithelial <- mapvalues(x = columnnames_plot, from = colanno_df$columnname, to = as.vector(emt_scores_df$epithelial_score)); scores_epithelial <- as.numeric(scores_epithelial)
+scores_epithelial <- mapvalues(x = columnnames_plot, from = colanno_df$columnname, to = as.vector(colanno_df$epithelial_score)); scores_epithelial <- as.numeric(scores_epithelial)
 
 ## make highlighted samples
 index_highlight <- which(columnnames_plot %in% gsub(x = c("C3L-00079-T1_C4", "C3L-01302-T1_C1",
                                                           "C3L-00088-T2_C1", "C3N-00733-T1_C1", "C3L-00416-T2_C1", "C3L-00010-T1_C1", "C3L-00088-T1_C1"), pattern = "\\-", replacement = "."))
-texts_highlight <- columnnames_plot[index_highlight];
+texts_highlight <- colanno_df$text_id[index_highlight];
 ## make column annotation object
 colanno_obj = HeatmapAnnotation(#link = anno_mark(at = index_highlight, labels = texts_highlight, labels_gp = gpar(fontsize = 15), side = "top"),
-  CellType = anno_simple(x = colanno_df$cell_type, col = colors_celltype[colanno_df$cell_type], height = unit(0.5, "cm")),
-  EpithelialScore = anno_simple(x = colanno_df$epithelial_score, col = colors_scores_epithelial, height = unit(0.75, "cm")),
-  # EMTEnriched = anno_simple(x = emt_enriched_vec, col = colors_emtenriched[emt_enriched_vec], height = unit(1, "cm")),
-  EMTScore = anno_simple(x = emt_scores_vec, col = colors_emtscores, height = unit(0.75, "cm")),
+  # CellType = anno_simple(x = colanno_df$cell_type, col = colors_celltype[colanno_df$cell_type], height = unit(0.5, "cm")),
+  CellType_CellState = anno_simple(x = colanno_df$epithelial_group, col = colors_tumorgroup_sim[colanno_df$epithelial_group], height = unit(0.75, "cm")),
+  EpithelialScore = anno_simple(x = scores_epithelial, col = colors_scores_epithelial, height = unit(0.75, "cm")),
   PT_S1_S2_Score = anno_simple(x = scores_s12, col = colors_s12score, height = unit(0.75, "cm")),
   PT_S3_Score = anno_simple(x = scores_s3, col = colors_s3score, height = unit(0.75, "cm")),
   PTSegmentSignature = anno_simple(x = colanno_df$s123_group, col = colors_s123_group[colanno_df$s123_group], height = unit(0.75, "cm")),
+  EMTScore = anno_simple(x = emt_scores_vec, col = colors_emtscores, height = unit(0.75, "cm")),
   TumorGrade = anno_simple(x = colanno_df$Histologic_Grade, col = colors_hist_grade[colanno_df$Histologic_Grade], height = unit(0.75, "cm")),
   annotation_name_gp = gpar(fontsize = 20, fontface = "bold"), annotation_name_side = "left")
-colanno_obj2 <- HeatmapAnnotation(link = anno_mark(at = index_highlight, labels = texts_highlight, labels_gp = gpar(fontsize = 15), side = "bottom"))
+colanno_obj2 <- HeatmapAnnotation(link = anno_mark(at = index_highlight, labels = texts_highlight, labels_gp = gpar(fontsize = 20), side = "bottom"))
 
 # make column order --------------------------------------------------
 column_order_vec <- order(scores_epithelial, decreasing = T)
 
 # make column split -------------------------------------------------------
 column_group_vec <- colanno_df$epithelial_group
-column_group_factor <- factor(x = column_group_vec, levels = c("PT", "Epithelial-strong", "Epithellal-intermediate", "Epithelial-weak", "EMT"))
+# column_group_factor <- factor(x = column_group_vec, levels = c("PT", "Epithelial-strong", "Epithellal-intermediate", "Epithelial-weak", "EMT"))
+column_group_factor <- factor(x = column_group_vec, levels = c("PT", "Epi-H", "Epi-M", "Epi-L", "EMT"))
 
 # make legend list --------------------------------------------------------
 list_lgd = packLegend(
-  # Legend(title = "expression signature enriched", 
-  #        title_gp = gpar(fontsize = 20),
-  #        labels = names(colors_emtenriched), legend_gp = gpar(fill = colors_emtenriched),
-  #        labels_gp =  gpar(fontsize = 20), border = "black", direction = "horizontal", nrow = 1),
-  Legend(title = "Cell type", 
+  Legend(title = "Cell type/state", 
          title_gp = gpar(fontsize = 20),
-         labels = names(colors_celltype), legend_gp = gpar(fill = colors_celltype), grid_width = unit(0.5, "cm"), grid_height = unit(0.75, "cm"),
-         labels_gp =  gpar(fontsize = 20),direction = "horizontal", nrow = 1),
+         labels = names(colors_tumorgroup_sim), legend_gp = gpar(fill = colors_tumorgroup_sim), grid_width = unit(0.5, "cm"), grid_height = unit(0.75, "cm"),
+         labels_gp =  gpar(fontsize = 20),direction = "horizontal", nrow = 2),
   Legend(col_fun = colors_scores_epithelial, 
          title = "Epithelial score", 
          title_gp = gpar(fontsize = 20),
@@ -247,6 +247,7 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              row_split = row_split_factor,
                              row_title_rot = 0, row_title_gp = gpar(fontsize = 20),
                              # row_labels = factor_cellgroup,
+                             cluster_rows = F,
                              cluster_row_slices = F, show_row_dend = F,
                              ## column
                              show_column_dend = F, cluster_columns = F, cluster_column_slices = F,
@@ -255,7 +256,7 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              show_column_names = F, column_title = NA,
                              show_heatmap_legend = F)
 file2write <- paste0(dir_out, "EMT_Genes_by_tumorcluster", ".pdf")
-pdf(file2write, width = 14, height = 12, useDingbats = F)
+pdf(file2write, width = 14, height = 11.5, useDingbats = F)
 draw(object = p,
      annotation_legend_side = "top", annotation_legend_list = list_lgd)
 dev.off()

@@ -59,9 +59,10 @@ p <- p + geom_text_repel(data = subset(plot_data_df, (foldchange_type == "consis
 p <- p + scale_size_area(max_size = 4)
 p <- p + theme_classic()
 # p <- p + xlab("Log2(fold change) of tumor-cell sn gene expression for\nBAP1-mutant tumor vs. other tumors(n=19)")
-p <- p + xlab("Log2(fold change) of tumor-cell sn gene expression\n(BAP1-mutants vs. Non-BAP1/PBRM1-mutants)")
+p <- p + xlab("Log2(fold change) of tumor-cell sn gene expression")
 p <- p + ylab("-Log10FDR")
-p <- p + ylim(c(0, 450)) + xlim(c(-2.5, 2.5))
+# p <- p + ylim(c(0, 450)) + xlim(c(-2.5, 2.5))
+p <- p + ylim(c(0, 450)) + xlim(c(-2.75, 2.5))
 p <- p + guides(color = guide_legend(title = "Fold change type", title.position = "top", title.theme = element_text(size = 14), 
                                      nrow = 4, override.aes = aes(size = 3), label.theme = element_text(size = 14)))
 p <- p + theme(axis.text = element_text(size = 14, color = "black"),
@@ -100,7 +101,7 @@ p <- p + geom_text_repel(data = subset(plot_data_df, (foldchange_type == "consis
 p <- p + scale_size_area(max_size = 4)
 p <- p + theme_classic()
 # p <- p + xlab("Log2(fold change) of tumor-cell sn gene expression for\nBAP1-mutant tumor vs. other tumors(n=19)")
-p <- p + xlab("Log2(fold change) of tumor-cell sn gene expression\n(BAP1-mutants vs. Non-BAP1/PBRM1-mutants)")
+p <- p + xlab("Log2(fold change) of tumor-cell sn gene expression")
 p <- p + ylab("-Log10FDR")
 p <- p + ylim(c(0, 450)) + xlim(c(-2.5, 2.5))
 p <- p + guides(color = guide_legend(title = "Fold change type", title.position = "top", title.theme = element_text(size = 14), 

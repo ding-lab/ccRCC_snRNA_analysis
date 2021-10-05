@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -37,6 +37,7 @@ pathway2genes_list <- sapply(pathway2genes_filtered_df$geneID, function(x) {
 })
 genes_mesenchymal <- unique(unlist(pathway2genes_list))
 genes_mesenchymal <- unique(c(genes_mesenchymal, emtgenes_df$hgnc_symbol[emtgenes_df$gene_function == "Mesenchymal"]))
+# genes_mesenchymal <- c("WNT5B", genes_mesenchymal)
 genes_epithelal <- genes4score_df$genesymbol_deg
 genes_epithelal <- unique(genes_epithelal, c(gene2celltype_df$Gene[gene2celltype_df$Gene_Group2 == "Proximal tubule"]))
 genes_filter <- c(genes_mesenchymal, genes_epithelal)
@@ -53,7 +54,8 @@ color_left_deep <- RColorBrewer::brewer.pal(n = 6, name = "Set1")[2]
 plot_data_df <- deg_df %>%
   dplyr::rename(genesymbol = genesymbol_deg) %>%
   mutate(Log10p_val_adj = -log10(x = p_val_adj)) %>%
-  mutate(x_plot = avg_log2FC)
+  mutate(x_plot = ifelse(avg_log2FC < -3, -3,
+                         ifelse(avg_log2FC > 3, 3, avg_log2FC)))
 ## cap y axis
 y_cap <- max(plot_data_df$Log10p_val_adj[!is.infinite(plot_data_df$Log10p_val_adj)])
 ## set x limits to distinguish colors
@@ -63,6 +65,7 @@ x_pos <- quantile(x = plot_data_df$avg_log2FC, 0.925)
 x_neg <- quantile(x = plot_data_df$avg_log2FC, 0.025)
 plot_data_df <- plot_data_df %>%
   mutate(y_plot = ifelse(Log10p_val_adj >= y_cap, y_cap, Log10p_val_adj)) %>%
+  
   mutate(text_gene = ifelse((y_plot >= y_bottom) & ((genesymbol %in% genes_mesenchymal) & (x_plot >= x_pos)) | ((genesymbol %in% genes_epithelal) & (x_plot <= x_neg)), genesymbol, NA))
 
 # plot all markers--------------------------------------------------------------------
@@ -77,14 +80,14 @@ p <- p + scale_color_manual(values = c("FDR<0.05 (up)" = "red", "FDR<0.05 (down)
 #                          mapping = aes(x = x_plot, y = y_plot, label = text_gene), color = "black", force = 4, fontface = "italic", segment.alpha = 0.5)
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot > 0),
                          mapping = aes(x = x_plot, y = y_plot, label = text_gene),
-                         color = "black", force = 4, fontface = "italic", segment.alpha = 0.5, segment.size = 0.2,
-                         size = 5, max.overlaps = Inf, xlim = c(0.1, 4.25))
+                         color = "black", force = 5, fontface = "italic", segment.alpha = 0.5, segment.size = 0.2,
+                         size = 5, max.overlaps = Inf, xlim = c(0.5, 4.5))
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot < 0),
                          mapping = aes(x = x_plot, y = y_plot, label = text_gene),
-                         color = "black", force = 4, fontface = "italic", segment.alpha = 0.5, segment.size = 0.2,
+                         color = "black", force = 5, fontface = "italic", segment.alpha = 0.5, segment.size = 0.2,
                          size = 5, max.overlaps = Inf, xlim = c(-3.9, 0))
 p <- p + theme_classic()
-p <- p + ylim(c(0, 340))
+p <- p + ylim(c(0, 350)) + xlim(c(-3.5, 4.5))
 p <- p + xlab("Log2(Fold-Change)")
 p <- p + ylab("-Log10(P-value-adjusted)")
 p <- p + theme(axis.text = element_text(size = 14, color = "black"),

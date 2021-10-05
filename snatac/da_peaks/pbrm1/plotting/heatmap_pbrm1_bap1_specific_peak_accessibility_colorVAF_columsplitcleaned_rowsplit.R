@@ -7,7 +7,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -38,6 +38,10 @@ plotdata_df <- cbind(acc_pbrm1_down_df,
                      acc_bap1_up_df[rownames_plot, grepl(pattern = "chr", x = colnames(acc_bap1_up_df))]
 )
 plotdata_df <- plotdata_df[,!duplicated(colnames(plotdata_df))]
+# ## remove the BAP1-associated peaks from the PBRM1 associated peaks
+# peaks_overlap <- c(colnames(acc_pbrm1_down_df), colnames(acc_pbrm1_up_df))
+# peaks_overlap <- peaks_overlap[!(peaks_overlap %in% c(colnames(acc_bap1_down_df), colnames(acc_bap1_up_df)))]
+# plotdata_df <- plotdata_df[, !(colnames(plotdata_df) %in% peaks_overlap)]
 ## change group names
 plotdata_df$Group.1=gsub('_','-',plotdata_df$Group.1)
 plotdata_df$Group.2=gsub('_','.',plotdata_df$Group.2)
@@ -71,8 +75,13 @@ color_red <- RColorBrewer::brewer.pal(n = 5, name = "Set1")[1]
 color_blue <- RColorBrewer::brewer.pal(n = 5, name = "Set1")[2]
 colors_heatmapbody = colorRamp2(c(-2, 0, 2), 
                                 c(color_blue, "white", color_red))
+colors_heatmapbody = colorRamp2(seq(-2, 2, 0.4), 
+                                rev(brewer.pal(n = 11, name = "PiYG")))
+colors_heatmapbody = colorRamp2(seq(-2, 2, 0.4), 
+                                rev(brewer.pal(n = 11, name = "BrBG")))
 colors_bap1_vaf <- colorRamp2(c(0, 0.5), c("white smoke", '#984EA3'))
 colors_pbrm1_vaf <- colorRamp2(c(0, 0.5), c("white smoke", '#FF7F00'))
+colors_peaktype <- c("Up-regulated" = "#E41A1C", "Down-regulated" = "#377EB8", "other" = "white smoke")
 
 # make row annotation -----------------------------------------------------
 ## get BAP1 mutated cases
@@ -106,12 +115,15 @@ row_ha= rowAnnotation(#Cell_type=row_anno_df$Cell_type,
 #                                Is_PBRM1_down_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_down_df)), col = c("TRUE" = "orange", "FALSE" = "white smoke")),
 #                                Is_PBRM1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_up_df)), col = c("TRUE" = "orange", "FALSE" = "white smoke")), 
 #                                annotation_name_side = "left", annotation_name_gp = gpar(fontsize = 13))
-column_ha <- HeatmapAnnotation(BAP1_associated_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% c(colnames(acc_bap1_down_df))), col = c("TRUE" = "purple", "FALSE" = "white smoke")),
-                               Is_BAP1_down_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_bap1_down_df)), col = c("TRUE" = "#377EB8", "FALSE" = "white smoke")),
-                               Is_BAP1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_bap1_up_df)), col = c("TRUE" = "#E41A1C", "FALSE" = "white smoke")),
-                               Is_PBRM1_down_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_down_df)), col = c("TRUE" = "#377EB8", "FALSE" = "white smoke")),
-                               Is_PBRM1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_up_df)), col = c("TRUE" = "#E41A1C", "FALSE" = "white smoke")), 
-                               annotation_name_side = "left", annotation_name_gp = gpar(fontsize = 13))
+"#377EB8"
+"#E41A1C"
+is_bap1_peaks_vec <- ifelse(colnames(plotdata_mat) %in% colnames(acc_bap1_down_df), "Down-regulated",
+                                         ifelse(colnames(plotdata_mat) %in% colnames(acc_bap1_up_df), "Up-regulated", "other"))
+is_pbrm1_peaks_vec <- ifelse(colnames(plotdata_mat) %in% colnames(acc_pbrm1_down_df), "Down-regulated",
+                            ifelse(colnames(plotdata_mat) %in% colnames(acc_pbrm1_up_df), "Up-regulated", "other"))
+column_ha <- HeatmapAnnotation(BAP1_associated_peak = anno_simple(x = is_bap1_peaks_vec, col = colors_peaktype[is_bap1_peaks_vec], height = unit(0.6, "cm")),
+                               PBRM1_associated_peak = anno_simple(x = is_pbrm1_peaks_vec, col = colors_peaktype[is_pbrm1_peaks_vec],  height = unit(0.6, "cm")),
+                               annotation_name_side = "left", annotation_name_gp = gpar(fontsize = 17))
 
 # make column split -------------------------------------------------------
 column_split_vec <- ifelse(colnames(plotdata_mat) %in% colnames(acc_pbrm1_down_df), "PBRM1 down peak",
@@ -134,11 +146,16 @@ row_split_factor <- factor(row_split_vec, levels = c("BAP1&PBRM1\nmutated", "BAP
 #                           ## other
 #                           show_heatmap_legend = F, use_raster = F)
 list_lgd = list(
+  Legend(title = "Peak accessibility direction vs. non-mutants", 
+         title_gp = gpar(fontsize = 12),
+         labels = names(colors_peaktype), legend_gp = gpar(fill = colors_peaktype), grid_width = unit(0.5, "cm"), grid_height = unit(0.75, "cm"),
+         labels_gp =  gpar(fontsize = 12),direction = "horizontal", nrow = 1),
   Legend(col_fun = colors_heatmapbody, 
          title = "Relative peak\naccessibility",
          title_gp = gpar(fontsize = 12),
          labels_gp = gpar(fontsize = 12),
-         legend_height = unit(3, "cm")),
+         legend_width = unit(3, "cm"), 
+         direction = "horizontal"),
   Legend(col_fun = colors_bap1_vaf, 
          title = "BAP1 mutation VAF", 
          title_gp = gpar(fontsize = 12),
@@ -161,7 +178,7 @@ list_lgd = list(
 p=ComplexHeatmap::Heatmap(matrix = plotdata_mat, col = colors_heatmapbody, name = "Peak\naccessibility", 
                           ## rows
                           show_row_names = F,  row_names_gp = gpar(fontsize = 13),
-                          show_row_dend=FALSE,  left_annotation=row_ha, row_split = row_split_factor, row_title_rot = 0,
+                          show_row_dend=FALSE,  left_annotation=row_ha, row_split = row_split_factor, row_title_rot = 0, row_title_gp = gpar(fontsize = 17),
                           cluster_row_slices=F, cluster_rows = F,
                           ## columns
                           show_column_names = FALSE, show_column_dend=FALSE, column_title = NULL, top_annotation = column_ha,
@@ -169,9 +186,9 @@ p=ComplexHeatmap::Heatmap(matrix = plotdata_mat, col = colors_heatmapbody, name 
                           ## other
                           show_heatmap_legend = F, use_raster = T)
 file2write <- paste0(dir_out, "PBRM1_specific_peak_accessibility_raster.pdf")
-pdf(file2write, width = 14, height=6.5, useDingbats = F)
+pdf(file2write, width = 10, height=6.5, useDingbats = F)
 draw(object = p,
-     annotation_legend_side = "right", annotation_legend_list = list_lgd)
+     annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
 dev.off()
 
 # p=ComplexHeatmap::Heatmap(matrix = plotdata_mat, col = colors_heatmapbody, name = "Peak\naccessibility", 

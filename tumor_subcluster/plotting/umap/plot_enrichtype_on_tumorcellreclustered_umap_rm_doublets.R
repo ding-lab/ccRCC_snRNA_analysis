@@ -1,4 +1,4 @@
-# Yige Wu @WashU Dec 2020
+# Yige Wu @WashU Sep 2021
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -18,10 +18,11 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input barcode2UMAP
-barcode2umap_df <- fread(data.table = F, input = "./Resources/Analysis_Results/fetch_data/fetchdata_individual_tumorcellreclustered_on_katmai/20201127.v1/MetaData_TumorCellOnlyReclustered.20201127.v1.tsv")
-barcode2tumorsubcluster_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_tumorsubclusterid/map_barcode_with_manual_tumorsubcluster_id/20201130.v1/Barcode2TumorSubclusterId.20201130.v1.tsv", data.table = F)
-barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20200902.v1/scrublet.run20200902_adj_cutoff.united_outputs.tsv", data.table = F)
-enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210503.v1/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
+barcode2umap_df <- fread(data.table = F, input = "./Resources/Analysis_Results/fetch_data/fetchdata_individual_tumorcellreclustered_on_katmai/20210805.v1/MetaData_TumorCellOnlyReclustered.20210805.v1.tsv")
+barcode2tumorsubcluster_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/map_tumorsubclusterid/map_barcode_with_manual_tumorsubcluster_id/20210805.v1/Barcode2TumorSubclusterId.20210805.v1.tsv", data.table = F)
+barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20210729.v1/scrublet.united_outputs.20210729.v1.tsv", data.table = F)
+enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210805.v1/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
+epi_group_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_epithelial_group_bytumorcluster/20210929.v1/Tumorcluster_EpithelialGroup.20210929.v1.tsv")
 
 # merge data --------------------------------------------------------------
 barcode_merged_df <- merge(x = barcode2umap_df, y = barcode2tumorsubcluster_df, 
@@ -29,15 +30,21 @@ barcode_merged_df <- merge(x = barcode2umap_df, y = barcode2tumorsubcluster_df,
                          by.y = c("easy_id", "barcode"),
                          all.x = T)
 ## add enrichment type
+enrich_df <- enrich_df %>%
+  mutate(EMT = (cluster_name %in% epi_group_df$cluster_name[epi_group_df$epithelial_group == "EMT"]))
 cluster2enrichtype_df <- enrich_df %>%
   mutate(sample = str_split_fixed(string = cluster_name, pattern = "_", n = 2)[,1]) %>%
   mutate(sample = gsub(x = sample, pattern = "\\.", replacement = "-")) %>%
   mutate(cluster = str_split_fixed(string = cluster_name, pattern = "_", n = 2)[,2]) %>%
   mutate(cluster_name2 = paste0(sample, "_", cluster)) %>%
+  # mutate(cluster_enrich_type = ifelse(EMT, "EMT",
+  #                                     ifelse(Cell_cycle, "Cell_cycle",
+  #                                            ifelse(Immune, "Immune",
+  #                                                   ifelse(mTOR, "mTOR", "Other"))))) %>%
   mutate(cluster_enrich_type = ifelse(EMT, "EMT",
-                                      ifelse(Cell_cycle, "Cell_cycle",
+                                      ifelse(mTOR,"mTOR", 
                                              ifelse(Immune, "Immune",
-                                                    ifelse(mTOR, "mTOR", "Other"))))) %>%
+                                                    ifelse(Cell_cycle,  "Cell_cycle", "Other"))))) %>%
   mutate(cluster_enrich_type2 = ifelse(cluster_enrich_type != "Cell_cycle" & Cell_cycle, "Cell_cycle",
                                        ifelse(cluster_enrich_type != "Immune" & Immune, "Immune",
                                               ifelse(cluster_enrich_type != "mTOR" & mTOR, "mTOR", "NA"))))
@@ -50,6 +57,10 @@ dir_out_png <- paste0(dir_out, "png", "/")
 dir.create(dir_out_png)
 dir_out_pdf <- paste0(dir_out, "pdf", "/")
 dir.create(dir_out_pdf)
+# colors_enrich_type <- RColorBrewer::brewer.pal(n = 8, name = "Set2")[c(1,6,3,4,8)]
+colors_enrich_type <- RColorBrewer::brewer.pal(n = 9, name = "Set1")[c(1, 2, 3, 5, 9)]
+names(colors_enrich_type) <- c("EMT", "Cell_cycle", "Immune", "mTOR", "Other")
+swatch(colors_enrich_type)
 
 # for (aliquot_tmp in "C3L-00416-T1") {
 for (aliquot_tmp in unique(barcode_merged_df$easy_id)) {
@@ -62,9 +73,7 @@ for (aliquot_tmp in unique(barcode_merged_df$easy_id)) {
     filter(!(barcode_tumorcellreclustered %in% scrublets_df$Barcodes))
   
   ## make color for each cluster
-  colors_enrich_type <- RColorBrewer::brewer.pal(n = 8, name = "Set2")[c(1,6,3,4,8)]
-  names(colors_enrich_type) <- c("EMT", "Cell_cycle", "Immune", "mTOR", "Other")
-  
+
   ## make png
   # p <- ggplot()
   # p <- p + geom_point_rast(data = plot_data_df, mapping = aes(x = UMAP_1, y = UMAP_2, color = cluster_enrich_type), shape = 16, alpha = 1, size = 1)

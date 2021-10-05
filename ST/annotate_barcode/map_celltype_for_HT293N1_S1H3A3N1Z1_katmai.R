@@ -83,7 +83,20 @@ table(barcode2celltype_df$Cell_group_w_epithelialcelltypes)
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, aliquot_show, ".Barcode2CellType.", run_id, ".tsv")
 write.table(x = barcode2celltype_df, file = file2write, quote = F, sep = "\t", row.names = F)
-rownames(barcode2celltype_df) <- barcode2celltype_df$individual_barcode
-srat@meta.data <- barcode2celltype_df
+srat@meta.data$Cell_type.shorter <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_df$individual_barcode, to = as.vector(barcode2celltype_df$Cell_type.shorter))
+table(srat@meta.data$Cell_type.shorter)
+
+srat@meta.data$Cell_type.detailed <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_df$individual_barcode, to = as.vector(barcode2celltype_df$Cell_type.detailed))
+table(srat@meta.data$Cell_type.shorter)
+
+srat@meta.data$Cell_group4 <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_df$individual_barcode, to = as.vector(barcode2celltype_df$Cell_group4))
+table(srat@meta.data$Cell_group4)
+
+srat@meta.data$Cell_group5 <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_df$individual_barcode, to = as.vector(barcode2celltype_df$Cell_group5))
+table(srat@meta.data$Cell_group5)
+
+srat@meta.data$Cell_group13 <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_df$individual_barcode, to = as.vector(barcode2celltype_df$Cell_group13))
+table(srat@meta.data$Cell_group13)
+
 file2write <- paste0(dir_out, aliquot_show, ".multiomic.celltypeannotated.", run_id, ".RDS")
 saveRDS(object = srat, file = file2write, compress = T)

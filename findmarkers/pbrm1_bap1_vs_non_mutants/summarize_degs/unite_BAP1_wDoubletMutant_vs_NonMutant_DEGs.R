@@ -40,5 +40,5 @@ for (path_deg_file_tmp in paths_file_process) {
 }
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "PBRM1_vs_NonMutants_DEGs.", run_id, ".tsv")
+file2write <- paste0(dir_out, "BAP1_vs_NonMutants_DEGs.", run_id, ".tsv")
 write.table(x = deg_sup_df, file = file2write, quote = F, sep = "\t", row.names = F)

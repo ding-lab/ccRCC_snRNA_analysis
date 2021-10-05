@@ -9,7 +9,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -18,27 +18,9 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input degs
 deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/findmarkers_selected_EMTclusters_vs_epithelialclusters_katmai/20210924.v3/Selected_2EMTclusters_vs_5Epithelialclusters.logfc.threshold0.min.pct0.1.min.diff.pct0.AssaySCT.tsv")
-## input EMT related genes
-gene2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/combine_pt_with_emt_markers_all/20200920.v1/Kidney_Specific_EMT_Genes.20200920.v1.tsv")
-emtgenes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/dependencies/write_emt_genes/20200915.v1/EMT_Genes.20200915.v1.tsv")
-pathway2genes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/pathway/ora_msigdb_tumor_manualsubcluster_up_degs/20210413.v1/ORA_Results.tsv")
-genes4score_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/filter_degs/filter_tumormanualcluster_EMT_degs/20210908.v1/EMTModuleDown.EpithelialPT_DEGs.Filtered.tsv")
-
-# filter the emt genes ----------------------------------------------------
-genesetnames_plot <- "HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION"
-## add name for the marker groups
-pathway2genes_filtered_df <- pathway2genes_df %>%
-  # filter(p.adjust < 0.05) %>%
-  filter(Description %in% genesetnames_plot)
-
-pathway2genes_list <- sapply(pathway2genes_filtered_df$geneID, function(x) {
-  genes_vec <- str_split(string = x, pattern = "\\/")[[1]]
-  return(genes_vec)
-})
-genes_mesenchymal <- unique(unlist(pathway2genes_list))
-genes_mesenchymal <- unique(c(genes_mesenchymal, emtgenes_df$hgnc_symbol[emtgenes_df$gene_function == "Mesenchymal"]))
-genes_epithelal <- genes4score_df$genesymbol_deg
-genes_epithelal <- unique(genes_epithelal, c(gene2celltype_df$Gene[gene2celltype_df$Gene_Group2 == "Proximal tubule"]))
+genes_mesenchymal <- c("SERPINE1", "TGFBI", "VIM", "FN1", "WNT5B", "ITGA5", "JUN", "TWIST1")
+# genes_mesenchymal <- c("WNT5B", genes_mesenchymal)
+genes_epithelal <- c("LRP2", "ABI3BP", "PTGER3", "FRMD3", "SLC28A1", "SLC6A3", "EPB41LA4", "NFIB", "NFIA", "HNF4A", "HNF4G", "CIT")
 genes_filter <- c(genes_mesenchymal, genes_epithelal)
 genes_filter
 
@@ -46,14 +28,15 @@ genes_filter
 ## set y bottom threshold
 y_bottom <- -log10(0.05)
 ## colors
-color_right_deep <- RColorBrewer::brewer.pal(n = 9, name = "Set1")[1]
-color_left_deep <- RColorBrewer::brewer.pal(n = 6, name = "Dark2")[4]
+color_right_deep <- RColorBrewer::brewer.pal(n = 12, name = "Set1")[1]
+color_left_deep <- RColorBrewer::brewer.pal(n = 6, name = "Set1")[2]
 
 # make data for plotting --------------------------------------------------
 plot_data_df <- deg_df %>%
   dplyr::rename(genesymbol = genesymbol_deg) %>%
   mutate(Log10p_val_adj = -log10(x = p_val_adj)) %>%
-  mutate(x_plot = avg_log2FC)
+  mutate(x_plot = ifelse(avg_log2FC < -3, -3,
+                         ifelse(avg_log2FC > 3, 3, avg_log2FC)))
 ## cap y axis
 y_cap <- max(plot_data_df$Log10p_val_adj[!is.infinite(plot_data_df$Log10p_val_adj)])
 ## set x limits to distinguish colors
@@ -63,6 +46,7 @@ x_pos <- quantile(x = plot_data_df$avg_log2FC, 0.925)
 x_neg <- quantile(x = plot_data_df$avg_log2FC, 0.025)
 plot_data_df <- plot_data_df %>%
   mutate(y_plot = ifelse(Log10p_val_adj >= y_cap, y_cap, Log10p_val_adj)) %>%
+  
   mutate(text_gene = ifelse((y_plot >= y_bottom) & ((genesymbol %in% genes_mesenchymal) & (x_plot >= x_pos)) | ((genesymbol %in% genes_epithelal) & (x_plot <= x_neg)), genesymbol, NA))
 
 # plot all markers--------------------------------------------------------------------
@@ -77,14 +61,14 @@ p <- p + scale_color_manual(values = c("FDR<0.05 (up)" = "red", "FDR<0.05 (down)
 #                          mapping = aes(x = x_plot, y = y_plot, label = text_gene), color = "black", force = 4, fontface = "italic", segment.alpha = 0.5)
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot > 0),
                          mapping = aes(x = x_plot, y = y_plot, label = text_gene),
-                         color = "black", force = 4, fontface = "italic", segment.alpha = 0.5, segment.size = 0.2,
-                         size = 5, max.overlaps = Inf, xlim = c(0.1, 4.25))
+                         color = "black", force = 5, fontface = "italic", segment.alpha = 0.5, segment.size = 0.2,
+                         size = 5, max.overlaps = Inf, xlim = c(0.5, 4.5))
 p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_gene) & x_plot < 0),
                          mapping = aes(x = x_plot, y = y_plot, label = text_gene),
-                         color = "black", force = 4, fontface = "italic", segment.alpha = 0.5, segment.size = 0.2,
-                         size = 5, max.overlaps = Inf, xlim = c(-3.9, 0), ylim = c(0.5, 330))
+                         color = "black", force = 5, fontface = "italic", segment.alpha = 0.5, segment.size = 0.2,
+                         size = 5, max.overlaps = Inf, xlim = c(-3.9, 0))
 p <- p + theme_classic()
-p <- p + ylim(c(0, 330))
+p <- p + ylim(c(0, 350)) + xlim(c(-3.5, 4.5))
 p <- p + xlab("Log2(Fold-Change)")
 p <- p + ylab("-Log10(P-value-adjusted)")
 p <- p + theme(axis.text = element_text(size = 14, color = "black"),

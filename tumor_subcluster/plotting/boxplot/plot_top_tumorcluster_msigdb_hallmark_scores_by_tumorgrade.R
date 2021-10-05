@@ -18,9 +18,11 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input clinical data
-specimen_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/extract_specimen_clinical_data/20200717.v1/snRNA_ccRCC_Specimen_Clinicl_Data.20200717.v1.tsv")
+# specimen_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/clinical/extract_specimen_clinical_data/20200717.v1/snRNA_ccRCC_Specimen_Clinicl_Data.20200717.v1.tsv")
+specimen_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/clinical/extract_ccRCC_specimen_clinical_data/20210706.v1/ccRCC_Specimen_Clinicl_Data.20210706.v1.tsv")
+
 ## input cell type fraction
-scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/summarize_top_msigdb_geneset_score_by_tumor/20210419.v1/Max.GenesetScorePerSample.tsv")
+scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/summarize_top_msigdb_geneset_score_by_tumor/20210929.v1/Max.GenesetScorePerSample.tsv")
 
 # set plotting parameters -------------------------------------------------
 symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), symbols = c("****", "***", "**", "*", "ns"))
@@ -31,12 +33,14 @@ my_comparisons <- list(c("G1/2", "G3"),c("G3", "G4"),c("G1/2", "G4"))
 scores_df <- scores_df %>%
   mutate(score_group = variable) %>%
   mutate(Aliquot_WU = gsub(x = sample_id, pattern = "\\.", replacement = "-"))
-for (scoregroup_tmp in unique(scores_df$score_group)) {
+for (scoregroup_tmp in "EPITHELIAL_MESENCHYMAL_TRANSITION_Score") {
+# for (scoregroup_tmp in unique(scores_df$score_group)) {
   ## make plot data
   plot_data_df <- specimen_clinical_df %>% 
     filter(Sample_Type == "Tumor") %>%
+    filter(Case != "C3L-00359") %>%
     filter(snRNA_available == TRUE) %>%
-    select(Aliquot.snRNA.WU, Histologic_Grade)
+    select(Aliquot.snRNA.WU, Histologic_Grade, Case)
   plot_data_df <- merge(x = plot_data_df,
                         y = scores_df %>%
                           filter(score_group == scoregroup_tmp) %>%
@@ -44,7 +48,10 @@ for (scoregroup_tmp in unique(scores_df$score_group)) {
                         by.x = c("Aliquot.snRNA.WU"), by.y = c("Aliquot_WU"), all.x = T)
   plot_data_df <- plot_data_df %>%
     mutate(x_plot = ifelse(Histologic_Grade %in% c("G1", "G2"), "G1/2", Histologic_Grade)) %>%
-    mutate(y_plot = value)
+    mutate(y_plot = value) %>%
+    arrange(Case, desc(Histologic_Grade), desc(value))
+  plot_data_df <- plot_data_df[!duplicated(plot_data_df$Case),]
+  
   ## plot
   p = ggplot(plot_data_df, aes(x=x_plot, y=y_plot))
   p = p + geom_violin(aes(fill = x_plot),  color = NA, alpha = 1)

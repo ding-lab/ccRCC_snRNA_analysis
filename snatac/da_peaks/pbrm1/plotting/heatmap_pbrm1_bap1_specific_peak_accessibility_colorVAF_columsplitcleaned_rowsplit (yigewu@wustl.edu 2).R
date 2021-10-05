@@ -38,6 +38,10 @@ plotdata_df <- cbind(acc_pbrm1_down_df,
                      acc_bap1_up_df[rownames_plot, grepl(pattern = "chr", x = colnames(acc_bap1_up_df))]
 )
 plotdata_df <- plotdata_df[,!duplicated(colnames(plotdata_df))]
+# ## remove the BAP1-associated peaks from the PBRM1 associated peaks
+# peaks_overlap <- c(colnames(acc_pbrm1_down_df), colnames(acc_pbrm1_up_df))
+# peaks_overlap <- peaks_overlap[!(peaks_overlap %in% c(colnames(acc_bap1_down_df), colnames(acc_bap1_up_df)))]
+# plotdata_df <- plotdata_df[, !(colnames(plotdata_df) %in% peaks_overlap)]
 ## change group names
 plotdata_df$Group.1=gsub('_','-',plotdata_df$Group.1)
 plotdata_df$Group.2=gsub('_','.',plotdata_df$Group.2)
@@ -106,9 +110,14 @@ row_ha= rowAnnotation(#Cell_type=row_anno_df$Cell_type,
 #                                Is_PBRM1_down_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_down_df)), col = c("TRUE" = "orange", "FALSE" = "white smoke")),
 #                                Is_PBRM1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_up_df)), col = c("TRUE" = "orange", "FALSE" = "white smoke")), 
 #                                annotation_name_side = "left", annotation_name_gp = gpar(fontsize = 13))
-column_ha <- HeatmapAnnotation(BAP1_associated_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% c(colnames(acc_bap1_down_df))), col = c("TRUE" = "purple", "FALSE" = "white smoke")),
+"#377EB8"
+"#E41A1C"
+is_bap1_peaks_vec <- ifelse(colnames(plotdata_mat) %in% colnames(acc_bap1_down_df), "Up-regulated",
+                                         ifelse(colnames(plotdata_mat) %in% colnames(acc_bap1_up_df), "Down-regulated", "other"))
+column_ha <- HeatmapAnnotation(BAP1_associated_peak = anno_simple(x = is_bap1_peaks_vec, col = c("TRUE" = "#984EA3", "FALSE" = "white smoke")),
                                Is_BAP1_down_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_bap1_down_df)), col = c("TRUE" = "#377EB8", "FALSE" = "white smoke")),
                                Is_BAP1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_bap1_up_df)), col = c("TRUE" = "#E41A1C", "FALSE" = "white smoke")),
+                               PBRM1_associated_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% c(colnames(acc_pbrm1_down_df), colnames(acc_pbrm1_up_df))), col = c("TRUE" = "#FF7F00", "FALSE" = "white smoke")),
                                Is_PBRM1_down_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_down_df)), col = c("TRUE" = "#377EB8", "FALSE" = "white smoke")),
                                Is_PBRM1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_up_df)), col = c("TRUE" = "#E41A1C", "FALSE" = "white smoke")), 
                                annotation_name_side = "left", annotation_name_gp = gpar(fontsize = 13))
@@ -169,7 +178,7 @@ p=ComplexHeatmap::Heatmap(matrix = plotdata_mat, col = colors_heatmapbody, name 
                           ## other
                           show_heatmap_legend = F, use_raster = T)
 file2write <- paste0(dir_out, "PBRM1_specific_peak_accessibility_raster.pdf")
-pdf(file2write, width = 14, height=6.5, useDingbats = F)
+pdf(file2write, width = 12, height=6.5, useDingbats = F)
 draw(object = p,
      annotation_legend_side = "right", annotation_legend_list = list_lgd)
 dev.off()

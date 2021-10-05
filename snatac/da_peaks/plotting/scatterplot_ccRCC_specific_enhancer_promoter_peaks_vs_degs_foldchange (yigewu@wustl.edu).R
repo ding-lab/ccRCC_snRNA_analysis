@@ -25,9 +25,12 @@ plotdata_df <- peaks2degs_df %>%
   filter(!is.na(avg_log2FC.snATAC) & !is.na(avg_log2FC.snRNA)) %>%
   select(avg_log2FC.snATAC, avg_log2FC.snRNA, Gene, peak2gene_type) %>%
   unique()
-test_df <- peaks2degs_df %>%
+peaks2degs_df %>%
   filter(!is.na(avg_log2FC.snATAC) & !is.na(avg_log2FC.snRNA)) %>%
-  filter(peak2gene_type == "Promoter")
+  filter(peak2gene_type == "Promoter") %>%
+  select(peak) %>%
+  unique() %>%
+  nrow()
   
 
 # plot promoter --------------------------------------------------------------------

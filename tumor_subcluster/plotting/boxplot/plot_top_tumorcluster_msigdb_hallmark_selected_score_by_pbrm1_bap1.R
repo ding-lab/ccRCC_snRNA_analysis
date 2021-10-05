@@ -18,21 +18,23 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input id meta data
-idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210305.v1/meta_data.20210305.v1.tsv")
+idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
 ## input sample group
 sample_group_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutation/annotate_cptac_sample_by_pbrm1_bap1_mutation/20210304.v1/PBRM1_BAP1_Mutation_Status_By_Case.20210304.v1.tsv")
 ## input cell type fraction
-scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/summarize_top_msigdb_geneset_score_by_tumor/20210419.v1/Max.GenesetScorePerSample.tsv")
+scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/summarize_top_msigdb_geneset_score_by_tumor/20210929.v1/Max.GenesetScorePerSample.tsv")
 
 # set plotting parameters -------------------------------------------------
 symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), symbols = c("****", "***", "**", "*", "ns"))
 pos <- position_jitter(width = 0.25, seed = 2)
-my_comparisons <- list(c("BAP1 mutated", "PBRM1 mutated"), c("BAP1 mutated", "Non-mutants"), c("PBRM1 mutated", "Non-mutants"))
+# my_comparisons <- list(c("BAP1 mutated", "PBRM1 mutated"), c("BAP1 mutated", "Non-mutants"), c("PBRM1 mutated", "Non-mutants"))
+my_comparisons <- list(c("BAP1\nmutated", "PBRM1\nmutated"), c("BAP1\nmutated", "Non-mutants"), c("PBRM1\nmutated", "Non-mutants"))
+
 sample_group_df <- sample_group_df %>%
   mutate(sample_group = mutation_category_sim)
 ## make colors for sample group
 colors_mut_type <- brewer.pal(name = "Pastel1", n = 3)
-names(colors_mut_type) <- c("BAP1 mutated", "PBRM1 mutated", "Non-mutants")
+names(colors_mut_type) <- c("BAP1\nmutated", "PBRM1\nmutated", "Non-mutants")
 # plot by cell group ------------------------------------------------------
 scores_df <- scores_df %>%
   mutate(score_group = variable) %>%
@@ -53,8 +55,11 @@ for (scoregroup_tmp in "MTORC1_SIGNALING_Score") {
                         by.x = c("Aliquot.snRNA.WU"), by.y = c("Aliquot_WU"), all.x = T)
   plot_data_df <- plot_data_df %>%
     filter(sample_group != "Both mutated") %>%
-    mutate(y_plot = value)
-  plot_data_df$x_plot <- factor(x = plot_data_df$sample_group, levels = c("Non-mutants", "BAP1 mutated", "PBRM1 mutated", "Both mutated"))
+    mutate(y_plot = value) %>%
+    mutate(x_plot = gsub(x = sample_group, pattern = " ", replacement = "\\\n")) %>%
+    arrange(Case, desc(value))
+  plot_data_df <- plot_data_df[!duplicated(plot_data_df$Case),]
+  plot_data_df$x_plot <- factor(x = plot_data_df$x_plot, levels = c("Non-mutants", "BAP1\nmutated", "PBRM1\nmutated", "Both\nmutated"))
   ## plot
   p = ggplot(plot_data_df, aes(x=x_plot, y=y_plot))
   p = p + geom_violin(aes(fill = x_plot),  color = NA, alpha = 1)
@@ -69,12 +74,12 @@ for (scoregroup_tmp in "MTORC1_SIGNALING_Score") {
   p <- p + theme(legend.position = "none")
   p <- p + theme(axis.title.x = element_blank(), axis.text.x = element_text(size = 8.5, colour = "black"))
   p <- p + ylab(label = scoregroup_tmp)
-  file2write <- paste0(dir_out, gsub(x = scoregroup_tmp, pattern = "\\/", replacement = "_"), ".png")
-  png(file2write, width = 600, height = 600, res = 150)
-  print(p)
-  dev.off()
+  # file2write <- paste0(dir_out, gsub(x = scoregroup_tmp, pattern = "\\/", replacement = "_"), ".png")
+  # png(file2write, width = 600, height = 600, res = 150)
+  # print(p)
+  # dev.off()
   file2write <- paste0(dir_out, gsub(x = scoregroup_tmp, pattern = "\\/", replacement = "_"), ".pdf")
-  pdf(file2write, width = 3.5, height = 2.5, useDingbats = F)
+  pdf(file2write, width = 3, height = 2.5, useDingbats = F)
   print(p)
   dev.off()
 }

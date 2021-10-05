@@ -106,11 +106,11 @@ row_ha= rowAnnotation(#Cell_type=row_anno_df$Cell_type,
 #                                Is_PBRM1_down_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_down_df)), col = c("TRUE" = "orange", "FALSE" = "white smoke")),
 #                                Is_PBRM1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_up_df)), col = c("TRUE" = "orange", "FALSE" = "white smoke")), 
 #                                annotation_name_side = "left", annotation_name_gp = gpar(fontsize = 13))
-column_ha <- HeatmapAnnotation(BAP1_associated_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% c(colnames(acc_bap1_down_df))), col = c("TRUE" = "purple", "FALSE" = "white smoke")),
-                               Is_BAP1_down_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_bap1_down_df)), col = c("TRUE" = "#377EB8", "FALSE" = "white smoke")),
-                               Is_BAP1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_bap1_up_df)), col = c("TRUE" = "#E41A1C", "FALSE" = "white smoke")),
-                               Is_PBRM1_down_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_down_df)), col = c("TRUE" = "#377EB8", "FALSE" = "white smoke")),
-                               Is_PBRM1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_up_df)), col = c("TRUE" = "#E41A1C", "FALSE" = "white smoke")), 
+column_ha <- HeatmapAnnotation(BAP1_associated_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% c(colnames(acc_bap1_down_df), colnames(acc_bap1_up_df))), col = c("TRUE" = "purple", "FALSE" = "white smoke")),
+                               Is_BAP1_down_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_bap1_down_df)), col = c("TRUE" = "purple", "FALSE" = "white smoke")),
+                               Is_BAP1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_bap1_up_df)), col = c("TRUE" = "purple", "FALSE" = "white smoke")),
+                               Is_PBRM1_down_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_down_df)), col = c("TRUE" = "orange", "FALSE" = "white smoke")),
+                               Is_PBRM1_up_peak = anno_simple(x = as.character(colnames(plotdata_mat) %in% colnames(acc_pbrm1_up_df)), col = c("TRUE" = "orange", "FALSE" = "white smoke")), 
                                annotation_name_side = "left", annotation_name_gp = gpar(fontsize = 13))
 
 # make column split -------------------------------------------------------

@@ -169,7 +169,7 @@ p=ComplexHeatmap::Heatmap(matrix = plotdata_mat, col = colors_heatmapbody, name 
                           ## other
                           show_heatmap_legend = F, use_raster = T)
 file2write <- paste0(dir_out, "PBRM1_specific_peak_accessibility_raster.pdf")
-pdf(file2write, width = 14, height=6.5, useDingbats = F)
+pdf(file2write, width = 12, height=6.5, useDingbats = F)
 draw(object = p,
      annotation_legend_side = "right", annotation_legend_list = list_lgd)
 dev.off()
