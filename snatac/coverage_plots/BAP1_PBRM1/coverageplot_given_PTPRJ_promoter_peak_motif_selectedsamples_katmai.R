@@ -26,7 +26,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -59,7 +59,7 @@ pieceids_selected <- c("C3L-00917-T1", "C3L-00088-T1", "C3L-00610-T1", "C3N-0024
 cellgroup_selected <- c('C3L-00088-N','C3N-01200-N', pieceids_selected)
 
 # preprocess ATAC object --------------------------------------------------
-atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_selected) | cell_type=='PT' & Piece_ID %in% c('C3L-00088-N','C3N-01200-N'))
+atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_selected) | (cell_type=='PT' & Piece_ID %in% c('C3L-00088-N','C3N-01200-N')))
 
 # process coordinates ------------------------------------------------------------
 chr=strsplit(x = peak_plot, split = "\\-")[[1]][1]
@@ -74,7 +74,7 @@ Idents(atac_subset)=factor(atac_subset$Piece_ID,levels=cellgroup_selected)
 
 # make colors ------------------------------------------------------------
 ## make colors
-colors_tumorgroup_sim <- c(RColorBrewer::brewer.pal(n = 9, name = "Dark2")[c(1, 2, 4)], RColorBrewer::brewer.pal(n = 9, name = "Set1")[c(4, 1)])
+colors_tumorgroup_sim <- c(RColorBrewer::brewer.pal(n = 8, name = "Dark2")[c(1, 2, 4)], RColorBrewer::brewer.pal(n = 8, name = "Set1")[c(4, 1)])
 names(colors_tumorgroup_sim) <- c("PT",  "PBRM1 mutated", "Non-mutants", "BAP1 mutated", "Both mutated")
 tumorgroup_vec <- mapvalues(x = str_split_fixed(string = pieceids_selected, pattern = "\\-T", n = 2)[,1], from = mut_df$Case, to = as.vector(mut_df$mutation_category_sim))
 tumorgroup_vec <- c("PT", "PT", tumorgroup_vec)
