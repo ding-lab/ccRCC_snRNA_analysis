@@ -55,7 +55,6 @@ topn_plot <- 3
 #   mutate(pieceid = str_split_fixed(string = variable, pattern = "_", n = 2)[,1])
 # pieceids_selected <- head(x = peak2fcs_long_tmp_df$pieceid, topn_plot)
 pieceids_selected <- c("C3L-00917-T1", "C3L-00088-T1", "C3L-00610-T1", "C3N-00242-T1", "C3N-00437-T1", "C3N-00317-T1", "C3L-00416-T2", "C3L-00908-T1")
-cellgroup_selected <- c('C3L-00088-N','C3N-01200-N', pieceids_selected)
 
 # preprocess ATAC object --------------------------------------------------
 atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_selected) | cell_type=='PT' & Piece_ID %in% c('C3L-00088-N','C3N-01200-N'))
@@ -69,16 +68,15 @@ new_en=en+1000
 peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
 ## change atac ident
 # print(head(atac@meta.data))
-Idents(atac_subset)=factor(atac_subset$Piece_ID,levels=cellgroup_selected)
+Idents(atac_subset)=factor(atac_subset$Piece_ID,levels=c('C3L-00088-N','C3N-01200-N', pieceids_selected))
 
 # make colors ------------------------------------------------------------
 ## make colors
 colors_tumorgroup_sim <- c(RColorBrewer::brewer.pal(n = 9, name = "Dark2")[c(1, 2, 4)], RColorBrewer::brewer.pal(n = 9, name = "Set1")[c(4, 1)])
 names(colors_tumorgroup_sim) <- c("PT",  "PBRM1 mutated", "Non-mutants", "BAP1 mutated", "Both mutated")
 tumorgroup_vec <- mapvalues(x = str_split_fixed(string = pieceids_selected, pattern = "\\-T", n = 2)[,1], from = mut_df$Case, to = as.vector(mut_df$mutation_category_sim))
-tumorgroup_vec <- c("PT", "PT", tumorgroup_vec)
-colors_tumorgroup <- colors_tumorgroup_sim[tumorgroup_vec]
-names(colors_tumorgroup) <- cellgroup_selected
+colors_tumorgroup <- colors_tumorgroup_sim[cluster2group_df$epithelial_group]
+names(colors_tumorgroup) <- cluster2group_df$cluster_name.formatted
 
 # plot --------------------------------------------------------------------
 p=Signac::CoveragePlot(
@@ -87,11 +85,10 @@ p=Signac::CoveragePlot(
   annotation = TRUE,
   peaks = TRUE,
   links=FALSE)
-p <- p + scale_fill_manual(values =  colors_tumorgroup)
 
 ## write output
 file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".pdf")
-pdf(file2write, width = 6, height = 7.5, useDingbats = F)
+pdf(file2write, width = 6, height = 7, useDingbats = F)
 print(p)
 dev.off()
 

@@ -8,6 +8,8 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
+library(ggrastr)
+
 ## set run id
 version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -65,9 +67,9 @@ plot_data_df <- plot_data_df %>%
 ## plot
 p <- ggplot()
 p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey70")
-p <- p + geom_point(data = subset(plot_data_df, y_plot < y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = "grey70")
-p <- p + geom_point(data = subset(plot_data_df, y_plot >= y_bottom & x_plot > 0), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = color_right_deep)
-p <- p + geom_point(data = subset(plot_data_df, y_plot >= y_bottom & x_plot < 0), mapping = aes(x = x_plot, y = y_plot), alpha = 0.5, size = 0.5, color = color_left_deep)
+p <- p + geom_point_rast(data = subset(plot_data_df, y_plot < y_bottom), mapping = aes(x = x_plot, y = y_plot), alpha = 1, size = 1, color = "grey70", shape = 16)
+p <- p + geom_point_rast(data = subset(plot_data_df, y_plot >= y_bottom & x_plot > 0), mapping = aes(x = x_plot, y = y_plot), alpha = 1, size = 1, color = color_right_deep, shape = 16)
+p <- p + geom_point_rast(data = subset(plot_data_df, y_plot >= y_bottom & x_plot < 0), mapping = aes(x = x_plot, y = y_plot), alpha = 1, size = 1, color = color_left_deep, shape = 16)
 # p <- p + scale_color_manual(values = c("FDR<0.05 (up)" = "red", "FDR<0.05 (down)" = "blue", "FDR<0.05" = "black", "FDR>=0.05" = "grey80"))
 # p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_TF)),
 #                          mapping = aes(x = x_plot, y = y_plot, label = text_TF), color = "black", force = 4, fontface = "bold", segment.alpha = 0.5)

@@ -11,6 +11,8 @@ source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 library(ggpubr)
 library(ggrepel)
+library(ggrastr)
+
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -93,10 +95,13 @@ length(unique(plotdata_df$peak)) ## 1096 promoter peaks
 # highlight genes with fold change > 1 ----------------------------------------------------
 plotdata_df <- plotdata_df %>%
   mutate(highlight = ((avg_log2FC.snATAC >= 1 & avg_log2FC.snRNA >= 1) | (avg_log2FC.snATAC <= -1 & avg_log2FC.snRNA <= -1) | (Gene %in% c("VIM", "FN1", "CDH2", "WNT5B"))))
-p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", alpha = 0.8, shape = 16, size = 1.5, color = "grey20",
-               add = "reg.line", add.params = list(color = RColorBrewer::brewer.pal(n = 9, name = "Set1")[3], linetype = 2), # Customize reg. line
-               conf.int = F # Add confidence interval
-)
+# p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", alpha = 0.8, shape = 16, size = 1.5, color = "grey20",
+#                add = "reg.line", add.params = list(color = RColorBrewer::brewer.pal(n = 9, name = "Set1")[3], linetype = 2), # Customize reg. line
+#                conf.int = F # Add confidence interval
+# )
+p <- ggplot() + geom_point_rast(data = plotdata_df, 
+                                mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.snRNA),
+                                alpha = 0.8, shape = 16, size = 1.5)
 p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
 p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
 p <- p + stat_cor(method = "spearman", label.x = 1, label.y = 1.5, size = 4)
