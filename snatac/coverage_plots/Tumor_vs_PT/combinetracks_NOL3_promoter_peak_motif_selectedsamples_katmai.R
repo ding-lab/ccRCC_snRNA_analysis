@@ -46,6 +46,7 @@ motif_plot <- "HIF1A"
 topn_plot <- 4
 sampleids_nat <- c('C3L-00088-N','C3N-01200-N', "C3L-00079-N", "C3N-00242-N")
 
+
 # preprocess samples to show ----------------------------------------------
 peak2fcs_tmp_df <- peak2fcs_df %>%
   filter(peak == peak_plot)
@@ -53,12 +54,12 @@ peak2fcs_long_tmp_df <- melt(data = peak2fcs_tmp_df, measure.vars = colnames(pea
 peak2fcs_long_tmp_df <- peak2fcs_long_tmp_df %>%
   arrange(desc(value)) %>%
   mutate(pieceid = str_split_fixed(string = variable, pattern = "_", n = 2)[,1])
-pieceids_selected <- head(x = peak2fcs_long_tmp_df$pieceid, topn_plot)
+pieceids_tumor_selected <- head(x = peak2fcs_long_tmp_df$pieceid, topn_plot)
+pieceids_tumor_selected <- c("C3L-00448-T1", "C3N-01213-T1", "C3L-00079-T1", "C3L-00917-T1")
+pieceids_nat_selected <- c('C3L-00088-N', "C3L-00079-N", "C3N-00242-N")
 
 # preprocess ATAC object --------------------------------------------------
-Idents(atac)=atac$Piece_ID
-atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_selected) | cell_type=='PT' & Piece_ID %in% sampleids_nat)
-Idents(atac_subset)=factor(atac_subset$Piece_ID, levels=c(pieceids_selected,'C3L-00088-N','C3N-01200-N', "C3L-00079-N", "C3N-00242-N"))
+atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_tumor_selected) | (cell_type=='PT' & Piece_ID %in% pieceids_nat_selected))
 
 # process coordinates ------------------------------------------------------------
 chr=strsplit(x = peak_plot, split = "\\-")[[1]][1]
@@ -71,13 +72,14 @@ peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
 motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == peak_plot & peak2motif_df$motif.name == motif_plot & peak2motif_df$Peak_Type == "Promoter"]; motif_coord <- unique(motif_coord)
 ## change atac ident
 # print(head(atac@meta.data))
+Idents(atac_subset)=factor(atac_subset$Piece_ID,levels=c(pieceids_tumor_selected, pieceids_nat_selected))
 
 # plot --------------------------------------------------------------------
 ## make colors
-color_tumorcell <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[4]
-color_pt <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[1]
-colors_celltype <- c(rep(x = color_tumorcell, 24), rep(x = color_pt, 6))
-names(colors_celltype) <- c(peak2fcs_long_tmp_df$pieceid, sampleids_nat)
+color_tumorcell <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[4]
+color_pt <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[1]
+colors_celltype <- c(rep(x = color_tumorcell, length(pieceids_tumor_selected)), rep(x = color_pt, length(pieceids_nat_selected)))
+names(colors_celltype) <- c(pieceids_tumor_selected, pieceids_nat_selected)
 
 cov_plot= Signac::CoveragePlot(
   object = atac_subset,
@@ -106,9 +108,10 @@ gene_plot <- Signac::AnnotationPlot(
 
 p <- Signac::CombineTracks(
   plotlist = list(cov_plot, peak_plot_obj, motif_plot, gene_plot),
-  heights = c(7, 0.5, 0.5, 1))
+  heights = c(7, 0.5, 0.5, 1.5))
 print("Finished CombineTracks")
 
+print("Finished peak_plot for cell line")
 ## write output
 # file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".", motif_plot, ".png")
 # png(file2write, width = 1000, height = 800, res = 150)
