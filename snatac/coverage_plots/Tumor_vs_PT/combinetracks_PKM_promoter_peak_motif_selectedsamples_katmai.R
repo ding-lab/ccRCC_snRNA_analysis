@@ -76,8 +76,8 @@ Idents(atac_subset)=factor(atac_subset$Piece_ID,levels=c(pieceids_tumor_selected
 ## make colors
 color_tumorcell <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[4]
 color_pt <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[1]
-colors_celltype <- c(rep(x = color_tumorcell, 24), rep(x = color_pt, length(pieceids_nat_selected)))
-names(colors_celltype) <- c(peak2fcs_long_tmp_df$pieceid, pieceids_nat_selected)
+colors_celltype <- c(rep(x = color_tumorcell, length(pieceids_tumor_selected)), rep(x = color_pt, length(pieceids_nat_selected)))
+names(colors_celltype) <- c(pieceids_tumor_selected, pieceids_nat_selected)
 
 cov_plot= Signac::CoveragePlot(
   object = atac_subset,
