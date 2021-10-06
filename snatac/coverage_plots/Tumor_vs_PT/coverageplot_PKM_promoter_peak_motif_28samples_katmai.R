@@ -57,14 +57,15 @@ peak2fcs_long_tmp_df <- melt(data = peak2fcs_tmp_df, measure.vars = colnames(pea
 peak2fcs_long_tmp_df <- peak2fcs_long_tmp_df %>%
   arrange(desc(value)) %>%
   mutate(pieceid = str_split_fixed(string = variable, pattern = "_", n = 2)[,1])
-pieceids_selected <- head(x = peak2fcs_long_tmp_df$pieceid, topn_plot)
+pieceids_tumor_selected <- head(x = peak2fcs_long_tmp_df$pieceid, topn_plot)
+pieceids_nat_selected <- c('C3L-00088-N', "C3L-00079-N", "C3N-00242-N", 'C3N-01200-N')
 
 # preprocess ATAC object --------------------------------------------------
 head(atac@meta.data)
-atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_selected) | cell_type=='PT' & Piece_ID %in% c('C3L-00088-N','C3N-01200-N', "C3L-00079-N", "C3N-00242-N"))
+atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_tumor_selected) | cell_type=='PT' & Piece_ID %in% pieceids_nat_selected)
 ## change atac ident
 # print(head(atac@meta.data))
-Idents(atac_subset)=factor(atac_subset$Piece_ID, levels=c(pieceids_selected,'C3L-00088-N','C3N-01200-N', "C3L-00079-N", "C3N-00242-N"))
+Idents(atac_subset)=factor(atac_subset$Piece_ID, levels=c(pieceids_tumor_selected, pieceids_nat_selected))
 
 # process coordinates ------------------------------------------------------------
 chr=strsplit(x = peak_plot, split = "\\-")[[1]][1]
@@ -79,7 +80,7 @@ motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == "chr15-72230151-7
 color_tumorcell <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")[4]
 color_pt <- RColorBrewer::brewer.pal(n = 8, name        = "Dark2")[1]
 colors_celltype <- c(rep(x = color_tumorcell, 24), rep(x = color_pt, 4))
-names(colors_celltype) <- c(pieceids_selected, 'C3L-00088-N','C3N-01200-N', "C3L-00079-N", "C3N-00242-N")
+names(colors_celltype) <- c(pieceids_tumor_selected, 'C3L-00088-N','C3N-01200-N', "C3L-00079-N", "C3N-00242-N")
 
 # plot --------------------------------------------------------------------
 p=Signac::CoveragePlot(
