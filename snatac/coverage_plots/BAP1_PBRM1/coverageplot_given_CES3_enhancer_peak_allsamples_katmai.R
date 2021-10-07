@@ -78,7 +78,7 @@ p=CoveragePlot(
   annotation = TRUE,
   peaks = TRUE,
   links=FALSE, heights = c(10, 1, 0.5))
-p <- p + scale_fill_manual(values =  colors_celltype)
+p <- p + scale_fill_manual(values =  colors_tumorgroup)
 
 ## write output
 file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".pdf")
