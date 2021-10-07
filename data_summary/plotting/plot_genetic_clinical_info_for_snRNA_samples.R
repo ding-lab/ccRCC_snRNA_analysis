@@ -18,7 +18,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input id meta data
-id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv", data.table = F)
+id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv", data.table = F)
 ## input te bulk genomics/methylation events
 bulk_sn_omicsprofile_df <- fread(input = "./Resources/Analysis_Results/data_summary/merge_bulk_sn_profiles/20210504.v1/bulk_sn_omics_profile.20210504.v1.tsv", data.table = F)
 ## input clinical info
@@ -27,6 +27,7 @@ specimen_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Resu
 # merge data --------------------------------------------------------------
 ## filter samples with either snRNA data
 id_metadata_filtered_df <- id_metadata_df %>%
+  filter(Case != "C3L-00359") %>%
   filter(snRNA_available) %>%
   filter(Is_discovery_set) %>%
   filter(Sample_Type == "Tumor")

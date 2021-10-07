@@ -20,16 +20,16 @@ dir.create(dir_out)
 ## input the tumor content estimate from the snRNA data
 snRNA_tumorcontent_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/count_fraction/count_cellgroup5_fraction_per_sample/20210901.v1/CellGroupBarcodes_Number_and_Fraction_per_Sample20210901.v1.tsv", data.table = F)
 ## input the tumor content estimate from the bulk RNA data (ESTIMATE)
-estimate_df <- readxl::read_excel("./Resources/Bulk_Processed_Data/CPTAC3-ccRCC-SupplementaryTables_Final/Table S7.xlsx", sheet = "ESTIMATE scores")
+estimate_df <- readxl::read_excel("./Resources/Bulk_Processed_Data/CPTAC3-ccRCC-SupplementaryTables_Final//Table S7.xlsx", sheet = "ESTIMATE scores")
 ## input meta data
-id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv", data.table = F)
+id_metadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20191105.v1/meta_data.20191105.v1.tsv", data.table = F)
 
 # preprocess snRNA-based tumor content ------------------------------------
 ## only keep the tumor samples
 snRNA_tumorcontent_df <- snRNA_tumorcontent_df %>%
   filter(Sample_Type == "Tumor") %>%
   filter(Cell_group == "Tumor cells")
-snRNA_tumorcontent_df$Aliquot <- mapvalues(snRNA_tumorcontent_df$Aliquot_WU, from = id_metadata_df$Aliquot.snRNA.WU, to = as.vector(id_metadata_df$Aliquot.snRNA))
+
 
 # extract the bulk RNA-based tumor content estimate -----------------------
 bulkRNA_tumor_content <- as.numeric(as.vector(as.data.frame(estimate_df[7,2:176])))

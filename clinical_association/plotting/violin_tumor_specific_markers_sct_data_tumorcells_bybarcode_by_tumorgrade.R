@@ -70,7 +70,7 @@ my_comparisons <- list(c("G1/2", "G3"),c("G3", "G4"),c("G1/2", "G4"))
 # path_log <- paste0(dir_out, "G12_Combined_FoldChanges.txt")
 path_log <- paste0(dir_out, "G12_Combined_T_test.txt")
 sink(path_log)
-for (gene_tmp in c("UBE2D2", "CP")) {
+for (gene_tmp in c("UBE2D2", "CP", "NDRG1", "KCTD3", "PCSK6")) {
 # for (gene_tmp in colnames(exp_df)) {
   ## make plot data
   plot_data_df <- data.frame(barcode_merged = rownames(exp_df), expression = exp_df[,gene_tmp])

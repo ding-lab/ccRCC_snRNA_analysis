@@ -18,28 +18,30 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input merged tumor content from bulk and snRNA
-merged_tumorcontent_df <- fread(input = "./Resources/Analysis_Results/bulk/tumor_content/merge_tumor_content_from_bulk_and_snRNA/20200316.v1/Perc_Tumor_Content_from_snRNA_and_bulkRNA.20200316.v1.tsv", data.table = F)
-
+merged_tumorcontent_df <- fread(input = "./Resources/Analysis_Results/bulk/tumor_content/merge_tumor_content_from_bulk_and_snRNA/20211007.v1/Perc_Tumor_Content_from_snRNA_and_bulkRNA.20211007.v1.tsv", data.table = F)
 
 # make plot data ----------------------------------------------------------
 plot_data_df <- merged_tumorcontent_df
 plot_data_df <- plot_data_df %>%
-  mutate(x = Frac_Tumor_Barcodes) %>%
-  mutate(y = ESTIMATE_TumorPurity_RNA)
+  mutate(x_plot = Frac_CellGroupBarcodes_ByAliquot) %>%
+  mutate(y_plot = ESTIMATE_TumorPurity_RNA) %>%
+  filter(!is.na(x_plot) & !is.na(y_plot))
 
 # make scatterplot --------------------------------------------------------
 ## reference: https://rpkgs.datanovia.com/ggpubr/reference/stat_cor.html
 p <- ggplot()
 # p <- p + geom_point(data = plot_data_df, mapping = aes(x = x, y = y))
-p <- ggscatter(plot_data_df, x = "x", y = "y",
+p <- ggscatter(plot_data_df, x = "x_plot", y = "y_plot",
                add = "reg.line",  # Add regressin line
                add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
                conf.int = TRUE # Add confidence interval
 )
 # Add correlation coefficient
-p <- p + stat_cor(method = "pearson", label.x = 0.5, label.y = 0.8)
+p <- p + stat_cor(method = "pearson", label.x = 0.4, label.y = 0.8, size = 6)
 p <- p + xlab("Tumor Content Estimated from snRNA Data")
 p <- p + ylab("Tumor Content Estimated from Bulk RNA Data")
+p <- p + theme_classic(base_size = 15)
+p <- p + theme(axis.text = element_text(color = "black"))
 p
 
 # save scatterplot --------------------------------------------------------

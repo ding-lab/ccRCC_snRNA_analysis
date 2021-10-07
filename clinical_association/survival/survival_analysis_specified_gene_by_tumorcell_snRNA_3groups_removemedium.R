@@ -44,7 +44,7 @@ colors_expgroup <- RColorBrewer::brewer.pal(n = 9, name = "YlOrRd")[c(9, 4, 6)]
 genes_process_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210702.v1/ccRCC_markers.Surface.20210702.v1.tsv")
 genes_process <- genes_process_df$Gene
 
-for (gene_test in "CP") {
+for (gene_test in "HIF1A") {
 # for (gene_test in genes_process) {
   # make combined data and test ------------------------------------------------------
   ## filter specific protein data

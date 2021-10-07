@@ -43,7 +43,7 @@ genes_process <- genes_process_df$Gene
 genes_process <- genes_process[!(genes_process %in% c("DPP6", "CPNE8", "EFNA5", "MGLL", "SPIRE1", "SPIRE1", "PLCB1", "OSMR", "SORBS1", "ANO6", "EPB41", "PAM", "RHEX"))]
 
 pvalues_vec <- NULL
-for (gene_test in "CP") {
+for (gene_test in "HIF1A") {
 # for (gene_test in genes_process) {
   ## filter specific protein data
   exp_test_wide_df <- exp_data_df[exp_df$gene_name == gene_test,]
