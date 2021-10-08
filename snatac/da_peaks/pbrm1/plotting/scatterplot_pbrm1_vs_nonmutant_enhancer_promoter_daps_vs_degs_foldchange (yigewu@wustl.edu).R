@@ -25,13 +25,10 @@ plotdata_df <- peaks2degs_df %>%
   filter(!is.na(avg_log2FC.snATAC) & !is.na(avg_log2FC.snRNA)) %>%
   select(avg_log2FC.snATAC, avg_log2FC.snRNA, Gene, peak2gene_type) %>%
   unique()
-## make colors
-colors_peak2genetype <- brewer.pal(n = 7, name = "Dark2")[c(4, 6)]
-names(colors_peak2genetype) <- c("Promoter", "Enhancer")
 
 # plot highlight genes ----------------------------------------------------
 plotdata_df <- plotdata_df %>%
-  mutate(highlight = (Gene %in% c("PBX1", "RP1", "NCALD")) | (Gene %in% c("ANGPTL4", "CAV1", "PPFIA4", "CAV1", "CAV2", "TNFAIP8", "EDN1")))
+  mutate(highlight = (Gene %in% c("PBX1", "RP1", "NCALD")))
 
 p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRNA", color = "peak2gene_type",
                add = "reg.line",  # Add regressin line
@@ -40,24 +37,19 @@ p <- ggscatter(data = plotdata_df, x = "avg_log2FC.snATAC", y = "avg_log2FC.snRN
 )
 p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey")
 p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey")
-p <- p + stat_cor(method = "pearson", label.x = -1, label.y = 0)
-p <-  p + scale_color_manual(values = colors_peak2genetype)
+p <- p + stat_cor(method = "pearson", label.x = 0, label.y = 0)
 p <- p + geom_text_repel(data = subset(x = plotdata_df, highlight == T), 
                          mapping = aes(x = avg_log2FC.snATAC, y = avg_log2FC.snRNA, label = Gene), 
-                         max.overlaps = Inf, size = 6, 
-                         segment.size = 0.4, segment.alpha = 0.6, min.segment.length = 0, box.padding = 0.5)
-p <- p + xlab("Log2(fold change of peak accessibility)")
-p <- p + ylab("Log2(fold change of gene expression)")
-p <- p + theme_classic()
-p <- p + guides(color = guide_legend(nrow = 1))
-p <- p + theme(axis.text = element_text(size = 18, color = "black"),
-               axis.title = element_text(size = 18),
+                         max.overlaps = Inf, min.segment.length = 0)
+p <- p + guides(color = guide_legend(nrow = 2))
+p <- p + theme(axis.text = element_text(size = 14),
+               axis.title = element_text(size = 14),
                legend.position = "bottom", legend.box = "horizontal")
 # file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC." , "1",".png")
 # png(file2write, width = 800, height = 900, res = 150)
 # print(p)
 # dev.off()
-file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC.","selectedGenes",".pdf")
+file2write <- paste0(dir_out, "scatterplot_snATAC_snRNA_FC.","1",".pdf")
 pdf(file2write, width = 5.5, height = 6, useDingbats = F)
 print(p)
 dev.off()

@@ -16,15 +16,15 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------
 ## input barcodes to cell type
-barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_35aliquots/20210802.v1/35Aliquot.Barcode2CellType.20210802.v1.tsv")
+barcode2celltype_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Barcode_Annotation/28_ccRCC_snATAC_ManualReviwed.v2.20210709.tsv")
 ## input id meta data
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
 
 # specify Cell group to plot ----------------------------------------------
-var_cellgroup <- "Cell_type.shorter"
+var_cellgroup <- "cell_type"
 
 # make data for plotting --------------------------------------------------
-barcode2celltype_df$Aliquot_WU <- mapvalues(x = barcode2celltype_df$orig.ident, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
+barcode2celltype_df$Aliquot_WU <- mapvalues(x = barcode2celltype_df$dataset, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
 barcode2celltype_df[, "Cell_group"] <- barcode2celltype_df[, var_cellgroup]
 ## sum the barcode fraction by cell group
 frac_barcodes_by_cellgroup <- barcode2celltype_df %>%
@@ -45,5 +45,5 @@ plot_df$Sample_Type <- mapvalues(x = plot_df$Aliquot_WU, from = idmetadata_df$Al
 plot_df$Case <- mapvalues(x = plot_df$Aliquot_WU, from = idmetadata_df$Aliquot.snRNA.WU, to = idmetadata_df$Case)
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "CellGroupBarcodes_Number_and_Fraction_per_Sample", run_id, '.tsv')
+file2write <- paste0(dir_out, "CellGroupBarcodes_Number_and_Fraction_per_snATAc_Sample", run_id, '.tsv')
 write.table(x = plot_df, file = file2write, quote = F, row.names = F, sep = "\t")

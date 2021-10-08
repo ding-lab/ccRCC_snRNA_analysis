@@ -1,4 +1,4 @@
-# Yige Wu @WashU Sep 2020
+# Yige Wu @WashU Sep 2021
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
@@ -18,13 +18,9 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input the average expression calculated (SCT)
 avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/avgexp_sct_data_bycelltypew_epithelial_katmai/20210907.v1/35_aliquot_merged.avgexp.SCT.data.Cell_group_w_epithelialcelltypes.20210907.v1.tsv", data.table = F)
-genes_process_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210824.v1/ccRCC_markers.Surface.20210824.v1.tsv")
-## input variations of expression by gene
-# sd_bygene_bysample_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/calculate_SD_for_ccRCC_markers_sct_data_across_tumormanualclusters_persample/20210712.v1/SD_for_ccRCC_markers_across_tumormanualclusters_persample.tsv")
-# sd_bygene_mean_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/calculate_SD_for_ccRCC_markers_sct_data_across_tumormanualclusters_persample/20210712.v1/Mean_SD_for_ccRCC_markers_across_tumormanualclusters_persample.tsv")
 
 # specify pairs to filter -------------------------------------------------
-genes_filter <- genes_process_df$Gene
+genes_filter <- c("B2M", "HLA-A", "HLA-E", "LILRB1")
 
 # format the column names to only aliquot id ------------------------------
 ## filtr the rows
@@ -39,8 +35,11 @@ rownames(plot_data_raw_mat) <- plot_data_df$gene
 genes_plot <- rownames(plot_data_raw_mat)
 genes_plot <- genes_plot[!(genes_plot %in% c("PIK3CB", "ARHGEF28", "PTGER3", "PARD3", "GNG12", "EFNA5", "SPIRE1", "LIFR", "PKP4", "SORBS1", "PTPRM", "FBXO16", "PAM"))]
 genes_plot <- genes_plot[!(genes_plot %in% c("DPP6", "CPNE8", "EFNA5", "MGLL", "SPIRE1", "SPIRE1", "PLCB1", "OSMR", "SORBS1", "ANO6", "EPB41", "PAM"))]
-
-plot_data_raw_mat <- plot_data_raw_mat[genes_plot,]
+genes_plot_ordered_df <- genes_process_df %>%
+  filter(Gene %in% genes_plot) %>%
+  arrange(desc(avg_log2FC.mean.TumorcellsvsNontumor))
+rownames_plot <- genes_plot_ordered_df$Gene
+plot_data_raw_mat <- plot_data_raw_mat[rownames_plot,]
 ## scale by row
 plot_data_mat <- t(apply(plot_data_raw_mat, 1, scale))
 rownames(plot_data_mat) <- rownames(plot_data_raw_mat)
@@ -91,27 +90,12 @@ colors_sd <- circlize::colorRamp2(seq(from = 0, to = 4, by = 0.5),
                                   RColorBrewer::brewer.pal(name = "Oranges", n = 9))
 
 # make row annotation -----------------------------------------------------
-## get snRNA fold changes
-log2fc_tumorvsnontumor_vec <- mapvalues(x = genes_plot, from = genes_process_df$Gene, to = as.vector(genes_process_df$avg_log2FC.mean.TumorcellsvsNontumor));log2fc_tumorvsnontumor_vec <- as.numeric(log2fc_tumorvsnontumor_vec)
-log2fc_tumorvspt_vec <- mapvalues(x = genes_plot, from = genes_process_df$Gene, to = as.vector(genes_process_df$avg_log2FC.allTumorcellsvsPT)); log2fc_tumorvspt_vec <- as.numeric(log2fc_tumorvspt_vec)
-## bulk bulk RNA fold changes
-log2fc_bulkrna_vec <- mapvalues(x = genes_plot, from = genes_process_df$Gene, to = as.vector(genes_process_df$log2FC.bulkRNA)); log2fc_bulkrna_vec <- as.numeric(log2fc_bulkrna_vec)
-## bulk bulk protein fold changes
-log2fc_bulkpro_vec <- mapvalues(x = genes_plot, from = genes_process_df$Gene, to = as.vector(genes_process_df$log2FC.bulkpro)); log2fc_bulkpro_vec <- as.numeric(log2fc_bulkpro_vec)
-## get if each gene is druggable
-isdruggable_vec <- mapvalues(x = genes_plot, from = genes_process_df$Gene, to = as.vector(genes_process_df$is_druggable))
-isdruggable_vec[genes_plot == "ENPP3"] <- "TRUE"
 ## annotate unscaled expression
 orig_avgexp_vec <- rowMeans(x = plot_data_raw_mat, na.rm = T)
 ## get mean SD
 # sd_vec <- mapvalues(x = genes_plot, from = sd_bygene_mean_df$V1, to = as.vector(sd_bygene_mean_df$sd_bysample_mean)); sd_vec <- as.numeric(sd_vec)
 ## make row annotation
-row_anno_obj <- rowAnnotation(ccRCCvsNontumor_snRNA = anno_simple(x = log2fc_tumorvsnontumor_vec, col = colors_snRNA_fc), 
-                              ccRCCvsPT_snRNA = anno_simple(x = log2fc_tumorvspt_vec, col = colors_snRNA_fc), 
-                              ccRCCvsNAT_bulkRNA = anno_simple(x = log2fc_bulkrna_vec, col = colors_snRNA_fc), 
-                              ccRCCvsNAT_bulkProtein = anno_simple(x = log2fc_bulkpro_vec, col = colors_snRNA_fc), 
-                              is_druggable = anno_simple(x = isdruggable_vec, col = colors_yesno), 
-                              unscaled_snRNA_exp = anno_simple(x = orig_avgexp_vec, col = colors_unscaledexp),
+row_anno_obj <- rowAnnotation(unscaled_snRNA_exp = anno_simple(x = orig_avgexp_vec, col = colors_unscaledexp),
                               # SD_tumorcluster_snRNA_exp = anno_simple(x = sd_vec, col = colors_sd),
                               annotation_name_side = "bottom", annotation_name_gp = gpar(fontsize = 10), annotation_width = unit(20, "mm"))
 
@@ -135,30 +119,9 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              show_heatmap_legend = F)
 p
 ## make legend
-# list_lgd = list(
-#   Legend(title = "Scaled snRNA\nexpression", title_gp = gpar(fontsize = 10),
-#          col_fun = colors_heatmapbody, 
-#          legend_width = unit(2, "cm"),
-#          direction = "horizontal"),
-#   Legend(title = "Log2 fold change", title_gp = gpar(fontsize = 10),
-#          col_fun = colors_snRNA_fc, 
-#          legend_width = unit(2, "cm"),
-#          direction = "horizontal"),
-#   Legend(title = "Unscaled snRNA\nexpression", title_gp = gpar(fontsize = 10),
-#          col_fun = colors_unscaledexp, 
-#          legend_width = unit(2, "cm"),
-#          direction = "horizontal"),
-#   Legend(title = "averaged standard deviation\nof snRNA expression", title_gp = gpar(fontsize = 10),
-#          col_fun = colors_sd, 
-#          legend_width = unit(2, "cm"),
-#          direction = "horizontal"))
 list_lgd = list(
   Legend(title = "Scaled snRNA\nexpression", title_gp = gpar(fontsize = 10),
          col_fun = colors_heatmapbody, 
-         legend_width = unit(2, "cm"),
-         direction = "horizontal"),
-  Legend(title = "Log2 fold change", title_gp = gpar(fontsize = 10),
-         col_fun = colors_snRNA_fc, 
          legend_width = unit(2, "cm"),
          direction = "horizontal"),
   Legend(title = "Unscaled snRNA\nexpression", title_gp = gpar(fontsize = 10),

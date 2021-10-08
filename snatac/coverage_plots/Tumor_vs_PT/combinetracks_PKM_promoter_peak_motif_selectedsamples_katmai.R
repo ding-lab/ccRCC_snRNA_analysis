@@ -41,7 +41,8 @@ peak2motif_df <- fread(data.table = F, input = "/diskmnt/Projects/ccRCC_scratch/
 ## input peak fold changes
 peak2fcs_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/UP_Tumor_vsPT.Filtered.CNV_corrected.Annotated.20210811.tsv")
 ## specify parameters to plot
-peak_plot <- c("chr15-72222291-72222791")
+# peak_plot <- c("chr15-72222291-72222791")
+peak_plot <- c("chr15-72230151-72230651")
 motif_plot <- "RBPJ"
 topn_plot <- 4
 

@@ -10,7 +10,7 @@ source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 library(ggpubr)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -30,8 +30,8 @@ plot_data_df <- plot_data_df %>%
 # make scatterplot --------------------------------------------------------
 ## reference: https://rpkgs.datanovia.com/ggpubr/reference/stat_cor.html
 p <- ggplot()
-# p <- p + geom_point(data = plot_data_df, mapping = aes(x = x, y = y))
-p <- ggscatter(plot_data_df, x = "x_plot", y = "y_plot",
+# p <- p + geom_point_rast(data = plot_data_df, mapping = aes(x = x_plot, y = y_plot), alpha = 0.8, shape = 16)
+p <- ggscatter(plot_data_df, x = "x_plot", y = "y_plot", alpha = 0.8,
                add = "reg.line",  # Add regressin line
                add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
                conf.int = TRUE # Add confidence interval
@@ -40,8 +40,9 @@ p <- ggscatter(plot_data_df, x = "x_plot", y = "y_plot",
 p <- p + stat_cor(method = "pearson", label.x = 0.4, label.y = 0.8, size = 6)
 p <- p + xlab("Tumor Content Estimated from snRNA Data")
 p <- p + ylab("Tumor Content Estimated from Bulk RNA Data")
-p <- p + theme_classic(base_size = 15)
-p <- p + theme(axis.text = element_text(color = "black"))
+p <- p + theme_classic(base_size = 16)
+p <- p + theme(axis.text = element_text(color = "black", size = 16),
+               axis.title = element_text(color = "black", size = 16))
 p
 
 # save scatterplot --------------------------------------------------------

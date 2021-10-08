@@ -16,15 +16,17 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------
 ## input barcodes to cell type
-barcode2celltype_df <- fread(data.table = F, input = "../ccRCC_snATAC//Resources/snATAC_Processed_Data/Barcode_Annotation/UMAP/UMAP_data_13_snATAC_Normal_epithelialCells_reclustered.20201209.tsv")
+barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_35aliquots/20210802.v1/35Aliquot.Barcode2CellType.20210802.v1.tsv")
 ## input id meta data
-idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv")
+idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
 
 # specify Cell group to plot ----------------------------------------------
-var_cellgroup <- "cell_type_manual_5"
+barcode2celltype_df <- barcode2celltype_df %>%
+  mutate(Cell_group_process = ifelse(Cell_group14_w_transitional == "EMT tumor cells", Cell_group14_w_transitional, Cell_group_w_epithelialcelltypes))
+var_cellgroup <- "Cell_group_process"
 
 # make data for plotting --------------------------------------------------
-barcode2celltype_df$Aliquot_WU <- mapvalues(x = barcode2celltype_df$dataset, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
+barcode2celltype_df$Aliquot_WU <- mapvalues(x = barcode2celltype_df$orig.ident, from = idmetadata_df$Aliquot.snRNA, to = as.vector(idmetadata_df$Aliquot.snRNA.WU))
 barcode2celltype_df[, "Cell_group"] <- barcode2celltype_df[, var_cellgroup]
 ## sum the barcode fraction by cell group
 frac_barcodes_by_cellgroup <- barcode2celltype_df %>%
@@ -45,5 +47,5 @@ plot_df$Sample_Type <- mapvalues(x = plot_df$Aliquot_WU, from = idmetadata_df$Al
 plot_df$Case <- mapvalues(x = plot_df$Aliquot_WU, from = idmetadata_df$Aliquot.snRNA.WU, to = idmetadata_df$Case)
 
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "CellGroupBarcodes_Number_and_Fraction_per_snATAc_Sample", run_id, '.tsv')
+file2write <- paste0(dir_out, "CellGroupBarcodes_Number_and_Fraction_per_Sample", run_id, '.tsv')
 write.table(x = plot_df, file = file2write, quote = F, row.names = F, sep = "\t")

@@ -10,6 +10,8 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 library(ggpubr)
+library(ggrastr)
+
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -63,28 +65,90 @@ for (gene_y in genes_y) {
   # p <- p + geom_point(data = plot_data_df, mapping = aes(x = x, y = y))
   p <- ggscatter(data = plot_data_df, x = "value.x", y = "value.y", color = "Sample_Type", size = 0.5,
                  add = "reg.line",  # Add regressin line
-                 add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+                 # add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
                  conf.int = TRUE # Add confidence interval
   )
   # Add correlation coefficient
-  p <- p + stat_cor(method = "pearson", 
-                    label.x = quantile(x = plot_data_df$value.x, probs = 0.001, na.rm = T), 
-                    label.y = quantile(x = plot_data_df$value.y, probs = 0.99, na.rm = T))
+  p <- p + stat_cor(aes(color = Sample_Type),
+                    method = "pearson",
+                    label.x = quantile(x = plot_data_df$value.x, probs = 0.001, na.rm = T))
   p <- p + xlab(paste0(gene_x, " protein abundance"))
   p <- p + ylab(paste0(gene_y, " protein abundance"))
-  p <- p + theme_classic(base_size = 9)
-  p <- p + theme(legend.position = "top", title = element_text(size = 9))
-  p <- p + theme(axis.title = element_text(size = 8), axis.text = element_text(size = 8, color = "black"))
+  p <- p + theme_classic(base_size = 12)
+  p <- p + theme(legend.position = "none")
+  p <- p + theme(axis.title = element_text(size = 14), axis.text = element_text(size = 14, color = "black"))
   p
-  
+
   # save scatterplot --------------------------------------------------------
   # file2write <- paste0(dir_out, gene_x, "~", gene_y,".png")
   # png(file2write, width = 800, height = 800, res = 150)
   # print(p)
   # dev.off()
-  
+
   file2write <- paste0(dir_out, gene_x, "~", gene_y,".pdf")
-  pdf(file2write, width = 2, height = 2.3, useDingbats = F)
+  pdf(file2write, width = 3, height = 3, useDingbats = F)
   print(p)
   dev.off()
+  
+  # # make scatterplot --------------------------------------------------------
+  # p <- ggplot()
+  # # p <- p + geom_point(data = plot_data_df, mapping = aes(x = x, y = y))
+  # p <- ggscatter(data = plot_data_df, x = "value.x", y = "value.y", color = "Sample_Type", size = 0.5,
+  #                add = "reg.line",  # Add regressin line
+  #                add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+  #                conf.int = TRUE # Add confidence interval
+  # )
+  # # Add correlation coefficient
+  # p <- p + stat_cor(method = "pearson", 
+  #                   label.x = quantile(x = plot_data_df$value.x, probs = 0.001, na.rm = T), 
+  #                   label.y = quantile(x = plot_data_df$value.y, probs = 0.99, na.rm = T))
+  # p <- p + xlab(paste0(gene_x, " protein abundance"))
+  # p <- p + ylab(paste0(gene_y, " protein abundance"))
+  # p <- p + theme_classic(base_size = 9)
+  # p <- p + theme(legend.position = "top", title = element_text(size = 9))
+  # p <- p + theme(axis.title = element_text(size = 8), axis.text = element_text(size = 8, color = "black"))
+  # p
+  # 
+  # # save scatterplot --------------------------------------------------------
+  # # file2write <- paste0(dir_out, gene_x, "~", gene_y,".png")
+  # # png(file2write, width = 800, height = 800, res = 150)
+  # # print(p)
+  # # dev.off()
+  # 
+  # file2write <- paste0(dir_out, gene_x, "~", gene_y,".pdf")
+  # pdf(file2write, width = 2, height = 2.3, useDingbats = F)
+  # print(p)
+  # dev.off()
+  
+  # # make scatterplot --------------------------------------------------------
+  # p <- ggplot()
+  # p <- p + geom_point_rast(data = plot_data_df, mapping = aes(x = value.x, y = value.y))
+  # p <- ggscatter(data = plot_data_df, x = "value.x", y = "value.y", color = "Sample_Type", size = 0.5,
+  #                add = "reg.line",  # Add regressin line
+  #                add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+  #                conf.int = TRUE # Add confidence interval
+  # )
+  # # Add correlation coefficient
+  # p <- p + stat_cor(method = "pearson", 
+  #                   label.x = quantile(x = plot_data_df$value.x, probs = 0.001, na.rm = T), 
+  #                   label.y = quantile(x = plot_data_df$value.y, probs = 0.99, na.rm = T))
+  # p <- p + xlab(paste0(gene_x, " protein abundance"))
+  # p <- p + ylab(paste0(gene_y, " protein abundance"))
+  # p <- p + theme_classic(base_size = 9)
+  # p <- p + theme(legend.position = "top", title = element_text(size = 9))
+  # p <- p + theme(axis.title = element_text(size = 8), axis.text = element_text(size = 8, color = "black"))
+  # p
+  # 
+  # # save scatterplot --------------------------------------------------------
+  # # file2write <- paste0(dir_out, gene_x, "~", gene_y,".png")
+  # # png(file2write, width = 800, height = 800, res = 150)
+  # # print(p)
+  # # dev.off()
+  # 
+  # file2write <- paste0(dir_out, gene_x, "~", gene_y,".pdf")
+  # pdf(file2write, width = 2, height = 2.3, useDingbats = F)
+  # print(p)
+  # dev.off()
+  
+  
 }
