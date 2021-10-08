@@ -84,7 +84,7 @@ p <- p + scale_colour_gradient2(low = "blue", high = "red")
 p <- p + xlab("Log2(fold change of peak accessibility)")
 p <- p + ylab("Log2(fold change of methylation)")
 p <- p + theme_classic(base_size = 18)
-p <- p + guides(color = guide_legend(nrow = 4, override.aes = aes(size = 3), label.theme = element_text(size = 18), title = "spearman correlation coefficient\nbetween methylation beta values\nand gen expression"))
+p <- p + guides(color = guide_legend(nrow = 2, override.aes = aes(size = 3), label.theme = element_text(size = 18), title = "spearman correlation coefficient\nbetween methylation beta values\nand gen expression"))
 p <- p + theme(axis.text = element_text(color = "black"),
                legend.position = "bottom", legend.box = "horizontal")
 # file2write <- paste0(dir_out, "scatterplot_snATAC_methyl_FC.",".png")
