@@ -26,7 +26,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -34,8 +34,8 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the merged object
-atac=readRDS(paste('/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/3.Merge_snATAC/Merge.SelectPeaks.v.20210526/',
-                   '26_ccRCC_snATAC.selectedPeaks.chromvar.cicero.v4.20210607.rds',sep=''))
+atac=readRDS(paste('/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/3.Merge_snATAC/Merge.SelectPeaks.v.20210706/28_ccRCC_snATAC.selectedPeaks.chromvar.cicero.v3.20210725.rds',sep=''))
+Idents(atac)=atac$Piece_ID
 ## input peak fold changes
 peak2fcs_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/BAP1_Specific/DOWN_BAP1_specific_peaks.Filtered.CNV_corrected.Annotated.20210610.tsv")
 ## input mutation group
@@ -44,10 +44,10 @@ mut_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/mutat
 peak_plot <- c("chr16-66955443-66955943")
 
 # preprocess ATAC object --------------------------------------------------
-pieceids_tumor_selected <- c("C3L-00908-T1", "C3L-00416-T2", ## BAP1&PBRM1 mutants
+pieceids_tumor_selected <- rev(c("C3L-00908-T1", "C3L-00416-T2", ## BAP1&PBRM1 mutants
                              "C3L-01313-T1", "C3N-01200-T1", "C3N-00317-T1", "C3N-00437-T1", ## BAP1 mutants
                              "C3N-00733-T1", "C3L-00610-T1", "C3L-00079-T1", "C3N-00242-T1", "C3L-01302-T1", "C3N-01213-T1", "C3L-00004-T1", "C3L-00790-T1", "C3L-00583-T1",
-                             "C3L-00917-T1", "C3L-00088-T1", "C3L-00088-T2", "C3L-00448-T1", "C3L-00096-T1", "C3L-00010-T1", "C3N-00495-T1", "C3L-00026-T1")
+                             "C3L-00917-T1", "C3L-00088-T1", "C3L-00088-T2", "C3L-00448-T1", "C3L-00096-T1", "C3L-00010-T1", "C3N-00495-T1", "C3L-00026-T1"))
 pieceids_nat_selected <- c('C3L-00088-N', "C3L-00079-N", "C3N-00242-N", "C3N-01200-N")
 
 atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_tumor_selected) | (cell_type=='PT' & Piece_ID %in% pieceids_nat_selected))
@@ -58,7 +58,7 @@ chr=strsplit(x = peak_plot, split = "\\-")[[1]][1]
 st=strsplit(x = peak_plot, split = "\\-")[[1]][2]; st = as.numeric(st)
 en=strsplit(x = peak_plot, split = "\\-")[[1]][3]; en = as.numeric(en)
 new_st=st-1000
-new_en=en+1000
+new_en=en+6000
 peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
 
 # make colors ------------------------------------------------------------
