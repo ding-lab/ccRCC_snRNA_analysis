@@ -59,12 +59,14 @@ dm2rna_cor_df %>%
   select(probeID) %>%
   unique() %>%
   nrow()
+
 dm2rna_cor_df %>%
   filter(!is.na(fdr.y) & fdr.y < 0.05) %>%
   filter(rho < 0) %>%
   select(probeID) %>%
   unique() %>%
   nrow()
+
 dm2rna_cor_df %>%
   filter(!is.na(fdr.y) & fdr.y < 0.05) %>%
   filter(rho < 0) %>%
@@ -72,11 +74,27 @@ dm2rna_cor_df %>%
   unique() %>%
   nrow()
 
+dm2rna_cor_df %>%
+  filter(!is.na(fdr.y) & fdr.y < 0.05) %>%
+  filter(rho < 0) %>%
+  filter(log2FC > 0) %>%
+  select(probe2gene) %>%
+  unique() %>%
+  nrow()
+
+dm2rna_cor_df %>%
+  filter(!is.na(fdr.y) & fdr.y < 0.05) %>%
+  filter(rho < 0) %>%
+  filter(log2FC < 0) %>%
+  select(probe2gene) %>%
+  unique() %>%
+  nrow()
+
 # merge peak with probe ---------------------------------------------------
 peaks_anno_df %>%
   filter(peak2gene_type == "Promoter" & !is.na(avg_log2FC)) %>%
-  filter(avg_log2FC < 0) %>%
-  select(peak) %>%
+  # filter(avg_log2FC < 0) %>%
+  select(Gene) %>%
   unique() %>%
   nrow()
 ## merge
@@ -90,26 +108,24 @@ peaks2probes_df <- merge(x = peaks_anno_df %>%
                         by.x = c("Gene"), by.y = c("probe2gene"), suffix = c(".snATAC", ".methyl"))
 peaks2probes_df <- unique(peaks2probes_df)
 peaks2probes_cor_df <- merge(x = peaks2probes_df, y = probe2rna_cor_df, by.x = c("probeID", "Gene"), by.y = c("probeID", "gene_symbol"), all.x = T)
+
 peaks2probes_cor_df %>%
-  filter(peak2gene_type == "Promoter" & !is.na(avg_log2FC.snATAC)) %>%
   filter(!is.na(fdr.methyl) & fdr.methyl < 0.05) %>%
-  select(probeID) %>%
-  unique() %>%
-  nrow()
-peaks2probes_cor_df %>%
+  filter(!is.na(fdr) & fdr < 0.05) %>%
+  filter(rho < 0) %>%
   filter(peak2gene_type == "Promoter" & !is.na(avg_log2FC.snATAC)) %>%
-  filter(!is.na(fdr.methyl) & fdr.methyl < 0.05) %>%
-  filter(avg_log2FC.methyl > 0) %>%
-  select(peak) %>%
+  select(Gene) %>%
   unique() %>%
   nrow()
 
 peaks2probes_cor_df %>%
-  filter(peak2gene_type == "Promoter" & !is.na(avg_log2FC.snATAC)) %>%
   filter(!is.na(fdr.methyl) & fdr.methyl < 0.05) %>%
-  filter(!is.na(fdr.methyl) & fdr < 0.05) %>%
+  filter(!is.na(fdr) & fdr < 0.05) %>%
   filter(rho < 0) %>%
-  select(probeID) %>%
+  filter(peak2gene_type == "Promoter" & !is.na(avg_log2FC.snATAC)) %>%
+  filter(avg_log2FC.methyl > 0) %>%
+  filter(avg_log2FC.snATAC < 0) %>%
+  select(Gene) %>%
   unique() %>%
   nrow()
 
