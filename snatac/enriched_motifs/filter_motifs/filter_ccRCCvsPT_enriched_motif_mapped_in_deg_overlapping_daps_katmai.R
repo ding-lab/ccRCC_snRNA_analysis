@@ -33,7 +33,6 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input motif mapped
 motifs_all_df <- fread(data.table = F, input = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/3.Merge_snATAC/Merge.SelectPeaks.v.20210706/peaks/Motifs_matched.28_snATAC_merged.object.20210827.tsv")
-colnames(motifs_all_df)[9] <- "genesymbol_motif_nearest"
 # > head(motifs_all_df)
 # group_name                     Peak strand    score              motif_coord
 # 1   MA0003.4 chr5-135603208-135603708      + 11.45700 chr5-135603517-135603530
