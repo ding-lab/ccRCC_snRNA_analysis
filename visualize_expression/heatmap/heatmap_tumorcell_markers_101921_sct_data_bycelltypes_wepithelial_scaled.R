@@ -18,14 +18,13 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input the average expression calculated (SCT)
 avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/avgexp_sct_data_bycelltypew_epithelial_katmai/20210907.v1/35_aliquot_merged.avgexp.SCT.data.Cell_group_w_epithelialcelltypes.20210907.v1.tsv", data.table = F)
-genes_process_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210824.v1/ccRCC_markers.Surface.20210824.v1.tsv")
+genes_process_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20211019.v1/ccRCC_vs_NonTumorcells.merge.ccRCC_vs_PT.TissueSpecific20211019.v1.tsv")
 ## input variations of expression by gene
 # sd_bygene_bysample_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/calculate_SD_for_ccRCC_markers_sct_data_across_tumormanualclusters_persample/20210712.v1/SD_for_ccRCC_markers_across_tumormanualclusters_persample.tsv")
 # sd_bygene_mean_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/calculate_SD_for_ccRCC_markers_sct_data_across_tumormanualclusters_persample/20210712.v1/Mean_SD_for_ccRCC_markers_across_tumormanualclusters_persample.tsv")
 
 # specify pairs to filter -------------------------------------------------
 genes_filter <- genes_process_df$Gene
-genes_filter <- c(genes_filter, "RARRES2")
 
 # format the column names to only aliquot id ------------------------------
 ## filtr the rows
@@ -38,12 +37,10 @@ plot_data_raw_mat <- as.matrix(plot_data_df[,-1])
 rownames(plot_data_raw_mat) <- plot_data_df$gene
 ## filter rows based on the average expression
 genes_plot <- rownames(plot_data_raw_mat)
-genes_plot <- genes_plot[!(genes_plot %in% c("PIK3CB", "ARHGEF28", "PTGER3", "PARD3", "GNG12", "EFNA5", "SPIRE1", "LIFR", "PKP4", "SORBS1", "PTPRM", "FBXO16", "PAM"))]
-genes_plot <- genes_plot[!(genes_plot %in% c("DPP6", "CPNE8", "EFNA5", "MGLL", "SPIRE1", "SPIRE1", "PLCB1", "OSMR", "SORBS1", "ANO6", "EPB41", "PAM"))]
 genes_plot_ordered_df <- genes_process_df %>%
   filter(Gene %in% genes_plot) %>%
-  arrange(desc(avg_log2FC.mean.TumorcellsvsNontumor))
-rownames_plot <- c(genes_plot_ordered_df$Gene, "RARRES2")
+  arrange(desc(avg_log2FC))
+rownames_plot <- genes_plot_ordered_df$Gene
 plot_data_raw_mat <- plot_data_raw_mat[rownames_plot,]
 ## scale by row
 plot_data_mat <- t(apply(plot_data_raw_mat, 1, scale))
@@ -90,35 +87,34 @@ names(colors_yesno) <- c("TRUE", "FALSE")
 colors_unscaledexp = circlize::colorRamp2(seq(from = 0, to = 4, by = 0.5), 
                                           RColorBrewer::brewer.pal(name = "RdPu", n = 9))
 ## make colors for the standard deviation
-# summary(sd_vec)
+summary(sd_vec)
 colors_sd <- circlize::colorRamp2(seq(from = 0, to = 4, by = 0.5), 
                                   RColorBrewer::brewer.pal(name = "Oranges", n = 9))
 
 # make row annotation -----------------------------------------------------
 ## get snRNA fold changes
-log2fc_tumorvsnontumor_vec <- mapvalues(x = rownames_plot, from = genes_process_df$Gene, to = as.vector(genes_process_df$avg_log2FC.mean.TumorcellsvsNontumor));log2fc_tumorvsnontumor_vec <- as.numeric(log2fc_tumorvsnontumor_vec)
+log2fc_tumorvsnontumor_vec <- mapvalues(x = rownames_plot, from = genes_process_df$Gene, to = as.vector(genes_process_df$avg_log2FC));log2fc_tumorvsnontumor_vec <- as.numeric(log2fc_tumorvsnontumor_vec)
 log2fc_tumorvspt_vec <- mapvalues(x = rownames_plot, from = genes_process_df$Gene, to = as.vector(genes_process_df$avg_log2FC.allTumorcellsvsPT)); log2fc_tumorvspt_vec <- as.numeric(log2fc_tumorvspt_vec)
 ## bulk bulk RNA fold changes
 log2fc_bulkrna_vec <- mapvalues(x = rownames_plot, from = genes_process_df$Gene, to = as.vector(genes_process_df$log2FC.bulkRNA)); log2fc_bulkrna_vec <- as.numeric(log2fc_bulkrna_vec)
 ## bulk bulk protein fold changes
 log2fc_bulkpro_vec <- mapvalues(x = rownames_plot, from = genes_process_df$Gene, to = as.vector(genes_process_df$log2FC.bulkpro)); log2fc_bulkpro_vec <- as.numeric(log2fc_bulkpro_vec)
 ## get if each gene is druggable
-isdruggable_vec <- mapvalues(x = rownames_plot, from = genes_process_df$Gene, to = as.vector(genes_process_df$is_druggable))
-isdruggable_vec[genes_plot == "ENPP3"] <- "TRUE"
+# isdruggable_vec <- mapvalues(x = rownames_plot, from = genes_process_df$Gene, to = as.vector(genes_process_df$is_druggable))
+# isdruggable_vec[genes_plot == "ENPP3"] <- "TRUE"
 ## annotate unscaled expression
 orig_avgexp_vec <- rowMeans(x = plot_data_raw_mat, na.rm = T)
 ## get mean SD
 # sd_vec <- mapvalues(x = genes_plot, from = sd_bygene_mean_df$V1, to = as.vector(sd_bygene_mean_df$sd_bysample_mean)); sd_vec <- as.numeric(sd_vec)
 ## make row annotation
-row_anno_obj <- rowAnnotation(#ccRCCvsNontumor_snRNA = anno_simple(x = log2fc_tumorvsnontumor_vec, col = colors_snRNA_fc),
-  #                               ccRCCvsPT_snRNA = anno_simple(x = log2fc_tumorvspt_vec, col = colors_snRNA_fc), 
-  #                               ccRCCvsNAT_bulkRNA = anno_simple(x = log2fc_bulkrna_vec, col = colors_snRNA_fc), 
-  #                               ccRCCvsNAT_bulkProtein = anno_simple(x = log2fc_bulkpro_vec, col = colors_snRNA_fc), 
-  #                               is_druggable = anno_simple(x = isdruggable_vec, col = colors_yesno), 
-  unscaled_snRNA_exp = anno_simple(x = orig_avgexp_vec, col = colors_unscaledexp),
-  #                               # SD_tumorcluster_snRNA_exp = anno_simple(x = sd_vec, col = colors_sd),
-  annotation_name_side = "bottom", annotation_name_gp = gpar(fontsize = 10), annotation_width = unit(4, "mm"))
-# annotation_name_side = "bottom", annotation_name_gp = gpar(fontsize = 10), annotation_width = unit(20, "mm"))
+row_anno_obj <- rowAnnotation(ccRCCvsNontumor_snRNA = anno_simple(x = log2fc_tumorvsnontumor_vec, col = colors_snRNA_fc), 
+                              ccRCCvsPT_snRNA = anno_simple(x = log2fc_tumorvspt_vec, col = colors_snRNA_fc), 
+                              ccRCCvsNAT_bulkRNA = anno_simple(x = log2fc_bulkrna_vec, col = colors_snRNA_fc), 
+                              ccRCCvsNAT_bulkProtein = anno_simple(x = log2fc_bulkpro_vec, col = colors_snRNA_fc), 
+                              # is_druggable = anno_simple(x = isdruggable_vec, col = colors_yesno), 
+                              unscaled_snRNA_exp = anno_simple(x = orig_avgexp_vec, col = colors_unscaledexp),
+                              # SD_tumorcluster_snRNA_exp = anno_simple(x = sd_vec, col = colors_sd),
+                              annotation_name_side = "bottom", annotation_name_gp = gpar(fontsize = 10), annotation_width = unit(20, "mm"))
 
 
 # make row split for cell types ------------------------------------------
@@ -160,12 +156,12 @@ list_lgd = list(
 
 ## save heatmap as png
 png(filename = paste0(dir_out, "heatmap", ".png"), 
-    width = 650, height = 1000, res = 150)
+    width = 650, height = 2000, res = 150)
 draw(object = p, 
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
 dev.off()
 file2write <- paste0(dir_out, "heatmap", ".pdf")
-pdf(file2write, width = 4, height = 6.5)
+pdf(file2write, width = 4, height = 15)
 draw(object = p, 
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
 dev.off()

@@ -7,7 +7,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -22,6 +22,8 @@ scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_s
 enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210805.v1/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
 ## input CNV data
 cnv_df <- fread(data.table = F, input = "./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/cnv_fraction_in_tumorcells_per_manualcluster_rm_doublets/20210806.v1/fraction_of_tumorcells_with_cnv_by_gene_by_3state.per_manualsubcluster.20210806.v1.tsv")
+## input the EMT group later defined
+emt_group_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_epithelial_group_bytumorcluster/20211011.v1/Tumorcluster_EpithelialGroup.20211011.v1.tsv")
 
 # preprocess --------------------------------------------------------------
 ## group gene sets into modules
@@ -80,7 +82,8 @@ enrich_plot_df <- enrich_df[, c("cluster_name", "Cell_cycle", "Immune", "EMT", "
 colnames(enrich_plot_df) <- c("cluster_name", paste0(c("Cell_cycle", "Immune_signaling", "EMT", "mTOR"), "_Module_Enriched"))
 
 ## merge data
-colanno_df <- enrich_plot_df
+colanno_df <- enrich_plot_df %>%
+  mutate(EMT_Module_Enriched = (cluster_name %in% emt_group_df$cluster_name[emt_group_df$epithelial_group == "EMT"]))
 rownames(colanno_df) <- colanno_df$cluster_name
 colanno_df <- colanno_df[colnames_plot,-1]
 ## make colors

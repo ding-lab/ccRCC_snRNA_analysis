@@ -15,12 +15,14 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input gene-to-pathway
-gene2pathway_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/pathway/unite_PBRM1_BAP1_vs_NonMutants_DAP_ORA/20210628.v2/PBRM1_BAP1_vs_NonMutants.DAPGene2TopPathway.20210628.v2.tsv")
+# gene2pathway_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/pathway/unite_PBRM1_BAP1_vs_NonMutants_DAP_ORA/20210628.v2/PBRM1_BAP1_vs_NonMutants.DAPGene2TopPathway.20210628.v2.tsv")
+gene2pathway_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/pathway/unite_PBRM1_BAP1_vs_NonMutants_DAP_ORA_28samples/20211011.v1/PBRM1_BAP1_vs_NonMutants.DAPGene2TopPathway.20211011.v1.tsv")
+
 ## input pbrm1 daps
-daps_pbrm1_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/pbrm1/annotate_pbrm1_vs_nonmutant_daps/20210625.v1/PBRM1_DAP2Gene.EnhancerPromoter.20210625.v1.tsv")
-daps_bap1_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/bap1/annotate_peaks/annotate_BAP1_vs_NonMutant_daps/20210625.v1/BAP1_vs_NonMutant_DAP2Gene.EnhancerPromoter.20210625.v1.tsv")
+daps_pbrm1_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/pbrm1/annotate_peaks/annotate_pbrm1_vs_nonmutant_daps_28samples/20211011.v1/PBRM1_DAP2Gene.EnhancerPromoter.20211011.v1.tsv")
+daps_bap1_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/bap1/annotate_peaks/annotate_BAP1_vs_NonMutant_daps_28samples/20211011.v1/BAP1_vs_NonMutant_DAP2Gene.EnhancerPromoter.20211011.v1.tsv")
 ## input pathway enrichment results
-ora_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/pathway/unite_PBRM1_BAP1_vs_NonMutants_DAP_ORA/20210628.v2/PBRM1_BAP1_vs_NonMutants.DAPTopPathways2Genes.20210628.v2.tsv")
+ora_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/da_peaks/pathway/unite_PBRM1_BAP1_vs_NonMutants_DAP_ORA_28samples/20211011.v1/PBRM1_BAP1_vs_NonMutants.DAPTopPathways2Genes.20211011.v1.tsv")
 
 # make plot data ----------------------------------------------------------
 colnames_merge <- intersect(colnames(daps_pbrm1_df), colnames(daps_bap1_df))

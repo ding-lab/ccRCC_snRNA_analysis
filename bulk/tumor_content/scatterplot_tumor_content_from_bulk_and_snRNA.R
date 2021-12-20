@@ -10,7 +10,7 @@ source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 library(ggpubr)
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -21,6 +21,7 @@ dir.create(dir_out)
 merged_tumorcontent_df <- fread(input = "./Resources/Analysis_Results/bulk/tumor_content/merge_tumor_content_from_bulk_and_snRNA/20211007.v1/Perc_Tumor_Content_from_snRNA_and_bulkRNA.20211007.v1.tsv", data.table = F)
 
 # make plot data ----------------------------------------------------------
+mean(merged_tumorcontent_df$Frac_CellGroupBarcodes_ByAliquot)
 plot_data_df <- merged_tumorcontent_df
 plot_data_df <- plot_data_df %>%
   mutate(x_plot = Frac_CellGroupBarcodes_ByAliquot) %>%

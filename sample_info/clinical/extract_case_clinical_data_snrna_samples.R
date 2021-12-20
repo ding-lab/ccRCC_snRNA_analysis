@@ -24,11 +24,11 @@ get_yes_no <- function(response_string) {
 }
 
 # input sample mapping file -----------------------------------------------
-clinical_sup_df <- readxl::read_excel("./Resources/Clinical_Data/CCRCC_July2020_clinical_data.xlsx")
+clinical_sup_df <- readxl::read_excel("./Resources/Clinical_Data/CCRCC_June2021_clinical_data.xlsx")
 colnames_clinical_df <- data.frame(colnames_clinical = colnames(clinical_sup_df))
-colnames(clinical_sup_df)
+# View(colnames(clinical_sup_df))
 # input the snRNA sample matrix -------------------------------------------
-idmetadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20200716.v1/meta_data.20200716.v1.tsv", data.table = F)
+idmetadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv", data.table = F)
 
 ## rename
 clinical_tab <- clinical_sup_df %>%
@@ -39,10 +39,10 @@ clinical_tab <- clinical_sup_df %>%
   rename(Age = `consent/age`) %>%
   rename(Race = `consent/ethnicity_race_ancestry_identified`) %>%
   rename(Tumor_Stage_Pathological = `baseline/tumor_stage_pathological`) %>%
-  rename(Primary_Tumor_Pathologic_Stage = `baseline/pathologic_staging_primary_tumor`) %>%
+  rename(Primary_Tumor_Pathologic_Stage = `baseline/pathologic_staging_primary_tumor_pt`) %>%
   rename(Sarcomatoid_Features = `baseline/sarcomatoid_features`) %>%
   rename(BaseLine_Metastasis_Sites = `baseline/specify_distant_metastasis_documented_sites`) %>%
-  rename(Baseline_IHC = `baseline/ancillary_studies_immunohistochemistry_type_and_results`) %>%
+  rename(Baseline_IHC = `baseline/ancillary_studies_immunohistochemistry_type_and_result`) %>%
   rename(Adjuvant_Radiation = `follow-up/adjuvant_post-operative_radiation_therapy`) %>%
   rename(Adjuvant_Pharmaceutical_Therapy = `follow-up/adjuvant_post-operative_pharmaceutical_therapy`) %>%
   rename(Adjuvant_immunological_Therapy = `follow-up/adjuvant_post-operative_immunological_therapy`) %>%
@@ -61,6 +61,7 @@ clinical_tab <- clinical_sup_df %>%
          Outcome_of_Initial_Treatment, 
          Followup_Period, Outcome_at_Followup_Completion, Followup_Cause_of_Death, Followup_New_Tumor_Event, 
          Adjuvant_Radiation, Adjuvant_Pharmaceutical_Therapy, Adjuvant_immunological_Therapy) %>%
+  filter(Case != "C3L-00359") %>%
   arrange(Outcome_of_Initial_Treatment, Outcome_at_Followup_Completion)
 
 write.table(x = clinical_tab, file = paste0(dir_out, "snRNA_ccRCC_Clinicl_Table.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)

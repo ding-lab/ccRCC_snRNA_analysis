@@ -18,6 +18,9 @@ enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_s
 emt_scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_msigdb_geneset_scores_wgeneexpression_wPTclusters/20210929.v1/MSigDB.Hallmark.tsv")
 ## input score pre-calculated
 epi_scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_epithelial_scores_EMTmoduledown_wPT/20210908.v1/EpithelialScore.tsv")
+## add PT segment scores
+s12_scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_PTS12_scores_wPT/20210908.v1/PTS12Score.tsv")
+s3_scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_PTS3_scores_wPT/20210908.v1/PTS12Score.tsv")
 
 # make column annotation --------------------------------------------------
 cluster_anno_df <- merge(x = emt_scores_df %>%
@@ -33,11 +36,21 @@ cutoff_epithelial_weak <- quantile(x = cluster_anno_df$epithelial_score[!(grepl(
 #                                    ifelse(epithelial_score >= cutoff_epithelial_strong, "Epithelial-strong",
 #                                           ifelse(epithelial_score >= cutoff_epithelial_intermediate, "Epithellal-intermediate",
 #                                                  ifelse(cluster_name %in% enrich_df$cluster_name[enrich_df$EMT] & epithelial_score <= cutoff_epithelial_weak, "EMT", "Epithelial-weak")))))
+cluster_anno_df$PT_S12_score <- mapvalues(x = cluster_anno_df$cluster_name, from = s12_scores_df$cluster_name, to = as.vector(s12_scores_df$score)); cluster_anno_df$PT_S12_score <- as.numeric(cluster_anno_df$PT_S12_score)
+cluster_anno_df$PT_S3_score <- mapvalues(x = cluster_anno_df$cluster_name, from = s3_scores_df$cluster_name, to = as.vector(s3_scores_df$score)); cluster_anno_df$PT_S3_score <- as.numeric(cluster_anno_df$PT_S3_score)
+cutoff_pt_s12 <- quantile(cluster_anno_df$PT_S12_score, 0.9)
+cutoff_pt_s3 <- quantile(cluster_anno_df$PT_S3_score, 0.9)
+
 cluster_anno_df <- cluster_anno_df %>%
   mutate(epithelial_group = ifelse(grepl(pattern = "PT", cluster_anno_df$cluster_name), "PT", 
                                    ifelse(epithelial_score >= cutoff_epithelial_strong, "Epi-H",
                                           ifelse(epithelial_score >= cutoff_epithelial_intermediate, "Epi-M",
-                                                 ifelse(cluster_name %in% enrich_df$cluster_name[enrich_df$EMT] & epithelial_score <= cutoff_epithelial_weak, "EMT", "Epi-L")))))
+                                                 ifelse(cluster_name %in% enrich_df$cluster_name[enrich_df$EMT] & epithelial_score <= cutoff_epithelial_weak, "EMT", "Epi-L"))))) %>%
+  mutate(s123_group = ifelse(PT_S12_score >= cutoff_pt_s12,
+                             ifelse(PT_S3_score >=  cutoff_pt_s3, "mixed S1/2/3 identity", "S1/2 enriched"), 
+                             ifelse(PT_S3_score >=  cutoff_pt_s3, "S3 enriched", "weak segmental identity"))) %>%
+  mutate(cluster_name.figure = gsub(x = cluster_name, pattern = "\\.", replacement = "")) %>%
+  mutate(cluster_name.figure = gsub(x = cluster_name.figure, pattern = "C3L0|C3N0", replacement = "P"))
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "Tumorcluster_EpithelialGroup.", run_id, ".tsv")

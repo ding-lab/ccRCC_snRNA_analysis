@@ -16,9 +16,9 @@ dir.create(dir_out)
 ## input the average expression calculated (SCT)
 avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/avgeexp_tumorcells_sct_data_by_manualcluster_rm_doublets_on_katmai/20210805.v1/AverageExpression_ByManualTumorSubcluster.20210805.v1.tsv", data.table = F)
 ## input the genes to plot
-pathway2genes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/pathway/ora_msigdb_tumor_manualsubcluster_up_degs/20210413.v1/ORA_Results.tsv")
+pathway2genes_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/pathway/ora_msigdb_tumor_manualsubcluster_up_degs/20210413.v1/ORA_Results.tsv")
 ## input meta data
-id_metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
+id_metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
 ## input cell number per cluster
 cellnumber_percluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/count/count_cellnumber_per_manual_cluster_rm_doublet/20210805.v1/CellNumberPerTumorManualCluster.20210805.v1.tsv")
 
@@ -87,6 +87,12 @@ for (geneset_tmp in genesetnames_plot) {
   }
 }
 colanno_df$cluster_name <- rownames(colanno_df)
+colanno_df <- colanno_df %>%
+  mutate(cluster_name.figure = gsub(x = cluster_name, pattern = "\\.", replacement = "")) %>%
+  mutate(cluster_name.figure = gsub(x = cluster_name.figure, pattern = "C3L0|C3N0", replacement = "P"))
+colnames_file <- colnames(colanno_df)
+colnames_file <- c("cluster_name.figure", "cluster_name", colnames_file[!(colnames_file %in% c("cluster_name.figure", "cluster_name"))])
+colanno_df <- colanno_df[, colnames_file]
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "MSigDB.Hallmark.tsv")
 write.table(x = colanno_df, file = file2write, quote = F, sep = "\t", row.names = F)
