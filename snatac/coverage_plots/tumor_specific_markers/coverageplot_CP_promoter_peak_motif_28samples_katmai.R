@@ -62,7 +62,7 @@ pieceids_nat_selected <- c('C3L-00088-N', "C3L-00079-N", "C3N-00242-N", 'C3N-012
 
 # preprocess ATAC object --------------------------------------------------
 head(atac@meta.data)
-atac_subset=subset(atac,(cell_type.v20210611 %in% c('Tumor') & Piece_ID %in% pieceids_tumor_selected) | cell_type.v20210611=='PT' & Piece_ID %in% pieceids_nat_selected)
+atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_tumor_selected) | cell_type=='PT' & Piece_ID %in% pieceids_nat_selected)
 ## make colors
 
 color_tumorcell <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[4]
