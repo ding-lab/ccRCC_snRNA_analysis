@@ -68,11 +68,11 @@ peak_plot_obj <- Signac::PeakPlot(
   peaks = Signac::StringToGRanges(peak_plot, sep = c("-", "-")))
 print("Finished peak_plot")
 
-gene_plot <- Signac::AnnotationPlot(
+gene_plot_obj <- Signac::AnnotationPlot(
   object = atac,
   region = peak_plot_expanded)
 p <- Signac::CombineTracks(
-  plotlist = list(cov_plot, peak_plot,peak_plot_obj),
+  plotlist = list(cov_plot, peak_plot_obj, gene_plot_obj),
   heights = c(6, 1, 2))
 print("Finished CombineTracks")
 
