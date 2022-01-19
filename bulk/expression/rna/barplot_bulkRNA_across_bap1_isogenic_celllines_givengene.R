@@ -27,8 +27,13 @@ plot_data_long_df <- exp_df %>%
   filter(gene_name %in% gene_plot) %>%
   melt()
 plot_data_long_df <- plot_data_long_df %>%
-  mutate(sample_text = gsub(pattern = "X", replacement = "", x = variable)) %>%
   mutate(log2TPM = log2(value+1))
+plot_data_long_df$sample_text <- as.vector(plot_data_long_df$variable)
+plot_data_long_df$sample_text[plot_data_long_df$sample_text == "X786.o_sgbap1"] <- "786O_BAP1mt"
+plot_data_long_df$sample_text[plot_data_long_df$sample_text == "X786.o_sglacz"] <- "786O_BAP1wt"
+plot_data_long_df$sample_text[plot_data_long_df$sample_text == "skrc42_bap1"] <- "SKRC42_BAPwt"
+plot_data_long_df$sample_text[plot_data_long_df$sample_text == "skrc42_emptyvector"] <- "SKRC42_BAPmt"
+plot_data_long_df$sample_text <- factor(x = plot_data_long_df$sample_text, levels = c("SKRC42_BAPwt", "SKRC42_BAPmt", "786O_BAP1wt", "786O_BAP1mt"))
 
 # make barplot ------------------------------------------------------------
 p <- ggplot()
@@ -41,8 +46,27 @@ p <- p + ggtitle(label = paste0(gene_plot, " RNA expression"))
 p <- p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
 p <- p + theme(axis.title.x = element_blank(), axis.ticks.x = element_blank())
 p
-file2write <- paste0(dir_out, gene_plot, ".bulkRNA.", "pdf")
-pdf(file2write, width = 3, height = 3.5, useDingbats = F)
+file2write <- paste0(dir_out, gene_plot, ".bulkRNA.log2TPM.", "pdf")
+pdf(file2write, width = 2.5, height = 3, useDingbats = F)
+print(p)
+dev.off()
+
+p <- ggplot()
+p <- p + geom_col(data = plot_data_long_df, mapping = aes(x = sample_text, y = value))
+p <- p + theme_classic()
+p <- p + ylab(label = "TPM")
+p <- p + ggtitle(label = paste0(gene_plot, " RNA expression"))
+# p <- p + theme(strip.background = element_rect(fill = NA),
+#                panel.spacing = unit(0, "lines"))
+p <- p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+p <- p + theme(axis.title.x = element_blank(), axis.ticks.x = element_blank())
+p
+file2write <- paste0(dir_out, gene_plot, ".bulkRNA.TPM.", "pdf")
+pdf(file2write, width = 2.5, height = 3, useDingbats = F)
+print(p)
+dev.off()
+file2write <- paste0(dir_out, gene_plot, ".bulkRNA.TPM.", "png")
+png(file2write, width = 400, height = 450, res = 150)
 print(p)
 dev.off()
 
