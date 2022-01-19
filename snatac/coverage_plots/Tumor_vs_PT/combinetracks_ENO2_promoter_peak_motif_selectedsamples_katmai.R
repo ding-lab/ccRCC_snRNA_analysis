@@ -27,7 +27,7 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -43,7 +43,6 @@ peak2motif_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Dat
 peak2fcs_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/DA_peaks_Tumor_vs_PT_affected_byCNV_removed.tsv")
 ## specify parameters to plot
 peak_plot <- c("chr12-6914200-6914700")
-motif_plot <- "HIF1A"
 topn_plot <- 4
 sampleids_nat <- c('C3L-00088-N','C3N-01200-N', "C3L-00079-N", "C3N-00242-N")
 
@@ -68,8 +67,6 @@ en=strsplit(x = peak_plot, split = "\\-")[[1]][3]; en = as.numeric(en)
 new_st=st-1000
 new_en=en+1000
 peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
-## process motif coordinates
-motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == peak_plot & peak2motif_df$motif.name == motif_plot & peak2motif_df$Peak_Type == "Promoter"]; motif_coord <- unique(motif_coord)
 ## change atac ident
 # print(head(atac@meta.data))
 Idents(atac_subset)=factor(atac_subset$Piece_ID,levels=c(pieceids_tumor_selected, pieceids_nat_selected))
@@ -96,6 +93,12 @@ peak_plot_obj <- Signac::PeakPlot(
   peaks = StringToGRanges(peak_plot, sep = c("-", "-")))
 print("Finished peak plot")
 
+## process motif coordinates
+motif_plot <- "HIF1A"
+motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == peak_plot & peak2motif_df$motif.name == motif_plot & peak2motif_df$Peak_Type == "Promoter"]; motif_coord <- unique(motif_coord)
+motifs_plot <- c("NFKB1", "HIF1A", "KLF9")
+motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == peak_plot & peak2motif_df$motif.name %in% motifs_plot & peak2motif_df$Peak_Type == "Promoter"]; motif_coord <- unique(motif_coord)
+motif_coord <- sort(motif_coord) ## KLF9, HIF1A, KLF9, NFKB1
 motif_plot_obj <- Signac::PeakPlot(
   object = atac_subset,
   region = peak_plot_expanded, 
@@ -117,7 +120,7 @@ print("Finished peak_plot for cell line")
 # png(file2write, width = 1000, height = 800, res = 150)
 # print(p)
 # dev.off()
-file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".", motif_plot, ".pdf")
+file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".", paste0(motifs_plot, collapse = "_"), ".pdf")
 pdf(file2write, width = 6, height = 5)
 print(p)
 dev.off()
