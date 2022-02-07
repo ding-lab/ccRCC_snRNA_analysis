@@ -25,7 +25,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -100,6 +100,8 @@ dim(srat)
 
 # plot scaled -------------------------------------------------------------
 p <- DotPlot(object = srat, features = genes_plot, col.min = 0, assay = "RNA")
+p$data$cell_type <- plyr::mapvalues(x = p$data$id, from = barcode2celltype_df$cell_group, to = as.vector(barcode2celltype_df$Cell_group4))
+p <- p + facet_grid(cell_type~., scales = "free", space = "free", drop = T)
 p <- p + theme(axis.text.x = element_text(size = 10, angle=90,hjust=0.95,vjust=0.2), axis.title = element_blank())
 # p <- p + theme(legend.position = "bottom")
 p <- p + theme(panel.spacing = unit(0, "lines"), panel.grid.major = element_line(colour = "grey80"), 
