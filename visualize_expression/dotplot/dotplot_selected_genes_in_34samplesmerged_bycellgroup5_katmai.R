@@ -70,6 +70,9 @@ srat <- subset(x = srat, idents = cellgroups_keep)
 dim(srat)
 
 # plot not scaled -------------------------------------------------------------
+## get the pct expressed for each gene in each cluster
+p <- DotPlot(object = srat, features = genes_plot, col.min = 0, assay = "RNA")
+expdata_df <- p$data
 plotdata_df <- expdata_df %>%
   filter(features.plot %in% genes_plot)
 expvalue_top <- quantile(x = plotdata_df$avg.exp, probs = 0.95)
