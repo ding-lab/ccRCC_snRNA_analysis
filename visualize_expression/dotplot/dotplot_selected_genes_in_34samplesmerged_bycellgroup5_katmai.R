@@ -78,7 +78,6 @@ plotdata_df <- expdata_df %>%
 expvalue_top <- quantile(x = plotdata_df$avg.exp, probs = 0.95)
 plotdata_df <- plotdata_df %>%
   mutate(expvalue_plot = ifelse(avg.exp >= expvalue_top, expvalue_top, avg.exp))
-plotdata_df$cell_type <- plyr::mapvalues(x = plotdata_df$id, from = count_bycellgroup_keep_df$cell_group, to = as.vector(count_bycellgroup_keep_df$cell_type))
 p <- ggplot()
 p <- p + geom_point(data = plotdata_df, mapping = aes(x = features.plot, y = id, color = expvalue_plot, size = pct.exp), shape = 16)
 # p <- p +scale_color_gradient2(midpoint=median(plotdata_df$avg.exp, na.rm = T), low="blue", mid="white",
