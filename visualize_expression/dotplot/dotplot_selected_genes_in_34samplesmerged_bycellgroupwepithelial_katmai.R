@@ -25,7 +25,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
-version_tmp <- 2
+version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -46,7 +46,7 @@ cat(paste0("Assay: ", assay_process, "\n"))
 pct_thres <- 15
 avgexp_thres <- 0.1
 ## specify genes to plot
-genes_plot <- c("CA9", "PAX8", "PAX2", "CD24", "LRP2")
+genes_plot <- c("CA9", "CP", "PAX8", "LRP2")
 # set ident ---------------------------------------------------------------
 ## make unique id for each barcode in the cell type table
 barcode2celltype_df <- barcode2celltype_df %>%
@@ -109,10 +109,10 @@ p <- p + theme(panel.spacing = unit(0, "lines"), panel.grid.major = element_line
                panel.background = element_blank())
 p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5), 
                strip.text.x = element_text(angle = 0, vjust = 0.5),
-               strip.text.y = element_text(angle = 0, vjust = 0.5),
+               strip.text.y = element_text(angle = 90, vjust = 0.5),
                axis.text.x = element_text(size = 10, angle=90,hjust=0.95,vjust=0.2))
 file2write <- paste0(dir_out, "CellTypeMarkerExp.Scaled.png")
-png(file = file2write, width = 1200, height = 1000, res = 150)
+png(file = file2write, width = 1000, height = 1000, res = 150)
 print(p)
 dev.off()
 
