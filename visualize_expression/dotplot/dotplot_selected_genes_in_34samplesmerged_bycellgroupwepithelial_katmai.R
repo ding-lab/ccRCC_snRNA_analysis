@@ -51,7 +51,7 @@ genes_plot <- c("CA9", "PAX8", "PAX2", "CD24", "LRP2")
 ## make unique id for each barcode in the cell type table
 barcode2celltype_df <- barcode2celltype_df %>%
   mutate(barcode = paste0(orig.ident, "_", individual_barcode)) %>%
-  mutate(cell_group = Cell_group5)
+  mutate(cell_group = Cell_group_w_epithelialcelltypes)
 ## 
 srat@meta.data$individual_barcode <- str_split_fixed(string = rownames(srat@meta.data), pattern = "_", n = 2)[,1]
 ## check if the individual_barcode is mapped right
@@ -69,10 +69,48 @@ cellgroups_keep <- unique(barcode2celltype_df$cell_group); cellgroups_keep <- ce
 srat <- subset(x = srat, idents = cellgroups_keep)
 dim(srat)
 
+# plot not scaled -------------------------------------------------------------
+## get the pct expressed for each gene in each cluster
+# p <- DotPlot(object = srat, features = genes_plot, col.min = 0, assay = "RNA")
+# expdata_df <- p$data
+# plotdata_df <- expdata_df %>%
+#   filter(features.plot %in% genes_plot)
+# expvalue_top <- quantile(x = plotdata_df$avg.exp, probs = 0.95)
+# plotdata_df <- plotdata_df %>%
+#   mutate(expvalue_plot = ifelse(avg.exp >= expvalue_top, expvalue_top, avg.exp))
+# p <- ggplot()
+# p <- p + geom_point(data = plotdata_df, mapping = aes(x = features.plot, y = id, color = expvalue_plot, size = pct.exp), shape = 16)
+# # p <- p +scale_color_gradient2(midpoint=median(plotdata_df$avg.exp, na.rm = T), low="blue", mid="white",
+# #                               high="red", space ="Lab" )
+# p <- p + scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(n = 9, name = "Spectral")[1:5]), guide = guide_legend(direction = "horizontal"))
+# p <- p + scale_size_continuous(range = c(0, 8), name="% Expressed", guide = guide_legend(direction = "horizontal"))
+# # p <- p  + RotatedAxis()
+# p <- p + theme(panel.spacing = unit(0, "lines"), panel.grid.major = element_line(colour = "grey80"), 
+#                panel.border = element_rect(color = "black", fill = NA, size = 0.5),
+#                panel.background = element_blank())
+# p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5), 
+#                strip.text.x = element_text(angle = 0, vjust = 0.5),
+#                strip.text.y = element_text(angle = 0, vjust = 0.5),
+#                axis.text.x = element_text(size = 10, angle=90,hjust=0.95,vjust=0.2))
+# p <- p + theme(legend.position = "bottom")
+# file2write <- paste0(dir_out, "CellTypeMarkerExp.NotScaled.png")
+# png(file = file2write, width = 1000, height = 1000, res = 150)
+# print(p)
+# dev.off()
+
 # plot scaled -------------------------------------------------------------
-p <- Seurat::DoHeatmap(object = srat, features = genes_plot)
+p <- DotPlot(object = srat, features = genes_plot, col.min = 0, assay = "RNA")
+p <- p + theme(axis.text.x = element_text(size = 10, angle=90,hjust=0.95,vjust=0.2), axis.title = element_blank())
+# p <- p + theme(legend.position = "bottom")
+p <- p + theme(panel.spacing = unit(0, "lines"), panel.grid.major = element_line(colour = "grey80"), 
+               panel.border = element_rect(color = "black", fill = NA, size = 0.5),
+               panel.background = element_blank())
+p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5), 
+               strip.text.x = element_text(angle = 0, vjust = 0.5),
+               strip.text.y = element_text(angle = 0, vjust = 0.5),
+               axis.text.x = element_text(size = 10, angle=90,hjust=0.95,vjust=0.2))
 file2write <- paste0(dir_out, "CellTypeMarkerExp.Scaled.png")
-png(file = file2write, width = 1000, height = 1000, res = 150)
+png(file = file2write, width = 1200, height = 1000, res = 150)
 print(p)
 dev.off()
 
