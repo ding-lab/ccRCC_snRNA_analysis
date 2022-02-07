@@ -100,9 +100,6 @@ dev.off()
 
 # plot scaled -------------------------------------------------------------
 p <- DotPlot(object = srat, features = genes_plot, col.min = 0, assay = "RNA")
-# p <- p + facet_grid(.~gene_cell_type_group + gene_cell_type1 + gene_cell_type2 + gene_cell_type3 + gene_cell_type4, scales = "free", space = "free", drop = T)
-p <- p + facet_grid(cell_type~gene_cell_type_group + gene_cell_type1 + gene_cell_type2 + gene_cell_type3 + gene_cell_type4, scales = "free", space = "free", drop = T)
-
 p <- p + theme(panel.spacing = unit(0, "lines"), panel.grid.major = element_line(colour = "grey80"),
                panel.border = element_rect(color = "black", fill = NA, size = 0.5),
                panel.background = element_blank())
