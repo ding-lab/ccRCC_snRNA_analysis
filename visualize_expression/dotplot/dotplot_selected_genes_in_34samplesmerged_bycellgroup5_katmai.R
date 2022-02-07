@@ -99,7 +99,7 @@ print(p)
 dev.off()
 
 # plot scaled -------------------------------------------------------------
-p <- DotPlot(object = srat, features = genes_plot_filtered, col.min = 0, assay = "RNA")
+p <- DotPlot(object = srat, features = genes_plot, col.min = 0, assay = "RNA")
 # p <- p + facet_grid(.~gene_cell_type_group + gene_cell_type1 + gene_cell_type2 + gene_cell_type3 + gene_cell_type4, scales = "free", space = "free", drop = T)
 p <- p + facet_grid(cell_type~gene_cell_type_group + gene_cell_type1 + gene_cell_type2 + gene_cell_type3 + gene_cell_type4, scales = "free", space = "free", drop = T)
 
