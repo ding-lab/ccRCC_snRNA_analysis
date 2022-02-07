@@ -3,7 +3,8 @@
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+# dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -54,10 +55,12 @@ p <- p + geom_point_rast(data = plot_data_df,
                          mapping = aes(x = UMAP_1, y = UMAP_2, color = Cell_group),
                          alpha = 1, size = 0.1, shape = 16)
 p <- p + scale_color_manual(values = colors_cellgroup)
-p <- p + guides(colour = guide_legend(override.aes = list(size=4)))
+p <- p + guides(colour = guide_legend(override.aes = list(size=4), title = NULL))
 p <- p + theme_void()
 p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-               panel.background = element_blank(), axis.line = element_line(colour = "black"))
+               panel.background = element_blank(),
+               axis.line = element_blank())
+               # axis.line = element_line(colour = "black"))
 p <- p + theme(axis.text.x=element_blank(),
                axis.ticks.x=element_blank())
 p <- p + theme(axis.text.y=element_blank(),

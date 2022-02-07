@@ -2,7 +2,7 @@
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -24,16 +24,18 @@ clinical_case_df <- fread(data.table = F, input = "./Resources/Analysis_Results/
 metadata_filtered_df <- metadata_df %>%
   filter(Case %in% clinical_case_df$Case) %>%
   filter(snRNA_available) %>%
-  select(Aliquot.snRNA.WU, Case, snRNA_available, snATAC_used, Sample_Type)
+  select(Aliquot.snRNA.WU, Case, snRNA_available, snATAC_used, Sample_Type, Aliquot.snRNA)
 final_df <- rbind(metadata_filtered_df %>%
                     mutate(sample_name = paste0("snRNA.", Aliquot.snRNA.WU)) %>%
                     mutate(library_strategy = "RNA-seq") %>%
-                    select(sample_name, Case, Sample_Type, library_strategy),
+                    mutate(path_katmai = paste0("/diskmnt/primary/ccRCC_snRNA/", Aliquot.snRNA, "/BAM/possorted_genome_bam.bam")) %>%
+                    select(sample_name, Case, Sample_Type, library_strategy, path_katmai),
                   metadata_filtered_df %>%
                     filter(snATAC_used) %>%
                     mutate(sample_name = paste0("snATAC.", Aliquot.snRNA.WU)) %>%
                     mutate(library_strategy = "ATAC-seq") %>%
-                    select(sample_name, Case, Sample_Type, library_strategy))
+                    mutate(path_katmai = paste0("/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Cell_Ranger/outputs/", Aliquot.snRNA, "/outs/possorted_bam.bam")) %>%
+                    select(sample_name, Case, Sample_Type, library_strategy, path_katmai))
 final_df <- merge(x = final_df, y = clinical_case_df, by = c("Case"), all.x = T)
 final_df <- final_df %>%
   mutate(biosample_accession = "SAMN22866627") %>%
@@ -53,8 +55,9 @@ final_df <- final_df %>%
   mutate(reference_fasta_file = "") %>%
   mutate(reference_assembly = "GRCh38") %>%
   mutate(filename = paste0(sample_name, ".bam")) %>%
+  arrange(library_strategy) %>%
   select(biosample_accession, library_ID, title, library_strategy, library_source, library_selection, library_layout, platform, instrument_model,
-         design_description, filetype, reference_fasta_file, reference_assembly, filename)
+         design_description, filetype, reference_fasta_file, reference_assembly, filename, path_katmai)
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "HumanTissue.SRA_Metadata.", run_id, ".tsv")

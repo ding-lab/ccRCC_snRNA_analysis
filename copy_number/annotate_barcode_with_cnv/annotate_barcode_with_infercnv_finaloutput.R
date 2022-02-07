@@ -21,7 +21,7 @@ dir.create(dir_out)
 dir_infercnv_output <- "./Resources/snRNA_Processed_Data/InferCNV/outputs/"
 ## get aliquots to process
 files2process <- list.files(dir_infercnv_output, recursive = T)
-files2process <- files2process[grepl(pattern = "CPT", x = files2process) & grepl(pattern = "Individual.20200305.v1|run.20210805|run.20220201", x = files2process)]
+files2process <- files2process[grepl(pattern = "CPT", x = files2process) & grepl(pattern = "Individual.20200305.v1|run.20210805", x = files2process)]
 files2process <- files2process[grepl(pattern = "infercnv.14_HMM_predHMMi6.rand_trees.hmm_mode-subclusters.Pnorm_0.5.repr_intensities.observations.txt", x = files2process)]
 files2process
 ## input known CNV genes
