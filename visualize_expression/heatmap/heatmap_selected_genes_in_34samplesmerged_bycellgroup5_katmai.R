@@ -41,12 +41,13 @@ barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barc
 cat("finish reading the barcode-to-cell type table!\n")
 ## spcify assay
 assay_process <- "SCT"
-slot_process <- "data"
+# slot_process <- "data"
 cat(paste0("Assay: ", assay_process, "\n"))
 pct_thres <- 15
 avgexp_thres <- 0.1
 ## specify genes to plot
 genes_plot <- c("CA9", "PAX8", "PAX2", "CD24", "LRP2")
+
 # set ident ---------------------------------------------------------------
 ## make unique id for each barcode in the cell type table
 barcode2celltype_df <- barcode2celltype_df %>%
@@ -70,10 +71,9 @@ srat <- subset(x = srat, idents = cellgroups_keep)
 dim(srat)
 
 # plot scaled -------------------------------------------------------------
-p <- Seurat::DoHeatmap(object = srat, features = genes_plot)
 file2write <- paste0(dir_out, "CellTypeMarkerExp.Scaled.png")
 png(file = file2write, width = 1000, height = 1000, res = 150)
-print(p)
+Seurat::DoHeatmap(object = srat, features = genes_plot, assay = assay_process)
 dev.off()
 
 
