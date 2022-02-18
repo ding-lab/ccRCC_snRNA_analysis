@@ -38,7 +38,9 @@ srat <- readRDS(file = path_rds)
 print("Finish reading the RDS file!\n")
 
 # plot --------------------------------------------------------------
-p <- ElbowPlot(srat, ndims = 40)
+p <- ElbowPlot(srat, ndims = 40
+               
+               )
 file2write <- paste0(dir_out, "ccRCC.34Sample.Merged.ElbowPlot.", run_id, ".pdf")
 pdf(file2write, width = 5, height = 4, useDingbats = F)
 print(p)
