@@ -34,7 +34,7 @@ plot_data_df <- plot_data_df %>%
 plot_data_euler <- euler(plot_data_df)
 file2write <- paste0(dir_out, "BAP1", ".", "Up", ".png")
 png(file2write, height = 1000, width = 800, res = 150)
-p <- plot(plot_data_euler, labels = F, quantities = list(fontsize = 10), legend = T, fills = c("white", "lightblue", "lightgrey"))
+p <- plot(plot_data_euler, labels = F, quantities = list(fontsize = 10), fills = c("white", "lightblue", "lightgrey"))
 grid.draw(p)
 dev.off()
 
