@@ -83,7 +83,8 @@ if (!file.exists(path_sct_file)) {
 }
 
 ## keep it consistant with individual processing pipeline
-renal.integrated <- RunPCA(renal.integrated, npcs = 30, verbose = FALSE)
+# renal.integrated <- RunPCA(renal.integrated, npcs = 30, verbose = FALSE)
+renal.integrated <- RunPCA(renal.integrated, npcs = 45, verbose = FALSE)
 cat("Finished RUNPCA!\n")
 renal.integrated <- RunUMAP(renal.integrated, reduction = "pca", dims = 1:30)
 cat("Finished RUNUMAP!\n")
