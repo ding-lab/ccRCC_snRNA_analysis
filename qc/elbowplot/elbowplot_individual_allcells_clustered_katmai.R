@@ -17,8 +17,8 @@ thisFile <- function() {
 }
 path_this_script <- thisFile()
 ## set working directory
+# dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA"
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
-# dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
 dir_tmp <- getwd()
 print(dir_tmp)
@@ -34,7 +34,9 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input seurat object paths
-srat_paths <- fread(data.table = F, input = "./Data_Freezes/V2/snRNA/Seurat_Object_Paths.20210428.v1.tsv")
+srat_paths <- fread(data.table = F, input = "./Resources/Analysis_Results/data_summary/write_individual_srat_object_paths/20210729.v1/Seurat_Object_Paths.20210729.v1.tsv")
+## input id meta data
+idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
 
 # plot --------------------------------------------------------------
 aliquots2process <- unique(srat_paths$Aliquot)
@@ -47,9 +49,9 @@ for (aliquot_tmp in aliquots2process) {
   srat <- readRDS(file = seurat_obj_path)
   print(dim(srat))
   
-  p <- ElbowPlot(srat, ndims = 35)
+  p <- ElbowPlot(srat, ndims = 40)
   file2write <- paste0(dir_out, easyid, ".ElbowPlot", ".pdf")
-  pdf(file2write, width = 5, height = 5, useDingbats = F)
+  pdf(file2write, width = 5, height = 4, useDingbats = F)
   print(p)
   dev.off()
   
