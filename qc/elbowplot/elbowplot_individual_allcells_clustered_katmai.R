@@ -33,15 +33,27 @@ dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-path_rds <- "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/merging/merge_34_ccRCC_samples/20211005.v1//ccRCC.34samples.Merged.20211005.v1.RDS"
-srat <- readRDS(file = path_rds)
-print("Finish reading the RDS file!\n")
+## input seurat object paths
+srat_paths <- fread(data.table = F, input = "./Data_Freezes/V2/snRNA/Seurat_Object_Paths.20210428.v1.tsv")
 
 # plot --------------------------------------------------------------
-p <- ElbowPlot(srat)
-file2write <- paste0(dir_out, "ccRCC.34Sample.Merged.ElbowPlot.", run_id, ".pdf")
-pdf(file2write, width = 5, height = 5, useDingbats = F)
-print(p)
-dev.off()
+aliquots2process <- unique(srat_paths$Aliquot)
+
+for (aliquot_tmp in aliquots2process) {
+  easyid <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == aliquot_tmp]
+  ## input individually processed seurat object
+  seurat_obj_path <- srat_paths$Path_katmai_seurat_object[srat_paths$Aliquot == aliquot_tmp]
+  seurat_obj_path
+  srat <- readRDS(file = seurat_obj_path)
+  print(dim(srat))
+  
+  p <- ElbowPlot(srat, ndims = 35)
+  file2write <- paste0(dir_out, easyid, ".ElbowPlot", ".pdf")
+  pdf(file2write, width = 5, height = 5, useDingbats = F)
+  print(p)
+  dev.off()
+  
+}
+
 
 
