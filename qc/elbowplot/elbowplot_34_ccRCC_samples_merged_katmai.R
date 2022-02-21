@@ -33,14 +33,12 @@ dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-path_rds <- "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/merging/merge_34_ccRCC_samples/20211005.v1//ccRCC.34samples.Merged.20211005.v1.RDS"
+path_rds <- "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/merging/merge_34_ccRCC_samples/20220218.v1/ccRCC.34samples.Merged.20220218.v1.RDS"
 srat <- readRDS(file = path_rds)
 print("Finish reading the RDS file!\n")
 
 # plot --------------------------------------------------------------
-p <- ElbowPlot(srat, ndims = 40
-               
-               )
+p <- ElbowPlot(srat, ndims = 45)
 file2write <- paste0(dir_out, "ccRCC.34Sample.Merged.ElbowPlot.", run_id, ".pdf")
 pdf(file2write, width = 5, height = 4, useDingbats = F)
 print(p)
