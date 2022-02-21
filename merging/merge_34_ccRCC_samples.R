@@ -24,8 +24,9 @@ source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 ## set run id
-version_tmp <- 1
-run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
+# version_tmp <- 1
+# run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
+run_id <- "20220218.v1"
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
