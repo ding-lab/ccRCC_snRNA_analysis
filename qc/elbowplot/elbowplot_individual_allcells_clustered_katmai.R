@@ -63,7 +63,7 @@ for (aliquot_tmp in aliquots2process) {
   # Calculate cumulative percents for each PC
   cumu <- cumsum(pct)
   
-  pct_tmp_df <- data.frame(easy_id = rep(easyid, length(pct)), rank_pc = length(pct), pct = pct, cumu_pct = cumu, aliquot = rep(aliquot_tmp, length(pct)))
+  pct_tmp_df <- data.frame(easy_id = rep(easyid, length(pct)), rank_pc = 1:length(pct), pct = pct, cumu_pct = cumu, aliquot = rep(aliquot_tmp, length(pct)))
   pct_df <- rbind(pct_tmp_df, pct_df)
   # Determine which PC exhibits cumulative percent greater than 90% and % variation associated with the PC as less than 5
   co1 <- which(cumu > 90 & pct < 5)[1]
