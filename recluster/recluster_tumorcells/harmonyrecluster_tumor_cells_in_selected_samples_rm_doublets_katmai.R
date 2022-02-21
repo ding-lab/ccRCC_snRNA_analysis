@@ -85,7 +85,7 @@ for (aliquot_tmp in aliquots2process) {
     
     ## RunPCA
     srat.new <- RunPCA(srat.new, npcs = num_pc, verbose = FALSE)
-    srat.new <- RunHarmony(srat.new)
+    srat.new <- RunHarmony(srat.new, "nCount_RNA")
     
     srat.new <- RunUMAP(srat.new, reduction = "harmony")
     srat.new <- FindNeighbors(srat.new, reduction = "harmony", dims = 1:num_pc, force.recalc = T)
