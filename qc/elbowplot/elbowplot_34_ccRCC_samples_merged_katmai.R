@@ -44,4 +44,17 @@ pdf(file2write, width = 5, height = 4, useDingbats = F)
 print(p)
 dev.off()
 
+file2write <- paste0(dir_out, "ccRCC.34Sample.Merged.pctvariance.", run_id, ".txt")
+sink(file2write)
+# Determine percent of variation associated with each PC
+pct <- seurat_integrated[["pca"]]@stdev / sum(seurat_integrated[["pca"]]@stdev) * 100
+print(pct)
 
+# Calculate cumulative percents for each PC
+cumu <- cumsum(pct)
+print(cumu)
+
+# Determine which PC exhibits cumulative percent greater than 90% and % variation associated with the PC as less than 5
+co1 <- which(cumu > 90 & pct < 5)[1]
+print(co1)
+sink()
