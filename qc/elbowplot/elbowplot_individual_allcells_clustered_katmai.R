@@ -40,6 +40,7 @@ idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sam
 
 # plot --------------------------------------------------------------
 aliquots2process <- unique(srat_paths$Aliquot)
+pct_df <- NULL
 
 for (aliquot_tmp in aliquots2process) {
   easyid <- idmetadata_df$Aliquot.snRNA.WU[idmetadata_df$Aliquot.snRNA == aliquot_tmp]
@@ -50,12 +51,27 @@ for (aliquot_tmp in aliquots2process) {
   print(dim(srat))
   
   p <- ElbowPlot(srat, ndims = 40)
-  file2write <- paste0(dir_out, easyid, ".ElbowPlot", ".pdf")
-  pdf(file2write, width = 5, height = 4, useDingbats = F)
+  # file2write <- paste0(dir_out, easyid, ".ElbowPlot", ".pdf")
+  # pdf(file2write, width = 5, height = 4, useDingbats = F)
+  file2write <- paste0(dir_out, easyid, ".ElbowPlot", ".png")
+  png(file2write, width = 600, height = 500, res = 150)
   print(p)
   dev.off()
   
+  # Determine percent of variation associated with each PC
+  pct <- srat[["pca"]]@stdev / sum(srat[["pca"]]@stdev) * 100
+  # Calculate cumulative percents for each PC
+  cumu <- cumsum(pct)
+  
+  pct_tmp_df <- data.frame(aliquot = aliquot_tmp, easy_id = easyid, rank_pc = 1:30, pct = pct, cumu_pct = cumu)
+  pct_df <- rbind(pct_tmp_df, pct_df)
+  # Determine which PC exhibits cumulative percent greater than 90% and % variation associated with the PC as less than 5
+  co1 <- which(cumu > 90 & pct < 5)[1]
+  print(co1)
 }
 
+# write output ------------------------------------------------------------
+file2write <- paste0(dir_out, "pct_standard_variances_by_PC.", run_id, ".tsv")
+write.table(x = pct_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
 
