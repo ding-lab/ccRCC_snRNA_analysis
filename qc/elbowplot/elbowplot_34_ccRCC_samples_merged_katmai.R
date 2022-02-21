@@ -47,7 +47,7 @@ dev.off()
 file2write <- paste0(dir_out, "ccRCC.34Sample.Merged.pctvariance.", run_id, ".txt")
 sink(file2write)
 # Determine percent of variation associated with each PC
-pct <- seurat_integrated[["pca"]]@stdev / sum(seurat_integrated[["pca"]]@stdev) * 100
+pct <- srat[["pca"]]@stdev / sum(srat[["pca"]]@stdev) * 100
 print(pct)
 
 # Calculate cumulative percents for each PC
