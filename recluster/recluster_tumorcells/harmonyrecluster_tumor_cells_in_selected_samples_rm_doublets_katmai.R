@@ -85,13 +85,18 @@ for (aliquot_tmp in aliquots2process) {
     
     ## RunPCA
     srat.new <- RunPCA(srat.new, npcs = num_pc, verbose = FALSE)
+    cat("Finished RUNPCA!\n")
     srat.new <- RunHarmony(srat.new, "nCount_RNA")
-    
+    cat("Finished RunHarmony!\n")
     srat.new <- RunUMAP(srat.new, reduction = "harmony")
+    cat("Finished RUNUMAP!\n")
     srat.new <- FindNeighbors(srat.new, reduction = "harmony", dims = 1:num_pc, force.recalc = T)
+    cat("Finished FindNeighbors!\n")
     srat.new <- FindClusters(srat.new, resolution = 0.5)
+    cat("Finished FindClusters!\n")
     # srat.new <- FindClusters(srat.new, resolution = 1.0)
     saveRDS(object = srat.new, file = file2write, compress = T)
+    cat("Finished saving the output!\n")
     
     p <- DimPlot(object = srat.new, reduction = "harmony", pt.size = .1, do.return = TRUE)
     file_plot<- paste(dir_out, easyid, ".dimplot.png")
