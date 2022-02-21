@@ -41,7 +41,7 @@ barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barc
 print("Finish reading the barcode2celltype_df file!\n")
 
 # run harmony -------------------------------------------------------------
-srat <- RunHarmony(srat, "orig.ident")
+srat <- RunHarmony(object = srat, group.by.vars = "orig.ident", assay.use = "SCT")
 cat("Finished RunHarmony!\n")
 srat <- srat %>% 
   RunUMAP(reduction = "harmony", dims = 1:30, verbose = F) %>% 
