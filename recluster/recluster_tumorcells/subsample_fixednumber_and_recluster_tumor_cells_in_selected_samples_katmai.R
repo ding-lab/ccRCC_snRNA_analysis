@@ -42,7 +42,7 @@ barcodes_umapdata_df <- NULL
 colors_cluster <- Polychrome::dark.colors(n = 24)
 names(colors_cluster) <- 1:24
 
-for (easy_id_tmp in srat_paths_df$Sample[1]) {
+for (easy_id_tmp in srat_paths_df$Sample) {
   ## input individually processed seurat object
   seurat_obj_path <- srat_paths_df$Path_katmai[srat_paths_df$Sample == easy_id_tmp]
   srat <- readRDS(file = seurat_obj_path)
