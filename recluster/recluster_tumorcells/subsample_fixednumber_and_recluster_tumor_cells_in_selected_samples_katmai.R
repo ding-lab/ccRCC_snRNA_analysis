@@ -72,7 +72,7 @@ for (easy_id_tmp in srat_paths_df$Sample[1]) {
       srat.new <- FindClusters(srat.new, resolution = 0.5)
       # srat.new <- FindClusters(srat.new, resolution = 1.0)
       saveRDS(object = srat.new, file = file2write, compress = T)
-      print(paste0("Finished reclustering ", aliquot_tmp, "!"))
+      print(paste0("Finished reclustering ", easy_id_tmp, "!"))
     } else {
       srat.new <- readRDS(file = file2write)
     }
