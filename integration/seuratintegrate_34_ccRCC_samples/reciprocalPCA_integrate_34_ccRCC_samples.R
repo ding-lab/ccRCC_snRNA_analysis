@@ -34,7 +34,7 @@ dir.create(dir_out)
 library(future)
 library(future.apply)
 plan("multiprocess", workers = 4)
-options(future.globals.maxSize = 1000 * 1024^2)
+options(future.globals.maxSize = 10000 * 1024^2)
 
 # input dependencies ------------------------------------------------------
 ## input seurat paths
