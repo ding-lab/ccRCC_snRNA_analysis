@@ -44,7 +44,7 @@ names(colors_cluster) <- 1:24
 
 for (easy_id_tmp in srat_paths_df$Sample[1]) {
   ## input individually processed seurat object
-  seurat_obj_path <- srat_paths$Path_katmai[srat_paths$Sample == easy_id_tmp]
+  seurat_obj_path <- srat_paths_df$Path_katmai[srat_paths_df$Sample == easy_id_tmp]
   srat <- readRDS(file = seurat_obj_path)
   number_tumorcells <- ncol(srat)
   
