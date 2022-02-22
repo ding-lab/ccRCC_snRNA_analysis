@@ -128,13 +128,13 @@ cat("Finished saving the srat_integrated!\n")
 umap_data <- Seurat::FetchData(object = srat_integrated, vars = c("orig.ident", "ident", "UMAP_1", "UMAP_2"))
 umap_data$barcode <- rownames(umap_data)
 
-file2write <- paste0(dir_out, "ccRCC.34Sample.Merged.HarmonyIntegrated.Metadata.", run_id, ".tsv")
+file2write <- paste0(dir_out, "ccRCC.34Sample.Integrated.ReciprocalPCA.Metadata.", run_id, ".tsv")
 write.table(x = umap_data, file = file2write, quote = F, sep = "\t", row.names = F)
 print("Finish writing the output!\n")
 
 # plot --------------------------------------------------------------------
-file2write <- paste0(dir_out, "ccRCC.34samples.Merged.HarmonyIntegrated.", run_id, ".png")
+file2write <- paste0(dir_out, "ccRCC.34Sample.Integrated.ReciprocalPCA.", run_id, ".png")
 png(filename = file2write, width = 1200, height = 1100, res = 150)
-DimPlot(srat,reduction = "umap")
+DimPlot(srat_integrated,reduction = "umap")
 dev.off()
 
