@@ -97,7 +97,7 @@ for (easy_id_tmp in srat_paths_df$Sample) {
                  axis.ticks.x=element_blank())
   p <- p + theme(axis.text.y=element_blank(),
                  axis.ticks.y=element_blank())
-  p <- p + ggtitle(label = paste0(easy_id_tmp, " tumor cells subclusters"), subtitle = paste0("Subsampling ", 100*perc_tumorcells, "% cells"))
+  p <- p + ggtitle(label = paste0(easy_id_tmp, " tumor cells subclusters"), subtitle = paste0("Using 50 PCs"))
   p <- p + theme(legend.position = "right")
   p
   file2write <- paste0(dir_out, easy_id_tmp, ".png")
