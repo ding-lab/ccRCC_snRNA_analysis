@@ -25,5 +25,7 @@ pct_pc30_df <- pct_long_df %>%
   filter(rank_pc == 30)
 summary(pct_pc30_df$cumu_pct)
 
-pct_wide_df <- dcast(data = pct_long_df, )
+pct_cutoff_df <- pct_long_df %>%
+  filter(cumu_pct > 95 & pct < 5)
+
 
