@@ -19,6 +19,9 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input barcode2UMAP
 barcode2umap_df <- fread(data.table = F, input = "./Resources/Analysis_Results/recluster/recluster_tumorcells/downsample_fixednumber_and_recluster_tumor_cells_in_selected_samples_katmai/20220222.v1/UMAPData.2000TumorCellReclustered.20220222.v1.tsv")
+## input meta data
+### accidently use the wrong sample id
+metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
 
 # plot by each aliquot ----------------------------------------------------
 ## make different output files
@@ -28,6 +31,7 @@ dir.create(dir_out_png)
 # dir.create(dir_out_pdf)
 
 for (aliquot_tmp in unique(barcode2umap_df$easy_id)) {
+  easyid_tmp <- metadata_df$Aliquot.snRNA.WU[metadata_df$Sample == aliquot_tmp]
   plot_data_df <- barcode2umap_df %>%
     filter(easy_id == aliquot_tmp) %>%
     mutate(Name_TumorCluster = paste0("C", seurat_clusters))
@@ -51,7 +55,7 @@ for (aliquot_tmp in unique(barcode2umap_df$easy_id)) {
   p <- p + theme(plot.title = element_text(size = 18))
   p
   ## save plot
-  png2write <- paste0(dir_out_png, aliquot_tmp, ".TumorCellOnlyClustering.", ".png")
+  png2write <- paste0(dir_out_png, easyid_tmp, ".png")
   png(filename = png2write, width = 900, height = 1000, res = 150)
   print(p)
   dev.off()
