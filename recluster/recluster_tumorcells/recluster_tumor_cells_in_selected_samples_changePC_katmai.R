@@ -62,7 +62,7 @@ for (easy_id_tmp in srat_paths_df$Sample) {
     saveRDS(object = srat, file = file2write, compress = T)
     print(paste0("Finished reclustering ", easy_id_tmp, "!"))
   } else {
-    srat.new <- readRDS(file = file2write)
+    srat <- readRDS(file = file2write)
   }
   # Determine percent of variation associated with each PC
   pct <- srat[["pca"]]@stdev / sum(srat[["pca"]]@stdev) * 100
@@ -76,7 +76,7 @@ for (easy_id_tmp in srat_paths_df$Sample) {
   print(co1)
   
   ## extract current meta data
-  barcodes_tmp_df <- FetchData(object = srat.new, vars = c("UMAP_1", "UMAP_2", "orig.ident", "seurat_clusters"))
+  barcodes_tmp_df <- FetchData(object = srat, vars = c("UMAP_1", "UMAP_2", "orig.ident", "seurat_clusters"))
   barcodes_tmp_df$barcode <- rownames(barcodes_tmp_df)
   barcodes_tmp_df$easy_id <- easy_id_tmp
   
@@ -90,18 +90,18 @@ for (easy_id_tmp in srat_paths_df$Sample) {
                       mapping = aes(x = UMAP_1, y = UMAP_2, color = factor(seurat_clusters)),
                       alpha = 1, size = 0.05)
   p <- p + scale_color_manual(values = colors_cluster[unique(barcodes_tmp_df$seurat_clusters)])
-  p <- p + guides(colour = guide_legend(override.aes = list(size=3)))
   p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                  panel.background = element_blank(), axis.line = element_line(colour = "black"))
   p <- p + theme(axis.text.x=element_blank(),
                  axis.ticks.x=element_blank())
   p <- p + theme(axis.text.y=element_blank(),
                  axis.ticks.y=element_blank())
-  p <- p + ggtitle(label = paste0(easy_id_tmp, " tumor cells subclusters"), subtitle = paste0("Using 50 PCs"))
-  p <- p + theme(legend.position = "right")
+  p <- p + ggtitle(label = paste0(" Tumor-cells subclusters for sample ", easy_id_tmp), subtitle = paste0("Using 50 PCs"))
+  p <- p + theme(legend.position = "bottom")
+  p <- p + guides(colour = guide_legend(override.aes = list(size=3), title = NULL))
   p
   file2write <- paste0(dir_out, easy_id_tmp, ".png")
-  png(filename = file2write, width = 600, height = 500, res = 150)
+  png(filename = file2write, width = 600, height = 700, res = 150)
   print(p)
   dev.off()
   print(paste0("Finished plotting for ", easy_id_tmp))
@@ -110,4 +110,8 @@ for (easy_id_tmp in srat_paths_df$Sample) {
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "UMAPData.PC", num_pc, "TumorCellReclustered.", run_id, ".tsv")
 write.table(x = barcodes_umapdata_df, file = file2write, sep = '\t', quote = F, row.names = F)
-print("Finished write.table!")
+print("Finished write.table for barcodes_umapdata_df!")
+
+file2write <- paste0(dir_out, "Pct.SD.byPC.", run_id, ".tsv")
+write.table(x = pct_df, file = file2write, sep = '\t', quote = F, row.names = F)
+print("Finished write.table for pct_df!")

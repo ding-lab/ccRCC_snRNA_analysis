@@ -1,5 +1,6 @@
 # Yige Wu @WashU Jun 2020
 ## annotate each barcode to the manual tumor subcluster number (raw)
+## doublets have not been removed
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
