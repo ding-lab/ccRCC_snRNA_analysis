@@ -18,7 +18,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input barcode2UMAP
-barcode2umap_df <- fread(data.table = F, input = "./Resources/Analysis_Results/recluster/recluster_tumorcells/downsample_fixednumber_and_recluster_tumor_cells_in_selected_samples_katmai/20220222.v1/UMAPData.2000TumorCellReclustered.20220222.v1.tsv")
+barcode2umap_df <- fread(data.table = F, input = "./Resources/Analysis_Results/recluster/recluster_tumorcells/recluster_tumor_cells_in_selected_samples_changePC_katmai/20220301.v1/UMAPData.PC50TumorCellReclustered.20220301.v1.tsv")
 ## input meta data
 ### accidently use the wrong sample id
 metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
@@ -37,7 +37,7 @@ for (aliquot_tmp in unique(barcode2umap_df$easy_id)) {
     mutate(Name_TumorCluster = paste0("C", seurat_clusters))
   ## make color for each cluster
   uniq_cluster_colors <- Polychrome::dark.colors(n = length(unique(plot_data_df$Name_TumorCluster)))
-  names(uniq_cluster_colors) <- unique(plot_data_df$Name_TumorCluster)
+  names(uniq_cluster_colors) <- sort(unique(plot_data_df$Name_TumorCluster))
   
   ## make plot
   p <- ggplot()

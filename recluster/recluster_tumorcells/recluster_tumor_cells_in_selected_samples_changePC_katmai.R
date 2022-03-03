@@ -33,7 +33,9 @@ library(ggplot2)
 # input dependencies ------------------------------------------------------
 ## input seurat object paths
 srat_paths_df <- fread(data.table = F, input = "./Data_Freezes/V2/snRNA/Tumor_Cell_Reclustered/Paths_TumorCellOnlyReclustered_SeuratObject.20210805.v1.tsv")
-## specify the minical number of cells to subsample to
+## input the scrublet output
+barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20210729.v1/scrublet.united_outputs.20210729.v1.tsv", data.table = F)
+## specify the minical number of cells to downsample to
 num_pc <- 50
 # run reclustering by each aliquot ----------------------------------------
 barcodes_umapdata_df <- NULL
@@ -41,17 +43,28 @@ pct_df <- NULL
 
 ### make colors
 colors_cluster <- Polychrome::dark.colors(n = 24)
-names(colors_cluster) <- 1:24
+names(colors_cluster) <- 0:23
 
-for (easy_id_tmp in srat_paths_df$Sample) {
+for (easy_id_tmp in srat_paths_df$Aliquot.snRNA.WU) {
   ## input individually processed seurat object
-  seurat_obj_path <- srat_paths_df$Path_katmai[srat_paths_df$Sample == easy_id_tmp]
+  seurat_obj_path <- srat_paths_df$Path_katmai[srat_paths_df$Aliquot.snRNA.WU == easy_id_tmp]
   srat <- readRDS(file = seurat_obj_path)
   number_tumorcells <- ncol(srat)
-  
   ## check if the reclustered object has been saved for this aliquot
   file2write <- paste0(dir_out, easy_id_tmp, ".PC", num_pc, "tumorcellreclustered.", run_id, ".RDS")
   if (!file.exists(file2write)) {
+    ## remove doublets
+    ## take out the doublets
+    barcode2scrublet_tmp_df <- barcode2scrublet_df %>%
+      filter(Aliquot_WU == easy_id_tmp) %>%
+      filter(Barcode %in% rownames(srat@meta.data)) %>%
+      filter(!predicted_doublet)
+    barcodes_keep <- barcode2scrublet_tmp_df$Barcode
+    
+    ## subset data
+    print(dim(srat))
+    srat <- subset(srat, cells = barcodes_keep)
+    print(dim(srat))
     
     ## RunPCA
     srat <- RunPCA(srat, npcs = num_pc, verbose = FALSE)

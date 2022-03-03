@@ -47,15 +47,16 @@ dir_out_pdf <- paste0(dir_out, "pdf", "/")
 dir.create(dir_out_pdf)
 colors_all <- Polychrome::dark.colors(n = 24)
 
-# for (easyid_tmp in "C3L-00416-T1") {
-for (easyid_tmp in unique(barcode2umap_df$easy_id)) {
+for (easyid_tmp in "C3L-00004-T1") {
+# for (easyid_tmp in unique(barcode2umap_df$easy_id)) {
   scrublets_df <- barcode2scrublet_df %>%
     filter(Aliquot_WU == easyid_tmp) %>%
     filter(predicted_doublet)
+  barcodes_doublet <- scrublets_df$Barcode; length(barcodes_doublet)
   
   plot_data_df <- barcode2umap_df %>%
     filter(easy_id == easyid_tmp) %>%
-    filter(!(barcode_tumorcellreclustered %in% scrublets_df$Barcodes)) %>%
+    filter(!(barcode_tumorcellreclustered %in% barcodes_doublet)) %>%
     mutate(Name_TumorCluster = paste0("C", id_manual_cluster_w0+1))
   cellnumber_percluster_df <- plot_data_df %>%
     select(Name_TumorCluster) %>%
