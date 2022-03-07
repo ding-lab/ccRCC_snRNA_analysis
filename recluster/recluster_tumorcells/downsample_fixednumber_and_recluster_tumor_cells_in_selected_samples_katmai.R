@@ -112,7 +112,7 @@ for (easy_id_tmp in srat_paths_df$Aliquot.snRNA.WU) {
     p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                    panel.background = element_blank())
     ## save plot
-    png2write <- paste0(dir_out, easyid_tmp, ".png")
+    png2write <- paste0(dir_out, easy_id_tmp, ".png")
     png(filename = png2write, width = 900, height = 1000, res = 150)
     print(p)
     dev.off()
