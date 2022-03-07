@@ -50,21 +50,22 @@ for (easy_id_tmp in srat_paths_df$Aliquot.snRNA.WU) {
   ## input individually processed seurat object
   seurat_obj_path <- srat_paths_df$Path_katmai[srat_paths_df$Aliquot.snRNA.WU == easy_id_tmp]
   srat <- readRDS(file = seurat_obj_path)
-  number_tumorcells <- ncol(srat)
+
+  ## remove doublets
+  ## take out the doublets
+  barcode2scrublet_tmp_df <- barcode2scrublet_df %>%
+    filter(Aliquot_WU == easy_id_tmp) %>%
+    filter(Barcode %in% rownames(srat@meta.data)) %>%
+    filter(predicted_doublet)
+  barcodes_doublet <- barcode2scrublet_tmp_df$Barcode
+  barcodes_keep <- colnames(srat); length(barcodes_keep)
+  barcodes_keep <- barcodes_keep[!(barcodes_keep %in% barcodes_doublet)]; length(barcodes_keep)
   
-  ## check if the reclustered object has been saved for this aliquot
-  file2write <- paste0(dir_out, easy_id_tmp, ".", min_tumorcells, "tumorcellreclustered.", run_id, ".RDS")
-  if (number_tumorcells >= min_tumorcells) {
+  if (length(barcodes_keep) >= min_tumorcells) {
+    
+    ## check if the reclustered object has been saved for this aliquot
+    file2write <- paste0(dir_out, easy_id_tmp, ".", min_tumorcells, "tumorcellreclustered.", run_id, ".RDS")
     if (!file.exists(file2write)) {
-      ## remove doublets
-      ## take out the doublets
-      barcode2scrublet_tmp_df <- barcode2scrublet_df %>%
-        filter(Aliquot_WU == easy_id_tmp) %>%
-        filter(Barcode %in% rownames(srat@meta.data)) %>%
-        filter(predicted_doublet)
-      barcodes_doublet <- barcode2scrublet_tmp_df$Barcode
-      barcodes_keep <- colnames(srat); length(barcodes_keep)
-      barcodes_keep <- barcodes_keep[!(barcodes_keep %in% barcodes_doublet)]; length(barcodes_keep)
       barcodes_keep2 <- sample(x = barcodes_keep, size = min_tumorcells)
       
       ## subset data
@@ -93,7 +94,8 @@ for (easy_id_tmp in srat_paths_df$Aliquot.snRNA.WU) {
     barcodes_tmp_df <- FetchData(object = srat.new, vars = c("UMAP_1", "UMAP_2", "orig.ident", "seurat_clusters"))
     barcodes_tmp_df$barcode <- rownames(barcodes_tmp_df)
     barcodes_tmp_df$easy_id <- easy_id_tmp
-    
+    barcodes_tmp_df <- barcodes_tmp_df %>%
+      arrange(seurat_clusters)
     ## bind with the super table
     barcodes_umapdata_df <- rbind(barcodes_tmp_df, barcodes_umapdata_df)
     print(paste0("Finished FetchData for ", easy_id_tmp))
@@ -104,7 +106,7 @@ for (easy_id_tmp in srat_paths_df$Aliquot.snRNA.WU) {
                         mapping = aes(x = UMAP_1, y = UMAP_2, color = factor(seurat_clusters)),
                         alpha = 1, size = 0.05)
     p <- p + scale_color_manual(values = sort(colors_cluster[unique(barcodes_tmp_df$seurat_clusters)]))
-    p <- p + ggtitle(label = paste0(easy_id_tmp, " tumor cells subclusters (Seurat)"), subtitle = paste0("Subsampling ", min_tumorcells, " cells"))
+    p <- p + ggtitle(label = paste0(easy_id_tmp, " tumor cells subclusters (Seurat)"), subtitle = paste0("Down-sampling ", min_tumorcells, " cells"))
     p <- p + guides(colour = guide_legend(override.aes = list(size=3), title = NULL, nrow = 1))
     p <- p + theme_void()
     p <- p + theme(legend.position = "bottom")
