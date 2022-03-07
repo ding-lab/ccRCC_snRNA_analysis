@@ -102,7 +102,7 @@ for (easy_id_tmp in srat_paths_df$Aliquot.snRNA.WU) {
   p <- p + geom_point(data = barcodes_tmp_df, 
                       mapping = aes(x = UMAP_1, y = UMAP_2, color = factor(seurat_clusters)),
                       alpha = 1, size = 0.05)
-  p <- p + scale_color_manual(values = colors_cluster[unique(barcodes_tmp_df$seurat_clusters)])
+  p <- p + scale_color_manual(values = colors_cluster[sort(unique(barcodes_tmp_df$seurat_clusters))])
   p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                  panel.background = element_blank(), axis.line = element_line(colour = "black"))
   p <- p + theme(axis.text.x=element_blank(),

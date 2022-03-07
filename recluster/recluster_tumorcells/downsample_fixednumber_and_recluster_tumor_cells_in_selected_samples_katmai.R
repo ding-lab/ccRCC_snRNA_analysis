@@ -33,18 +33,22 @@ library(ggplot2)
 # input dependencies ------------------------------------------------------
 ## input seurat object paths
 srat_paths_df <- fread(data.table = F, input = "./Data_Freezes/V2/snRNA/Tumor_Cell_Reclustered/Paths_TumorCellOnlyReclustered_SeuratObject.20210805.v1.tsv")
+## input the scrublet output
+barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20210729.v1/scrublet.united_outputs.20210729.v1.tsv", data.table = F)
 ## specify the minical number of cells to subsample to
 min_tumorcells <- 2000
 
 # run reclustering by each aliquot ----------------------------------------
 barcodes_umapdata_df <- NULL
+pct_df <- NULL
+
 ### make colors
 colors_cluster <- Polychrome::dark.colors(n = 24)
-names(colors_cluster) <- 1:24
+names(colors_cluster) <- 0:23
 
-for (easy_id_tmp in srat_paths_df$Sample) {
+for (easy_id_tmp in srat_paths_df$Aliquot.snRNA.WU) {
   ## input individually processed seurat object
-  seurat_obj_path <- srat_paths_df$Path_katmai[srat_paths_df$Sample == easy_id_tmp]
+  seurat_obj_path <- srat_paths_df$Path_katmai[srat_paths_df$Aliquot.snRNA.WU == easy_id_tmp]
   srat <- readRDS(file = seurat_obj_path)
   number_tumorcells <- ncol(srat)
   
@@ -52,12 +56,20 @@ for (easy_id_tmp in srat_paths_df$Sample) {
   file2write <- paste0(dir_out, easy_id_tmp, ".", min_tumorcells, "tumorcellreclustered.", run_id, ".RDS")
   if (number_tumorcells >= min_tumorcells) {
     if (!file.exists(file2write)) {
-      barcodes_total <- colnames(srat)
-      barcodes_keep <- sample(x = barcodes_total, size = min_tumorcells)
+      ## remove doublets
+      ## take out the doublets
+      barcode2scrublet_tmp_df <- barcode2scrublet_df %>%
+        filter(Aliquot_WU == easy_id_tmp) %>%
+        filter(Barcode %in% rownames(srat@meta.data)) %>%
+        filter(predicted_doublet)
+      barcodes_doublet <- barcode2scrublet_tmp_df$Barcode
+      barcodes_keep <- colnames(srat); length(barcodes_keep)
+      barcodes_keep <- barcodes_keep[!(barcodes_keep %in% barcodes_doublet)]; length(barcodes_keep)
+      barcodes_keep2 <- sample(x = barcodes_keep, size = min_tumorcells)
       
       ## subset data
       print(dim(srat))
-      srat.new <- subset(srat, cells = barcodes_keep)
+      srat.new <- subset(srat, cells = barcodes_keep2)
       rm(srat)
       print(dim(srat.new))
       
@@ -66,6 +78,7 @@ for (easy_id_tmp in srat_paths_df$Sample) {
       srat.new <- FindVariableFeatures(object = srat.new, selection.method = "vst", nfeatures = 2000)
       
       ## RunPCA
+      print(num_pc)
       srat.new <- RunPCA(srat.new, npcs = num_pc, verbose = FALSE)
       srat.new <- RunUMAP(srat.new, reduction = "pca", dims = 1:num_pc)
       srat.new <- FindNeighbors(srat.new, reduction = "pca", dims = 1:num_pc, force.recalc = T)
@@ -90,19 +103,17 @@ for (easy_id_tmp in srat_paths_df$Sample) {
     p <- p + geom_point(data = barcodes_tmp_df, 
                         mapping = aes(x = UMAP_1, y = UMAP_2, color = factor(seurat_clusters)),
                         alpha = 1, size = 0.05)
-    p <- p + scale_color_manual(values = colors_cluster[unique(barcodes_tmp_df$seurat_clusters)])
-    p <- p + guides(colour = guide_legend(override.aes = list(size=3)))
+    p <- p + scale_color_manual(values = sort(colors_cluster[unique(barcodes_tmp_df$seurat_clusters)]))
+    p <- p + ggtitle(label = paste0(easy_id_tmp, " tumor cells subclusters (Seurat)"), subtitle = paste0("Subsampling ", min_tumorcells, " cells"))
+    p <- p + guides(colour = guide_legend(override.aes = list(size=3), title = NULL, nrow = 1))
+    p <- p + theme_void()
+    p <- p + theme(legend.position = "bottom")
+    p <- p + theme(legend.text = element_text(size = 15), legend.title = element_text(size = 15))
     p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                   panel.background = element_blank(), axis.line = element_line(colour = "black"))
-    p <- p + theme(axis.text.x=element_blank(),
-                   axis.ticks.x=element_blank())
-    p <- p + theme(axis.text.y=element_blank(),
-                   axis.ticks.y=element_blank())
-    p <- p + ggtitle(label = paste0(easy_id_tmp, " tumor cells subclusters"), subtitle = paste0("Subsampling ", min_tumorcells, " cells"))
-    p <- p + theme(legend.position = "right")
-    p
-    file2write <- paste0(dir_out, easy_id_tmp, ".png")
-    png(filename = file2write, width = 600, height = 500, res = 150)
+                   panel.background = element_blank())
+    ## save plot
+    png2write <- paste0(dir_out, easyid_tmp, ".png")
+    png(filename = png2write, width = 900, height = 1000, res = 150)
     print(p)
     dev.off()
     print(paste0("Finished plotting for ", easy_id_tmp))

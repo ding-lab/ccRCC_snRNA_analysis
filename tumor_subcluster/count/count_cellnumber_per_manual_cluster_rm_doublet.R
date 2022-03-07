@@ -1,17 +1,28 @@
 # Yige Wu @WashU Apr 2021
 
+# Yige Wu @WashU Mar 2022
+
 # set up libraries and output directory -----------------------------------
 ## set working directory
-dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA"
 setwd(dir_base)
-source("./ccRCC_snRNA_analysis/load_pkgs.R")
-source("./ccRCC_snRNA_analysis/functions.R")
-source("./ccRCC_snRNA_analysis/variables.R")
-source("./ccRCC_snRNA_analysis/plotting.R")
+packages = c(
+  "rstudioapi",
+  "plyr",
+  "dplyr",
+  "stringr",
+  "reshape2",
+  "data.table",
+  "Seurat"
+)
+for (pkg_name_tmp in packages) {
+  library(package = pkg_name_tmp, character.only = T)
+}
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
+source("./ccRCC_snRNA_analysis/functions.R")
 dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
@@ -23,13 +34,15 @@ barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite
 # count -------------------------------------------------------------------
 barcode_merged_df <- merge(x = barcode2tumorsubcluster_df, y = barcode2scrublet_df, by.x = c("orig.ident", "barcode"), by.y = c("Aliquot", "Barcode"), all.x = T)
 cellnumber_percluster_df <- barcode_merged_df %>%
-  filter(!predicted_doublet) %>%
+  filter(is.na(predicted_doublet) | (!is.na(predicted_doublet) & predicted_doublet == F)) %>%
   mutate(id_cluster_uniq = Cluster_Name) %>%
   select(id_cluster_uniq) %>%
   table() %>%
   as.data.frame() %>%
   rename(id_cluster_uniq = '.') %>%
   mutate(easy_id = str_split_fixed(string = id_cluster_uniq, pattern = "_C", n = 2)[,1])
+nrow(cellnumber_percluster_df[cellnumber_percluster_df$Freq >= 50,])
+nrow(cellnumber_percluster_df[cellnumber_percluster_df$Freq > 50,])
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "CellNumberPerTumorManualCluster.", run_id, ".tsv")
