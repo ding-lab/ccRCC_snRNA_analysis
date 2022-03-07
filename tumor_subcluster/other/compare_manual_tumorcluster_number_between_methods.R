@@ -72,3 +72,4 @@ summary(count_merged_df$Freq.pc50)
 median(x = count_merged_df$Freq.orig, na.rm = T)
 median(x = count_merged_df$Freq.ds2000, na.rm = T)
 
+mean(abs(count_merged_df$Freq.orig - count_merged_df$Freq.pc50))

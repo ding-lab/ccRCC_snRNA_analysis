@@ -47,6 +47,7 @@ colors_cluster <- Polychrome::dark.colors(n = 24)
 names(colors_cluster) <- 0:23
 
 for (easy_id_tmp in srat_paths_df$Aliquot.snRNA.WU) {
+  print(paste0("Processsing ", easy_id_tmp, "!"))
   ## input individually processed seurat object
   seurat_obj_path <- srat_paths_df$Path_katmai[srat_paths_df$Aliquot.snRNA.WU == easy_id_tmp]
   srat <- readRDS(file = seurat_obj_path)
@@ -66,6 +67,8 @@ for (easy_id_tmp in srat_paths_df$Aliquot.snRNA.WU) {
     ## check if the reclustered object has been saved for this aliquot
     file2write <- paste0(dir_out, easy_id_tmp, ".", min_tumorcells, "tumorcellreclustered.", run_id, ".RDS")
     if (!file.exists(file2write)) {
+      print(paste0("RDS file for ", easy_id_tmp, " still needs to be processed!"))
+      
       barcodes_keep2 <- sample(x = barcodes_keep, size = min_tumorcells)
       
       ## subset data
@@ -88,6 +91,7 @@ for (easy_id_tmp in srat_paths_df$Aliquot.snRNA.WU) {
       saveRDS(object = srat.new, file = file2write, compress = T)
       print(paste0("Finished reclustering ", easy_id_tmp, "!"))
     } else {
+      print(paste0("RDS file for ", easy_id_tmp, " is there!"))
       srat.new <- readRDS(file = file2write)
     }
     ## extract current meta data
