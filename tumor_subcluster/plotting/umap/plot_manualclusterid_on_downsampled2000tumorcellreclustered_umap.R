@@ -19,7 +19,7 @@ for (pkg_name_tmp in packages) {
 library(ggrastr)
 library(ggplot2)
 ## set run id
-version_tmp <- 1
+version_tmp <- "cutoff25cells"
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -28,7 +28,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input barcode with UMAP coordinates and manual group id
-barcode2umap_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/map_tumorsubclusterid/map_barcode_with_manual_tumorsubcluster_id_downsample2000cells/20220228.vcutoff50cells/Barcode2TumorSubclusterId.20220228.vcutoff50cells.tsv")
+barcode2umap_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/map_tumorsubclusterid/map_barcode_with_manual_tumorsubcluster_id_downsample2000cells/20220307.vcutoff25cells/Barcode2TumorSubclusterId.20220307.vcutoff25cells.tsv")
 
 # plot by each aliquot ----------------------------------------------------
 ## make different output files
@@ -43,13 +43,15 @@ for (easyid_tmp in unique(barcode2umap_df$easy_id)) {
   
   plot_data_df <- barcode2umap_df %>%
     filter(easy_id == easyid_tmp) %>%
-    mutate(Name_TumorCluster = str_split_fixed(string = Cluster_Name.cutoff50cells, pattern = "_", n = 2)[,2]) %>%
-    mutate(Name_TumorCluster = ifelse(Name_TumorCluster == "CNA", "Minor cluster (<50 cells)", Name_TumorCluster))
-
+    mutate(Name_TumorCluster = str_split_fixed(string = Cluster_Name, pattern = "_", n = 2)[,2]) %>%
+    # mutate(Name_TumorCluster = ifelse(Name_TumorCluster == "CNA", "Minor cluster (<50 cells)", Name_TumorCluster))
+  mutate(Name_TumorCluster = ifelse(Name_TumorCluster == "CNA", "Minor cluster (<25 cells)", Name_TumorCluster))
+  
   ## make color for each cluster
   names_cluster_tmp <- unique(plot_data_df$Name_TumorCluster)
   length_clusters <- length(names_cluster_tmp)
-  if("Minor cluster (<50 cells)" %in% names_cluster_tmp) {
+  if("Minor cluster (<25 cells)" %in% names_cluster_tmp) {
+  # if("Minor cluster (<50 cells)" %in% names_cluster_tmp) {
     uniq_cluster_colors <- c(colors_all[1:(length_clusters-1)], "grey40")
   } else {
     uniq_cluster_colors <-colors_all[1:length_clusters]

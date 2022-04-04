@@ -2,18 +2,29 @@
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+# dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA"
 setwd(dir_base)
-source("./ccRCC_snRNA_analysis/load_pkgs.R")
-source("./ccRCC_snRNA_analysis/functions.R")
-source("./ccRCC_snRNA_analysis/variables.R")
-source("./ccRCC_snRNA_analysis/plotting.R")
-## set run id
-version_tmp <- 1
-run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
-## set output directory
-dir_out <- paste0(makeOutDir(), run_id, "/")
-dir.create(dir_out)
+packages = c(
+  "plyr",
+  "dplyr",
+  "stringr",
+  "reshape2",
+  "data.table",
+  "ggplot2",
+  "ggrepel"
+)
+for (pkg_name_tmp in packages) {
+  if (!(pkg_name_tmp %in% installed.packages()[,1])) {
+    install.packages(pkg_name_tmp, dependencies = T)
+  }
+  if (!(pkg_name_tmp %in% installed.packages()[,1])) {
+    if (!requireNamespace("BiocManager", quietly=TRUE))
+      install.packages("BiocManager")
+    BiocManager::install(pkg_name_tmp)
+  }
+  library(package = pkg_name_tmp, character.only = T)
+}
 
 # input dependencies ------------------------------------------------------
 # dam_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Enriched_Motifs/Score_difference.Tumor_Normal_comparison.20210509.tsv")
@@ -88,6 +99,13 @@ p <- p + theme(axis.text = element_text(size = 14, color = "black"),
                axis.title = element_text(size = 14),
                legend.position = "none")
 
+## set run id
+version_tmp <- 1
+run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
+## set output directory
+source("./ccRCC_snRNA_analysis/functions.R")
+dir_out <- paste0(makeOutDir(), run_id, "/")
+dir.create(dir_out)
 file2write <- paste0(dir_out, "volcano.nolegend.", "pdf")
 pdf(file2write, width = 5.5, height = 5, useDingbats = F)
 print(p)

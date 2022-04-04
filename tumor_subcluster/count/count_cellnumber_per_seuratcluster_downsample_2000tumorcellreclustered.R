@@ -17,7 +17,8 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input barcode2UMAP
-barcode2umap_df <- fread(data.table = F, input = "./Resources/Analysis_Results/recluster/recluster_tumorcells/downsample_fixednumber_and_recluster_tumor_cells_in_selected_samples_katmai/20220222.v1/UMAPData.2000TumorCellReclustered.20220222.v1.tsv")
+# barcode2umap_df <- fread(data.table = F, input = "./Resources/Analysis_Results/recluster/recluster_tumorcells/downsample_fixednumber_and_recluster_tumor_cells_in_selected_samples_katmai/20220222.v1/UMAPData.2000TumorCellReclustered.20220222.v1.tsv")
+barcode2umap_df <- fread(data.table = F, input = "./Resources/Analysis_Results/recluster/recluster_tumorcells/downsample_fixednumber_and_recluster_tumor_cells_in_selected_samples_katmai/20220307.v1/UMAPData.2000TumorCellReclustered.20220307.v1.tsv")
 ## input meta data
 ### accidently use the wrong sample id
 metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")

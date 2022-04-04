@@ -18,6 +18,7 @@ for (pkg_name_tmp in packages) {
 }
 ## set run id
 version_tmp <- "cutoff50cells"
+version_tmp <- "cutoff25cells"
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory to be in the same structure as the code
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -26,22 +27,29 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input barcode2seurat cluster info
-barcode2seuratcluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/recluster/recluster_tumorcells/downsample_fixednumber_and_recluster_tumor_cells_in_selected_samples_katmai/20220222.v1/UMAPData.2000TumorCellReclustered.20220222.v1.tsv")
+# barcode2seuratcluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/recluster/recluster_tumorcells/downsample_fixednumber_and_recluster_tumor_cells_in_selected_samples_katmai/20220222.v1/UMAPData.2000TumorCellReclustered.20220222.v1.tsv")
+barcode2seuratcluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/recluster/recluster_tumorcells/downsample_fixednumber_and_recluster_tumor_cells_in_selected_samples_katmai/20220307.v1/UMAPData.2000TumorCellReclustered.20220307.v1.tsv")
 ## input the cell to cell type table
-sratcluster2manualcluster_df <- readxl::read_xlsx(path = "./Resources/snRNA_Processed_Data/Tumor_Subclusters/Individual.Downsample2000cells.TumorSeuratCluster2Manual.20220223.xlsx")
+# sratcluster2manualcluster_df <- readxl::read_xlsx(path = "./Resources/snRNA_Processed_Data/Tumor_Subclusters/Individual.Downsample2000cells.TumorSeuratCluster2Manual.20220223.xlsx")
+sratcluster2manualcluster_df <- readxl::read_xlsx(path = "./Resources/snRNA_Processed_Data/Tumor_Subclusters/Individual.Downsample2000cells.TumorSeuratCluster2Manual.20220307.xlsx")
 ## input meta data
 ### accidently use the wrong sample id
 metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
 
 # get barcode2manualcluster -----------------------------------------------
 barcode2seuratcluster_df$easy_id <- mapvalues(x = barcode2seuratcluster_df$orig.ident, from = metadata_df$Aliquot.snRNA, to = as.vector(metadata_df$Aliquot.snRNA.WU))
+sratcluster2manualcluster_df$Aliquot <- mapvalues(x = sratcluster2manualcluster_df$easy_id, from = metadata_df$Aliquot.snRNA.WU, to = as.vector(metadata_df$Aliquot.snRNA))
+
 barcode2manualcluster_df <- merge(x = barcode2seuratcluster_df %>%
                                     filter(easy_id != "C3L-00359-T1") %>%
                                     rename(id_seurat_cluster = seurat_clusters), 
                                   y = sratcluster2manualcluster_df %>%
+                                    mutate(id_seurat_cluster = gsub(x = str_split_fixed(string = id_cluster_uniq, pattern = "_", n = 2)[,2], pattern = "C", replacement = "")) %>%
+                                    # mutate(id_manual_cluster_w0 = id_manual_cluster_cutoff50) %>%
+                                    mutate(id_manual_cluster_w0 = id_manual_cluster_cutoff25) %>%
                                     mutate(id_manual_cluster_w0 = ifelse(id_manual_cluster_w0 == "NA", NA, id_manual_cluster_w0)) %>%
                                     mutate(id_manual_cluster_w0 = as.numeric(id_manual_cluster_w0)) %>%
-                                    select(Aliquot, id_seurat_cluster, id_manual_cluster_w0, Comment), 
+                                    select(Aliquot, id_seurat_cluster, id_manual_cluster_w0), 
                                   by.x = c("orig.ident", "id_seurat_cluster"), 
                                   by.y = c("Aliquot", "id_seurat_cluster"), all.x = T)
 barcode2manualcluster_df <- barcode2manualcluster_df %>%
@@ -52,18 +60,14 @@ cellnumber_percluster_df <- barcode2manualcluster_df %>%
   group_by(Cluster_Name) %>%
   summarise(Freq = n())
 
-barcode2manualcluster_df <- barcode2manualcluster_df %>%
-  mutate(Cluster_Name.cutoff50cells = ifelse(Cluster_Name %in% cellnumber_percluster_df$Cluster_Name[cellnumber_percluster_df$Freq >= 50], Cluster_Name, paste0(easy_id, "_CNA")))
-
 barcode2manualcluster_df %>%
   select(Cluster_Name, id_manual_cluster_w0) %>%
   unique()
 
 unique(barcode2manualcluster_df$Cluster_Name[!is.na(barcode2manualcluster_df$id_manual_cluster_w0)])
-## 98
-
-unique(barcode2manualcluster_df$Cluster_Name.cutoff50cells[!grepl(pattern = "CNA", x = barcode2manualcluster_df$Cluster_Name.cutoff50cells)])
-## 83
+unique(barcode2manualcluster_df$easy_id[!is.na(barcode2manualcluster_df$id_manual_cluster_w0)])
+## 57 for cutoff 50 cells - 24 tumors
+## 68 for cutoff 25 cells - 24 tumors
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "Barcode2TumorSubclusterId.", run_id, ".tsv")

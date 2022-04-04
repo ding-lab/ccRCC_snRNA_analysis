@@ -19,7 +19,7 @@ for (pkg_name_tmp in packages) {
 library(ggrastr)
 library(ggplot2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -80,7 +80,8 @@ for (easyid_tmp in unique(barcode2umap_df$easy_id)) {
   p <- ggplot()
   p <- p + geom_point_rast(data = plot_data_df, mapping = aes(x = UMAP_1, y = UMAP_2, color = Name_TumorCluster), shape = 16, alpha = 0.8, size = 1)
   p <- p + scale_color_manual(values = uniq_cluster_colors, na.translate = T)
-  p <- p + ggtitle(label = paste0("Tumor-cell subclusters for sample ", easyid_tmp), subtitle = "original")
+  # p <- p + ggtitle(label = paste0("Tumor-cell subclusters for sample ", easyid_tmp), subtitle = "original")
+  p <- p + ggtitle(label = paste0("Tumor-cell subclusters for sample ", easyid_tmp), subtitle = "Manually grouped")
   p <- p + guides(colour = guide_legend(override.aes = list(size=3), title = NULL, nrow = 1))
   p <- p + theme_void()
   p <- p + theme(legend.position = "bottom")
