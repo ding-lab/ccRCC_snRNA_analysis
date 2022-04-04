@@ -61,7 +61,8 @@ path_anchor_file <- paste0(dir_out, "anchor" , ".RDS")
 
 if (!file.exists(path_anchor_file)) {
   paths_srat2process <- paths_srat %>%
-    filter(Case != "C3L-00359")
+    filter(Case != "C3L-00359") %>%
+    filter(Sample_Type == "Tumor")
   srat_list <- list()
   for (i in 1:nrow(paths_srat2process)) {
     sample_id_tmp <- paths_srat2process$Aliquot[i]
