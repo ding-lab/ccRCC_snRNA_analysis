@@ -56,14 +56,6 @@ barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barc
 ## input doublet prediction
 barcode2scrublet_df <- fread(input = "./Resources/Analysis_Results/doublet/unite_scrublet_outputs/20210729.v1/scrublet.united_outputs.20210729.v1.tsv", data.table = F)
 
-# preprocess ------------------------------------------------------------------
-barcode2celltype_df <- barcode2celltype_df %>%
-  mutate(id_sample_barcode = paste0(orig.ident, "_", individual_barcode))
-srat@meta.data$individual_barcode <- str_split_fixed(string = rownames(srat@meta.data), pattern = "_", n = 2)[,1]
-srat@meta.data$id_sample_barcode <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$individual_barcode)
-srat@meta.data$Cell_type.shorter <- mapvalues(x = srat@meta.data$id_sample_barcode, from = barcode2celltype_df$id_sample_barcode, to = as.vector(barcode2celltype_df$Cell_type.shorter))
-barcodes_keep <- rownames(srat@meta.data)[srat@meta.data$Cell_type.shorter %in% c("Tumor cells", "EMT tumor cells")]
-
 # process -----------------------------------------------------------------
 path_anchor_file <- paste0(dir_out, "anchor" , ".RDS")
 
@@ -81,7 +73,7 @@ if (!file.exists(path_anchor_file)) {
       filter(Barcode %in% rownames(seurat_obj@meta.data)) %>%
       filter(!predicted_doublet)
     barcodes_keep <- barcode2scrublet_tmp_df$Barcode; length(barcodes_keep)
-    barcodes_tumorcells <- barcode2celltype_df$individual_barcode[barcode2celltype_df$Cell_type.shorter %in% c("Tumor cells", "EMT tumor cells")]
+    barcodes_tumorcells <- barcode2celltype_df$individual_barcode[barcode2celltype_df$orig.ident == sample_id_tmp & barcode2celltype_df$Cell_type.shorter %in% c("Tumor cells", "EMT tumor cells")]
     barcodes_keep <- barcodes_keep[(barcodes_keep %in% barcodes_tumorcells)]; length(barcodes_keep)
     ###
     print("subsetting")
