@@ -72,9 +72,12 @@ if (!file.exists(path_anchor_file)) {
       filter(Aliquot == sample_id_tmp) %>%
       filter(Barcode %in% rownames(seurat_obj@meta.data)) %>%
       filter(!predicted_doublet)
-    barcodes_keep <- barcode2scrublet_tmp_df$Barcode; length(barcodes_keep)
+    barcodes_keep <- barcode2scrublet_tmp_df$Barcode
+    print(length(barcodes_keep))
     barcodes_tumorcells <- barcode2celltype_df$individual_barcode[barcode2celltype_df$orig.ident == sample_id_tmp & barcode2celltype_df$Cell_type.shorter %in% c("Tumor cells", "EMT tumor cells")]
-    barcodes_keep <- barcodes_keep[(barcodes_keep %in% barcodes_tumorcells)]; length(barcodes_keep)
+    print(length(barcodes_tumorcells))
+    barcodes_keep <- barcodes_keep[(barcodes_keep %in% barcodes_tumorcells)]
+    print(length(barcodes_keep))
     ###
     print("subsetting")
     seurat_sub_obj <- subset(x = seurat_obj, cells = barcodes_keep)
