@@ -54,6 +54,54 @@ clinical_filtered_df$mutation_category_sim <- mapvalues(x = clinical_filtered_df
 scoregroups_test <- colnames(scores_df)
 scoregroups_test <- scoregroups_test[grepl(pattern = "Score", x = scoregroups_test)]
 
+
+# plot top score per tumor, compare high grade vs. low grade ------------------------------------------------------
+scoregroup_tmp <- "MTORC1_SIGNALING_Score"
+my_comparisons <- list( c("PBRM1 mutated\nG3/4", "PBRM1 mutated\nG1/2"), c("PBRM1 mutated\nG3/4", "Non-mutants\nG1/2"), c("BAP1 mutated\nG3/4", "Non-mutants\nG1/2"))
+
+for (scoregroup_tmp in "MTORC1_SIGNALING_Score") {
+# for (scoregroup_tmp in scoregroups_test) {
+  ## make plot data
+  scores_tmp_df <- scores_df[, c("cluster_name", scoregroup_tmp)]
+  colnames(scores_tmp_df) <- c("cluster_name", "score.bycluster")
+  scores_avg_tmp_df <- scores_tmp_df %>%
+    mutate(sample_id = str_split_fixed(string = cluster_name, pattern = "_", n = 2)[,1]) %>%
+    mutate(Aliquot_WU = gsub(x = sample_id, pattern = "\\.", replacement = "-")) %>%
+    group_by(Aliquot_WU) %>%
+    summarise(score.bysample = max(score.bycluster))
+  plot_data_df <- merge(x = clinical_filtered_df,
+                        y = scores_avg_tmp_df,
+                        by.x = c("Aliquot.snRNA.WU"), by.y = c("Aliquot_WU"), all.x = T)
+  plot_data_df <- plot_data_df %>%
+    mutate(grade_group = ifelse(Histologic_Grade %in% c("G1", "G2"), "G1/2", "G3/4")) %>%
+    mutate(x_plot = paste0(mutation_category_sim, '\n', grade_group)) %>%
+    mutate(y_plot = score.bysample) %>%
+    arrange(Case, desc(Histologic_Grade), desc(score.bysample))
+  # plot_data_df <- plot_data_df[!duplicated(plot_data_df$Case),]
+  plot_data_df$x_plot <- factor(x = plot_data_df$x_plot, levels = c("BAP1 mutated\nG3/4","BAP1 mutated\nG1/2",
+                                                                    "Both mutated\nG3/4",
+                                                                    "PBRM1 mutated\nG3/4","PBRM1 mutated\nG1/2",
+                                                                    "Non-mutants\nG3/4","Non-mutants\nG1/2"))
+  
+  ## plot
+  p = ggplot(plot_data_df, aes(x=x_plot, y=y_plot))
+  p = p + geom_violin(aes(fill = x_plot),  color = NA, alpha = 1)
+  p = p + geom_boxplot(width=.1)
+  p = p + geom_point(color = "black", fill = "black", shape = 16, position = pos, stroke = 0, alpha = 0.8, size = 2)
+  p = p + stat_compare_means(data = plot_data_df, 
+                             mapping = aes(x = x_plot, y = y_plot, label = ..p.signif..),comparisons = my_comparisons,
+                             symnum.args = symnum.args,
+                             hide.ns = F, method = "wilcox.test")
+  p <- p + ylab("mTORC1 signaling score by tumor")
+  p <- p + theme_classic()
+  p <- p + theme(legend.position = "none")
+  p <- p + theme(axis.title.x = element_blank())+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  file2write <- paste0(dir_out, scoregroup_tmp, ".MaxBySample.Wilcox.ByGrade.ByPBRM1BAP1.v2.png")
+  png(file2write, width = 600, height = 600, res = 150)
+  print(p)
+  dev.off()
+}
+
 # plot top score per tumor, compare high grade vs. low grade ------------------------------------------------------
 scoregroup_tmp <- "MTORC1_SIGNALING_Score"
 
