@@ -72,6 +72,6 @@ for (i in 1:ncol(pairwise)) {
 
 # save output -------------------------------------------------------------
 file2write <- paste0(dir_out, "tumorcellsreclustered.pairwisebycluster.markers.logfcthreshold.", logfc.threshold.run, ".minpct.", min.pct.run, ".mindiffpct.", min.diff.pct.run, ".tsv")
-write.table(x = results_df, file = file2write, quote = F, sep = F, row.names = F)
+write.table(x = results_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
 
