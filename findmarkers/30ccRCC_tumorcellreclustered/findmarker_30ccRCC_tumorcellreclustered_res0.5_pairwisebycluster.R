@@ -65,8 +65,8 @@ for (i in 1:ncol(pairwise)) {
   markers <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = pairwise[1, i], ident.2 = pairwise[2, i], only.pos = T,
                          min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
   markers$gene_symbol <- rownames(markers)
-  markers$ident.1 <- ident.1 = pairwise[1, i]
-  markers$ident.2 <- ident.1 = pairwise[2, i]
+  markers$ident.1 <- pairwise[1, i]
+  markers$ident.2 <- pairwise[2, i]
   results_df <- rbind(results_df, markers)
 }
 
