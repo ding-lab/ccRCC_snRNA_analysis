@@ -54,6 +54,12 @@ signatures <- c("./Resources/Knowledge/Databases/MSigDB/msigdb_v7.4_GMTs/h.all.v
                 "./Resources/Knowledge/Databases/MSigDB/msigdb_v7.4_GMTs/c5.go.bp.v7.4.symbols.gmt")
 
 # process -----------------------------------------------------------------
+## this is important because the default assay for the seurat object is "integrated" and I think if not set to RNA assay Vision will just take integrated assay,
+## which will give an error about  "rownames(data) = NULL. Expression matrix must have gene names as the rownames" because
+### > rownames(srat$integrated@counts)
+### NULL
+### rownames(srat$integrated@data will give top variably expressed genes
+DefaultAssay(srat) <- "RNA"
 vision.obj <- Vision(srat, signatures = signatures)
 # Set the number of threads when running parallel computations
 options(mc.cores = 4)
