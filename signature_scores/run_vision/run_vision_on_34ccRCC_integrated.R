@@ -60,11 +60,14 @@ signatures <- c("./Resources/Knowledge/Databases/MSigDB/msigdb_v7.4_GMTs/h.all.v
 ### NULL
 ### rownames(srat$integrated@data will give top variably expressed genes
 DefaultAssay(srat) <- "RNA"
-vision.obj <- Vision(srat, signatures = signatures, assay = "RNA")
+vision.obj <- Vision(srat, signatures = signatures)
+print("Finish creating the vision object!\n")
 # Set the number of threads when running parallel computations
 options(mc.cores = 4)
 vision.obj <- analyze(vision.obj)
+print("Finish analyze the vision object!\n")
 sigScores <- getSignatureScores(vision.obj)
+print("Finish getSignatureScores!\n")
 
 # save output -------------------------------------------------------------
 file2write <- paste0(dir_out, "ccRCC.34samples.SeuratIntegrated.Vision.", run_id, ".RDS")
