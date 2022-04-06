@@ -60,7 +60,7 @@ signatures <- c("./Resources/Knowledge/Databases/MSigDB/msigdb_v7.4_GMTs/h.all.v
 ### NULL
 ### rownames(srat$integrated@data will give top variably expressed genes
 DefaultAssay(srat) <- "RNA"
-vision.obj <- Vision(srat, signatures = signatures)
+vision.obj <- Vision(srat, signatures = signatures, assay = "RNA")
 # Set the number of threads when running parallel computations
 options(mc.cores = 4)
 vision.obj <- analyze(vision.obj)
