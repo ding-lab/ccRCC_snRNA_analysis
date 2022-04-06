@@ -26,6 +26,7 @@ packages = c(
   "plyr",
   "dplyr",
   "stringr",
+  "reshape2",
   "data.table",
   "Seurat",
   "VISION"
