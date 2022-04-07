@@ -66,26 +66,25 @@ for (i in 1:ncol(pairwise)) {
   
   print("Start foreach!\n")
   start_time <- Sys.time()
-  result_list<-foreach(g=genesets_test[1:5]) %dopar% {
+  result_list<-foreach(g=genesets_test) %dopar% {
     sigscores_cluster1 <- sigScores[barcodes_cluster1, g]
-    print(head(sigscores_cluster1))
     sigscores_cluster2 <- sigScores[barcodes_cluster2, g]
     median_diff <- median(sigscores_cluster1) - median(sigscores_cluster2)
-    print(head(median_diff))
+    log2FC <- log2(median(sigscores_cluster1)/median(sigscores_cluster2))
     stat <- wilcox.test(x = sigscores_cluster1, y = sigscores_cluster2)
     p_val <- stat$p.value
-    result_tmp <- list(c(p_val, median_diff))
+    result_tmp <- list(c(p_val, median_diff, log2FC))
     return(result_tmp)
   }
   print("Finish foreach!\n")
   
   end_time <- Sys.time()
   end_time - start_time 
-  result_tmp_df <- do.call(rbind.data.frame, result_list)
+  result_tmp_df <- data.frame(matrix(data = unlist(result_list), ncol = 3, byrow = T))
   print("Finish rbind.data.frame result_list!\n")
   print(head(result_tmp_df))
   
-  colnames(result_tmp_df) <- c("p_val", "median_diff")
+  colnames(result_tmp_df) <- c("p_val", "median_diff", "log2FC")
   result_tmp_df$gene_set <- genesets_test
   result_tmp_df$ident.1 <- cluster1
   result_tmp_df$ident.2 <- cluster2
