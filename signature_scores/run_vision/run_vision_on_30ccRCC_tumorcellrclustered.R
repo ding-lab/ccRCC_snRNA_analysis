@@ -19,7 +19,9 @@ for (pkg_name_tmp in packages) {
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
-dir_out <- paste0("/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/signature_scores/run_vision/run_vision_on_34ccRCC_integrated/", run_id, "/")
+dir_parent_out <- "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/signature_scores/run_vision/run_vision_on_30ccRCC_tumorcellreclustered/"
+dir.create(dir_parent_out)
+dir_out <- paste0(dir_parent_out, run_id, "/")
 dir.create(dir_out)
 
 # input  ------------------------------------------------------
