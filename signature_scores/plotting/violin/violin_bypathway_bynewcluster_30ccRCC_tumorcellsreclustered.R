@@ -73,7 +73,7 @@ plotdata_df <- scores_long_df %>%
   mutate(x_plot = clusterid_new) %>%
   mutate(y_plot = value)
 ## plot
-p = ggplot(plot_data_df, aes(x=x_plot, y=y_plot))
+p = ggplot(plotdata_df, aes(x=x_plot, y=y_plot))
 p = p + geom_violin(aes(fill = x_plot),  color = NA, alpha = 1)
 p = p + geom_boxplot(width=.1)
 # p = p + geom_point(color = "black", fill = "black", shape = 16, position = pos, stroke = 0, alpha = 0.8, size = 0.1)
