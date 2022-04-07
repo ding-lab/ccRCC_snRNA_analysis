@@ -66,10 +66,12 @@ for (i in 1:ncol(pairwise)) {
   
   print("Start foreach!\n")
   start_time <- Sys.time()
-  result_list<-foreach(g=genesets_test) %dopar% {
+  result_list<-foreach(g=genesets_test[1:5]) %dopar% {
     sigscores_cluster1 <- sigScores[barcodes_cluster1, g]
+    print(head(sigscores_cluster1))
     sigscores_cluster2 <- sigScores[barcodes_cluster2, g]
     median_diff <- median(sigscores_cluster1) - median(sigscores_cluster2)
+    print(head(median_diff))
     stat <- wilcox.test(x = sigscores_cluster1, y = sigscores_cluster2)
     p_val <- stat$p.value
     result_tmp <- list(c(p_val, median_diff))
