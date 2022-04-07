@@ -29,7 +29,7 @@ plot_data_df <- integrated_umap_df
 plot_data_df$sample <- mapvalues(x = plot_data_df$orig.ident, from = metadata_df$Aliquot.snRNA, to = as.vector(metadata_df$Aliquot.snRNA.WU))
 
 # make colors -------------------------------------------------------------
-sampleids_ordered <- unique(plot_data_df$sample)
+sampleids_ordered <- sort(unique(plot_data_df$sample))
 colors_cellgroup <- Polychrome::palette36.colors(n = length(sampleids_ordered))
 # swatch(colors_cellgroup)
 # swatch(Polychrome::palette36.colors(n = 36))

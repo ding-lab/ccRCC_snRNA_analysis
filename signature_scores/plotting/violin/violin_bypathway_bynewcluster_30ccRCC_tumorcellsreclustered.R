@@ -36,7 +36,7 @@ for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
 ## set run id
-version_tmp <- 2
+version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -57,8 +57,17 @@ genesets_plot <- c("HALLMARK_FATTY_ACID_METABOLISM", "KEGG_FATTY_ACID_METABOLISM
                    "GOBP_KIDNEY_MORPHOGENESIS", 
                    "GOBP_ADHERENS_JUNCTION_ASSEMBLY", "KEGG_ADHERENS_JUNCTION",
                    "HALLMARK_ANGIOGENESIS", "WP_ANGIOGENESIS")
+genesets_plot <- c("GOBP_REGULATION_OF_MESODERMAL_CELL_DIFFERENTIATION", "GOBP_CELL_PROLIFERATION_IN_MIDBRAIN",
+                   "GOBP_POSITIVE_REGULATION_OF_NUCLEOTIDE_BINDING_OLIGOMERIZATION_DOMAIN_CONTAINING_SIGNALING_PATHWAY",
+                   "WP_TCA_CYCLE_NUTRIENT_UTILIZATION_AND_INVASIVENESS_OF_OVARIAN_CANCER" ,
+                   "GOBP_DOPAMINE_CATABOLIC_PROCESS",
+                   "REACTOME_PTK6_PROMOTES_HIF1A_STABILIZATION",
+                   "GOBP_SEROTONIN_SECRETION",
+                   "GOBP_POSITIVE_REGULATION_OF_HIGH_VOLTAGE_GATED_CALCIUM_CHANNEL_ACTIVITY",
+                   "GOBP_CATECHOL_CONTAINING_COMPOUND_CATABOLIC_PROCESS",
+                   "REACTOME_ANDROGEN_BIOSYNTHESIS")
 genesets_plot <- genesets_plot[genesets_plot %in% colnames(sigScores)]; genesets_plot
-genesets_plot <- colnames(sigScores)[grepl(pattern = "HALLMARK", x = colnames(sigScores))]; genesets_plot
+# genesets_plot <- colnames(sigScores)[grepl(pattern = "HALLMARK", x = colnames(sigScores))]; genesets_plot
 
 # prepare data to plot -----------------------------------------------------------------
 scores_wide_df <- data.frame(sigScores[,genesets_plot])
