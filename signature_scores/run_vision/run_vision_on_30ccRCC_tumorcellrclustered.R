@@ -24,7 +24,7 @@ dir.create(dir_out)
 
 # input  ------------------------------------------------------
 ## input seurat object
-path_rds <- "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/integration/seuratintegrate_34_ccRCC_samples/reciprocalPCA_integrate_34_ccRCC_samples/20220222.v1/ccRCC.34samples.SeuratIntegrated.20220222.v1.RDS"
+path_rds <- "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/integration/seuratintegrate_34_ccRCC_samples/reciprocalPCA_integrate_30_ccRCC_tumorcells/20220404.v1/ccRCC.34samples.Tumorcells.SeuratIntegrated.20220404.v1.RDS"
 srat <- readRDS(file = path_rds)
 print("Finish reading the RDS file!\n")
 ## set paths to signature objects
@@ -39,7 +39,7 @@ signatures <- c("./Resources/Knowledge/Databases/MSigDB/msigdb_v7.4_GMTs/h.all.v
 ### NULL
 ### rownames(srat$integrated@data will give top variably expressed genes
 DefaultAssay(srat) <- "RNA"
-vision.obj <- Vision(srat, signatures = signatures)
+vision.obj <- Vision(srat, signatures = signatures, pool = F)
 print("Finish creating the vision object!\n")
 # Set the number of threads when running parallel computations
 options(mc.cores = 8)
@@ -49,7 +49,7 @@ sigScores <- getSignatureScores(vision.obj)
 print("Finish getSignatureScores!\n")
 
 # save output -------------------------------------------------------------
-file2write <- paste0(dir_out, "ccRCC.34samples.SeuratIntegrated.Vision.", run_id, ".RDS")
+file2write <- paste0(dir_out, "ccRCC.30ccRCC.TumorCellsReclustered.Vision.", run_id, ".RDS")
 saveRDS(object = vision.obj, file = file2write, compress = T)
-file2write <- paste0(dir_out, "ccRCC.34samples.SeuratIntegrated.Vision.scores.", run_id, ".RDS")
+file2write <- paste0(dir_out, "ccRCC.30ccRCC.TumorCellsReclustered.Vision.sigScores.", run_id, ".RDS")
 saveRDS(object = sigScores, file = file2write, compress = T)
