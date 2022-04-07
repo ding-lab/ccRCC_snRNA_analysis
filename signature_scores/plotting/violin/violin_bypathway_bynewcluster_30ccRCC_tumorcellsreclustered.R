@@ -28,7 +28,8 @@ packages = c(
   "stringr",
   "reshape2",
   "data.table",
-  "ggplot2"
+  "ggplot2",
+  "Polychrome"
 )
 
 for (pkg_name_tmp in packages) {
@@ -65,26 +66,32 @@ scores_wide_df$barcode <- rownames(sigScores)
 scores_long_df <- reshape2::melt(data = scores_wide_df, id.vars = c("barcode"))
 scores_long_df$clusterid_new <- mapvalues(x = scores_long_df$barcode, from = barcode2cluster_df$barcode, to = as.vector(barcode2cluster_df$clusterid_new))
 head(scores_long_df)
+clusterids <- sort(unique(plot_data_df$clusterid_new))
+colors_bycluster <- Polychrome::palette36.colors(n = (length(clusterids)+1))[-2]
+names(colors_bycluster) <- clusterids
 
 # plot --------------------------------------------------------------
-geneset_plot <- genesets_plot[1]
-plotdata_df <- scores_long_df %>%
-  filter(variable == geneset_plot) %>%
-  mutate(x_plot = clusterid_new) %>%
-  mutate(y_plot = value)
-## plot
-p = ggplot(plotdata_df, aes(x=x_plot, y=y_plot))
-p = p + geom_violin(aes(fill = x_plot),  color = NA, alpha = 1)
-p = p + geom_boxplot(width=.1)
-# p = p + geom_point(color = "black", fill = "black", shape = 16, position = pos, stroke = 0, alpha = 0.8, size = 0.1)
-# p = p + stat_compare_means(data = plot_data_df, 
-#                            mapping = aes(x = x_plot, y = y_plot), 
-#                            hide.ns = F, method = "wilcox.test")
-p <- p + ggtitle(label = paste0(geneset_plot, " score"), subtitle = "by tumor-cell cluster")
-p <- p + theme_classic()
-p <- p + theme(legend.position = "none")
-p <- p + theme(axis.title = element_blank())
-file2write <- paste0(dir_out, geneset_plot, ".png")
-png(file2write, width = 600, height = 600, res = 150)
-print(p)
-dev.off()
+geneset_tmp <- genesets_plot[1]
+for (geneset_tmp in genesets_plot) {
+  plotdata_df <- scores_long_df %>%
+    filter(variable == geneset_tmp) %>%
+    mutate(x_plot = clusterid_new) %>%
+    mutate(y_plot = value)
+  ## plot
+  p = ggplot(plotdata_df, aes(x=x_plot, y=y_plot))
+  p = p + geom_violin(aes(fill = x_plot),  color = NA, alpha = 1)
+  p = p + geom_boxplot(width=.1)
+  p <- p + scale_fill_manual(values = colors_bycluster)
+  # p = p + geom_point(color = "black", fill = "black", shape = 16, position = pos, stroke = 0, alpha = 0.8, size = 0.1)
+  # p = p + stat_compare_means(data = plot_data_df, 
+  #                            mapping = aes(x = x_plot, y = y_plot), 
+  #                            hide.ns = F, method = "wilcox.test")
+  p <- p + ggtitle(label = paste0(geneset_tmp), subtitle = "signature scores by tumor-cell cluster")
+  p <- p + theme_classic()
+  p <- p + theme(legend.position = "none")
+  p <- p + theme(axis.title = element_blank())
+  file2write <- paste0(dir_out, geneset_tmp, ".png")
+  png(file2write, width = 600, height = 600, res = 150)
+  print(p)
+  dev.off()
+}
