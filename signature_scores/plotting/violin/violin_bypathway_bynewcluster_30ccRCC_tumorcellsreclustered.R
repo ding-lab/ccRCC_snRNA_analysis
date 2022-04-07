@@ -62,7 +62,7 @@ genesets_plot <- genesets_plot[genesets_plot %in% colnames(sigScores)]; genesets
 scores_wide_df <- data.frame(sigScores[,genesets_plot])
 colnames(scores_wide_df) <- genesets_plot
 scores_wide_df$barcode <- rownames(sigScores)
-scores_long_df <- melt.data.table(data = scores_wide_df, id.vars = c("barcode"))
+scores_long_df <- reshape2::melt(data = scores_wide_df, id.vars = c("barcode"))
 scores_long_df$clusterid_new <- mapvalues(x = scores_long_df$barcode, from = barcode2cluster_df$barcode, to = as.vector(barcode2cluster_df$clusterid_new))
 head(scores_long_df)
 
