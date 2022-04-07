@@ -59,9 +59,12 @@ results_df <- NULL
 for (i in 1:ncol(pairwise)) {
   cluster1 <- max(pairwise[,i])
   cluster2 <- min(pairwise[,i])
+  cat(paste0("Start compare, " cluster1, " vs. ", cluster2"!\n"))
+  
   barcodes_cluster1 <- barcode2cluster_df$barcode[barcode2cluster_df$clusterid_new == cluster1]
   barcodes_cluster2 <- barcode2cluster_df$barcode[barcode2cluster_df$clusterid_new == cluster2]
   
+  print("Start foreach!\n")
   start_time <- Sys.time()
   result_list<-foreach(g=genesets_test) %dopar% {
     sigscores_cluster1 <- sigScores[barcodes_cluster1, g]
@@ -72,6 +75,8 @@ for (i in 1:ncol(pairwise)) {
     result_tmp <- list(c(p_val, median_diff))
     return(result_tmp)
   }
+  print("Finish foreach!\n")
+  
   end_time <- Sys.time()
   end_time - start_time 
   result_tmp_df <- do.call(rbind.data.frame, result_list)
