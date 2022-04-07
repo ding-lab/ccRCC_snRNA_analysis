@@ -59,7 +59,7 @@ results_df <- NULL
 for (i in 1:ncol(pairwise)) {
   cluster1 <- max(pairwise[,i])
   cluster2 <- min(pairwise[,i])
-  cat(paste0("Start compare, " cluster1, " vs. ", cluster2, "!\n"))
+  cat(paste0("Start compare, ", cluster1, " vs. ", cluster2, "!\n"))
   
   barcodes_cluster1 <- barcode2cluster_df$barcode[barcode2cluster_df$clusterid_new == cluster1]
   barcodes_cluster2 <- barcode2cluster_df$barcode[barcode2cluster_df$clusterid_new == cluster2]
