@@ -51,18 +51,15 @@ barcode2cluster_df <- fread(data.table = F, input = "./Resources/Analysis_Result
 
 # prepare data to plot -----------------------------------------------------------------
 clusters <- unique(barcode2cluster_df$clusterid_new)
-pairwise <- combn(clusters, 2)
 genesets_test <- colnames(sigScores)
 registerDoParallel(cores = 20)
 
 results_df <- NULL
-for (i in 1:ncol(pairwise)) {
-  cluster1 <- max(pairwise[,i])
-  cluster2 <- min(pairwise[,i])
-  cat(paste0("Start compare, ", cluster1, " vs. ", cluster2, "!\n"))
+for (cluster1 in clusters) {
+  cat(paste0("Start compare, ", cluster1, " vs. ", "the rest", "!\n"))
   
   barcodes_cluster1 <- barcode2cluster_df$barcode[barcode2cluster_df$clusterid_new == cluster1]
-  barcodes_cluster2 <- barcode2cluster_df$barcode[barcode2cluster_df$clusterid_new == cluster2]
+  barcodes_cluster2 <- barcode2cluster_df$barcode[barcode2cluster_df$clusterid_new != cluster1]
   
   print("Start foreach!\n")
   start_time <- Sys.time()
@@ -88,14 +85,13 @@ for (i in 1:ncol(pairwise)) {
   result_tmp_df$fdr <- p.adjust(p = result_tmp_df$p_val, method = "fdr")
   result_tmp_df$gene_set <- genesets_test
   result_tmp_df$ident.1 <- cluster1
-  result_tmp_df$ident.2 <- cluster2
   print("Finish adding id columns!\n")
   
   results_df <- rbind(results_df, result_tmp_df)
 }
 
 # save output -------------------------------------------------------------
-file2write <- paste0(dir_out, "wilcox.pairwise.bynewcluster.30ccRCCtumorcellreclustered,", run_id,".tsv")
+file2write <- paste0(dir_out, "wilcox.eachnewcluster_vs_rest.30ccRCCtumorcellreclustered,", run_id,".tsv")
 write.table(x = results_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
 
