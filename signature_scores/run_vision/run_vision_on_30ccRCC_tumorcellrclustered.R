@@ -17,7 +17,7 @@ for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 dir_parent_out <- "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/signature_scores/run_vision/run_vision_on_30ccRCC_tumorcellreclustered/"
 dir.create(dir_parent_out)
@@ -40,11 +40,11 @@ signatures <- c("./Resources/Knowledge/Databases/MSigDB/msigdb_v7.4_GMTs/h.all.v
 ### > rownames(srat$integrated@counts)
 ### NULL
 ### rownames(srat$integrated@data will give top variably expressed genes
-DefaultAssay(srat) <- "RNA"
+# DefaultAssay(srat) <- "RNA"
+options(mc.cores = 8)
 vision.obj <- Vision(srat, signatures = signatures, pool = F)
 print("Finish creating the vision object!\n")
 # Set the number of threads when running parallel computations
-options(mc.cores = 8)
 vision.obj <- analyze(vision.obj)
 print("Finish analyze the vision object!\n")
 sigScores <- getSignatureScores(vision.obj)
