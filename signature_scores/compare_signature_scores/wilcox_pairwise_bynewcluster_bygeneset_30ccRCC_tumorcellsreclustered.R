@@ -63,14 +63,14 @@ for (i in 1:ncol(pairwise)) {
   barcodes_cluster2 <- barcode2cluster_df$barcode[barcode2cluster_df$clusterid_new == cluster2]
   
   start_time <- Sys.time()
-  test_list<-foreach(g=genesets_test) %dopar% {
+  result_list<-foreach(g=genesets_test) %dopar% {
     sigscores_cluster1 <- sigScores[barcodes_cluster1, g]
     sigscores_cluster2 <- sigScores[barcodes_cluster2, g]
     median_diff <- median(sigscores_cluster1) - median(sigscores_cluster2)
     stat <- wilcox.test(x = sigscores_cluster1, y = sigscores_cluster2)
     p_val <- stat$p.value
-    result_list <- list(c(p_val, median_diff))
-    return(result_list)
+    result_tmp <- list(c(p_val, median_diff))
+    return(result_tmp)
   }
   end_time <- Sys.time()
   end_time - start_time 
