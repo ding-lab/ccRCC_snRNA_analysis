@@ -66,7 +66,7 @@ scores_wide_df$barcode <- rownames(sigScores)
 scores_long_df <- reshape2::melt(data = scores_wide_df, id.vars = c("barcode"))
 scores_long_df$clusterid_new <- mapvalues(x = scores_long_df$barcode, from = barcode2cluster_df$barcode, to = as.vector(barcode2cluster_df$clusterid_new))
 head(scores_long_df)
-clusterids <- sort(unique(plot_data_df$clusterid_new))
+clusterids <- sort(unique(scores_long_df$clusterid_new))
 colors_bycluster <- Polychrome::palette36.colors(n = (length(clusterids)+1))[-2]
 names(colors_bycluster) <- clusterids
 
