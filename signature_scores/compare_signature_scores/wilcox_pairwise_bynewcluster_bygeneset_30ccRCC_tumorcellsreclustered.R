@@ -85,6 +85,7 @@ for (i in 1:ncol(pairwise)) {
   print(head(result_tmp_df))
   
   colnames(result_tmp_df) <- c("p_val", "median_diff", "log2FC")
+  result_tmp_df$fdr <- p.adjust(p = result_tmp_df$p_val, method = "fdr")
   result_tmp_df$gene_set <- genesets_test
   result_tmp_df$ident.1 <- cluster1
   result_tmp_df$ident.2 <- cluster2
