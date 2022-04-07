@@ -36,7 +36,7 @@ for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -58,6 +58,7 @@ genesets_plot <- c("HALLMARK_FATTY_ACID_METABOLISM", "KEGG_FATTY_ACID_METABOLISM
                    "GOBP_ADHERENS_JUNCTION_ASSEMBLY", "KEGG_ADHERENS_JUNCTION",
                    "HALLMARK_ANGIOGENESIS", "WP_ANGIOGENESIS")
 genesets_plot <- genesets_plot[genesets_plot %in% colnames(sigScores)]; genesets_plot
+genesets_plot <- colnames(sigScores)[grepl(pattern = "HALLMARK", x = colnames(sigScores))]; genesets_plot
 
 # prepare data to plot -----------------------------------------------------------------
 scores_wide_df <- data.frame(sigScores[,genesets_plot])
