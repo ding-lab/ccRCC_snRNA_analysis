@@ -81,8 +81,8 @@ for (i in 1:ncol(pairwise)) {
   end_time - start_time 
   result_tmp_df <- do.call(rbind.data.frame, result_list)
   print("Finish rbind.data.frame result_list!\n")
+  print(head(result_tmp_df))
   
-  head(result_tmp_df)
   colnames(result_tmp_df) <- c("p_val", "median_diff")
   result_tmp_df$gene_set <- genesets_test
   result_tmp_df$ident.1 <- cluster1
