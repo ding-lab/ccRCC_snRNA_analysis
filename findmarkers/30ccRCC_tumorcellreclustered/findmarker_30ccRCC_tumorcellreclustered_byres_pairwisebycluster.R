@@ -38,10 +38,10 @@ for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
 # set up future for parallelization
-plan("multiprocess", workers = 5)
+plan("multiprocess", workers = 20)
 options(future.globals.maxSize = 10000 * 1024^2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -68,7 +68,10 @@ for (resolution_tmp in c("1", "2")) {
   path_markers <- paste0(dir_out_parent, "res.", resolution_tmp, "tumorcellsreclustered.pairwisebycluster.markers.logfcthreshold.", logfc.threshold.run, ".minpct.", min.pct.run, ".mindiffpct.", min.diff.pct.run, ".tsv")
   if (file.exists(path_markers)) {
     results_df <- fread(data.table = F, input = path_markers)
+    print("Markers for resolution ", resolution_tmp, "exists, reading!\n")
   } else {
+    print("Markers for resolution ", resolution_tmp, "doesn't exist, running FindMarkers!\n")
+    
     srat@meta.data$cluster_test <- mapvalues(x = rownames(srat@meta.data), from = barcode2cluster_df$barcode, to = as.vector(barcode2cluster_df[, paste0("integrated_snn_res.", resolution_tmp)]))
     Idents(srat) <- "cluster_test"
     clusters <- unique(Idents(srat))
