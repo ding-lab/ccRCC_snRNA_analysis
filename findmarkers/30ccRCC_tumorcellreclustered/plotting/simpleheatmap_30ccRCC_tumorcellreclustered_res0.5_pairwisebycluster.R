@@ -20,7 +20,7 @@ for (pkg_name_tmp in packages) {
 }
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 3
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -34,18 +34,20 @@ results_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findma
 plotdata_df <- results_df %>%
   filter(p_val_adj < 0.05) %>%
   mutate(diff_pct = (pct.1 - pct.2)) %>%
-  filter(diff_pct >= 0.1) %>%
+  # filter(diff_pct >= 0.1) %>%
+  filter(diff_pct >= 0) %>%
   mutate(x_plot = ifelse(ident.1 > ident.2, ident.1, ident.2)) %>%
   mutate(y_plot = ifelse(ident.1 > ident.2, ident.2, ident.1)) %>%
   group_by(x_plot, y_plot) %>%
   summarise(number_degs = n())
 
-plotdata_df <- rbind(plotdata_df,
-                     data.frame(x_plot = c(1, 0, 1, 6), y_plot = c(1, 0, 0, 0), number_degs = c(NA, NA, 0, 0)))
+# plotdata_df <- rbind(plotdata_df,
+#                      data.frame(x_plot = c(1, 0, 1, 6), y_plot = c(1, 0, 0, 0), number_degs = c(NA, NA, 0, 0)))
 plotdata_df$x_plot <- factor(plotdata_df$x_plot)
 plotdata_df$y_plot <- factor(plotdata_df$y_plot)
 # plotdata_df$number_degs_brks <- cut(plotdata_df$number_degs, breaks = c(-1, 40, 100, 200, 300), labels = c("0-40", "41-100", "101-200", "201-300"))
 plotdata_df$number_degs_brks <- cut(plotdata_df$number_degs, breaks = c(-1, 30, 100, 200, 300), labels = c("0-30", "31-100", "101-200", "201-300"))
+plotdata_df$number_degs_brks <- cut(plotdata_df$number_degs)
 
 # plot --------------------------------------------------------------------
 p <- ggplot(data = plotdata_df, mapping = aes(x = x_plot, y = y_plot))
