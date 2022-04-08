@@ -104,7 +104,7 @@ for (resolution_tmp in c("1", "2")) {
   plotdata_df$y_plot <- factor(plotdata_df$y_plot)
   
   p <- ggplot(data = plotdata_df, mapping = aes(x = x_plot, y = y_plot))
-  p <- p + geom_tile(mapping = aes(fill = number_degs_brks))
+  p <- p + geom_tile(mapping = aes(fill = number_degs))
   p <- p + geom_text(mapping = aes(label = number_degs))
   p <- p + scale_fill_gradient2(low = "blue", high = "red", mid = "white",
                                  midpoint = 20, space = "Lab",
