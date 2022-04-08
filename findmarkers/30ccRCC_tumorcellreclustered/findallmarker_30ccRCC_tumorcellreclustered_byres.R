@@ -80,6 +80,7 @@ result_list<-foreach(resolution_tmp=c("0.1", "0.5", "1", "2", "3", "4")) %dopar%
     markers <- FindAllMarkers(object = srat, test.use = "wilcox", only.pos = T,
                            min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
     markers$gene_symbol <- rownames(markers)
+    markers$resolution <- resolution_tmp
     write.table(x = markers, file = path_markers, quote = F, sep = "\t", row.names = F)
   }
   return(markers)
