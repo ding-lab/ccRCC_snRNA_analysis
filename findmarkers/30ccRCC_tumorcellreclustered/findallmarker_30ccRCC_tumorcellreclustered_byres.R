@@ -42,10 +42,9 @@ for (pkg_name_tmp in packages) {
 # set up future for parallelization
 plan("multiprocess", workers = 20)
 options(future.globals.maxSize = 10000 * 1024^2)
-registerDoParallel(cores = 5)
-
+registerDoParallel(cores = 6)
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -67,85 +66,30 @@ barcode2cluster_df <- fread(data.table = F, input = "./Resources/Analysis_Result
 # process -----------------------------------------------------------------
 resolutions_process <- colnames(barcode2cluster_df)[grepl(pattern = "integrated_snn_res", x = colnames(barcode2cluster_df))]
 resolutions_process <- gsub(x = resolutions_process, pattern = "integrated_snn_res\\.", replacement = "")
-results_sup_df <- NULL
-for (resolution_tmp in c("3", "4")) {
-# for (resolution_tmp in c("1", "2")) {
-# for (resolution_tmp in resolutions_process) {
-  path_markers <- paste0(dir_out_parent, "res.", resolution_tmp, ".tumorcellsreclustered.pairwisebycluster.markers.logfcthreshold.", logfc.threshold.run, ".minpct.", min.pct.run, ".mindiffpct.", min.diff.pct.run, ".tsv")
+result_list<-foreach(resolution_tmp=c("0.1", "0.5", "1", "2", "3", "4")) %dopar% {
+  path_markers <- paste0(dir_out_parent, "res.", resolution_tmp, ".tumorcellsreclustered.markers.logfcthreshold.", logfc.threshold.run, ".minpct.", min.pct.run, ".mindiffpct.", min.diff.pct.run, ".tsv")
   if (file.exists(path_markers)) {
-    results_df <- fread(data.table = F, input = path_markers)
+    markers <- fread(data.table = F, input = path_markers)
     cat(paste0("Markers for resolution ", resolution_tmp, "exists, reading!\n"))
   } else {
     cat(paste0("Markers for resolution ", resolution_tmp, "doesn't exist, running FindMarkers!\n"))
     
     srat@meta.data$cluster_test <- mapvalues(x = rownames(srat@meta.data), from = barcode2cluster_df$barcode, to = as.vector(barcode2cluster_df[, paste0("integrated_snn_res.", resolution_tmp)]))
     Idents(srat) <- "cluster_test"
-    clusters <- unique(Idents(srat))
-    pairwise <- combn(clusters, 2)
-    
-    # results_df <- NULL
-    # for (i in 1:ncol(pairwise)) {
-    #   cat(paste0("Process #", i, "for the pairwise FindMarkers!\n"))
-    #   
-    #   markers <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = pairwise[1, i], ident.2 = pairwise[2, i], only.pos = T,
-    #                          min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
-    #   markers$gene_symbol <- rownames(markers)
-    #   markers$ident.1 <- pairwise[1, i]
-    #   markers$ident.2 <- pairwise[2, i]
-    #   results_df <- rbind(results_df, markers)
-    # }
-    results_df <- NULL
-    result_list<-foreach(i=1:ncol(pairwise)) %dopar% {
-      cat(paste0("Process #", i, "for the pairwise FindMarkers!\n"))
-      
-      markers <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = pairwise[1, i], ident.2 = pairwise[2, i], only.pos = T,
-                             min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
-      markers$gene_symbol <- rownames(markers)
-      markers$ident.1 <- pairwise[1, i]
-      markers$ident.2 <- pairwise[2, i]
-      return(markers)
-    }
-    results_df <- do.call(rbind.data.frame, result_list)
-    write.table(x = results_df, file = path_markers, quote = F, sep = "\t", row.names = F)
-  }
-  results_sup_df <- rbind(results_sup_df, results_df)
-  
-  # plot --------------------------------------------------------------------
-  results_df$ident.1 <- as.vector(results_df$ident.1)
-  results_df$ident.2 <- as.vector(results_df$ident.2)
-  
-  plotdata_df <- results_df %>%
-    filter(p_val_adj < 0.05) %>%
-    mutate(diff_pct = (pct.1 - pct.2)) %>%
-    # filter(diff_pct >= 0.1) %>%
-    filter(diff_pct >= 0) %>%
-    mutate(x_plot = ifelse(ident.1 > ident.2, ident.1, ident.2)) %>%
-    mutate(y_plot = ifelse(ident.1 > ident.2, ident.2, ident.1)) %>%
-    group_by(x_plot, y_plot) %>%
-    summarise(number_degs = n())
-  plotdata_df$x_plot <- factor(plotdata_df$x_plot)
-  plotdata_df$y_plot <- factor(plotdata_df$y_plot)
-  
-  p <- ggplot(data = plotdata_df, mapping = aes(x = x_plot, y = y_plot))
-  p <- p + geom_tile(mapping = aes(fill = number_degs))
-  p <- p + geom_text(mapping = aes(label = number_degs))
-  p <- p + scale_fill_gradient2(low = "blue", high = "red", mid = "white",
-                                 midpoint = 20, space = "Lab",
-                                 name="Number of\nDEGs")
-  p <- p + xlab("Cluster #1") + ylab("Cluster #2")
-  p <- p + theme_minimal()
-  
-  file2write <- paste0(dir_out, "Res", resolution_tmp, ".Number_of_DEGs.png")
-  png(file2write, width = 1500, height = 1300, res = 150)
-  print(p)
-  dev.off()
-}
 
+    markers <- FindAllMarkers(object = srat, test.use = "wilcox", only.pos = T,
+                           min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
+    markers$gene_symbol <- rownames(markers)
+    write.table(x = markers, file = path_markers, quote = F, sep = "\t", row.names = F)
+  }
+  return(markers)
+}
+result_df <- do.call(rbind.data.frame, result_list)
 
 # save output -------------------------------------------------------------
-file2write <- paste0(dir_out, "tumorcellsreclustered.pairwisebycluster.markers.logfcthreshold.", 
+file2write <- paste0(dir_out, "tumorcellsreclustered.markers.logfcthreshold.", 
                      logfc.threshold.run, ".minpct.", min.pct.run, ".mindiffpct.", min.diff.pct.run,
                      ".byresolution", ".tsv")
-write.table(x = results_sup_df, file = file2write, quote = F, sep = "\t", row.names = F)
+write.table(x = result_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
 
