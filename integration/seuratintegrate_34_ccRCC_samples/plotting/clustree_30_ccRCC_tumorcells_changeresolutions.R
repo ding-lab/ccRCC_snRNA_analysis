@@ -40,7 +40,7 @@ for (pkg_name_tmp in packages) {
 plan("multiprocess", workers = 4)
 options(future.globals.maxSize = 10000 * 1024^2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
