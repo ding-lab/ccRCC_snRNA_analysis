@@ -58,13 +58,19 @@ barcode2cluster_df <- fread(data.table = F, input = "./Resources/Analysis_Result
 # srat <- FindClusters(srat, resolution = c(0.1, 0.2, 0.3, 0.4, 0.5, 1, 2))
 # cat("Finished FindClusters!\n")
 
-
 # add cluster id ----------------------------------------------------------
-
-
+columns_process <- colnames(barcode2cluster_df)[grepl(pattern = "integrated_snn_res", x = colnames(barcode2cluster_df))]
+columns_process <- c("barcode", columns_process)
+meta.data_df <- srat@meta.data
+meta.data_df$barcode <- rownames(meta.data_df)
+head(meta.data_df)
+meta.data_df <- merge(x = meta.data_df, y = barcode2cluster_df[, columns_process], by = c("barcode"), all.x = T, sort = F)
+rownames(meta.data_df) <- meta.data_df$barcode
+head(meta.data_df)
+srat@meta.data <- meta.data_df
 
 # clustree --------------------------------------------------------------
 file2write <- paste0(dir_out, "clustree.png")
-png(file2write, width = 1000, height = 1500, res = 150)
+png(file2write, width = 1500, height = 1300, res = 150)
 clustree(srat, prefix = "integrated_snn_res.")
 dev.off()
