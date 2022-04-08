@@ -40,9 +40,9 @@ for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
 # set up future for parallelization
-plan("multiprocess", workers = 20)
+plan("multiprocess", workers = 25)
 options(future.globals.maxSize = 10000 * 1024^2)
-registerDoParallel(cores = 6)
+# registerDoParallel(cores = 6)
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -66,7 +66,8 @@ barcode2cluster_df <- fread(data.table = F, input = "./Resources/Analysis_Result
 # process -----------------------------------------------------------------
 resolutions_process <- colnames(barcode2cluster_df)[grepl(pattern = "integrated_snn_res", x = colnames(barcode2cluster_df))]
 resolutions_process <- gsub(x = resolutions_process, pattern = "integrated_snn_res\\.", replacement = "")
-result_list<-foreach(resolution_tmp=c("0.1", "0.5", "1", "2", "3", "4")) %dopar% {
+result_df <- NULL
+for (resolution_tmp in c("0.1", "0.5", "1", "2", "3", "4")) {
   path_markers <- paste0(dir_out_parent, "res.", resolution_tmp, ".tumorcellsreclustered.markers.logfcthreshold.", logfc.threshold.run, ".minpct.", min.pct.run, ".mindiffpct.", min.diff.pct.run, ".tsv")
   if (file.exists(path_markers)) {
     markers <- fread(data.table = F, input = path_markers)
@@ -76,16 +77,36 @@ result_list<-foreach(resolution_tmp=c("0.1", "0.5", "1", "2", "3", "4")) %dopar%
     
     srat@meta.data$cluster_test <- mapvalues(x = rownames(srat@meta.data), from = barcode2cluster_df$barcode, to = as.vector(barcode2cluster_df[, paste0("integrated_snn_res.", resolution_tmp)]))
     Idents(srat) <- "cluster_test"
-
+    
     markers <- FindAllMarkers(object = srat, test.use = "wilcox", only.pos = T,
-                           min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
+                              min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
     markers$gene_symbol <- rownames(markers)
     markers$resolution <- resolution_tmp
     write.table(x = markers, file = path_markers, quote = F, sep = "\t", row.names = F)
   }
-  return(markers)
+  result_df <- rbind(result_df, markers)
 }
-result_df <- do.call(rbind.data.frame, result_list)
+
+# result_list<-foreach(resolution_tmp=c("0.1", "0.5", "1", "2", "3", "4")) %dopar% {
+#   path_markers <- paste0(dir_out_parent, "res.", resolution_tmp, ".tumorcellsreclustered.markers.logfcthreshold.", logfc.threshold.run, ".minpct.", min.pct.run, ".mindiffpct.", min.diff.pct.run, ".tsv")
+#   if (file.exists(path_markers)) {
+#     markers <- fread(data.table = F, input = path_markers)
+#     cat(paste0("Markers for resolution ", resolution_tmp, "exists, reading!\n"))
+#   } else {
+#     cat(paste0("Markers for resolution ", resolution_tmp, "doesn't exist, running FindMarkers!\n"))
+#     
+#     srat@meta.data$cluster_test <- mapvalues(x = rownames(srat@meta.data), from = barcode2cluster_df$barcode, to = as.vector(barcode2cluster_df[, paste0("integrated_snn_res.", resolution_tmp)]))
+#     Idents(srat) <- "cluster_test"
+# 
+#     markers <- FindAllMarkers(object = srat, test.use = "wilcox", only.pos = T,
+#                            min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
+#     markers$gene_symbol <- rownames(markers)
+#     markers$resolution <- resolution_tmp
+#     write.table(x = markers, file = path_markers, quote = F, sep = "\t", row.names = F)
+#   }
+#   return(markers)
+# }
+# result_df <- do.call(rbind.data.frame, result_list)
 
 # save output -------------------------------------------------------------
 file2write <- paste0(dir_out, "tumorcellsreclustered.markers.logfcthreshold.", 
