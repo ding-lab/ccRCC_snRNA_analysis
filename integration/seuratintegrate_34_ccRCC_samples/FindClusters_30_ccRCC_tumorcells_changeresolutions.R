@@ -37,7 +37,7 @@ for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
 # set up future for parallelization
-plan("multiprocess", workers = 4)
+plan("multiprocess", workers = 6)
 options(future.globals.maxSize = 10000 * 1024^2)
 ## set run id
 version_tmp <- 1
@@ -54,7 +54,7 @@ srat <- readRDS(file = path_rds)
 print("Finish reading the RDS file!\n")
 
 # process -----------------------------------------------------------------
-srat <- FindClusters(srat, resolution = c(0.1, 0.2, 0.3, 0.4, 0.5, 1, 2))
+srat <- FindClusters(srat, resolution = c(0.1, 0.2, 0.3, 0.4, 0.5, 1, 2, 3, 4))
 cat("Finished FindClusters!\n")
 
 # fetch data --------------------------------------------------------------

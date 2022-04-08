@@ -28,6 +28,7 @@ packages = c(
   "stringr",
   "reshape2",
   "data.table",
+  "limma",
   "Seurat",
   "future",
   "future.apply",
@@ -65,7 +66,7 @@ resolutions_process <- gsub(x = resolutions_process, pattern = "integrated_snn_r
 results_sup_df <- NULL
 for (resolution_tmp in c("1", "2")) {
 # for (resolution_tmp in resolutions_process) {
-  path_markers <- paste0(dir_out_parent, "res.", resolution_tmp, "tumorcellsreclustered.pairwisebycluster.markers.logfcthreshold.", logfc.threshold.run, ".minpct.", min.pct.run, ".mindiffpct.", min.diff.pct.run, ".tsv")
+  path_markers <- paste0(dir_out_parent, "res.", resolution_tmp, ".tumorcellsreclustered.pairwisebycluster.markers.logfcthreshold.", logfc.threshold.run, ".minpct.", min.pct.run, ".mindiffpct.", min.diff.pct.run, ".tsv")
   if (file.exists(path_markers)) {
     results_df <- fread(data.table = F, input = path_markers)
     cat(paste0("Markers for resolution ", resolution_tmp, "exists, reading!\n"))
@@ -79,6 +80,8 @@ for (resolution_tmp in c("1", "2")) {
     
     results_df <- NULL
     for (i in 1:ncol(pairwise)) {
+      cat(paste0("Process #", i, "for the pairwise FindMarkers!\n"))
+      
       markers <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = pairwise[1, i], ident.2 = pairwise[2, i], only.pos = T,
                              min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
       markers$gene_symbol <- rownames(markers)
@@ -113,7 +116,7 @@ for (resolution_tmp in c("1", "2")) {
   p <- p + theme_minimal()
   
   file2write <- paste0(dir_out, "Res", resolution_tmp, ".Number_of_DEGs.png")
-  png(file2write, width = 1000, height = 800, res = 150)
+  png(file2write, width = 1500, height = 1300, res = 150)
   print(p)
   dev.off()
 }
