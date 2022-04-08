@@ -60,6 +60,7 @@ barcode2cluster_df <- fread(data.table = F, input = "./Resources/Analysis_Result
 
 # add cluster id ----------------------------------------------------------
 columns_process <- colnames(barcode2cluster_df)[grepl(pattern = "integrated_snn_res", x = colnames(barcode2cluster_df))]
+columns_process <- columns_process[!(columns_process %in% colnames(srat@meta.data))]
 columns_process <- c("barcode", columns_process)
 meta.data_df <- srat@meta.data
 meta.data_df$barcode <- rownames(meta.data_df)
