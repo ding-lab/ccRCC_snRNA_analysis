@@ -32,6 +32,7 @@ packages = c(
   "Seurat",
   "future",
   "future.apply",
+  "doParallel",
   "ggplot2"
 )
 
@@ -41,6 +42,8 @@ for (pkg_name_tmp in packages) {
 # set up future for parallelization
 plan("multiprocess", workers = 20)
 options(future.globals.maxSize = 10000 * 1024^2)
+registerDoParallel(cores = 5)
+
 ## set run id
 version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -58,13 +61,15 @@ logfc.threshold.run <- 0.25
 min.pct.run <- 0.1
 min.diff.pct.run <- 0
 ## input the barcode-to-cluster results
-barcode2cluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/integration/seuratintegrate_34_ccRCC_samples/FindClusters_30_ccRCC_tumorcells_changeresolutions/20220405.v1/ccRCC.34Sample.Tumorcells.Integrated.ReciprocalPCA.Metadata.ByResolution.20220405.v1.tsv")
+# barcode2cluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/integration/seuratintegrate_34_ccRCC_samples/FindClusters_30_ccRCC_tumorcells_changeresolutions/20220405.v1/ccRCC.34Sample.Tumorcells.Integrated.ReciprocalPCA.Metadata.ByResolution.20220405.v1.tsv")
+barcode2cluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/integration/seuratintegrate_34_ccRCC_samples/FindClusters_30_ccRCC_tumorcells_changeresolutions/20220408.v1/ccRCC.34Sample.Tumorcells.Integrated.ReciprocalPCA.Metadata.ByResolution.20220408.v1.tsv")
 
 # process -----------------------------------------------------------------
 resolutions_process <- colnames(barcode2cluster_df)[grepl(pattern = "integrated_snn_res", x = colnames(barcode2cluster_df))]
 resolutions_process <- gsub(x = resolutions_process, pattern = "integrated_snn_res\\.", replacement = "")
 results_sup_df <- NULL
-for (resolution_tmp in c("1", "2")) {
+for (resolution_tmp in c("3", "4")) {
+# for (resolution_tmp in c("1", "2")) {
 # for (resolution_tmp in resolutions_process) {
   path_markers <- paste0(dir_out_parent, "res.", resolution_tmp, ".tumorcellsreclustered.pairwisebycluster.markers.logfcthreshold.", logfc.threshold.run, ".minpct.", min.pct.run, ".mindiffpct.", min.diff.pct.run, ".tsv")
   if (file.exists(path_markers)) {
@@ -78,8 +83,19 @@ for (resolution_tmp in c("1", "2")) {
     clusters <- unique(Idents(srat))
     pairwise <- combn(clusters, 2)
     
+    # results_df <- NULL
+    # for (i in 1:ncol(pairwise)) {
+    #   cat(paste0("Process #", i, "for the pairwise FindMarkers!\n"))
+    #   
+    #   markers <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = pairwise[1, i], ident.2 = pairwise[2, i], only.pos = T,
+    #                          min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
+    #   markers$gene_symbol <- rownames(markers)
+    #   markers$ident.1 <- pairwise[1, i]
+    #   markers$ident.2 <- pairwise[2, i]
+    #   results_df <- rbind(results_df, markers)
+    # }
     results_df <- NULL
-    for (i in 1:ncol(pairwise)) {
+    result_list<-foreach(i=1:ncol(pairwise)) %dopar% {
       cat(paste0("Process #", i, "for the pairwise FindMarkers!\n"))
       
       markers <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = pairwise[1, i], ident.2 = pairwise[2, i], only.pos = T,
@@ -87,8 +103,9 @@ for (resolution_tmp in c("1", "2")) {
       markers$gene_symbol <- rownames(markers)
       markers$ident.1 <- pairwise[1, i]
       markers$ident.2 <- pairwise[2, i]
-      results_df <- rbind(results_df, markers)
+      return(markers)
     }
+    results_df <- do.call(rbind.data.frame, result_list)
     write.table(x = results_df, file = path_markers, quote = F, sep = "\t", row.names = F)
   }
   results_sup_df <- rbind(results_sup_df, results_df)
