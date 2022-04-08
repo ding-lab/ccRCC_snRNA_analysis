@@ -56,7 +56,7 @@ print("Finish reading the RDS file!\n")
 logfc.threshold.run <- 0.25
 min.pct.run <- 0.1
 min.diff.pct.run <- 0
-## input the findcluster results
+## input the barcode-to-cluster results
 barcode2cluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/integration/seuratintegrate_34_ccRCC_samples/FindClusters_30_ccRCC_tumorcells_changeresolutions/20220405.v1/ccRCC.34Sample.Tumorcells.Integrated.ReciprocalPCA.Metadata.ByResolution.20220405.v1.tsv")
 
 # process -----------------------------------------------------------------
@@ -69,7 +69,7 @@ for (resolution_tmp in c("1", "2")) {
   if (file.exists(path_markers)) {
     results_df <- fread(data.table = F, input = path_markers)
   } else {
-    srat@cluster_test <- mapvalues(x = rownames(srat@meta.data), from = barcode2cluster_df$barcode, to = as.vector(barcode2cluster_df[, paste0("integrated_snn_res.", resolution_tmp)]))
+    srat@meta.data$cluster_test <- mapvalues(x = rownames(srat@meta.data), from = barcode2cluster_df$barcode, to = as.vector(barcode2cluster_df[, paste0("integrated_snn_res.", resolution_tmp)]))
     Idents(srat) <- "cluster_test"
     clusters <- unique(Idents(srat))
     pairwise <- combn(clusters, 2)

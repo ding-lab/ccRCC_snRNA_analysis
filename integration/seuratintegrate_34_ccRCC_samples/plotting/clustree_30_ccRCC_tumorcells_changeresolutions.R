@@ -51,10 +51,17 @@ dir.create(dir_out)
 path_rds <- "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/integration/seuratintegrate_34_ccRCC_samples/reciprocalPCA_integrate_30_ccRCC_tumorcells/20220404.v1/ccRCC.34samples.Tumorcells.SeuratIntegrated.20220404.v1.RDS"
 srat <- readRDS(file = path_rds)
 print("Finish reading the RDS file!\n")
+## input the barcode-to-cluster results
+barcode2cluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/integration/seuratintegrate_34_ccRCC_samples/FindClusters_30_ccRCC_tumorcells_changeresolutions/20220405.v1/ccRCC.34Sample.Tumorcells.Integrated.ReciprocalPCA.Metadata.ByResolution.20220405.v1.tsv")
 
-# FindClusters -----------------------------------------------------------------
-srat <- FindClusters(srat, resolution = c(0.1, 0.2, 0.3, 0.4, 0.5, 1, 2))
-cat("Finished FindClusters!\n")
+# # FindClusters -----------------------------------------------------------------
+# srat <- FindClusters(srat, resolution = c(0.1, 0.2, 0.3, 0.4, 0.5, 1, 2))
+# cat("Finished FindClusters!\n")
+
+
+# add cluster id ----------------------------------------------------------
+
+
 
 # clustree --------------------------------------------------------------
 file2write <- paste0(dir_out, "clustree.png")
