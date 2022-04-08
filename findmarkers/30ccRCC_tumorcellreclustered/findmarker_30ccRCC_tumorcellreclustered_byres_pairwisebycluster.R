@@ -66,7 +66,7 @@ results_sup_df <- NULL
 for (resolution_tmp in c("1", "2")) {
 # for (resolution_tmp in resolutions_process) {
   path_markers <- paste0(dir_out_parent, "res.", resolution_tmp, "tumorcellsreclustered.pairwisebycluster.markers.logfcthreshold.", logfc.threshold.run, ".minpct.", min.pct.run, ".mindiffpct.", min.diff.pct.run, ".tsv")
-  if (file.exists(file2write)) {
+  if (file.exists(path_markers)) {
     results_df <- fread(data.table = F, input = path_markers)
   } else {
     srat@cluster_test <- mapvalues(x = rownames(srat@meta.data), from = barcode2cluster_df$barcode, to = as.vector(barcode2cluster_df[, paste0("integrated_snn_res.", resolution_tmp)]))
