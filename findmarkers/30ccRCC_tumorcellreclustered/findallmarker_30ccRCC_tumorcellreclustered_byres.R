@@ -32,7 +32,7 @@ packages = c(
   "Seurat",
   "future",
   "future.apply",
-  "doParallel",
+  # "doParallel",
   "ggplot2"
 )
 
