@@ -60,13 +60,12 @@ Idents(srat) <- "cluster_test"
 
 # run average expression --------------------------------------------------
 aliquot.averages <- AverageExpression(srat, assays = assay_process, slot = slot_process)
-aliquot.averages$gene_symbol <- rownames(aliquot.averages)
 print("Finish running AverageExpression!\n")
 cat("###########################################\n")
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "30ccRCCtumorcellreclustered.", "avgexp.", assay_process, ".", slot_process, ".", "byres1clusters.", run_id, ".tsv")
-write.table(aliquot.averages, file = file2write, quote = F, sep = "\t", row.names = F)
+write.table(aliquot.averages, file = file2write, quote = F, sep = "\t", row.names = T)
 cat("Finished saving the output\n")
 cat("###########################################\n")
 
