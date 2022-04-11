@@ -35,7 +35,7 @@ for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -67,25 +67,26 @@ for (cluster1 in clusters) {
   result_list<-foreach(g=genesets_test) %dopar% {
     sigscores_cluster1 <- sigScores[barcodes_cluster1, g]
     sigscores_cluster2 <- sigScores[barcodes_cluster2, g]
+    median_cluster1 <- median(sigscores_cluster1)
     median_diff <- median(sigscores_cluster1) - median(sigscores_cluster2)
     log2FC <- log2(median(sigscores_cluster1)/median(sigscores_cluster2))
     stat <- wilcox.test(x = sigscores_cluster1, y = sigscores_cluster2)
     p_val <- stat$p.value
-    result_tmp <- list(c(p_val, median_diff, log2FC))
+    result_tmp <- list(c(p_val, median_diff, log2FC, median_cluster1))
     return(result_tmp)
   }
   print("Finish foreach!\n")
   
   end_time <- Sys.time()
   end_time - start_time 
-  result_tmp_df <- data.frame(matrix(data = unlist(result_list), ncol = 3, byrow = T))
+  result_tmp_df <- data.frame(matrix(data = unlist(result_list), ncol = 4, byrow = T))
   print("Finish rbind.data.frame result_list!\n")
   print(head(result_tmp_df))
   
-  colnames(result_tmp_df) <- c("p_val", "median_diff", "log2FC")
+  colnames(result_tmp_df) <- c("p_val", "median_diff", "log2FC", "median_sigScore")
   result_tmp_df$fdr <- p.adjust(p = result_tmp_df$p_val, method = "fdr")
   result_tmp_df$gene_set <- genesets_test
-  result_tmp_df$ident.1 <- cluster1
+  result_tmp_df$cluster <- cluster1
   print("Finish adding id columns!\n")
   
   results_df <- rbind(results_df, result_tmp_df)
