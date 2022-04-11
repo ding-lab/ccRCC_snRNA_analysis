@@ -31,6 +31,16 @@ sigCorr_df <- fread(data.table = F, input = "./Resources/Analysis_Results/signat
 
 # filter ------------------------------------------------------------------
 sigCorr_filtered_df <- sigCorr_df %>%
-  filter(FDR < 0.05 & C > 0.2) %>%
+  # filter(FDR < 0.05 & C > 0.2) %>%
+  filter(FDR < 0.05) %>%
   arrange(desc(C))
 
+sigCorr_filtered_df <- sigCorr_df %>%
+  # filter(FDR < 0.05 & C > 0.2) %>%
+  filter(FDR < 0.05 & C > 0.1) %>%
+  arrange(desc(C))
+
+sigCorr_filtered_df <- sigCorr_df %>%
+  filter(FDR < 0.05 & C > 0.2) %>%
+  filter(!grepl(pattern = "GOBP_", x = gene_set)) %>%
+  arrange(desc(C))
