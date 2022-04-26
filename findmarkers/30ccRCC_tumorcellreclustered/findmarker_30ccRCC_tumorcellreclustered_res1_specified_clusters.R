@@ -74,7 +74,7 @@ source("./ccRCC_snRNA_analysis/functions.R")
 dir_out_parent <- makeOutDir_katmai(path_this_script)
 dir_out <- paste0(dir_out_parent, run_id, "/")
 dir.create(dir_out)
-path_markers <- paste0(dir_out_parent, "res.1", ".tumorcellsreclustered.markers.logfcthreshold.", 
+path_markers <- paste0(dir_out, "res.1", ".tumorcellsreclustered.markers.logfcthreshold.", 
                        logfc.threshold.run, ".minpct.", min.pct.run, ".mindiffpct.", min.diff.pct.run, 
                        ".", run_id, ".tsv")
 write.table(x = markers, file = path_markers, quote = F, sep = "\t", row.names = F)
