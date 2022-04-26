@@ -1,6 +1,7 @@
 # set up libraries and output directory -----------------------------------
 ## set working directory
-dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+# dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -103,7 +104,7 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              na_col = color_na, #border = "black",
                              ## row
                              show_row_names = T, row_names_gp = gpar(fontsize = 14), row_names_side = "left",
-                             show_row_dend = F, cluster_row_slices = T, row_labels = rowlabels_plot,
+                             show_row_dend = T, row_dend_side = "right", cluster_row_slices = T, row_labels = rowlabels_plot, 
                              ## column
                              show_column_dend = F, cluster_columns = F,
                              top_annotation = colanno_obj,
@@ -134,16 +135,16 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              na_col = color_na, #border = "black",
                              ## row
                              show_row_names = T, row_names_gp = gpar(fontsize = 14), row_names_side = "left",
-                             show_row_dend = F, cluster_row_slices = T, row_labels = rowlabels_plot,
+                             show_row_dend = T, row_dend_side = "right", cluster_row_slices = T, row_labels = rowlabels_plot, 
                              ## column
                              show_column_dend = F, cluster_columns = F,
                              top_annotation = colanno_obj,
-                             show_column_names = T, column_names_side = "top", column_names_gp = gpar(fontsize = 5),
+                             show_column_names = F, column_names_side = "top", column_names_gp = gpar(fontsize = 5),
                              show_heatmap_legend = F)
 file2write <- paste0(dir_out, "GeneSetScores", ".png")
-png(file2write, width = 1300, height = 900, res = 150)
+png(file2write, width = 1300, height = 550, res = 150)
 draw(object = p, 
-     annotation_legend_side = "top", annotation_legend_list = list_lgd)
+     annotation_legend_side = "right", annotation_legend_list = list_lgd)
 dev.off()
 
 

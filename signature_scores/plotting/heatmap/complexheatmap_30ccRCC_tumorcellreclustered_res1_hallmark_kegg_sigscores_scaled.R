@@ -32,7 +32,11 @@ hallmark_anno_df <- readxl::read_xlsx(path = "./Resources/Knowledge/Databases/MS
 ## get gene sets to plot
 genesets_plot <- sigCorr_df$gene_set[sigCorr_df$FDR < 0.05 & sigCorr_df$C > 0.1]
 # genesets_plot <- sigCorr_df$gene_set[sigCorr_df$FDR < 0.05 & sigCorr_df$C > 0.2]
-genesets_plot <- genesets_plot[grepl(pattern = "HALLMARK", x = genesets_plot)]
+
+rm(sigCorr_df)
+# genesets_plot <- sigCorr_df$gene_set[sigCorr_df$FDR < 0.05 & sigCorr_df$C > 0.2]
+# genesets_plot <- genesets_plot[grepl(pattern = "HALLMARK|KEGG", x = genesets_plot)]
+genesets_plot <- genesets_plot[grepl(pattern = "HALLMARK|WP_", x = genesets_plot)]
 genesets_plot <- genesets_plot[!(genesets_plot %in% c("HALLMARK_UV_RESPONSE"))]
 ## extract the data for the matrix
 plotdata_df <- results_df %>%
@@ -40,6 +44,7 @@ plotdata_df <- results_df %>%
   mutate(x_plot = gene_set) %>%
   mutate(y_plot = cluster) %>%
   mutate(value = median_sigScore)
+rm(results_df)
 plotdata_wide_df <- dcast(data = plotdata_df, formula = x_plot ~ y_plot, value.var = "value")
 plotdata_raw_mat <- as.matrix(plotdata_wide_df[,-1])
 ## scale across clusters
@@ -49,7 +54,8 @@ colnames(plotdata_mat) <- colnames(plotdata_raw_mat)
 
 row_ids <- rownames(plotdata_mat)
 column_ids <- colnames(plotdata_mat)
-row_labels_vec <- gsub(x = row_ids, replacement = "", pattern = "HALLMARK_")
+# row_labels_vec <- gsub(x = row_ids, replacement = "", pattern = "HALLMARK_")
+row_labels_vec <- str_split_fixed(string = row_ids, pattern = "_", n = 2)[,2]
 # make matrix data for heatmap body significance-----------------------------------------------------------------
 ## extract the data for the matrix
 plotdata_df2 <- results_df %>%
@@ -118,16 +124,17 @@ p <- Heatmap(matrix = plotdata_mat,
          },
         cluster_columns = T, show_column_names = T, column_labels = column_split_vec, #column_split = column_split_vec,
         cluster_rows = T, row_split = geneset_cat_vec, cluster_row_slices = T, row_title = NULL,
-        left_annotation = anno_obj, row_names_side = "left", row_labels = row_labels_vec, row_dend_side = "right")
+        #left_annotation = anno_obj, 
+        row_names_side = "left", row_labels = row_labels_vec, row_dend_side = "right")
 
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 4
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 file2write <- paste0(dir_out, "heatmap", ".png")
-png(file2write, width = 1500, height = 1500, res = 150)
+png(file2write, width = 1500, height = 3000, res = 150)
 draw(object = p)
 dev.off()
