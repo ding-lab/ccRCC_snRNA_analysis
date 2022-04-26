@@ -61,7 +61,7 @@ Idents(srat) <- "cluster_test"
 idents_1 <- c(0, 3, 7, 12)
 idents_2 <- unique(barcode2cluster_df$integrated_snn_res.1); idents_2 <- idents_2[!(idents_2 %in% idents_1)]
 
-markers <- FindMarkers(object = srat, test.use = "wilcox", only.pos = F, ident.1 = , ident.2 = idents_2,
+markers <- FindMarkers(object = srat, test.use = "wilcox", only.pos = F, ident.1 = idents_1, ident.2 = idents_2,
                           min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
 markers$gene_symbol <- rownames(markers)
 
