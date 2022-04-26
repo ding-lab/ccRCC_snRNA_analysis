@@ -28,12 +28,10 @@ packages = c(
   "stringr",
   "reshape2",
   "data.table",
-  "limma",
+  # "limma",
   "Seurat",
   "future",
-  "future.apply",
-  # "doParallel",
-  "ggplot2"
+  "future.apply"
 )
 
 for (pkg_name_tmp in packages) {
