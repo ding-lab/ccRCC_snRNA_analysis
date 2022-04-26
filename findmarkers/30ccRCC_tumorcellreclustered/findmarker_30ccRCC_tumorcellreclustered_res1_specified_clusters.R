@@ -47,8 +47,8 @@ options(future.globals.maxSize = 10000 * 1024^2)
 path_rds <- "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/integration/seuratintegrate_34_ccRCC_samples/reciprocalPCA_integrate_30_ccRCC_tumorcells/20220404.v1/ccRCC.34samples.Tumorcells.SeuratIntegrated.20220404.v1.RDS"
 srat <- readRDS(file = path_rds)
 print("Finish reading the RDS file!\n")
-logfc.threshold.run <- 0.25
-min.pct.run <- 0.1
+logfc.threshold.run <- 0
+min.pct.run <- 0
 min.diff.pct.run <- 0
 ## input the barcode-to-cluster results
 # barcode2cluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/integration/seuratintegrate_34_ccRCC_samples/FindClusters_30_ccRCC_tumorcells_changeresolutions/20220405.v1/ccRCC.34Sample.Tumorcells.Integrated.ReciprocalPCA.Metadata.ByResolution.20220405.v1.tsv")
@@ -68,7 +68,7 @@ markers$gene_symbol <- rownames(markers)
 
 # write output ------------------------------------------------------------
 ## set run id
-run_id <- "0_3_7_12_vs_others.v1"
+run_id <- "0_3_7_12_vs_others.v2"
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
 dir_out_parent <- makeOutDir_katmai(path_this_script)
