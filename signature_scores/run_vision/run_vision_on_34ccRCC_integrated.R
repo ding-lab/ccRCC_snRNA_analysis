@@ -33,16 +33,13 @@ signatures <- c("./Resources/Knowledge/Databases/MSigDB/msigdb_v7.4_GMTs/h.all.v
                 "./Resources/Knowledge/Databases/MSigDB/msigdb_v7.4_GMTs/c5.go.bp.v7.4.symbols.gmt")
 
 # process -----------------------------------------------------------------
-## this is important because the default assay for the seurat object is "integrated" and I think if not set to RNA assay Vision will just take integrated assay,
-## which will give an error about  "rownames(data) = NULL. Expression matrix must have gene names as the rownames" because
-### > rownames(srat$integrated@counts)
-### NULL
-### rownames(srat$integrated@data will give top variably expressed genes
-# DefaultAssay(srat) <- "RNA"
-vision.obj <- Vision(srat, signatures = signatures)
+## doing this otherwise will has the following message
+### Dropping 'orig.ident' from meta data as it is of type 'character' and has more than 20 unique values.  If you want to include this meta data variable, convert it to a factor before providing the data frame to Vision
+srat@meta.data@orig.ident <- factor(srat@meta.data@orig.ident)
+vision.obj <- Vision(srat, signatures = signatures, pool = F)
 print("Finish creating the vision object!\n")
 # Set the number of threads when running parallel computations
-options(mc.cores = 9)
+options(mc.cores = 15)
 vision.obj <- analyze(vision.obj)
 print("Finish analyze the vision object!\n")
 sigScores <- getSignatureScores(vision.obj)
