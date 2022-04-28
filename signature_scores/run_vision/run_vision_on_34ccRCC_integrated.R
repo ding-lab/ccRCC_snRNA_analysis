@@ -33,25 +33,29 @@ signatures <- c("./Resources/Knowledge/Databases/MSigDB/msigdb_v7.4_GMTs/h.all.v
                 "./Resources/Knowledge/Databases/MSigDB/msigdb_v7.4_GMTs/c5.go.bp.v7.4.symbols.gmt")
 
 # process -----------------------------------------------------------------
-## doing this otherwise will has the following message
-### Dropping 'orig.ident' from meta data as it is of type 'character' and has more than 20 unique values.  If you want to include this meta data variable, convert it to a factor before providing the data frame to Vision
-srat@meta.data$orig.ident <- factor(srat@meta.data$orig.ident)
+# ## doing this otherwise will has the following message
+# ### Dropping 'orig.ident' from meta data as it is of type 'character' and has more than 20 unique values.  If you want to include this meta data variable, convert it to a factor before providing the data frame to Vision
+# srat@meta.data$orig.ident <- factor(srat@meta.data$orig.ident)
 vision.obj <- Vision(srat, signatures = signatures, pool = F)
 print("Finish creating the vision object!\n")
 # Set the number of threads when running parallel computations
 options(mc.cores = 15)
 vision.obj <- analyze(vision.obj)
 print("Finish analyze the vision object!\n")
+file2write <- paste0(dir_out, "ccRCC.34samples.SeuratIntegrated.Vision.", run_id, ".RDS")
+saveRDS(object = vision.obj, file = file2write, compress = T)
+
 sigScores <- getSignatureScores(vision.obj)
+file2write <- paste0(dir_out, "ccRCC.34samples.SeuratIntegrated.Vision.scores.", run_id, ".RDS")
+saveRDS(object = sigScores, file = file2write, compress = T)
 print("Finish getSignatureScores!\n")
+
 sigCorr <- getSignatureAutocorrelation(vis_obj)
 sigCorr$gene_set <- rownames(sigCorr)
 print("Finish getSignatureAutocorrelation!\n")
-
-# save output -------------------------------------------------------------
-file2write <- paste0(dir_out, "ccRCC.34samples.SeuratIntegrated.Vision.", run_id, ".RDS")
-saveRDS(object = vision.obj, file = file2write, compress = T)
-file2write <- paste0(dir_out, "ccRCC.34samples.SeuratIntegrated.Vision.scores.", run_id, ".RDS")
-saveRDS(object = sigScores, file = file2write, compress = T)
 file2write <- paste0(dir_out, "ccRCC.34samples.SeuratIntegrated.Vision.SignatureAutocorrelation.", run_id, ".tsv")
 write.table(x = sigCorr, file = file2write, quote = F, sep = "\t", row.names = F)
+
+
+
+

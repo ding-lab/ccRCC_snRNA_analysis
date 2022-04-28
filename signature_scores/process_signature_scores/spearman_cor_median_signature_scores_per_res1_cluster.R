@@ -55,6 +55,7 @@ Heatmap(matrix = result, col = col_fun)
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
+source("./ccRCC_snRNA_analysis/functions.R")
 dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 ## write output

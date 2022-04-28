@@ -48,14 +48,16 @@ plotdata_raw_mat <- as.matrix(plotdata_wide_df[,-1])
 plotdata_mat <- apply(plotdata_raw_mat, 1, scale)
 rownames(plotdata_mat) <- colnames(plotdata_raw_mat)
 colnames(plotdata_mat) <- plotdata_wide_df$x_plot
-plotdata_mat <- plotdata_mat[rev(c("10", "15", "6", "13", "9", "8", "5", "14", "16", "11", "4", "12", "7", "0", "3", "17", "2", "1")),]
+## reorder clusters
+clusters_ordered <- rev(c("10", "15", "6", "13", "9", "8", "5", "14", "16", "11", "4", "12", "7", "0", "3", "17", "2", "1"))
+plotdata_mat <- plotdata_mat[clusters_ordered,]
 
 # make row labels ---------------------------------------------------------
-row_labels_vec <- c("MC1:ER_signaling", "MC2:Metabolic", "MC17:Metabolic (sample-specific)",
+row_labels_vec <- c("MC1:ER_signaling", "MC2:OXPHOS_high", "MC17:OXOHOS_high",
                 "MC3:DDR_dysregulated", "MC0:DDR_dysregulated", "MC7:DDR_dysregulated", "MC12:DDR_dysregulated",
-                "MC4:ER_signaling", "MC11:Cycling", "MC16:Multi-activated (sample-specific)", "MC14:Cycling", 
+                "MC4:ER_signaling", "MC11:Cycling", "MC16:Multi-activated", "MC14:Cycling", 
                 "MC5:IL2-STAT5_signaling", "MC8:IFN_signaling", "MC9:Inflammatory", "MC13:Inflammatory+KRAS signaling",
-                "MC6:Hypoxic", "MC15:Multi-activated (sample-specific)", "MC10:Multi-activated (sample-specific)")
+                "MC6:Hypoxic", "MC15:Multi-activated", "MC10:Multi-activated")
 
 row_ids <- rownames(plotdata_mat)
 column_ids <- colnames(plotdata_mat)
@@ -64,14 +66,12 @@ col_labels_vec <- gsub(x = column_ids, replacement = "", pattern = "HALLMARK_")
 # make colors -------------------------------------------------------------
 ## make colors for the heatmap body
 summary(as.vector(plotdata_mat))
-heatmap_colors = circlize::colorRamp2(breaks = c(-1.5, 0, seq(0.2, 1.8, 0.2)), 
-                                      colors = c("blue", "white", RColorBrewer::brewer.pal(n = 9, name = "YlOrRd")))
-heatmap_colors = circlize::colorRamp2(breaks = c(-2, 0, 2), 
+# colors_sig_zscore = circlize::colorRamp2(breaks = c(-1.5, 0, seq(0.2, 1.8, 0.2)), 
+#                                       colors = c("blue", "white", RColorBrewer::brewer.pal(n = 9, name = "YlOrRd")))
+colors_sig_zscore = circlize::colorRamp2(breaks = c(-2, 0, 2), 
                                       colors = c("purple", "black", "yellow"))
-## make colors for gene set category
-colors_geneset_cat <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")
-## make colors for cluster group
-colors_clustergroup <- RColorBrewer::brewer.pal(n = 5, name = "Dark2"); colors_clustergroup <- c(colors_clustergroup, "grey50")
+## 
+colors_correlation <- colorRamp2(c(-1, 0, 1), c("blue", "white", "red")) 
 
 # make row annotation -----------------------------------------------------
 # consistency_vec <-  mapvalues(x = row_ids, from = sigCorr_df$gene_set, to = as.vector(sigCorr_df$C)); consistency_vec <- as.numeric(consistency_vec)
@@ -83,16 +83,15 @@ names(colors_geneset_cat) <- unique(geneset_cat_vec)
 col_split_vec <- geneset_cat_vec
 col_split_vec <- factor(x = col_split_vec, levels = c("metabolic", "DNA damage", "proliferation", "immune", "development", "pathway", "signaling", "cellular component"))
 
-
-
 # plot --------------------------------------------------------------------
 p <- Heatmap(matrix = cor(t(plotdata_mat), method = "spearman"),
-                 col = colorRamp2(c(-1, 0, 1), c("blue", "white", "red")), 
+                 col = colors_correlation,
              show_row_names = T, cluster_rows = T,
-             cluster_columns = T, 
-             name = "Correlation")
+             cluster_columns = T, column_labels = paste0("MC", clusters_ordered),
+             # name = "Correlation", 
+             show_heatmap_legend = F)
 p <- p + Heatmap(matrix = plotdata_mat, 
-             col = heatmap_colors,
+             col = colors_sig_zscore,
              cell_fun = function(j, i, x, y, w, h, fill) {
                if (plotdata_mat[i,j] >= quantile(plotdata_mat[,j], 0.75)+1.5*IQR(plotdata_mat[,j])) {
                  grid.text("*", x, y)
@@ -106,10 +105,29 @@ p <- p + Heatmap(matrix = plotdata_mat,
              cluster_rows = F,
              show_row_names = T,
              # top_annotation = col_anno_obj,
-             cluster_columns = T, column_split = col_split_vec, cluster_column_slices = F, column_labels = col_labels_vec,
+             cluster_columns = T, column_split = col_split_vec, column_title_gp = gpar(fontsize = 8),
+             cluster_column_slices = F, 
+             column_labels = col_labels_vec, 
              # # left_annotation = row_anno_obj, 
              row_names_side = "right", row_labels = row_labels_vec,
-             name = "Signature\nz-score")
+             show_heatmap_legend = F)
+
+list_lgd = list(
+  Legend(col_fun = colors_correlation, 
+         title = "Correlation",
+         title_gp = gpar(fontsize = 14),
+         labels_gp = gpar(fontsize = 14),
+         # legend_width = unit(4, "cm"),
+         # legend_height = unit(4, "cm"),
+         direction = "vertical"),
+  Legend(col_fun = colors_sig_zscore, 
+         title = "Signature\nz-score",
+         title_gp = gpar(fontsize = 14),
+         labels_gp = gpar(fontsize = 14),
+         # legend_width = unit(4, "cm"),
+         # legend_height = unit(4, "cm"),
+         direction = "vertical"))
+
 
 p
 
@@ -122,5 +140,6 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 file2write <- paste0(dir_out, "heatmap", ".png")
 png(file2write, width = 2000, height = 1000, res = 150)
-draw(object = p)
+draw(object = p,
+     annotation_legend_side = "left", annotation_legend_list = list_lgd)
 dev.off()
