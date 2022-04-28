@@ -38,18 +38,23 @@ signatures <- c("./Resources/Knowledge/Databases/MSigDB/msigdb_v7.4_GMTs/h.all.v
 ### > rownames(srat$integrated@counts)
 ### NULL
 ### rownames(srat$integrated@data will give top variably expressed genes
-DefaultAssay(srat) <- "RNA"
+# DefaultAssay(srat) <- "RNA"
 vision.obj <- Vision(srat, signatures = signatures)
 print("Finish creating the vision object!\n")
 # Set the number of threads when running parallel computations
-options(mc.cores = 8)
+options(mc.cores = 9)
 vision.obj <- analyze(vision.obj)
 print("Finish analyze the vision object!\n")
 sigScores <- getSignatureScores(vision.obj)
 print("Finish getSignatureScores!\n")
+sigCorr <- getSignatureAutocorrelation(vis_obj)
+sigCorr$gene_set <- rownames(sigCorr)
+print("Finish getSignatureAutocorrelation!\n")
 
 # save output -------------------------------------------------------------
 file2write <- paste0(dir_out, "ccRCC.34samples.SeuratIntegrated.Vision.", run_id, ".RDS")
 saveRDS(object = vision.obj, file = file2write, compress = T)
 file2write <- paste0(dir_out, "ccRCC.34samples.SeuratIntegrated.Vision.scores.", run_id, ".RDS")
 saveRDS(object = sigScores, file = file2write, compress = T)
+file2write <- paste0(dir_out, "ccRCC.34samples.SeuratIntegrated.Vision.SignatureAutocorrelation.", run_id, ".tsv")
+write.table(x = sigCorr, file = file2write, quote = F, sep = "\t", row.names = F)

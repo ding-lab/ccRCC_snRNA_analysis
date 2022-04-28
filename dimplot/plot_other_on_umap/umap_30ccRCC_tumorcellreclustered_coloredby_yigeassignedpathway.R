@@ -46,13 +46,22 @@ plot_data_df <- merge(x = plot_data_df, y = enrich_df %>%
 # make plots --------------------------------------------------------------
 genemodule_tmp <- "mTOR"
 for (genemodule_tmp in c("Cell_cycle", "Immune", "EMT", "mTOR")) {
-  plot_data_df[, "cell_group"] <- plot_data_df[, genemodule_tmp]
+  plot_data_df[, "cell_group"] <- ifelse(is.na(plot_data_df[, genemodule_tmp]), "Not assigned",
+                                         ifelse(plot_data_df[, genemodule_tmp], paste0(genemodule_tmp, " enriched (original)"), "Not enriched"))
+  plot_data_df <- plot_data_df %>%
+    arrange(factor(cell_group, levels = rev(c(paste0(genemodule_tmp, " enriched (original)"),
+                                          "Not enriched",
+                                          "Not assigned"))))
+  colors_cellgroup <- c("red", "grey80", "grey50")
+  names(colors_cellgroup) <- c(paste0(genemodule_tmp, " enriched (original)"),
+                               "Not enriched",
+                               "Not assigned")
   p <- ggplot()
   p <- p + geom_point_rast(data = plot_data_df, 
                            mapping = aes(x = UMAP_1, y = UMAP_2, color = cell_group),
                            alpha = 1, size = 0.1, shape = 16)
-  # p <- p + scale_color_manual(values = colors_cellgroup)
-  p <- p + guides(colour = guide_legend(override.aes = list(size=4), title = genemodule_tmp))
+  p <- p + scale_color_manual(values = colors_cellgroup)
+  p <- p + guides(colour = guide_legend(override.aes = list(size=4), title = NULL))
   p <- p + theme_void()
   p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                  panel.background = element_blank(),

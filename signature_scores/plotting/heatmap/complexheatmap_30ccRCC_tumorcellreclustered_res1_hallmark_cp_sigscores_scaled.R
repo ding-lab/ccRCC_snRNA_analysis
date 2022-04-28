@@ -35,9 +35,10 @@ genesets_plot <- sigCorr_df$gene_set[sigCorr_df$FDR < 0.05 & sigCorr_df$C > 0.1]
 
 rm(sigCorr_df)
 # genesets_plot <- sigCorr_df$gene_set[sigCorr_df$FDR < 0.05 & sigCorr_df$C > 0.2]
-# genesets_plot <- genesets_plot[grepl(pattern = "HALLMARK|KEGG", x = genesets_plot)]
-genesets_plot <- genesets_plot[grepl(pattern = "HALLMARK|WP_", x = genesets_plot)]
+genesets_plot <- genesets_plot[grepl(pattern = "HALLMARK", x = genesets_plot)]
+# genesets_plot <- genesets_plot[grepl(pattern = "HALLMARK|WP_", x = genesets_plot)]
 genesets_plot <- genesets_plot[!(genesets_plot %in% c("HALLMARK_UV_RESPONSE"))]
+genesets_plot <- c(genesets_plot, "WP_MITOCHONDRIAL_CIV_ASSEMBLY", "HALLMARK_DNA_REPAIR")
 ## extract the data for the matrix
 plotdata_df <- results_df %>%
   filter(gene_set %in% genesets_plot) %>%
@@ -129,7 +130,7 @@ p <- Heatmap(matrix = plotdata_mat,
 
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")

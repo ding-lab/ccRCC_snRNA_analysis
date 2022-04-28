@@ -49,7 +49,7 @@ print("Finish reading the sigScores matrix!\n")
 ## input the gene set auto-correlation results
 sigCorr_df <- fread(data.table = F, input = "./Resources/Analysis_Results/signature_scores/run_vision/getSignatureAutocorrelation_30ccRCC_tumorcellreclustered/20220411.v1/ccRCC.30ccRCC.TumorCellsReclustered.Vision.SignatureAutocorrelation.20220411.v1.tsv")
 
-# prepare data to plot -----------------------------------------------------------------
+# do correlation -----------------------------------------------------------------
 genesets_test <- sigCorr_df$gene_set[sigCorr_df$FDR < 0.05]
 sigScores <- sigScores[, genesets_test]
 result<- cor(sigScores, method = "spearman")

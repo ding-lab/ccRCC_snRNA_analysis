@@ -25,11 +25,13 @@ for (pkg_name_tmp in packages) {
 exp_df <- fread(data.table = F, input = "./Resources/Analysis_Results/average_expression/avgexp_integrated_data_bycluster_res1_katmai/20220411.v1/30ccRCCtumorcellreclustered.avgexp.RNA.data.byres1clusters.20220411.v1.tsv")
 ## input the annotation for the hallmark gene sets
 degs_df <- fread(data.table = F,input = "./Resources/Analysis_Results/findmarkers/30ccRCC_tumorcellreclustered/findmarker_30ccRCC_tumorcellreclustered_res1_specified_clusters/0_3_7_12_vs_others.v1/res.1.tumorcellsreclustered.markers.logfcthreshold.0.25.minpct.0.1.mindiffpct.0.0_3_7_12_vs_others.v1.tsv")
+degs_df <- fread(data.table = F,input = "./Resources/Analysis_Results/findmarkers/30ccRCC_tumorcellreclustered/findmarker_30ccRCC_tumorcellreclustered_res1_specified_clusters/0_3_7_12_vs_others.v2/res.1.tumorcellsreclustered.markers.logfcthreshold.0.minpct.0.mindiffpct.0.0_3_7_12_vs_others.v2.tsv")
 
 # make matrix data for heatmap body color-----------------------------------------------------------------
 degs_filtered_df <- degs_df %>%
   mutate(deg_direction = ifelse(avg_log2FC > 0, "up", "down")) %>%
   filter(deg_direction == "up") %>%
+  filter(gene_symbol %in% geneset2genes_df$gene[geneset2genes_df$term == "HALLMARK_UV_RESPONSE_DN"]) %>%
   filter(p_val_adj < 0.05)
 genes_plot <- degs_filtered_df$gene_symbol; genes_plot
 ## extract the data for the matrix
@@ -49,6 +51,7 @@ column_labels <- gsub(x = column_ids, replacement = "", pattern = "RNA\\.")
 ## make colors for the heatmap body
 summary(as.vector(plotdata_mat))
 heatmap_colors = circlize::colorRamp2(breaks = c(-2, 0, 2), colors = c("purple", "black", "yellow"))
+heatmap_colors = circlize::colorRamp2(breaks = c(-2, 0, 2), colors = c("blue", "white", "red"))
 
 # make row split ----------------------------------------------------------
 row_split_vec <- mapvalues(x = row_ids, from = degs_filtered_df$gene_symbol, to = as.vector(degs_filtered_df$deg_direction))
@@ -80,7 +83,7 @@ p <- Heatmap(matrix = plotdata_mat,
 # save output -------------------------------------------------------------
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 3
+version_tmp <- 5
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
