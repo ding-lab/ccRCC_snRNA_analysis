@@ -35,7 +35,7 @@ signatures <- c("./Resources/Knowledge/Databases/MSigDB/msigdb_v7.4_GMTs/h.all.v
 # process -----------------------------------------------------------------
 ## doing this otherwise will has the following message
 ### Dropping 'orig.ident' from meta data as it is of type 'character' and has more than 20 unique values.  If you want to include this meta data variable, convert it to a factor before providing the data frame to Vision
-srat@meta.data@orig.ident <- factor(srat@meta.data@orig.ident)
+srat@meta.data$orig.ident <- factor(srat@meta.data$orig.ident)
 vision.obj <- Vision(srat, signatures = signatures, pool = F)
 print("Finish creating the vision object!\n")
 # Set the number of threads when running parallel computations
