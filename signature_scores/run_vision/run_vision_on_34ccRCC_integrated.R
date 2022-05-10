@@ -3,6 +3,7 @@
 ## before run script, run conda activate vision
 
 # set up libraries and output directory -----------------------------------
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA"
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
 setwd(dir_base)
 packages = c(

@@ -1,5 +1,4 @@
-# Yige Wu @WashU May 2020
-## plot cell type on integration UMAP
+# Yige Wu @WashU May 2022
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
