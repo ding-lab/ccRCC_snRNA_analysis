@@ -81,7 +81,7 @@ metadata_df <- merge(x = metadata_df,
 nrow(metadata_df)
 rownames(metadata_df) <- metadata_df$DropletID
 srat@meta.data <- metadata_df
-View(srat@meta.data)
+# View(srat@meta.data)
 ## add feature meta.data
 feature.names <- feature.names %>%
   mutate(feature_name = gsub(pattern = "_ENSG", replacement = "-ENSG", x = GeneLabel))
@@ -114,8 +114,7 @@ if (!file.exists(path_sct_file)) {
   srat <- readRDS(file = path_sct_file)
 }
 ## save as RDS file
-file2write <- paste0(dir_out, "Young_scRNA_Science_2018.Seurat.RDS")
-saveRDS(object = srat, file = file2write, compress = T)
+saveRDS(object = srat, file = path_final_file, compress = T)
 cat("Finished saving the output!\n")
 
 
