@@ -1,7 +1,7 @@
 # Yige Wu @WashU May 2022
 
 # set up working directory and libraries --------------------------------------------------------
-## getting the path to the current script
+## getting the path to the current script - need to keep in the front
 thisFile <- function() {
   cmdArgs <- commandArgs(trailingOnly = FALSE)
   needle <- "--file="
@@ -44,6 +44,7 @@ run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 source("./ccRCC_snRNA_analysis/functions.R")
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
+
 
 # input data ------------------------------------------------------
 path_rds <- "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/generate_seurat_object_merged_katmai/20220510.v1/Young_scRNA_Science_2018.Merged.20220510.v1.RDS"
