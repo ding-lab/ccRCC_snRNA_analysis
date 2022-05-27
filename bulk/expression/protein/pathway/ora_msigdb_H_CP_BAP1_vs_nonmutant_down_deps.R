@@ -19,10 +19,10 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-## input wikipathway 
-wp2gene1 <- read.gmt("./Resources/Knowledge/Databases/MSigDB/h.all.v7.4.entrez.gmt")
-wp2gene2 <- read.gmt("./Resources/Knowledge/Databases/MSigDB/c2.cp.v7.4.entrez.gmt")
-wp2gene <- rbind(wp2gene1, wp2gene2)
+## input gene-set data
+gs2gene1 <- read.gmt("./Resources/Knowledge/Databases/MSigDB/h.all.v7.4.entrez.gmt")
+gs2gene2 <- read.gmt("./Resources/Knowledge/Databases/MSigDB/c2.cp.v7.4.entrez.gmt")
+gs2gene <- rbind(gs2gene1, gs2gene2)
 ## input degs
 dep_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/expression/protein/compare_bulk_protein_BAP1_tumor_vs_NonMutant_tumors/20210913.v1/Bulk_Protein_BAP1_vs_NonMutant.Wilcox.20210913.v1.tsv")
 
@@ -48,10 +48,10 @@ genes_test_df <- genes_background_df %>%
 
 # prepare inputs for clusterprofiler -----------------------------------------------------
 entrezgene_ids_test <- unique(genes_test_df$entrezgene_id)
-entrezgene_ids_universe <- unique(genes_background_df$entrezgene_id)
+entrezgene_ids_background <- unique(genes_background_df$entrezgene_id)
 
 # test over-representation analysis and gene set enrichment using wikipathway ------------------------------
-enricher_out <- tryCatch(expr = enricher(gene = entrezgene_ids_test, TERM2GENE = wp2gene, pvalueCutoff = 1, universe = entrezgene_ids_universe),
+enricher_out <- tryCatch(expr = enricher(gene = entrezgene_ids_test, TERM2GENE = gs2gene, pvalueCutoff = 1, universe = entrezgene_ids_background),
                          error = function(e) {warning("ORA failed.");return(NULL)})
 
 if (length(enricher_out) > 0 ) {

@@ -38,7 +38,7 @@ for (pkg_name_tmp in packages) {
 plan("multiprocess", workers = 4)
 options(future.globals.maxSize = 10000 * 1024^2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -62,6 +62,7 @@ idents_group2 <- c(paste0("IT", c(0, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
 # process -----------------------------------------------------------------
 Idents(srat) <- "ClusterID"
 table(Idents(srat))
+DefaultAssay(srat)<-"RNA"
 markers <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = idents_group1, ident.2 = idents_group2, only.pos = F,
                        min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
 markers$gene_symbol <- rownames(markers)

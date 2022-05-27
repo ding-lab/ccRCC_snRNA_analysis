@@ -22,7 +22,7 @@ setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -40,6 +40,7 @@ print("Finish reading the barcode2celltype_df file!\n")
 logfc.threshold.run <- 0
 min.pct.run <- 0
 min.diff.pct.run <- 0
+DefaultAssay(srat)<-"RNA"
 
 # set ident ---------------------------------------------------------------
 srat@meta.data$Cell_group_test <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_df$integrated_barcode, to = as.vector(barcode2celltype_df$Cell_group5))
