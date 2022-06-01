@@ -54,7 +54,7 @@ p <- p + scale_color_gradientn(colors = c("blue", "purple", "red"),
                                breaks = c(10, 20, 30, 40),
                                guide = guide_colourbar(title = "-log10(p.adjust)", direction = "horizontal", title.position = "top"))
 p <- p + scale_size_continuous(breaks = c(60, 80, 100, 120), 
-                               guide = guide_legend(direction = "horizontal", title = "Gene count", nrow = 2, byrow = T, title.position = "top"))
+                               guide = guide_legend(direction = "horizontal", title = "Gene count", nrow = 1, byrow = T, title.position = "top"))
 p <- p + theme_light(base_size = 12)
 p <- p + xlab(label = "Gene ratio (%)")
 p <- p + xlim(c(0.0345, 0.082)*100)
@@ -76,6 +76,6 @@ source("./ccRCC_snRNA_analysis//functions.R")
 dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 file2write <- paste(dir_out, "dotplot.pdf")
-pdf(file2write, width = 6.5, height = 2.5, useDingbats = F)
+pdf(file2write, width = 7, height = 1.75, useDingbats = F)
 print(p)
 dev.off()

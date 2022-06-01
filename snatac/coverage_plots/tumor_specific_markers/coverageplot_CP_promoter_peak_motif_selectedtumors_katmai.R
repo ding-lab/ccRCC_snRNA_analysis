@@ -17,14 +17,30 @@ thisFile <- function() {
 }
 path_this_script <- thisFile()
 ## set working directory
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA"
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
-# dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
-## library additional libaries
-library(Signac)
-source("./ccRCC_snRNA_analysis/load_pkgs.R")
+## load libraries
+packages = c(
+  "rstudioapi",
+  "plyr",
+  "dplyr",
+  "stringr",
+  "reshape2",
+  "data.table",
+  "Signac",
+  "ggplot2"
+)
+for (pkg_name_tmp in packages) {
+  if (!(pkg_name_tmp %in% installed.packages()[,1])) {
+    print(paste0(pkg_name_tmp, "is being installed!"))
+    BiocManager::install(pkgs = pkg_name_tmp, update = F)
+    install.packages(pkg_name_tmp, dependencies = T)
+  }
+  print(paste0(pkg_name_tmp, " is installed!"))
+  library(package = pkg_name_tmp, character.only = T)
+}
 source("./ccRCC_snRNA_analysis/functions.R")
-library(ggplot2)
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -43,11 +59,12 @@ peak2fcs_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/
 ## specify parameters to plot
 peak_plot_df <- peak2motif_df %>%
   filter(Gene == "CP" & Peak_Type == "Promoter") %>%
-  filter(motif.name == "MXI1")# %>%
+  filter(motif.name == "KLF9")# %>%
   # select(Peak) %>%
   # unique()
 peak_plot <- c("chr3-149179908-149180408")
-motif_plot <- "MXI1"
+motif_plot <- "KLF9"
+## specify the number of tumors to show
 topn_plot <- 4
 
 # preprocess samples to show ----------------------------------------------

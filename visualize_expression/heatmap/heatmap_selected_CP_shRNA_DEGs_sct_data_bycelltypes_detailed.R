@@ -20,6 +20,7 @@ dir.create(dir_out)
 ## input the average expression calculated (SCT)
 # avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/avgexp_sct_data_bycelltypew_epithelial_katmai/20210709.v1/33_aliquot_merged.avgexp.SCT.data.Cell_group_w_epithelialcelltypes.20210709.v1.tsv", data.table = F)
 avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/avgexp_sct_data_bycelltypew_epithelial_katmai/20210907.v1/35_aliquot_merged.avgexp.SCT.data.Cell_group_w_epithelialcelltypes.20210907.v1.tsv", data.table = F)
+avgexp_df <- fread(input = "./Resources/Analysis_Results/average_expression/averageexpression_bycelltypeshorter_on_katmai/20200411.v1/averageexpression_bycelltypeshorter.30_aliquot_integration.20200411.v1.tsv", data.table = F)
 
 # specify pairs to filter -------------------------------------------------
 genes_filter <- c("OSMR", "IL6ST", "OSM", 

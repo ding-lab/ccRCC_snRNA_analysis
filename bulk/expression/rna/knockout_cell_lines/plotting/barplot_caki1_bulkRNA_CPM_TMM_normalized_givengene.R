@@ -38,7 +38,7 @@ colnames_value <- colnames(exp_df)[grepl(pattern = "sample", x = colnames(exp_df
 exp_df <- as.data.table(exp_df)
 # genes_plot <- c("KLF9", "CP")
 genes_plot <- c("CP")
-genes_plot <- c("COL5A2")
+# genes_plot <- c("VEGFA")
 samples_plot <- c("caki_1_control_e1", "dr_caki_1_rna", "caki_1_cp_c2_e1", "caki_1_cp_c1_e1")
 sampletext_plot <- c("caki1_nt1", "caki1_nt2", "caki1_cp_c2", "caki1_cp_c1")
 
@@ -70,4 +70,8 @@ png(file2write, width = 300, height = 450, res = 150)
 print(p)
 dev.off()
 
+## when genes_plot == "CP
+exp_shRNA <- sum(plot_data_long_df$value[plot_data_long_df$sample %in% c("caki_1_cp_c2_e1", "caki_1_cp_c1_e1")])
+exp_NT <- sum(plot_data_long_df$value[plot_data_long_df$sample %in% c("caki_1_control_e1", "dr_caki_1_rna")])
+exp_shRNA/exp_NT
 
