@@ -1,5 +1,5 @@
 # Yige Wu @WashU May 2021
-## source activate ccrcc_snrna
+## source activate signac
 
 # set up libraries and output directory -----------------------------------
 ## getting the path to the current script
@@ -29,6 +29,7 @@ packages = c(
   "reshape2",
   "data.table",
   "Signac",
+  "Seurat",
   "ggplot2"
 )
 for (pkg_name_tmp in packages) {
