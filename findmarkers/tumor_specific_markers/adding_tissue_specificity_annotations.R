@@ -105,9 +105,9 @@ comb_df <- merge(comb_df,HPA_test_subset,by = "Gene",all.x = T,sort=FALSE)
 ########################
 #HPA_protein_tissue_type <- "BM_and_lymphoid_tissues"
 GTEX_sig_genes <- comb_df$Gene
-HPA_exp_df <- read.table("DOWNLOAD_DB/HPA_normal_tissue.tsv",header=T,fill=T)
+HPA_exp_df <- read.table("/diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Scripts/V8/automate_test/docker/downloaded_db/HPA_normal_tissue.tsv",header=T,fill=T)
 
-tissue_type_match <- read.table("DOWNLOAD_DB/HPA_Tissue_type_matching.txt",sep="\t",header=T)
+tissue_type_match <- read.table("/diskmnt/Datasets/mmy_scratch/lyao/MMY/Analysis/cell_surface_markers/Scripts/V8/automate_test/docker/downloaded_db/HPA_Tissue_type_matching.txt",sep="\t",header=T)
 HPA_exp_df$general_tissue <-  tissue_type_match$general_tissue[match(HPA_exp_df$Tissue,tissue_type_match$tissue)]
 HPA_exp_subset <- HPA_exp_df %>% filter(Gene_name %in% GTEX_sig_genes)
 
