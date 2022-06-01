@@ -1,5 +1,5 @@
 # Yige Wu @WashU May 2021
-## source activate ccrcc_snrna
+## source activate signac
 
 # set up libraries and output directory -----------------------------------
 ## getting the path to the current script
@@ -20,11 +20,28 @@ path_this_script <- thisFile()
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
 # dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
-## library additional libaries
-library(Signac)
-source("./ccRCC_snRNA_analysis/load_pkgs.R")
+## load libraries
+packages = c(
+  "rstudioapi",
+  "plyr",
+  "dplyr",
+  "stringr",
+  "reshape2",
+  "data.table",
+  "Signac",
+  "Seurat",
+  "ggplot2"
+)
+for (pkg_name_tmp in packages) {
+  if (!(pkg_name_tmp %in% installed.packages()[,1])) {
+    print(paste0(pkg_name_tmp, "is being installed!"))
+    BiocManager::install(pkgs = pkg_name_tmp, update = F)
+    install.packages(pkg_name_tmp, dependencies = T)
+  }
+  print(paste0(pkg_name_tmp, " is installed!"))
+  library(package = pkg_name_tmp, character.only = T)
+}
 source("./ccRCC_snRNA_analysis/functions.R")
-library(ggplot2)
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
@@ -43,11 +60,11 @@ peak2fcs_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/
 ## specify parameters to plot
 peak_plot_df <- peak2motif_df %>%
   filter(Gene == "CP" & Peak_Type == "Promoter") %>%
-  filter(motif.name == "MXI1")# %>%
-  # select(Peak) %>%
+  filter(motif.name == "KLF9")# %>%
+# select(Peak) %>%
   # unique()
 peak_plot <- c("chr3-149179908-149180408")
-motif_plot <- "MXI1"
+motif_plot <- "KLF9"
 topn_plot <- 24
 
 # preprocess samples to show ----------------------------------------------
@@ -111,7 +128,7 @@ gene_plot <- Signac::AnnotationPlot(
 
 p <- Signac::CombineTracks(
   plotlist = list(cov_plot, peakplot_obj, motifplot_obj, gene_plot),
-  heights = c(15, 0.5, 0.2, 1))
+  heights = c(8, 0.5, 0.2, 1))
 print("Finished CombineTracks")
 
 ## write output
@@ -120,7 +137,7 @@ print("Finished CombineTracks")
 # print(p)
 # dev.off()
 file2write <- paste0(dir_out, gsub(x = peak_plot, pattern = "\\-", replacement = "_"), ".", motif_plot, ".pdf")
-pdf(file2write, width = 6, height = 15, useDingbats = F)
+pdf(file2write, width = 6, height = 10, useDingbats = F)
 print(p)
 dev.off()
 

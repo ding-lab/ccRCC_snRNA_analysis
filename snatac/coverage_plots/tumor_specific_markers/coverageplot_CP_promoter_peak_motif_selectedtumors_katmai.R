@@ -101,13 +101,13 @@ motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == peak_plot & peak2
 Idents(atac_subset)=factor(atac_subset$Piece_ID, levels=c(pieceids_selected, 'C3L-00088-N','C3N-01200-N', "K1103044", "K1301462", "K1301463FB", "K1900070_1FB"))
 
 # plot --------------------------------------------------------------------
-cov_plot= Signac::CoveragePlot(
+covplot_obj= Signac::CoveragePlot(
   object = atac_subset,
   region = peak_plot_expanded,
   annotation = F, 
   peaks = F,
   links=FALSE)
-cov_plot <- cov_plot + scale_fill_manual(values =  colors_celltype)
+covplot_obj <- covplot_obj + scale_fill_manual(values =  colors_celltype)
 print("Finished cov_plot")
 
 peakplot_obj <- Signac::PeakPlot(
@@ -116,18 +116,18 @@ peakplot_obj <- Signac::PeakPlot(
   peaks = StringToGRanges(peak_plot, sep = c("-", "-")))
 print("Finished peak plot")
 
-motif_plot <- Signac::PeakPlot(
+motifplot_obj <- Signac::PeakPlot(
   object = atac_subset,
   region = peak_plot_expanded, 
   peaks = StringToGRanges(motif_coord, sep = c("-", "-")))
 print("Finished motif plot")
 
-gene_plot <- Signac::AnnotationPlot(
+geneplot_obj <- Signac::AnnotationPlot(
   object = atac_subset,
   region = peak_plot_expanded)
 
 p <- Signac::CombineTracks(
-  plotlist = list(cov_plot, peakplot_obj, motif_plot, gene_plot),
+  plotlist = list(covplot_obj, peakplot_obj, motifplot_obj, geneplot_obj),
   heights = c(7, 0.5, 0.5, 1.5))
 print("Finished CombineTracks")
 
