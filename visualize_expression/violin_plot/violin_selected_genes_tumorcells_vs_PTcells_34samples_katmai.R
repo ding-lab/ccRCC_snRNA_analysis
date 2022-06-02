@@ -78,18 +78,18 @@ exp_df <- merge(x = exp_df,
 ## filter
 plotdata_df <- exp_df %>%
   filter(cell_group_plot %in% c("Tumor cells", "Proximal tubule"))
-plotdata_df$cell_group_text <- mapvalues(x = plotdata_df$cell_group_plot, from = c("Tumor cells", "Proximal tubule"), to = c("Tumor\ncells", "PT\ncells"))
-# plotdata_df$cell_group_plot <- factor(x = plotdata_df$cell_group_plot, levels = c("Tumor cells", "Proximal tubule"))
-plotdata_df$cell_group_text <- factor(x = plotdata_df$cell_group_text, levels = c("Tumor\ncells", "PT\ncells"))
-
 ## write output
 file2write <- paste0(dir_out, gene_plot, ".expression_by_cell.tsv")
 write.table(x = plotdata_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
+plotdata_df$cell_group_text <- mapvalues(x = plotdata_df$cell_group_plot, from = c("Tumor cells", "Proximal tubule"), to = c("Tumor\ncells", "PT\ncells"))
+# plotdata_df$cell_group_plot <- factor(x = plotdata_df$cell_group_plot, levels = c("Tumor cells", "Proximal tubule"))
+plotdata_df$cell_group_text <- factor(x = plotdata_df$cell_group_text, levels = c("Tumor\ncells", "PT\ncells"))
+
 # plot --------------------------------------------------------------------
 p <- ggviolin(data = plotdata_df, x = "cell_group_text", y = "exp_value", fill = "cell_group_plot", 
                add = "boxplot", add.params = list(fill = "white"))
-p + stat_compare_means(method = "t.test", label = aes(label = paste0("p =", ..p.format..)))
+p + stat_compare_means(method = "t.test", aes(label = paste0("p =", ..p.format..)))
 ## write output
 file2write <- paste0(dir_out, gene_plot, ".pdf")
 pdf(file2write, width = 2.5, height = 2.5, useDingbats = F)
