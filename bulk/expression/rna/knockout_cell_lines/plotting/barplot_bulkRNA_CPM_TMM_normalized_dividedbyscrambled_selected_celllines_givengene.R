@@ -42,7 +42,8 @@ genes_plot <- c("MXI1", "PKM", "HK2", "MYC")
 samples_plot <- c("rcc4_scrambled", "rcc4_mxi1_c1", "rcc4_mxi1_c2")
 genes_plot <- c("KLF9", "CP")
 genes_plot <- c("KLF9", "HK2", "PFKP", "ENO2", "PKM")
-samples_plot <- c("rcc4_scrambled", "rcc4_klf9_c2", "rcc4_klf9_c3")
+# samples_plot <- c("rcc4_scrambled", "rcc4_klf9_c2", "rcc4_klf9_c3")
+samples_plot <- c("rcc4_scrambled", "rcc4_klf9_c2")
 
 # format expression data --------------------------------------------------
 plot_data_long_df <- exp_df %>%
