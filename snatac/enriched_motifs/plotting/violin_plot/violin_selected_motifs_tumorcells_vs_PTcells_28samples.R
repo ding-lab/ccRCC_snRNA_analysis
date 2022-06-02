@@ -28,6 +28,7 @@ packages = c(
   "reshape2",
   "data.table",
   "Seurat",
+  "Signac",
   "ggplot2",
   "ggpubr"
 )
@@ -50,7 +51,20 @@ dir.create(dir_out)
 
 # input data ------------------------------------------------------
 ## input the integrated data
-## input the integrated data
-path_rds <- "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/merging/merge_34_ccRCC_samples/20211005.v1//ccRCC.34samples.Merged.20211005.v1.RDS"
+path_rds <- "/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/3.Merge_snATAC/Merge.SelectPeaks.v.20210706/28_ccRCC_snATAC.selectedPeaks.chromvar.cicero.v3.20210725.rds"
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
+## input the barcode-cell-type table
+barcode2celltype_df <- fread(input = "./Resources/snATAC_Processed_Data/Barcode_Annotation/28_ccRCC_snATAC_ManualReviwed.v2.20210709.tsv", data.table = F)
+cat("finish reading the barcode-to-cell type table!\n")
+
+# make plot data ----------------------------------------------------
+# this will extract chromvar assay:
+DefaultAssay(srat) <- 'chromvar'
+chromv = GetAssayData(object = srat)
+
+# plot --------------------------------------------------------------------
+
+
+
+
