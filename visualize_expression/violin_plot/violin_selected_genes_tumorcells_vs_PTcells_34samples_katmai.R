@@ -89,7 +89,7 @@ plotdata_df$cell_group_text <- factor(x = plotdata_df$cell_group_text, levels = 
 # plot --------------------------------------------------------------------
 p <- ggviolin(data = plotdata_df, x = "cell_group_text", y = "exp_value", fill = "cell_group_plot", 
                add = "boxplot", add.params = list(fill = "white"))
-p + stat_compare_means(method = "t.test", aes(label = paste0("p =", ..p.format..)))
+p <- p + stat_compare_means(method = "t.test", aes(label = paste0("p =", ..p.format..)))
 ## write output
 file2write <- paste0(dir_out, gene_plot, ".pdf")
 pdf(file2write, width = 2.5, height = 2.5, useDingbats = F)

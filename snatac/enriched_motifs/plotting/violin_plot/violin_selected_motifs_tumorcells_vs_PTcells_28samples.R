@@ -58,12 +58,21 @@ print("Finish reading RDS file")
 barcode2celltype_df <- fread(input = "./Resources/snATAC_Processed_Data/Barcode_Annotation/28_ccRCC_snATAC_ManualReviwed.v2.20210709.tsv", data.table = F)
 cat("finish reading the barcode-to-cell type table!\n")
 
+# specify the parameters --------------------------------------------------
+motif_id_plot <- "MA1107.2"
+
 # make plot data ----------------------------------------------------
 # this will extract chromvar assay:
 DefaultAssay(srat) <- 'chromvar'
 chromv = GetAssayData(object = srat)
-
-# plot --------------------------------------------------------------------
+## make plot data
+chromv_df <- data.frame(barcode_uniq = colnames(chromv), motif_score = as.vector(chromv[motif_id_plot,]))
+chromv_df$cell_group_plot <- mapvalues(x = chromv_df$barcode_uniq , from = barcode2celltype_df$V1, to = as.vector(barcode2celltype_df$cell_type))
+plotdata_df <- chromv_df %>%
+  filter(cell_group_plot %in% c("Tumor", "EMT tumor cells", "PT"))
+## write output
+file2write <- paste0(dir_out, motif_id_plot, ".motif_score_by_cell.tsv")
+write.table(x = plotdata_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
 
 

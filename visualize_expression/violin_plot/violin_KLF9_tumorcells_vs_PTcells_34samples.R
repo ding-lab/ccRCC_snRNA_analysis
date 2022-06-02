@@ -37,9 +37,12 @@ dir.create(dir_out)
 plotdata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/visualize_expression/violin_plot/violin_selected_genes_tumorcells_vs_PTcells_34samples_katmai/20220602.v1/KLF9.expression_by_cell.tsv", fill=TRUE)
 
 # plot --------------------------------------------------------------------
-p <- ggviolin(data = plotdata_df, x = "cell_group_text", y = "exp_value", fill = "cell_group_plot", 
-               add = "boxplot", add.params = list(fill = "white"))
-p + stat_compare_means(method = "t.test", aes(label = paste0("p =", ..p.format..)))
+p <- ggviolin(data = plotdata_df, x = "cell_group_plot", y = "exp_value", fill = "cell_group_plot", 
+               add = "boxplot", add.params = list(fill = "white", width = 0.1))
+p <- p + stat_compare_means(method = "t.test", label = "p.format", label.y = 2, label.x = 1.25)
+p <- p + ylab(label = paste0("Normalized ", " KLF9 ", " expression"))
+p <- p + theme(legend.position = "none")
+p
 ## write output
 file2write <- paste0(dir_out, gene_plot, ".pdf")
 pdf(file2write, width = 2.5, height = 2.5, useDingbats = F)
