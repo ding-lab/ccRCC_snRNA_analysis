@@ -22,7 +22,7 @@ setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -33,7 +33,7 @@ options(future.globals.maxSize = 7 * 1024^3) # for 7 Gb RAM
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
-path_rds <- "./Resources/Analysis_Results/merging/merge_35_samples/20210802.v1/RCC.35samples.Merged.20210802.v1.RDS"
+path_rds <- "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/merging/merge_34_ccRCC_samples/20211005.v1//ccRCC.34samples.Merged.20211005.v1.RDS"
 srat <- readRDS(file = path_rds)
 print("Finish reading RDS file")
 ## input the barcode-manualsubcluster info
@@ -49,15 +49,12 @@ min.diff.pct.run <- 0
 assay_process <- "RNA"
 cat(paste0("Assay: ", assay_process, "\n"))
 cat("###########################################\n")
-## tumor-cell cluster enrichment modules
-cluster_group1_process <- c("C3L-00079-T1_C4", "C3L-01302-T1_C1")
 
 # preprocess --------------------------------------------------------------
 enrich_df <- enrich_df %>%
   mutate(cluster_name.formatted = gsub(x = cluster_name, pattern = "\\.", replacement = "-"))
-cluster_group2_process <- unique(enrich_df$cluster_name.formatted)
-cluster_group2_process <- cluster_group2_process[!(cluster_group2_process %in% cluster_group1_process) & !grepl(x = cluster_group2_process, pattern = "NA")]
-
+cluster_group1_process <- enrich_df$cluster_name.formatted[enrich_df$INFLAMMATORY_RESPONSE_Score >= quantile(x = enrich_df$INFLAMMATORY_RESPONSE_Score, probs = 0.9)]
+cluster_group2_process <- enrich_df$cluster_name.formatted[enrich_df$INFLAMMATORY_RESPONSE_Score <= quantile(x = enrich_df$INFLAMMATORY_RESPONSE_Score, probs = 0.1)]
 
 ## process the barcode info
 barcode2subclusterid_df <- barcode2subclusterid_df %>%
@@ -99,7 +96,7 @@ deg_df$cellnumber_group2 <- length(which(srat@meta.data$group_findmarkers == "gr
 
 # write output ------------------------------------------------------------
 ## write output
-file2write <- paste0(dir_out, "Selected_2EMTclusters_vs_5Epithelialclusters", 
+file2write <- paste0(dir_out, "Inflammatory_score_top_vs_bottom_tumorclusters.", 
                      ".logfc.threshold", logfc.threshold.run, 
                      ".min.pct", min.pct.run,
                      ".min.diff.pct", min.diff.pct.run,

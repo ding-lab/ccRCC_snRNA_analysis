@@ -2,23 +2,32 @@
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
-source("./ccRCC_snRNA_analysis/load_pkgs.R")
-source("./ccRCC_snRNA_analysis/functions.R")
-source("./ccRCC_snRNA_analysis/variables.R")
-## set run id
-version_tmp <- 1
-run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
-## set output directory
-dir_out <- paste0(makeOutDir(), run_id, "/")
-dir.create(dir_out)
+packages = c(
+  "rstudioapi",
+  "plyr",
+  "dplyr",
+  "data.table",
+  "stringr"
+)
+for (pkg_name_tmp in packages) {
+  if (!(pkg_name_tmp %in% installed.packages()[,1])) {
+    install.packages(pkg_name_tmp, dependencies = T)
+  }
+  if (!(pkg_name_tmp %in% installed.packages()[,1])) {
+    if (!requireNamespace("BiocManager", quietly=TRUE))
+      install.packages("BiocManager")
+    BiocManager::install(pkg_name_tmp)
+  }
+  library(package = pkg_name_tmp, character.only = T)
+}
 
-# input dependencies ------------------------------------------------
+# input data ------------------------------------------------
 ## input barcodes to cell type
-barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_33aliquots/20210423.v1/33Aliquot.Barcode2CellType.20210423.v1.tsv")
+barcode2celltype_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_35aliquots/20210802.v1/35Aliquot.Barcode2CellType.20210802.v1.tsv")
 ## input id meta data
-idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
+idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
 
 # specify Cell group to plot ----------------------------------------------
 var_cellgroup <- "Cell_type.detailed"
@@ -45,5 +54,12 @@ plot_df$Sample_Type <- mapvalues(x = plot_df$Aliquot_WU, from = idmetadata_df$Al
 plot_df$Case <- mapvalues(x = plot_df$Aliquot_WU, from = idmetadata_df$Aliquot.snRNA.WU, to = idmetadata_df$Case)
 
 # write output ------------------------------------------------------------
+## set run id
+version_tmp <- 1
+run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
+## set output directory
+source("./ccRCC_snRNA_analysis/functions.R")
+dir_out <- paste0(makeOutDir(), run_id, "/")
+dir.create(dir_out)
 file2write <- paste0(dir_out, "CellGroupBarcodes_Number_and_Fraction_per_Sample", run_id, '.tsv')
 write.table(x = plot_df, file = file2write, quote = F, row.names = F, sep = "\t")

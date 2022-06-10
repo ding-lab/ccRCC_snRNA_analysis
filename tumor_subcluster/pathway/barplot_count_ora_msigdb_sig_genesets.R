@@ -17,6 +17,8 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/pathway/ora_msigdb_tumor_manualsubcluster_up_degs/20210413.v1/ORA_Results.tsv")
+enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/pathway/ora_msigdb_tumor_manualsubcluster_up_degs/20210413.v1/ORA_Results.tsv")
+enrich_df <- fread(data.table = F, input = "~/Downloads/ORA_Results.tsv")
 
 # make plot data ----------------------------------------------------------
 count_geneset_df <- enrich_df %>%
