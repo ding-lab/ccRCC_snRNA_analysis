@@ -2,11 +2,10 @@
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
-source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
 version_tmp <- 1
@@ -28,6 +27,7 @@ plot_data_df <- avgexp_df %>%
   rename(gene = V1) %>%
   filter(gene %in% genes_filter) %>%
   melt() %>%
+  filter(variable %in% paste0("SCT.", c("Myofibroblasts", "Endothelial.cells", "DC", "CD4..T.cells", "B.cells", "Macrophages", "NK.cells", "CD8..T.cells", "Tumor.cells", "Fibroblasts"))) %>%
   mutate(cell_type = gsub(x = variable, pattern = "SCT\\.", replacement = "")) %>%
   filter(cell_type != "Unknown") %>%
   arrange(value)
@@ -36,8 +36,8 @@ plot_data_df$cell_type <- factor(x = plot_data_df$cell_type, levels = plot_data_
 # plot --------------------------------------------------------------------
 p <- ggplot()
 p <- p + geom_bar(data = plot_data_df, mapping = aes(x = value, y = cell_type), stat = "identity")
-p <- p + xlab("Normalized  expression")
-p <- p + ggtitle(paste0(genes_filter, " expression"))
+p <- p + xlab("LILRB1\nexpression")
+# p <- p + ggtitle(paste0(genes_filter, " expression"))
 p <- p + theme_classic(base_size = 14)
 p <- p + theme(axis.text = element_text(color = "black", size = 14),
                axis.title.y = element_blank(),
@@ -46,7 +46,7 @@ p <- p + theme(axis.text = element_text(color = "black", size = 14),
 p
 
 file2write <- paste0(dir_out, genes_filter, ".pdf")
-pdf(file2write, width = 5, height = 4, useDingbats = F)
+pdf(file2write, width = 3, height = 3, useDingbats = F)
 print(p)
 dev.off()
 

@@ -26,7 +26,7 @@ for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
 ## set run id
-version_tmp <- 3
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -38,8 +38,6 @@ dir.create(dir_out)
 id_metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
 ## input pathway scores
 scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_msigdb_geneset_scores/20210805.v1/MSigDB.Hallmark.tsv")
-## input by cluster enrichment assignment
-enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210805.v1/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
 ## input the EMT group later defined
 emt_group_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_epithelial_group_bytumorcluster/20211011.v1/Tumorcluster_EpithelialGroup.20211011.v1.tsv")
 ## input the pathways to plot
@@ -50,10 +48,15 @@ hallmark_anno_df <- readxl::read_xlsx(path = "./Resources/Knowledge/Databases/MS
 cnv_df <- fread(data.table = F, input = "./Resources/Analysis_Results/copy_number/summarize_cnv_fraction/cnv_fraction_in_tumorcells_per_manualcluster_rm_doublets/20210806.v1/fraction_of_tumorcells_with_cnv_by_gene_by_3state.per_manualsubcluster.20210806.v1.tsv")
 ## input mutation mapped
 driver_mutation_bytumorcluster_df <- fread(data.table = T, input = "./Resources/Analysis_Results/mutation/summarize/count_driver_mutation_mapped_by_intrapatient_tumor_cluster/20220610.v1/Driver_mutation_mapped_per_intrapatienttumorcluster.20220610.v1.tsv")
+## input te bulk genomics/methylation events
+bulk_sn_omicsprofile_df <- fread(input = "./Resources/Analysis_Results/data_summary/merge_bulk_sn_profiles/20210504.v1/bulk_sn_omics_profile.20210504.v1.tsv", data.table = F)
+## input by cluster enrichment assignment
+enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210805.v1/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
 
 # preprocess --------------------------------------------------------------
 genesets_plot_df <- genesets_plot_df %>%
-  mutate(scoregroup_name = paste0(gsub(x = Description, pattern = "HALLMARK_", replacement = ""), "_Score"))
+  mutate(scoregroup_name = paste0(gsub(x = Description, pattern = "HALLMARK_", replacement = ""), "_Score")) %>%
+  filter(Description != "SPERMATOGENESIS")
 genesets_plot <- genesets_plot_df$scoregroup_name
 hallmark_anno_df$`Hallmark Name`[hallmark_anno_df$`Hallmark Name` == "UV_RESPONSE_DOWN"] <- "UV_RESPONSE_DN"
 ## make cluster id
@@ -63,7 +66,8 @@ clustername_df <- clustername_df %>%
   mutate(sampleid = gsub(x = sampleid, pattern = "\\.", replacement = "-"))
 clustername_df$case <- mapvalues(x = clustername_df$sampleid, from = id_metadata_df$Aliquot.snRNA.WU, to = as.vector(id_metadata_df$Case))
 clustername_df <- clustername_df %>%
-  filter(case != "C3L-00359")
+  filter(case != "C3L-00359") %>%
+  filter(!(cluster_name %in% c("C3N.00733.T2_C5", "C3L.01313.T1_C7" , "C3L.01287.T1_C2")))
 ##
 rownames(scores_df) <- scores_df$cluster_name
 ## prepare CNV data
@@ -80,12 +84,13 @@ rowlabels_plot <- gsub(x = rownames_plot, pattern = "_Score", replacement = "")
 # rowlabels_plot[rowlabels_plot == "EPITHELIAL_MESENCHYMAL_TRANSITION"] <- "EMT"
 
 # make column order -------------------------------------------------------
-col_order_df <- enrich_df %>%
-  arrange(desc(Cell_cycle), desc(Immune), desc(EMT), desc(mTOR))
+# col_order_df <- enrich_df %>%
+#   arrange(desc(Cell_cycle), desc(Immune), desc(EMT), desc(mTOR))
 # plot_data_mat <- plot_data_mat[, col_order_df$cluster_name]
 plot_data_mat <- plot_data_mat[, clustername_df$cluster_name]
 colnames_plot <- colnames(plot_data_mat)
-clusternames_map <- gsub(x = colnames_plot, pattern = "\\.", replacement = "-")
+clusternames_column <- gsub(x = colnames_plot, pattern = "\\.", replacement = "-")
+sampleids_column <- str_split_fixed(string = clusternames_column, pattern = "_", n = 2)[,1]
 
 # specify colors ----------------------------------------------------------
 ## specify color for NA values
@@ -104,7 +109,8 @@ colors_heatmapbody = colorRamp2(c(quantile(as.vector(unlist(plot_data_mat)), 0.0
 # colors_heatmapbody = colorRamp2(seq(-100, 100, 20), 
 #                                 rev(brewer.pal(n = 11, name = "BrBG")))
 # colors for group
-colors_truefalse <- c("black", "grey90")
+# colors_truefalse <- c("black", "grey90")
+colors_truefalse <- c("black", "white")
 names(colors_truefalse) <- c("TRUE", "FALSE")
 color_gridline = "grey90"
 colors_enrich_type <- RColorBrewer::brewer.pal(n = 9, name = "Set1")[c(1, 2, 3, 5, 9)]
@@ -125,13 +131,21 @@ setd2_loss_frac_vec <- mapvalues(x = colnames_plot, from = cnv_df$tumor_subclust
 setd2_loss_frac_vec[setd2_loss_frac_vec == colnames_plot] <- "0"; setd2_loss_frac_vec <- as.numeric(setd2_loss_frac_vec)
 SQSTM1_Gain_frac_vec <- mapvalues(x = colnames_plot, from = cnv_df$tumor_subcluster.dataname[cnv_df$gene_symbol == "SQSTM1" & cnv_df$cna_3state == "Gain"], to = as.vector(cnv_df$Fraction[cnv_df$gene_symbol == "SQSTM1" & cnv_df$cna_3state == "Gain"]))
 SQSTM1_Gain_frac_vec[SQSTM1_Gain_frac_vec == colnames_plot] <- "0"; SQSTM1_Gain_frac_vec <- as.numeric(SQSTM1_Gain_frac_vec)
-mut_map_vec <- mapvalues(x = clusternames_map, from = driver_mutation_bytumorcluster_df$Cluster_Name, to = as.vector(driver_mutation_bytumorcluster_df$number_cells_w_driver_mutation))
+mut_map_vec <- mapvalues(x = clusternames_column, from = driver_mutation_bytumorcluster_df$Cluster_Name, to = as.vector(driver_mutation_bytumorcluster_df$number_cells_w_driver_mutation))
 mut_map_vec <- as.character(mut_map_vec != "0")
-colanno_obj <- HeatmapAnnotation(chr3p_SETD2_loss = anno_simple(x = setd2_loss_frac_vec, col = colorRamp2(seq(0, 1, 0.2), 
+VHL_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.VHL)); VHL_bysample_vec <- as.character(VHL_bysample_vec != "None")
+PBRM1_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.PBRM1)); PBRM1_bysample_vec <- as.character(PBRM1_bysample_vec != "None")
+BAP1_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.BAP1)); BAP1_bysample_vec <- as.character(BAP1_bysample_vec != "None")
+SETD2_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.SETD2)); SETD2_bysample_vec <- as.character(SETD2_bysample_vec != "None")
+colanno_obj <- HeatmapAnnotation(chr3p_SETD2_loss_bycluster = anno_simple(x = setd2_loss_frac_vec, col = colorRamp2(seq(0, 1, 0.2), 
                                                                                                           c("white", brewer.pal(n = 6, name = "Blues")[-1]))),
-                                 chr5q_SQSTM1_gain = anno_simple(x = SQSTM1_Gain_frac_vec, col = colorRamp2(seq(0, 1, 0.2), 
+                                 chr5q_SQSTM1_gain_bycluster = anno_simple(x = SQSTM1_Gain_frac_vec, col = colorRamp2(seq(0, 1, 0.2), 
                                                                                                           c("white", brewer.pal(n = 6, name = "Reds")[-1]))),
-                                 driver_mutation_mapped = anno_simple(x = mut_map_vec, col = colors_truefalse[mut_map_vec]),
+                                 driver_mutation_bycluster = anno_simple(x = mut_map_vec, col = colors_truefalse[mut_map_vec]),
+                                 VHL_mutated_bysample = anno_simple(x = VHL_bysample_vec, col = colors_truefalse[VHL_bysample_vec]),
+                                 PBRM1_mutated_bysample = anno_simple(x = PBRM1_bysample_vec, col = colors_truefalse[PBRM1_bysample_vec]),
+                                 BAP1_mutated_bysample = anno_simple(x = BAP1_bysample_vec, col = colors_truefalse[BAP1_bysample_vec]),
+                                 SETD2_mutated_bysample = anno_simple(x = SETD2_bysample_vec, col = colors_truefalse[SETD2_bysample_vec]),
                                  Inflammatory = anno_simple(x = inflam_assign_vec, col = colors_topbottom[inflam_assign_vec]), annotation_name_side = "left")
 # ## merge data
 # colanno_df <- enrich_plot_df %>%
@@ -183,11 +197,10 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              top_annotation = colanno_obj, 
                              show_column_names = F, column_names_side = "top", column_names_gp = gpar(fontsize = 5),
                              show_heatmap_legend = F)
-p
 list_lgd = list(
-  Legend(labels = names(colors_isenriched), labels_gp = gpar(fontsize = 14),
-         title = "Expression\nenriched", title_gp = gpar(fontsize = 14),
-         legend_gp = gpar(fill = colors_isenriched), border = NA),
+  # Legend(labels = names(colors_isenriched), labels_gp = gpar(fontsize = 14),
+  #        title = "Expression\nenriched", title_gp = gpar(fontsize = 14),
+  #        legend_gp = gpar(fill = colors_isenriched), border = NA),
   Legend(col_fun = colors_heatmapbody, 
          title = "Gene set score", 
          title_gp = gpar(fontsize = 14),

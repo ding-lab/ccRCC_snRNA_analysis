@@ -81,21 +81,21 @@ for (easyid_tmp in unique(barcode2umap_df$easy_id)) {
   p <- p + geom_point_rast(data = plot_data_df, mapping = aes(x = UMAP_1, y = UMAP_2, color = Name_TumorCluster), shape = 16, alpha = 0.8, size = 1)
   p <- p + scale_color_manual(values = uniq_cluster_colors, na.translate = T)
   # p <- p + ggtitle(label = paste0("Tumor-cell subclusters for sample ", easyid_tmp), subtitle = "original")
-  p <- p + ggtitle(label = paste0("Tumor-cell subclusters for sample ", easyid_tmp), subtitle = "Manually grouped")
-  p <- p + guides(colour = guide_legend(override.aes = list(size=3), title = NULL, nrow = 1))
+  # p <- p + ggtitle(label = paste0("Tumor-cell subclusters for sample ", easyid_tmp), subtitle = "Manually grouped")
+  p <- p + guides(colour = guide_legend(override.aes = list(size=3), title = NULL, nrow = 1, label.theme = element_text(size = 17)))
   p <- p + theme_void()
   p <- p + theme(legend.position = "bottom")
-  p <- p + theme(legend.text = element_text(size = 15), legend.title = element_text(size = 15))
+  # p <- p + theme(legend.text = element_text(size = 15))
   p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                  panel.background = element_blank())
   ## save plot
-  png2write <- paste0(dir_out_png, easyid_tmp, ".png")
-  png(filename = png2write, width = 900, height = 1000, res = 150)
-  print(p)
-  dev.off()
-  
-  # file2write <- paste0(dir_out_pdf, easyid_tmp,".pdf")
-  # pdf(file2write, width = 5, height = 5.5, useDingbats = F)
+  # png2write <- paste0(dir_out_png, easyid_tmp, ".png")
+  # png(filename = png2write, width = 900, height = 1000, res = 150)
   # print(p)
   # dev.off()
+  
+  file2write <- paste0(dir_out_pdf, easyid_tmp,".pdf")
+  pdf(file2write, width = 5, height = 5, useDingbats = F)
+  print(p)
+  dev.off()
 }

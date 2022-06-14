@@ -35,7 +35,7 @@ celltype_frac_long_df <- fread(data.table = F, input = "./Resources/Analysis_Res
 
 # pre-process -------------------------------------------------------------
 genesets_test <- genesets_test_df$Description
-scoregroups_test <- paste0(gsub(x = genesets_plot_df$Description, pattern = "HALLMARK_", replacement = ""), "_Score")
+scoregroups_test <- paste0(gsub(x = genesets_test_df$Description, pattern = "HALLMARK_", replacement = ""), "_Score")
 cellgroups_test <- unique(celltype_frac_long_df$Cell_group); cellgroups_test <- cellgroups_test[!(cellgroups_test %in% c("Unknown", "Mixed myeloid/lymphoid"))]; cellgroups_test
 celltype_frac_wide_df <- dcast(data = celltype_frac_long_df, formula = Aliquot_WU~Cell_group, value.var = "Frac_CellGroupBarcodes_ByAliquot")
 celltype_frac_wide_df[is.na(celltype_frac_wide_df)] <- 0
@@ -49,7 +49,9 @@ for (scoregroup_tmp in scoregroups_test) {
   colnames(scores_tmp_df) <- c("cluster_name", "score.bycluster")
   scores_tmp_df <- scores_tmp_df %>%
     mutate(sample_id = str_split_fixed(string = cluster_name, pattern = "_", n = 2)[,1]) %>%
-    mutate(Aliquot_WU = gsub(x = sample_id, pattern = "\\.", replacement = "-"))
+    mutate(Aliquot_WU = gsub(x = sample_id, pattern = "\\.", replacement = "-")) %>%
+    group_by(Aliquot_WU) %>%
+    summarise(score.bycluster = max(score.bycluster))
   test_data_comp_df <- merge(x = scores_tmp_df,
                         y = celltype_frac_wide_df,
                         by = c("Aliquot_WU"), all.x = T)

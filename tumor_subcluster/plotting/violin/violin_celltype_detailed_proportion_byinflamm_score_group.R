@@ -48,50 +48,41 @@ cellgroups_test <- unique(celltype_frac_long_df$Cell_group); cellgroups_test <- 
 celltype_frac_wide_df <- dcast(data = celltype_frac_long_df, formula = Aliquot_WU~Cell_group, value.var = "Frac_CellGroupBarcodes_ByAliquot")
 celltype_frac_wide_df[is.na(celltype_frac_wide_df)] <- 0
 
-# test --------------------------------------------------------------------
-for (scoregroup_tmp in scoregroups_test) {
-  dir_out_tmp <- paste0(dir_out, scoregroup_tmp, "/")
-  dir.create(dir_out_tmp)
-  
-  ## make plot data
-  scores_tmp_df <- scores_df[, c("cluster_name", scoregroup_tmp)]
-  colnames(scores_tmp_df) <- c("cluster_name", "score.bycluster")
-  scores_tmp_df <- scores_tmp_df %>%
-    mutate(sample_id = str_split_fixed(string = cluster_name, pattern = "_", n = 2)[,1]) %>%
-    mutate(Aliquot_WU = gsub(x = sample_id, pattern = "\\.", replacement = "-")) %>%
-    group_by(Aliquot_WU) %>%
-    summarise(score.bycluster = max(score.bycluster))
-  test_data_comp_df <- merge(x = scores_tmp_df,
-                        y = celltype_frac_wide_df,
-                        by = c("Aliquot_WU"), all.x = T)
-  
-  for (cellgroup_tmp in cellgroups_test) {
-    plotdata_df <- test_data_comp_df[, c("Aliquot_WU", "score.bycluster", cellgroup_tmp)]
-    colnames(plotdata_df) <- c("Aliquot_WU",  "x_plot", "y_plot")
-    ## plot
-    p <- ggscatter(data = plotdata_df, x = "x_plot", y = "y_plot",
-                   add = "reg.line",  # Add regressin line
-                   # label = "cluster", font.label = c(14, "plain"),
-                   add.params = list(color = "grey", fill = "lightgray", linetype = 2)
-    )
-    p <- p + stat_cor(method = "pearson",
-                      label.x = min(plotdata_df$x_plot),
-                      label.y = max(plotdata_df$y_plot), size = 7)
-    # p <- p + ggtitle(label = paste0(protein_tmp, "~", treatment_tmp, " 1-month response"))
-    p <- p + theme_classic(base_size = 17)
-    p <- p + xlab(paste0(scoregroup_tmp))
-    p <- p + ylab(paste0("% ", cellgroup_tmp))
-    # p <- p + xlim(c(min(plotdata_tmp_df$x_plot)-0.11, max(plotdata_tmp_df$x_plot)+0.11))
-    # p <- p + ylim(c(min(plotdata_tmp_df$y_plot)-0.05, max(plotdata_tmp_df$y_plot)+0.1))
-    p <- p + theme(axis.text = element_text(color = "black"))
-    # p
-    ## write output
-    file2write <- paste0(dir_out_tmp, gsub(x = cellgroup_tmp, pattern = " |\\/", replacement = "_"), ".png")
-    png(file2write, width = 600, height = 600, res = 150)
-    print(p)
-    dev.off()
-  }
-}
+## make plot data
+scores_bycluster_df <- scores_df[, c("cluster_name", "INFLAMMATORY_RESPONSE_Score")]
+colnames(scores_bycluster_df) <- c("cluster_name", "score.bycluster")
+scores_bycluster_df <- scores_bycluster_df %>%
+  mutate(sampleid = str_split_fixed(string = cluster_name, pattern = "_", n = 2)[,1]) %>%
+  mutate(sampleid = gsub(x = sampleid, pattern = "\\.", replacement = "-"))
+sampleids_top_inflamm <- scores_bycluster_df$sampleid[scores_bycluster_df$score.bycluster >= quantile(x = scores_bycluster_df$score.bycluster, probs = 0.9)]
+sampleids_bottom_inflamm <- scores_bycluster_df$sampleid[scores_bycluster_df$score.bycluster <= quantile(x = scores_bycluster_df$score.bycluster, probs = 0.1)]
+plot_data_comp_df <- celltype_frac_wide_df %>%
+  mutate(sample_group = ifelse(Aliquot_WU %in% sampleids_top_inflamm, "top",
+                               ifelse(Aliquot_WU %in% sampleids_bottom_inflamm, "bottom", "middle")))
 
+# test --------------------------------------------------------------------
+my_comparisons <- list(c("top", "bottom"), c("top", "middle"))
+for (cellgroup_tmp in cellgroups_test) {
+  plotdata_df <- plot_data_comp_df[, c("Aliquot_WU", "sample_group", cellgroup_tmp)]
+  colnames(plotdata_df) <- c("Aliquot_WU",  "x_plot", "y_plot")
+  ## plot
+  p <- ggviolin(data = plotdata_df, x = "x_plot", y = "y_plot",
+                 add = "dotplot"
+  )
+  p <- p + stat_compare_means(method = "t.test", comparisons = my_comparisons)
+  # p <- p + ggtitle(label = paste0(protein_tmp, "~", treatment_tmp, " 1-month response"))
+  p <- p + theme_classic(base_size = 17)
+  p <- p + xlab(paste0("inflammation score"))
+  p <- p + ylab(paste0("% ", cellgroup_tmp))
+  # p <- p + xlim(c(min(plotdata_tmp_df$x_plot)-0.11, max(plotdata_tmp_df$x_plot)+0.11))
+  # p <- p + ylim(c(min(plotdata_tmp_df$y_plot)-0.05, max(plotdata_tmp_df$y_plot)+0.1))
+  p <- p + theme(axis.text = element_text(color = "black"))
+  # p
+  ## write output
+  file2write <- paste0(dir_out, gsub(x = cellgroup_tmp, pattern = " |\\/", replacement = "_"), ".png")
+  png(file2write, width = 600, height = 600, res = 150)
+  print(p)
+  dev.off()
+}
 
 

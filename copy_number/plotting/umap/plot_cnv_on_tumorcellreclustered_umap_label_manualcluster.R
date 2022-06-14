@@ -54,6 +54,8 @@ copy_number_colors <-  c("0 Copies" = PuBu_colors[9],
                          "4 Copies" = PuRd_colors[7],
                          ">4 Copies" = PuRd_colors[9],
                          "Not Available" = "black")
+barcode2umap_df <- merge(x = barcode2umap_df, y = barcode2tumorsubcluster_df, 
+                         by.x = c("orig.ident", "barcode_tumorcellreclustered", "easy_id"), by.y = c("orig.ident", "barcode", "easy_id"), all.x = T)
 
 # Loop: for each aliquot, input seurat object and infercnv output, plot important genes on UMAP ---------
 for (infercnv_run_id in c("Individual.20200305.v1", "run.20210805")) {
@@ -65,8 +67,8 @@ for (infercnv_run_id in c("Individual.20200305.v1", "run.20210805")) {
   aliquots2process <- aliquots2process[grepl(pattern = "CPT", x = aliquots2process)]
   
   # for (snRNA_aliquot_id_tmp in c("CPT0075130004")) {
-    for (snRNA_aliquot_id_tmp in c("CPT0075120002", "CPT0075140002", "CPT0075130004")) {
-    # for (snRNA_aliquot_id_tmp in aliquots2process) {
+    # for (snRNA_aliquot_id_tmp in c("CPT0075120002", "CPT0075140002", "CPT0075130004")) {
+    for (snRNA_aliquot_id_tmp in aliquots2process) {
     ## get the case id for this aliquot to show in the title
     easy_id_tmp <- unique(barcode2umap_df$easy_id[barcode2umap_df$orig.ident == snRNA_aliquot_id_tmp])
     
@@ -97,8 +99,8 @@ for (infercnv_run_id in c("Individual.20200305.v1", "run.20210805")) {
     rm(obs_cnv_state_mat)
     rm(ref_cnv_state_mat)
     
-    for (gene_tmp in c("VHL", "SQSTM1")) {
-    # for (gene_tmp in genes2plot) {
+    # for (gene_tmp in c("VHL", "SQSTM1")) {
+    for (gene_tmp in genes2plot) {
       chr_arm_tmp <- knowncnvgenes_df$chr_arm[knowncnvgenes_df$Gene_Symbol == gene_tmp]
       ## create output directory by chromosome region
       dir_out2 <- paste0(dir_out1, chr_arm_tmp, "/")
