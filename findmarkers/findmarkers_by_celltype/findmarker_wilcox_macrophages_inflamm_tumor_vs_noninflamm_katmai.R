@@ -18,6 +18,7 @@ thisFile <- function() {
 path_this_script <- thisFile()
 ## set working directory
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
+# dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -29,7 +30,7 @@ dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
 library(future)
 plan("multiprocess", workers = 4)
-options(future.globals.maxSize = 15 * 1024^3) # for 7 Gb RAM
+options(future.globals.maxSize = 7 * 1024^3) # for 7 Gb RAM
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
@@ -43,7 +44,7 @@ metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sampl
 
 # set parameters for findmarkers ------------------------------------------
 logfc.threshold.run <- 0
-min.pct.run <- 0
+min.pct.run <- 0.1
 min.diff.pct.run <- 0
 DefaultAssay(srat)<-"RNA"
 celltypes_process <- unique(barcode2celltype_df$Cell_type.detailed[grepl(pattern = "Macrophage", x = barcode2celltype_df$Cell_type.detailed)])
@@ -58,6 +59,7 @@ barcode2celltype_df <- barcode2celltype_df %>%
   mutate(group_findmarkers = ifelse(sample_id %in% samples_inflamm & Cell_type.detailed %in% celltypes_process, "group1",
                                     ifelse(sample_id %in% samples_noninflamm& Cell_type.detailed %in% celltypes_process, "group2", "others")))
 table(barcode2celltype_df$group_findmarkers)
+print("Finished making cell group!")
 
 # set ident ---------------------------------------------------------------
 ## make combined id for the Seurat meta data
@@ -65,9 +67,9 @@ srat@meta.data$id_aliquot_barcode <- paste0(srat@meta.data$orig.ident, "_", srat
 srat@meta.data$group_findmarkers <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$group_findmarkers))
 Idents(srat) <- "group_findmarkers"
 table(Idents(srat))
-srat <- subset(srat, idents = c("group1", "group2"))
-table(Idents(srat))
-print("Finished subsetting")
+# srat <- subset(srat, idents = c("group1", "group2"))
+# table(Idents(srat))
+# print("Finished subsetting!")
 
 # run findallmarkers ------------------------------------------------------
 deg_df <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = "group1", ident.2 = "group2", only.pos = F,
