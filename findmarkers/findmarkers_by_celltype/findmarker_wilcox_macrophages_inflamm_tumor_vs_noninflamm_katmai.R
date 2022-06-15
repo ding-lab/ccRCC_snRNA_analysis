@@ -29,7 +29,7 @@ dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
 library(future)
 plan("multiprocess", workers = 4)
-options(future.globals.maxSize = 7 * 1024^3) # for 7 Gb RAM
+options(future.globals.maxSize = 15 * 1024^3) # for 7 Gb RAM
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data
