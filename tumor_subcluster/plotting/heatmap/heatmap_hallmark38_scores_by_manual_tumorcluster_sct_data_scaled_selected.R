@@ -126,21 +126,28 @@ tumor_piece_vec <- paste0("T", str_split_fixed(string = colnames_plot, pattern =
 inflam_score_vec <- scores_df[colnames_plot, "INFLAMMATORY_RESPONSE_Score"]
 inflam_assign_vec <- ifelse(inflam_score_vec >= quantile(inflam_score_vec, probs = 0.9), "top",
                             ifelse(inflam_score_vec <= quantile(inflam_score_vec, probs = 0.1), "bottom", "middle"))
-# vhl_loss_frac_vec <- mapvalues(x = colnames_plot, from = cnv_df$tumor_subcluster.dataname[cnv_df$gene_symbol == "VHL" & cnv_df$cna_3state == "Loss"], to = as.vector(cnv_df$Fraction[cnv_df$gene_symbol == "VHL" & cnv_df$cna_3state == "Loss"]))
+VHL_Loss_frac_vec <- mapvalues(x = colnames_plot, from = cnv_df$tumor_subcluster.dataname[cnv_df$gene_symbol == "VHL" & cnv_df$cna_3state == "Loss"], to = as.vector(cnv_df$Fraction[cnv_df$gene_symbol == "VHL" & cnv_df$cna_3state == "Loss"]))
+VHL_Loss_frac_vec[VHL_Loss_frac_vec == colnames_plot] <- "0"; VHL_Loss_frac_vec <- as.numeric(VHL_Loss_frac_vec)
 setd2_loss_frac_vec <- mapvalues(x = colnames_plot, from = cnv_df$tumor_subcluster.dataname[cnv_df$gene_symbol == "SETD2" & cnv_df$cna_3state == "Loss"], to = as.vector(cnv_df$Fraction[cnv_df$gene_symbol == "SETD2" & cnv_df$cna_3state == "Loss"]))
 setd2_loss_frac_vec[setd2_loss_frac_vec == colnames_plot] <- "0"; setd2_loss_frac_vec <- as.numeric(setd2_loss_frac_vec)
 SQSTM1_Gain_frac_vec <- mapvalues(x = colnames_plot, from = cnv_df$tumor_subcluster.dataname[cnv_df$gene_symbol == "SQSTM1" & cnv_df$cna_3state == "Gain"], to = as.vector(cnv_df$Fraction[cnv_df$gene_symbol == "SQSTM1" & cnv_df$cna_3state == "Gain"]))
 SQSTM1_Gain_frac_vec[SQSTM1_Gain_frac_vec == colnames_plot] <- "0"; SQSTM1_Gain_frac_vec <- as.numeric(SQSTM1_Gain_frac_vec)
+GOLPH3_Gain_frac_vec <- mapvalues(x = colnames_plot, from = cnv_df$tumor_subcluster.dataname[cnv_df$gene_symbol == "GOLPH3" & cnv_df$cna_3state == "Gain"], to = as.vector(cnv_df$Fraction[cnv_df$gene_symbol == "GOLPH3" & cnv_df$cna_3state == "Gain"]))
+GOLPH3_Gain_frac_vec[GOLPH3_Gain_frac_vec == colnames_plot] <- "0"; GOLPH3_Gain_frac_vec <- as.numeric(GOLPH3_Gain_frac_vec)
 mut_map_vec <- mapvalues(x = clusternames_column, from = driver_mutation_bytumorcluster_df$Cluster_Name, to = as.vector(driver_mutation_bytumorcluster_df$number_cells_w_driver_mutation))
 mut_map_vec <- as.character(mut_map_vec != "0")
 VHL_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.VHL)); VHL_bysample_vec <- as.character(VHL_bysample_vec != "None")
 PBRM1_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.PBRM1)); PBRM1_bysample_vec <- as.character(PBRM1_bysample_vec != "None")
 BAP1_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.BAP1)); BAP1_bysample_vec <- as.character(BAP1_bysample_vec != "None")
 SETD2_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.SETD2)); SETD2_bysample_vec <- as.character(SETD2_bysample_vec != "None")
-colanno_obj <- HeatmapAnnotation(chr3p_SETD2_loss_bycluster = anno_simple(x = setd2_loss_frac_vec, col = colorRamp2(seq(0, 1, 0.2), 
-                                                                                                          c("white", brewer.pal(n = 6, name = "Blues")[-1]))),
+colanno_obj <- HeatmapAnnotation(chr3p_VHL_loss_bycluster = anno_simple(x = VHL_Loss_frac_vec, col = colorRamp2(seq(0, 1, 0.2), 
+                                                                                                                    c("white", brewer.pal(n = 6, name = "Blues")[-1]))),
+                                 chr3p_SETD2_loss_bycluster = anno_simple(x = setd2_loss_frac_vec, col = colorRamp2(seq(0, 1, 0.2), 
+                                                                                                                    c("white", brewer.pal(n = 6, name = "Blues")[-1]))),
                                  chr5q_SQSTM1_gain_bycluster = anno_simple(x = SQSTM1_Gain_frac_vec, col = colorRamp2(seq(0, 1, 0.2), 
-                                                                                                          c("white", brewer.pal(n = 6, name = "Reds")[-1]))),
+                                                                                                                      c("white", brewer.pal(n = 6, name = "Reds")[-1]))),
+                                 chr5q_GOLPH3_gain_bycluster = anno_simple(x = GOLPH3_Gain_frac_vec, col = colorRamp2(seq(0, 1, 0.2), 
+                                                                                                                      c("white", brewer.pal(n = 6, name = "Reds")[-1]))),
                                  driver_mutation_bycluster = anno_simple(x = mut_map_vec, col = colors_truefalse[mut_map_vec]),
                                  VHL_mutated_bysample = anno_simple(x = VHL_bysample_vec, col = colors_truefalse[VHL_bysample_vec]),
                                  PBRM1_mutated_bysample = anno_simple(x = PBRM1_bysample_vec, col = colors_truefalse[PBRM1_bysample_vec]),

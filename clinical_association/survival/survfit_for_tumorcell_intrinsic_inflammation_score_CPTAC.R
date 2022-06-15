@@ -35,7 +35,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input scores
-exp_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/expression/rna/other/preprocess/calculate_tumorcell_intrinsic_inflammation_score/20220612.v1/tumorcell_intrinsic_inflammation_signature_scores.20220612.v1.tsv")
+exp_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/expression/rna/other/preprocess/calculate_tumorcell_intrinsic_inflammation_score/20220615.v1/tumorcell_intrinsic_inflammation_signature_scores.20220615.v1.tsv")
 ## input survival ddata
 survival_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/clinical/extract_cptac_discovery_ccRCC_survival_time/20220317.v1/CPTAC_Discovery_ccRCC_Survival_Time20220317.v1.tsv")
 
