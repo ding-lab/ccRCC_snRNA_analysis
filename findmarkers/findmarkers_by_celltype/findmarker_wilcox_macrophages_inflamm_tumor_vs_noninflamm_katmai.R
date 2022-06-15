@@ -62,8 +62,13 @@ table(barcode2celltype_df$group_findmarkers)
 print("Finished making cell group!")
 
 # set ident ---------------------------------------------------------------
+## get original barcode
+BC <- srat@meta.data %>% rownames
+srat@meta.data$original_barcode <- BC %>% strsplit("_") %>% lapply("[[",1) %>% unlist
+head(srat@meta.data$original_barcode)
 ## make combined id for the Seurat meta data
 srat@meta.data$id_aliquot_barcode <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$original_barcode)
+head(srat@meta.data$id_aliquot_barcode)
 srat@meta.data$group_findmarkers <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$group_findmarkers))
 Idents(srat) <- "group_findmarkers"
 table(Idents(srat))
