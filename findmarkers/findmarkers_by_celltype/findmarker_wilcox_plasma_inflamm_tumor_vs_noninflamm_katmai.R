@@ -57,13 +57,22 @@ barcode2celltype_df <- barcode2celltype_df %>%
   mutate(group_findmarkers = ifelse(sample_id %in% samples_inflamm & Cell_type.detailed %in% celltypes_process, "group1",
                                     ifelse(sample_id %in% samples_noninflamm& Cell_type.detailed %in% celltypes_process, "group2", "others")))
 table(barcode2celltype_df$group_findmarkers)
+print("Finished making cell group!")
 
 # set ident ---------------------------------------------------------------
-## make combined id for the seurat meta data
+## get original barcode
+BC <- srat@meta.data %>% rownames
+srat@meta.data$original_barcode <- BC %>% strsplit("_") %>% lapply("[[",1) %>% unlist
+head(srat@meta.data$original_barcode)
+## make combined id for the Seurat meta data
 srat@meta.data$id_aliquot_barcode <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$original_barcode)
+head(srat@meta.data$id_aliquot_barcode)
 srat@meta.data$group_findmarkers <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$group_findmarkers))
 Idents(srat) <- "group_findmarkers"
 table(Idents(srat))
+# srat <- subset(srat, idents = c("group1", "group2"))
+# table(Idents(srat))
+# print("Finished subsetting!")
 
 # run findallmarkers ------------------------------------------------------
 deg_df <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = "group1", ident.2 = "group2", only.pos = F,
