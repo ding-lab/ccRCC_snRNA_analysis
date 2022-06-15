@@ -65,6 +65,9 @@ srat@meta.data$id_aliquot_barcode <- paste0(srat@meta.data$orig.ident, "_", srat
 srat@meta.data$group_findmarkers <- mapvalues(x = srat@meta.data$id_aliquot_barcode, from = barcode2celltype_df$id_aliquot_barcode, to = as.vector(barcode2celltype_df$group_findmarkers))
 Idents(srat) <- "group_findmarkers"
 table(Idents(srat))
+srat <- subset(srat, idents = c("group1", "group2"))
+table(Idents(srat))
+print("Finished subsetting")
 
 # run findallmarkers ------------------------------------------------------
 deg_df <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = "group1", ident.2 = "group2", only.pos = F,
