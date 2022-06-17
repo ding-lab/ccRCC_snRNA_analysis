@@ -36,14 +36,20 @@ dir.create(dir_out)
 # input data ------------------------------------------------------
 plotdata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/snatac/enriched_motifs/plotting/violin_plot/violin_selected_motifs_tumorcells_vs_PTcells_28samples/20220602.v1/MA1107.2.motif_score_by_cell.tsv", fill=TRUE)
 
+
+# make colors -------------------------------------------------------------
+color_tumorcell <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[4]
+color_pt <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[1]
+
 # plot --------------------------------------------------------------------
 plotdata_df <- plotdata_df %>%
   mutate(cell_group_text = ifelse(cell_group_plot %in% c("Tumor", "EMT tumor cells"), "Tumor cells", "PT cells"))
 p <- ggviolin(data = plotdata_df, x = "cell_group_text", y = "motif_score", fill = "cell_group_text", 
                add = "boxplot", add.params = list(fill = "white", width = 0.15))
+p <- p <- scale_fill_manual(values = c("Tumor cells" = color_tumorcell, "PT cells" = color_pt))
 p <- p + stat_compare_means(method = "t.test", label = "p.format", label.y = 5, label.x = 1.25)
 p <- p + ylab(label = paste0("KLF9 ", " motif enrichment"))
-p <- p + theme(legend.position = "none", axis.title.x = element_blank())
+p <- p + theme(legend.position = "none", axis.title.x = element_blank(), axis.title.y = element_text(size = 12, color = "black"), axis.text = element_text(color = "black", size = 12))
 p
 ## write output
 file2write <- paste0(dir_out, "KLF9", ".pdf")

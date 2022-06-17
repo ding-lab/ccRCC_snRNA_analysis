@@ -74,6 +74,9 @@ p2 = SpatialPlotSharedScaleMultipleGenes(st_htan, features = genes_check, stroke
 ## set output directory
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
 setwd(dir_base)
+## set run id
+version_tmp <- 1
+run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 source("./ccRCC_snRNA_analysis/functions.R")
 dir_out_parent <- makeOutDir_katmai(path_this_script)
 dir_out <- paste0(dir_out_parent, run_id, "/")

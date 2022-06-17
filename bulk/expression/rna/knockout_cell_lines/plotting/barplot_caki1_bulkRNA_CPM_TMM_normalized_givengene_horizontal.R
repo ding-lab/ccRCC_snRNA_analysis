@@ -32,6 +32,7 @@ dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 exp_df <- fread(input = "./Resources/Analysis_Results/bulk/expression/rna/knockout_cell_lines/normalization/get_edgeR_TMM_normalized_counts_selected_cell_lines/20220524.v1/CPM.TMM_normalized.Knockout_Cell_Lines.20220524.v1.tsv", data.table = F)
+# exp_df <- fread(input = "./Resources/Analysis_Results/bulk/expression/rna/knockout_cell_lines/divide_knockout_cellline_TPM_TMMnormalized_byscrambled/20220516.v1/Knockout_celllines.Kallisto.gene_level.CPM.TMMnormalized.DividedByControl.20220516.v1.tsv", data.table = F)
 
 # specify parameters ------------------------------------------------------
 colnames_value <- colnames(exp_df)[grepl(pattern = "sample", x = colnames(exp_df))]

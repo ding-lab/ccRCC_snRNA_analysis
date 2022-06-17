@@ -56,7 +56,7 @@ plot_data_long_df$sample_text2 <- mapvalues(x = plot_data_long_df$sample_text, f
 plot_data_long_df$sample_text2 <- factor(x = plot_data_long_df$sample_text2, levels = sampletexts_plot)
 plot_data_long_df$external_gene_name <- factor(x = plot_data_long_df$external_gene_name, levels = genes_plot)
 p <- ggplot()
-p <- p + geom_col(data = plot_data_long_df, mapping = aes(x = sample_text2, y = value, fill = external_gene_name), position=position_dodge(), color = "black")
+p <- p + geom_col(data = plot_data_long_df, mapping = aes(x = external_gene_name, y = value, fill = sample_text2), position=position_dodge(), color = "black")
 p <- p + theme_classic()
 p <- p + ylab(label = "% CPM to control")
 p <- p + ggtitle(label = paste0("RNA-seq expression"))
