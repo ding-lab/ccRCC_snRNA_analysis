@@ -44,12 +44,13 @@ color_pt <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[1]
 # plot --------------------------------------------------------------------
 plotdata_df <- plotdata_df %>%
   mutate(cell_group_text = ifelse(cell_group_plot %in% c("Tumor", "EMT tumor cells"), "Tumor cells", "PT cells"))
-p <- ggviolin(data = plotdata_df, x = "cell_group_text", y = "motif_score", fill = "cell_group_text", 
-               add = "boxplot", add.params = list(fill = "white", width = 0.15))
-p <- p <- scale_fill_manual(values = c("Tumor cells" = color_tumorcell, "PT cells" = color_pt))
-p <- p + stat_compare_means(method = "t.test", label = "p.format", label.y = 5, label.x = 1.25)
+p <- ggviolin(data = plotdata_df, x = "cell_group_text", y = "motif_score", fill = "cell_group_text", color = NA,
+               add = "boxplot", add.params = list(fill = "white", width = 0.15, color = "black"))
+p <- p + scale_fill_manual(values = c("Tumor cells" = color_tumorcell, "PT cells" = color_pt))
+p <- p + stat_compare_means(method = "t.test", label = "p.format", label.y = 6, label.x = 1.25)
 p <- p + ylab(label = paste0("KLF9 ", " motif enrichment"))
-p <- p + theme(legend.position = "none", axis.title.x = element_blank(), axis.title.y = element_text(size = 12, color = "black"), axis.text = element_text(color = "black", size = 12))
+p <- p + theme(legend.position = "none", axis.title.x = element_blank(), 
+               axis.title.y = element_text(size = 12, color = "black"), axis.text = element_text(color = "black", size = 12))
 p
 ## write output
 file2write <- paste0(dir_out, "KLF9", ".pdf")
