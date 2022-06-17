@@ -65,7 +65,7 @@ SpatialPlotSharedScale = function(obj, feature, range_ratio = 0.9, ...){
 }
 SpatialPlotSharedScaleMultipleGenes = function(obj, features, range_ratio = 0.9, ...){
     p_list = map(features, function(gene) SpatialPlotSharedScale(obj, feature = gene, range_ratio=range_ratio, ...))
-    wrap_plots(p_list, ncol = 2)
+    wrap_plots(p_list, nrow = 5)
 }
 
 p2 = SpatialPlotSharedScaleMultipleGenes(st_htan, features = genes_check, stroke = NA, image.alpha = 0)
@@ -86,6 +86,6 @@ pdf(paste0(dir_out, "ccRCC_HT282_293.", "different_scales.", "pdf"), width = 6, 
 print(p1)
 dev.off()
 
-pdf(paste0(dir_out, "ccRCC_HT282_293.", "same_scales.", "pdf"), width = 6, height = 15, useDingbats = F)
+pdf(paste0(dir_out, "ccRCC_HT282_293.", "same_scales.", "pdf"), width = 15, height = 25, useDingbats = F)
 print(p2)
 dev.off()
