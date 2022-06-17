@@ -61,11 +61,11 @@ p1 = SpatialPlot(st_htan, features = genes_check, stroke = NA, image.alpha = 0, 
 ## Plot function
 SpatialPlotSharedScale = function(obj, feature, range_ratio = 0.9, ...){
     exp_max = FetchData(obj, feature) %>% max() %>% "*"(range_ratio)
-    SpatialPlot(st_htan, features = feature, ncol = 1, ...) & scale_fill_gradientn(colors = Seurat:::SpatialColors(100), limit = c(0, exp_max))
+    SpatialPlot(st_htan, features = feature, ...) & scale_fill_gradientn(colors = Seurat:::SpatialColors(100), limit = c(0, exp_max))
 }
 SpatialPlotSharedScaleMultipleGenes = function(obj, features, range_ratio = 0.9, ...){
     p_list = map(features, function(gene) SpatialPlotSharedScale(obj, feature = gene, range_ratio=range_ratio, ...))
-    wrap_plots(p_list, ncol = 5)
+    wrap_plots(p_list)
 }
 
 p2 = SpatialPlotSharedScaleMultipleGenes(st_htan, features = genes_check, stroke = NA, image.alpha = 0)
@@ -82,10 +82,10 @@ dir_out_parent <- makeOutDir_katmai(path_this_script)
 dir_out <- paste0(dir_out_parent, run_id, "/")
 dir.create(dir_out)
 ## Save
-pdf(paste0(dir_out, "ccRCC_HT282_293.", "different_scales.", "pdf"), width = 10, height = 6, useDingbats = F)
+pdf(paste0(dir_out, "ccRCC_HT282_293.", "different_scales.", "pdf"), width = 6, height = 15, useDingbats = F)
 print(p1)
 dev.off()
 
-pdf(paste0(dir_out, "ccRCC_HT282_293.", "same_scales.", "pdf"), width = 10, height = 6, useDingbats = F)
+pdf(paste0(dir_out, "ccRCC_HT282_293.", "same_scales.", "pdf"), width = 6, height = 15, useDingbats = F)
 print(p2)
 dev.off()

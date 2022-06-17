@@ -42,6 +42,7 @@ densitometry_df <- readxl::read_xlsx(path = "./Validation/Western_Blot/wb densit
 # set plot parameters -----------------------------------------------------
 genes_plot <- c("CP")
 # genes_plot <- c("KLF9")
+# genes_plot <- c("KLF9")
 # genes_plot <- c("HK2")
 # genes_plot <- c("PFKP")
 # genes_plot <- c("PKM2")
@@ -90,8 +91,10 @@ p <- ggbarplot(data = plotdata_df, x = "Line", y = "Value_bytub_byscrambled",
                add = "mean_sd", fill = "Line", color = "black", 
                error.plot = "upper_linerange")
 p <- p + stat_pvalue_manual(stat.test, 
-                            y.position = seq(ymax*1.05, ymax*(1+0.1*(length(lines_plot)-1)), length.out = (length(lines_plot)-1)),
-                            label = "p = {signif(p, digits = 2)}")
+                            y.position = seq(ymax*1.05, ymax*(1+0.1*(length(lines_plot)-1)), length.out = (length(lines_plot)-1)), 
+                            # label = "p = {p.format}",
+                            label = "p = {signif(p, digits = 2)}",
+                            label.size = 5)
 p <- p + scale_fill_manual(values = colors_byline)
 p <- p + scale_x_discrete(labels = c("RCC4_scrambled" = "sh-NC", "RCC4_KLF9_C2" = "sh-KLF9"))
 # p <- p + ggtitle(label = paste0(genes_plot, " densitometry"))
@@ -100,10 +103,11 @@ p <- p + scale_x_discrete(labels = c("RCC4_scrambled" = "sh-NC", "RCC4_KLF9_C2" 
 p <- p  + scale_y_continuous(expand = c(0,0), limits = c(0, ymax*(1+0.1*(length(lines_plot))))) ## CP expression for MXI1 lines - 3 lines
 # p <- p  + scale_y_continuous(expand = c(0,0), limits = c(0, ymax*(1+0.2*(length(lines_plot))))) ## CP expression for MXI1 lines - 3 lines
 p <- p + theme_classic()
-p <- p + ylab(label = paste0("Relative ", genes_plot, " expression"))
+p <- p + ylab(label = paste0("Relative ", genes_plot, " level"))
 p <- p + theme(legend.position = "none")
-p <- p + theme(axis.text.x = element_text(angle = 0, vjust = 0.5, color = "black"), axis.text.y = element_text(color = "black"))
-p <- p + theme(axis.title.x = element_blank(), axis.ticks.x = element_blank())
+p <- p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, color = "black", size = 12), 
+               axis.text.y = element_text(color = "black", size = 12))
+p <- p + theme(axis.title.x = element_blank(), axis.ticks.x = element_blank(), axis.title.y = element_text(color = "black", size = 12))
 p
 file2write <- paste0(dir_out, paste0(genes_plot, collapse = "_"), ".", paste0(lines_plot, collapse = "_"), ".", test_plot, ".densitometry_bytub_byscrambled.", "pdf")
 # pdf(file2write, width = 1.4, height = 3.5, useDingbats = F) ## KLF9 - 2 lines
