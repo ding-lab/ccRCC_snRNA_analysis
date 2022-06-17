@@ -37,8 +37,8 @@ exp_df <- fread(input = "./Resources/Analysis_Results/bulk/expression/rna/knocko
 colnames_value <- colnames(exp_df)[grepl(pattern = "sample", x = colnames(exp_df))]
 exp_df <- as.data.table(exp_df)
 # genes_plot <- c("KLF9", "CP")
-genes_plot <- c("CP")
-# genes_plot <- c("VEGFA")
+# genes_plot <- c("CP")
+genes_plot <- c("COL4A1")
 samples_plot <- c("caki_1_control_e1", "dr_caki_1_rna", "caki_1_cp_c2_e1", "caki_1_cp_c1_e1")
 sampletext_plot <- c("caki1_nt1", "caki1_nt2", "caki1_cp_c2", "caki1_cp_c1")
 sampletext_plot <- c("sh-NT1", "sh-NT2", "sh-CP-C2", "sh-CP-C1")
@@ -56,22 +56,22 @@ plot_data_long_df <- exp_df %>%
   mutate(sample = gsub(x = variable, pattern = "sample\\.", replacement = "")) %>%
   filter(sample %in% samples_plot)
 plot_data_long_df$sample_text <- mapvalues(x = plot_data_long_df$sample, from = samples_plot, to = sampletext_plot)
-plot_data_long_df$sample_text <- factor(x = plot_data_long_df$sample_text, levels = sampletext_plot)
+plot_data_long_df$sample_text <- factor(x = plot_data_long_df$sample_text, levels = rev(sampletext_plot))
 
 p <- ggplot()
-p <- p + geom_col(data = plot_data_long_df, mapping = aes(x = sample_text, y = value, fill = sample_text), position=position_dodge())
+p <- p + geom_col(data = plot_data_long_df, mapping = aes(x = value, y = sample_text, fill = sample_text), position=position_dodge())
 p <- p + scale_fill_manual(values = colors_bysample)
 p <- p + theme_classic()
-p <- p + ylab(label = "CPM (RNA-seq)")
-p <- p + ggtitle(label = paste0(paste0(genes_plot, collapse = " & "), " expression")) # , subtitle = "by RNA-seq"
+p <- p + xlab(label = paste0(genes_plot, " gene CPM"))
+# p <- p + ggtitle(label = paste0(paste0(genes_plot, collapse = " & "), " expression")) # , subtitle = "by RNA-seq"
 # p <- p + theme(strip.background = element_rect(fill = NA),
 #                panel.spacing = unit(0, "lines"))
-p <- p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, size = 12), axis.text.y = element_text(size = 12))
-p <- p + theme(axis.title.x = element_blank(), axis.title.y = element_text(size = 12),
-               axis.ticks.x = element_blank(), legend.position = "none")
+p <- p + theme(axis.text = element_text(size = 15, color = "black"))
+p <- p + theme(axis.title.y = element_blank(), axis.title.x = element_text(size = 15),
+               axis.ticks.y = element_blank(), legend.position = "none")
 p
 file2write <- paste0(dir_out, paste0(genes_plot, collapse = "_"), ".bulkRNA.CPM.", "pdf")
-pdf(file2write, width = 1.75, height = 2.5, useDingbats = F)
+pdf(file2write, width = 2.5, height = 1.25, useDingbats = F)
 print(p)
 dev.off()
 # file2write <- paste0(dir_out, paste0(genes_plot, collapse = "_"), ".bulkRNA.CPM.", "png")

@@ -17,7 +17,7 @@ thisFile <- function() {
 }
 path_this_script <- thisFile()
 ## set working directory
-dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA"
+# dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA"
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
 setwd(dir_base)
 packages = c(
@@ -72,6 +72,8 @@ p2 = SpatialPlotSharedScaleMultipleGenes(st_htan, features = genes_check, stroke
 
 ##############               
 ## set output directory
+dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
+setwd(dir_base)
 source("./ccRCC_snRNA_analysis/functions.R")
 dir_out_parent <- makeOutDir_katmai(path_this_script)
 dir_out <- paste0(dir_out_parent, run_id, "/")
