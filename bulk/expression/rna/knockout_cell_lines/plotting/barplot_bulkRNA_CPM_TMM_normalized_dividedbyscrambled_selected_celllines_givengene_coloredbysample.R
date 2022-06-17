@@ -37,9 +37,9 @@ exp_df <- fread(input = "./Resources/Analysis_Results/bulk/expression/rna/knocko
 colnames_value <- colnames(exp_df)[grepl(pattern = "sample", x = colnames(exp_df))]
 exp_df <- as.data.table(exp_df)
 # genes_plot <- c("KLF9", "CP")
-genes_plot <- c("MXI1", "CP")
-genes_plot <- c("MXI1", "PKM", "HK2", "MYC")
-samples_plot <- c("rcc4_scrambled", "rcc4_mxi1_c1", "rcc4_mxi1_c2")
+# genes_plot <- c("MXI1", "CP")
+# genes_plot <- c("MXI1", "PKM", "HK2", "MYC")
+# samples_plot <- c("rcc4_scrambled", "rcc4_mxi1_c1", "rcc4_mxi1_c2")
 genes_plot <- c("KLF9", "CP")
 # genes_plot <- c("KLF9", "HK2", "PFKP", "ENO2", "PKM")
 # samples_plot <- c("rcc4_scrambled", "rcc4_klf9_c2", "rcc4_klf9_c3")
@@ -55,15 +55,21 @@ plot_data_long_df <- exp_df %>%
 plot_data_long_df$sample_text2 <- mapvalues(x = plot_data_long_df$sample_text, from = samples_plot, to = sampletexts_plot)
 plot_data_long_df$sample_text2 <- factor(x = plot_data_long_df$sample_text2, levels = sampletexts_plot)
 plot_data_long_df$external_gene_name <- factor(x = plot_data_long_df$external_gene_name, levels = genes_plot)
+
+colors_byline <- RColorBrewer::brewer.pal(n = 6, name = "Set2")[c(1, 2)]
+names(colors_byline) <- c("sh-NC", "sh-KLF9")
+
 p <- ggplot()
 p <- p + geom_col(data = plot_data_long_df, mapping = aes(x = external_gene_name, y = value, fill = sample_text2), position=position_dodge(), color = "black")
+p <- p + scale_fill_manual(values = colors_byline)
+p <- p + guides(fill = guide_legend(title = "Cell line", title.theme = element_text(size = 15), label.theme = element_text(size = 15)))
 p <- p + theme_classic()
-p <- p + ylab(label = "% CPM to control")
+p <- p + ylab(label = "% CPM to sh-NC")
 p <- p + ggtitle(label = paste0("RNA-seq expression"))
 # p <- p + theme(strip.background = element_rect(fill = NA),
 #                panel.spacing = unit(0, "lines"))
-p <- p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
-p <- p + theme(axis.title.x = element_blank(), axis.ticks.x = element_blank())
+p <- p + theme(axis.text.x = element_text(angle = 0, vjust = 0.5, color = "black", size = 15), axis.text.y = element_text(color = "black", size = 15))
+p <- p + theme(axis.title.x = element_blank(), axis.ticks.x = element_blank(), axis.title.y = element_text(color = "black", size = 15), title = element_text(size = 15))
 p
 file2write <- paste0(dir_out, paste0(genes_plot, collapse = "_"), ".bulkRNA.CPM.", "pdf")
 pdf(file2write, width = 3.5, height = 3, useDingbats = F)

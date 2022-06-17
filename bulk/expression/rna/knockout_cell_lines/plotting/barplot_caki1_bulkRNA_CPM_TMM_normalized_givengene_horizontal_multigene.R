@@ -59,7 +59,7 @@ plot_data_long_df$sample_text <- mapvalues(x = plot_data_long_df$sample, from = 
 plot_data_long_df$sample_text <- factor(x = plot_data_long_df$sample_text, levels = rev(sampletext_plot))
 
 p <- ggplot()
-p <- p + geom_col(data = plot_data_long_df, mapping = aes(x = value, y = sample_text, fill = sample_text), position=position_dodge())
+p <- p + geom_col(data = plot_data_long_df, mapping = aes(x = value, y = sample_text, fill = sample_text), position=position_dodge(), color = "black")
 p <- p + scale_fill_manual(values = colors_bysample)
 p <- p + facet_wrap(.~external_gene_name, scales = "free_x")
 p <- p + theme_classic()
@@ -67,8 +67,8 @@ p <- p + xlab(label = paste0("CPM"))
 # p <- p + ggtitle(label = paste0(paste0(genes_plot, collapse = " & "), " expression")) # , subtitle = "by RNA-seq"
 # p <- p + theme(strip.background = element_rect(fill = NA),
 #                panel.spacing = unit(0, "lines"))
-p <- p + theme(axis.text = element_text(size = 15, color = "black"))
-p <- p + theme(axis.title.y = element_blank(), axis.title.x = element_text(size = 15), strip.text = element_text(size = 15),
+p <- p + theme(axis.text.x = element_text(size = 15, color = "black"), axis.text.y = element_text(size = 17, color = "black"))
+p <- p + theme(axis.title.y = element_blank(), axis.title.x = element_text(size = 15), strip.text = element_text(size = 17),
                axis.ticks.y = element_blank(), legend.position = "none")
 p
 file2write <- paste0(dir_out, paste0(genes_plot, collapse = "_"), ".bulkRNA.CPM.", "pdf")

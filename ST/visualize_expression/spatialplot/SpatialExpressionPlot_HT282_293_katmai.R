@@ -65,7 +65,7 @@ SpatialPlotSharedScale = function(obj, feature, range_ratio = 0.9, ...){
 }
 SpatialPlotSharedScaleMultipleGenes = function(obj, features, range_ratio = 0.9, ...){
     p_list = map(features, function(gene) SpatialPlotSharedScale(obj, feature = gene, range_ratio=range_ratio, ...))
-    wrap_plots(p_list)
+    wrap_plots(p_list, ncol = 2)
 }
 
 p2 = SpatialPlotSharedScaleMultipleGenes(st_htan, features = genes_check, stroke = NA, image.alpha = 0)
