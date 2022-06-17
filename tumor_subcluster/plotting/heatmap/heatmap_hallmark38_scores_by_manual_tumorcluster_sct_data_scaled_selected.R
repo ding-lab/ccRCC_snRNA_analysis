@@ -38,8 +38,6 @@ dir.create(dir_out)
 id_metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
 ## input pathway scores
 scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_msigdb_geneset_scores/20210805.v1/MSigDB.Hallmark.tsv")
-## input the EMT group later defined
-emt_group_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_epithelial_group_bytumorcluster/20211011.v1/Tumorcluster_EpithelialGroup.20211011.v1.tsv")
 ## input the pathways to plot
 genesets_plot_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/pathway/count_ora_sig_genesets_in_up_degs_across_samples/20220606.v1/Count_gene_set_in_up_tumorcluster_degs.20220606.v1.tsv")
 ## input the annotation for the hallmark gene sets
@@ -50,13 +48,16 @@ cnv_df <- fread(data.table = F, input = "./Resources/Analysis_Results/copy_numbe
 driver_mutation_bytumorcluster_df <- fread(data.table = T, input = "./Resources/Analysis_Results/mutation/summarize/count_driver_mutation_mapped_by_intrapatient_tumor_cluster/20220610.v1/Driver_mutation_mapped_per_intrapatienttumorcluster.20220610.v1.tsv")
 ## input te bulk genomics/methylation events
 bulk_sn_omicsprofile_df <- fread(input = "./Resources/Analysis_Results/data_summary/merge_bulk_sn_profiles/20210504.v1/bulk_sn_omics_profile.20210504.v1.tsv", data.table = F)
+bulk_mut_bycase_df <- fread(input = "./Resources/Analysis_Results/bulk/mutation/annotate_cptac_sample_by_pbrm1_bap1_mutation/20210412.v1/PBRM1_BAP1_Mutation_Status_By_Case.20210412.v1.tsv", data.table = F)
 ## input by cluster enrichment assignment
 enrich_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/assign_tumorcluster_by_msigdb_geneset_scores/20210805.v1/MsigDB_Hallmark.Top15GeneSets.4Module.Enrichment.tsv")
+## input cell fraction by cluster
+count_bycluster_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/count/calculate_manualcluster_frac_bypatient_rm_doublets/20220616.v1/Fraction_cluster_by_case.20220616.v1.tsv")
 
 # preprocess --------------------------------------------------------------
 genesets_plot_df <- genesets_plot_df %>%
   mutate(scoregroup_name = paste0(gsub(x = Description, pattern = "HALLMARK_", replacement = ""), "_Score")) %>%
-  filter(Description != "SPERMATOGENESIS")
+  filter(Description != "HALLMARK_SPERMATOGENESIS")
 genesets_plot <- genesets_plot_df$scoregroup_name
 hallmark_anno_df$`Hallmark Name`[hallmark_anno_df$`Hallmark Name` == "UV_RESPONSE_DOWN"] <- "UV_RESPONSE_DN"
 ## make cluster id
@@ -91,6 +92,7 @@ plot_data_mat <- plot_data_mat[, clustername_df$cluster_name]
 colnames_plot <- colnames(plot_data_mat)
 clusternames_column <- gsub(x = colnames_plot, pattern = "\\.", replacement = "-")
 sampleids_column <- str_split_fixed(string = clusternames_column, pattern = "_", n = 2)[,1]
+caseids_column <- clustername_df$case
 
 # specify colors ----------------------------------------------------------
 ## specify color for NA values
@@ -117,6 +119,8 @@ colors_enrich_type <- RColorBrewer::brewer.pal(n = 9, name = "Set1")[c(1, 2, 3, 
 names(colors_enrich_type) <- paste0(c("EMT", "Cell_cycle", "Immune_signaling", "mTOR", "Other"), "_Module_Enriched")
 colors_topbottom <- c("red", "blue", "grey90")
 names(colors_topbottom) <- c("top", "bottom", "middle")
+colors_loss_frac <- colorRamp2(seq(0, 1, 0.2), c("white", brewer.pal(n = 6, name = "Blues")[-1]))
+colors_gain_frac <- colorRamp2(seq(0, 1, 0.2), c("white", brewer.pal(n = 6, name = "Reds")[-1]))
 
 # make column annotation --------------------------------------------------
 ## prepare data
@@ -136,24 +140,31 @@ GOLPH3_Gain_frac_vec <- mapvalues(x = colnames_plot, from = cnv_df$tumor_subclus
 GOLPH3_Gain_frac_vec[GOLPH3_Gain_frac_vec == colnames_plot] <- "0"; GOLPH3_Gain_frac_vec <- as.numeric(GOLPH3_Gain_frac_vec)
 mut_map_vec <- mapvalues(x = clusternames_column, from = driver_mutation_bytumorcluster_df$Cluster_Name, to = as.vector(driver_mutation_bytumorcluster_df$number_cells_w_driver_mutation))
 mut_map_vec <- as.character(mut_map_vec != "0")
-VHL_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.VHL)); VHL_bysample_vec <- as.character(VHL_bysample_vec != "None")
-PBRM1_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.PBRM1)); PBRM1_bysample_vec <- as.character(PBRM1_bysample_vec != "None")
-BAP1_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.BAP1)); BAP1_bysample_vec <- as.character(BAP1_bysample_vec != "None")
-SETD2_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.SETD2)); SETD2_bysample_vec <- as.character(SETD2_bysample_vec != "None")
-colanno_obj <- HeatmapAnnotation(chr3p_VHL_loss_bycluster = anno_simple(x = VHL_Loss_frac_vec, col = colorRamp2(seq(0, 1, 0.2), 
-                                                                                                                    c("white", brewer.pal(n = 6, name = "Blues")[-1]))),
-                                 chr3p_SETD2_loss_bycluster = anno_simple(x = setd2_loss_frac_vec, col = colorRamp2(seq(0, 1, 0.2), 
-                                                                                                                    c("white", brewer.pal(n = 6, name = "Blues")[-1]))),
-                                 chr5q_SQSTM1_gain_bycluster = anno_simple(x = SQSTM1_Gain_frac_vec, col = colorRamp2(seq(0, 1, 0.2), 
-                                                                                                                      c("white", brewer.pal(n = 6, name = "Reds")[-1]))),
-                                 chr5q_GOLPH3_gain_bycluster = anno_simple(x = GOLPH3_Gain_frac_vec, col = colorRamp2(seq(0, 1, 0.2), 
-                                                                                                                      c("white", brewer.pal(n = 6, name = "Reds")[-1]))),
+## prepare bulk mutation status
+VHL_bycase_vec <- mapvalues(x = caseids_column, from = bulk_mut_bycase_df$Case, to = as.vector(bulk_mut_bycase_df$VHL)); VHL_bycase_vec <- as.character(VHL_bycase_vec != "")
+PBRM1_bycase_vec <- mapvalues(x = caseids_column, from = bulk_mut_bycase_df$Case, to = as.vector(bulk_mut_bycase_df$PBRM1)); PBRM1_bycase_vec <- as.character(PBRM1_bycase_vec != "")
+BAP1_bycase_vec <- mapvalues(x = caseids_column, from = bulk_mut_bycase_df$Case, to = as.vector(bulk_mut_bycase_df$BAP1)); BAP1_bycase_vec <- as.character(BAP1_bycase_vec != "")
+SETD2_bycase_vec <- mapvalues(x = caseids_column, from = bulk_mut_bycase_df$Case, to = as.vector(bulk_mut_bycase_df$SETD2)); SETD2_bycase_vec <- as.character(SETD2_bycase_vec != "")
+## prepare data for cell fraction
+fraction_bycase_vec <- mapvalues(x = clusternames_column, from = count_bycluster_df$Cluster_Name, to = as.vector(count_bycluster_df$frac_cluster_count_bycase)); fraction_bycase_vec <- as.numeric(fraction_bycase_vec)
+colors_cellfrac = colorRamp2(c(quantile(fraction_bycase_vec, 0.1), 
+                               quantile(fraction_bycase_vec, 0.3), 
+                               quantile(fraction_bycase_vec, 0.5),
+                               quantile(fraction_bycase_vec, 0.7),
+                               quantile(fraction_bycase_vec, 0.9)), 
+                             brewer.pal(n = 5, "YlGn"))
+## make column annotation object
+colanno_obj <- HeatmapAnnotation(fraction_in_patient = anno_simple(x = fraction_bycase_vec, col = colors_cellfrac),
+                                 chr3p_VHL_loss_bycluster = anno_simple(x = VHL_Loss_frac_vec, col = colors_loss_frac),
+                                 chr3p_SETD2_loss_bycluster = anno_simple(x = setd2_loss_frac_vec, col = colors_loss_frac),
+                                 chr5q_SQSTM1_gain_bycluster = anno_simple(x = SQSTM1_Gain_frac_vec, col = colors_gain_frac),
+                                 chr5q_GOLPH3_gain_bycluster = anno_simple(x = GOLPH3_Gain_frac_vec, col = colors_gain_frac),
                                  driver_mutation_bycluster = anno_simple(x = mut_map_vec, col = colors_truefalse[mut_map_vec]),
-                                 VHL_mutated_bysample = anno_simple(x = VHL_bysample_vec, col = colors_truefalse[VHL_bysample_vec]),
-                                 PBRM1_mutated_bysample = anno_simple(x = PBRM1_bysample_vec, col = colors_truefalse[PBRM1_bysample_vec]),
-                                 BAP1_mutated_bysample = anno_simple(x = BAP1_bysample_vec, col = colors_truefalse[BAP1_bysample_vec]),
-                                 SETD2_mutated_bysample = anno_simple(x = SETD2_bysample_vec, col = colors_truefalse[SETD2_bysample_vec]),
-                                 Inflammatory = anno_simple(x = inflam_assign_vec, col = colors_topbottom[inflam_assign_vec]), annotation_name_side = "left")
+                                 VHL_mutated_bycase = anno_simple(x = VHL_bycase_vec, col = colors_truefalse[VHL_bycase_vec]),
+                                 PBRM1_mutated_bycase = anno_simple(x = PBRM1_bycase_vec, col = colors_truefalse[PBRM1_bycase_vec]),
+                                 BAP1_mutated_bycase = anno_simple(x = BAP1_bycase_vec, col = colors_truefalse[BAP1_bycase_vec]),
+                                 SETD2_mutated_bycase = anno_simple(x = SETD2_bycase_vec, col = colors_truefalse[SETD2_bycase_vec]),
+                                 Inflammatory_score_group = anno_simple(x = inflam_assign_vec, col = colors_topbottom[inflam_assign_vec]), annotation_name_side = "left")
 # ## merge data
 # colanno_df <- enrich_plot_df %>%
 #   mutate(EMT_Module_Enriched = (cluster_name %in% emt_group_df$cluster_name[emt_group_df$epithelial_group == "EMT"]))
@@ -192,6 +203,18 @@ column_split_factor <- factor(x = column_split_vec, levels = clustercount_df$cas
 p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat, 
                              col = colors_heatmapbody,
                              na_col = color_na, #border = "black",
+                             cell_fun = function(j, i, x, y, w, h, fill) {
+                               if (plot_data_mat[i,j] >= (quantile(plot_data_mat[i,], 0.75)+1.5*IQR(plot_data_mat[i,]))) {
+                                 grid.text("*", x, y)
+                               }
+                               # if (plot_data_mat[i,j] >= max(plot_data_mat[,j])) {
+                               #   # if (plot_data_mat[i,j] >= min(tail(sort(plot_data_mat[i,]), 2))) {
+                               #   grid.rect(x = x, y = y, width = w, height = h,
+                               #             gp = gpar(col = "red", fill = NA))
+                               # }
+                             },
+                             width = ncol(plot_data_mat)*unit(4, "mm"), 
+                             # height = nrow(plot_data_mat)*unit(5, "mm"),
                              ## row
                              show_row_names = T, row_names_gp = gpar(fontsize = 16), row_names_side = "right",
                              show_row_dend = T, row_dend_side = "left", cluster_row_slices = T, 
@@ -205,20 +228,44 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              show_column_names = F, column_names_side = "top", column_names_gp = gpar(fontsize = 5),
                              show_heatmap_legend = F)
 list_lgd = list(
-  # Legend(labels = names(colors_isenriched), labels_gp = gpar(fontsize = 14),
-  #        title = "Expression\nenriched", title_gp = gpar(fontsize = 14),
-  #        legend_gp = gpar(fill = colors_isenriched), border = NA),
   Legend(col_fun = colors_heatmapbody, 
          title = "Gene set score", 
          title_gp = gpar(fontsize = 14),
          labels_gp = gpar(fontsize = 14),
          legend_width = unit(4, "cm"),
          legend_height = unit(4, "cm"),
-         direction = "horizontal"))
+         direction = "horizontal"),
+  Legend(col_fun = colors_cellfrac, 
+         title = "% cluster cells in\npatient tumor cells", 
+         title_gp = gpar(fontsize = 14),
+         labels_gp = gpar(fontsize = 14),
+         legend_width = unit(4, "cm"),
+         legend_height = unit(4, "cm"),
+         direction = "horizontal"),
+  Legend(col_fun = colors_loss_frac, 
+         title = "% cells in cluster\nwith CN loss", 
+         title_gp = gpar(fontsize = 14),
+         labels_gp = gpar(fontsize = 14),
+         legend_width = unit(4, "cm"),
+         legend_height = unit(4, "cm"),
+         direction = "horizontal"),
+  Legend(col_fun = colors_gain_frac, 
+         title = "% cells in cluster\nwith CN gain", 
+         title_gp = gpar(fontsize = 14),
+         labels_gp = gpar(fontsize = 14),
+         legend_width = unit(4, "cm"),
+         legend_height = unit(4, "cm"),
+         direction = "horizontal"),
+  Legend(labels = names(colors_truefalse), labels_gp = gpar(fontsize = 14),
+         title = "Mutation status", title_gp = gpar(fontsize = 14),
+         legend_gp = gpar(fill = colors_truefalse)),
+  Legend(labels = names(colors_topbottom), labels_gp = gpar(fontsize = 14),
+         title = "Inflammatory  score group", title_gp = gpar(fontsize = 14),
+         legend_gp = gpar(fill = colors_topbottom)))
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "GeneSetScores", ".pdf")
-pdf(file2write, width = 20, height = 13, useDingbats = F)
+pdf(file2write, width = 25, height = 13, useDingbats = F)
 draw(object = p,
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
 dev.off()
@@ -246,4 +293,12 @@ draw(object = p,
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
 dev.off()
 
+# VHL_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.VHL)); VHL_bysample_vec <- as.character(VHL_bysample_vec != "None")
+# PBRM1_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.PBRM1)); PBRM1_bysample_vec <- as.character(PBRM1_bysample_vec != "None")
+# BAP1_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.BAP1)); BAP1_bysample_vec <- as.character(BAP1_bysample_vec != "None")
+# SETD2_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.SETD2)); SETD2_bysample_vec <- as.character(SETD2_bysample_vec != "None")
 
+# VHL_mutated_bysample = anno_simple(x = VHL_bysample_vec, col = colors_truefalse[VHL_bysample_vec]),
+# PBRM1_mutated_bysample = anno_simple(x = PBRM1_bysample_vec, col = colors_truefalse[PBRM1_bysample_vec]),
+# BAP1_mutated_bysample = anno_simple(x = BAP1_bysample_vec, col = colors_truefalse[BAP1_bysample_vec]),
+# SETD2_mutated_bysample = anno_simple(x = SETD2_bysample_vec, col = colors_truefalse[SETD2_bysample_vec]),

@@ -46,7 +46,7 @@ plot_data_df <- barcode2umap_df %>%
 texts_cluster_uniq <- sort(unique(plot_data_df$Text_Cluster))
 # colors_cluster <- Polychrome::alphabet.colors(n = length(texts_cluster_uniq))
 # colors_cluster <- Polychrome::palette36.colors(n = length(texts_cluster_uniq))
-colors_cluster <- RColorBrewer::brewer.pal(n = 7, name = "Dark2")
+colors_cluster <- RColorBrewer::brewer.pal(n = 8, name = "Accent")[c(1, 2, 5, 8, 6, 7, 3)]
 names(colors_cluster) <- texts_cluster_uniq
 
 ## make plot
@@ -54,7 +54,7 @@ p <- ggplot()
 p <- p + geom_point_rast(data = plot_data_df, mapping = aes(x = UMAP_1, y = UMAP_2, color = Text_Cluster), shape = 16, alpha = 0.8, size = 1)
 p <- p + scale_color_manual(values = colors_cluster, na.translate = T)
 # p <- p + ggtitle(label = paste0("Tumor-cell subclusters for sample ", easyid_tmp), subtitle = "original")
-p <- p + guides(colour = guide_legend(override.aes = list(size=3), title = NULL, ncol = 1))
+p <- p + guides(colour = guide_legend(override.aes = list(size=4), title = NULL, ncol = 1))
 p <- p + theme_void()
 # p <- p + theme(legend.position = "bottom")
 p <- p + theme(legend.position = c(0.87, 0.75))

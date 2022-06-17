@@ -53,7 +53,7 @@ st_htan = FixSeuratImage(st_htan)
 # Plotting
 # v1: Direct Plot with different scale
 genes_check = c("LAMA1", "LAMA3", "COL5A1", "COL8A1", "COL28A1", "CD70", "CD27", "OSM", "OSMR", "IL6ST")
-genes_check = c("CP", "COL4A1", "COL4A3", "LOX")
+genes_check = c("CA9", "CP", "COL4A1", "OSMR", "TGM2")
 p1 = SpatialPlot(st_htan, features = genes_check, stroke = NA, image.alpha = 0)
 
 ##############

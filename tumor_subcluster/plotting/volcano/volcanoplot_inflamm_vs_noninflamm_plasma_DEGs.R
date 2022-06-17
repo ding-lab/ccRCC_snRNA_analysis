@@ -33,23 +33,25 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input -------------------------------------------------------------------
-deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_subclusters/findmarkers_intrapatienttumorclusters_inflammatory_top_vs_bottom_katmai/20220610.v1/Inflammatory_score_top_vs_bottom_tumorclusters..logfc.threshold0.min.pct0.1.min.diff.pct0.AssayRNA.tsv")
+deg_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/findmarker_wilcox_plasma_inflamm_tumor_vs_noninflamm_katmai/20220615.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
 ## input genes to highlight
-immune_genes_df <- readxl::read_xlsx(path = "./Resources/Knowledge/Gene_Lists/Immune/Cytokines/Cytokine_Genes.20210420.xlsx")
+immune_genes_df1 <- readxl::read_xlsx(path = "./Resources/Knowledge/Gene_Lists/Immune/Cytokines/Cytokine_Genes.20210420.xlsx")
+immune_genes_df2 <- fread(data.table = F, input = "./Resources/Knowledge/Gene_Lists/Immune/Cell_state_markers.txt")
 
 # set plotting parameters -------------------------------------------------
 color_red <- RColorBrewer::brewer.pal(n = 4, name = "Set1")[1]
 color_blue <- RColorBrewer::brewer.pal(n = 4, name = "Set1")[2]
 p_val_adj_sig_cutoff <- 0.05
-genes_highlight <- c("IL7", "IL7R", "IL15", "IL15RA", "B2M")
-genes_highlight <- immune_genes_df$gene_symbol
-genes_highlight <- c("B2M", "C1R", "ENTPD1", "C1S", "C3")
+genes_highlight <- unique(c(immune_genes_df1$gene_symbol, immune_genes_df2$Gene))
+genes_highlight <- unique(c(immune_genes_df1$gene_symbol))
+# genes_highlight <- unique(c(immune_genes_df2$Gene))
 
 # make data for plotting --------------------------------------------------
 text_up <- paste0("Up (", length(which(deg_df$p_val_adj < 0.05 & deg_df$avg_log2FC > 0)), ")")
 text_down <- paste0("Down (", length(which(deg_df$p_val_adj < 0.05 & deg_df$avg_log2FC < 0)), ")")
 
 plot_data_df <- deg_df %>%
+  rename(genesymbol_deg = gene_symbol) %>%
   mutate(log10p_val_adj = -log10(p_val_adj)) %>%
   mutate(foldchange_type = ifelse(p_val_adj < p_val_adj_sig_cutoff, ifelse(avg_log2FC > 0, text_up, text_down), "insignificant"))
 summary(plot_data_df$log10p_val_adj)
@@ -77,13 +79,12 @@ p <- p + geom_point_rast(data = subset(plot_data_df, foldchange_type == "insigni
 p <- p + geom_point_rast(data = subset(plot_data_df, foldchange_type != "insignificant"), 
                          mapping = aes(x = x_plot, y = y_plot,  color = foldchange_type), alpha = 0.5, shape = 16, size = 0.5)
 p <- p + scale_color_manual(values = colors_deg)
-p <- p + geom_text_repel(data = subset(plot_data_df, avg_log2FC > 0 & (genesymbol_deg %in% genes_highlight)),
+p <- p + geom_text_repel(data = subset(plot_data_df, p_val_adj < 0.05 & avg_log2FC > 0 & (genesymbol_deg %in% genes_highlight)),
                          mapping = aes(x = x_plot, y = y_plot, label = genesymbol_deg),
-                         min.segment.length = 0,   box.padding = 0.5,
                          color = "black", alpha = 1, size = 4.5, #fontface = "bold",
                          segment.size = 0.2, segment.alpha = 0.5, #min.segment.length = 0,
                          xlim = c(0, NA), max.overlaps = Inf)
-p <- p + geom_text_repel(data = subset(plot_data_df, (avg_log2FC < 0) & (genesymbol_deg %in% genes_highlight)),
+p <- p + geom_text_repel(data = subset(plot_data_df, p_val_adj < 0.05 &  (avg_log2FC < 0) & (genesymbol_deg %in% genes_highlight)),
                          mapping = aes(x = x_plot, y = y_plot, label = genesymbol_deg),
                          color = "black", alpha = 1, size = 4.5, #fontface = "bold",
                          segment.size = 0.2, segment.alpha = 0.5, #min.segment.length = 0,
@@ -98,12 +99,12 @@ p <- p + guides(color = guide_legend(title = paste0("DEG direction"),
                                      nrow = 4, override.aes = aes(size = 3), label.theme = element_text(size = 14)))
 p <- p + theme(axis.text = element_text(size = 14, color = "black"),
                axis.title = element_text(size = 14),
-               # legend.position = "right",
-               legend.position = c(0.80, 0.20), legend.box.background = element_blank(), legend.background = element_blank(),
+               legend.position = "right",
+               # legend.position = c(0.80, 0.20), legend.box.background = element_blank(), legend.background = element_blank(),
                legend.box = "horizontal")
 p
 file2write <- paste0(dir_out, paste0(head(genes_highlight, 20), collapse = "_"), ".pdf")
-pdf(file2write, width = 4.75, height = 4, useDingbats = F)
+pdf(file2write, width = 7, height = 4, useDingbats = F)
 print(p)
 dev.off()
 

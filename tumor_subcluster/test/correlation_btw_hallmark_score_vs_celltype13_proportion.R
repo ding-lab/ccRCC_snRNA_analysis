@@ -36,7 +36,7 @@ celltype_frac_long_df <- fread(data.table = F, input = "./Resources/Analysis_Res
 # pre-process -------------------------------------------------------------
 genesets_test <- genesets_test_df$Description
 scoregroups_test <- paste0(gsub(x = genesets_test_df$Description, pattern = "HALLMARK_", replacement = ""), "_Score")
-cellgroups_test <- unique(celltype_frac_long_df$Cell_group); cellgroups_test <- cellgroups_test[cellgroups_test != "Unknown"]; cellgroups_test
+cellgroups_test <- unique(celltype_frac_long_df$Cell_group); cellgroups_test <- cellgroups_test[!(cellgroups_test %in% c("Unknown", "Immune others", "Normal epithelial cells"))]; cellgroups_test
 celltype_frac_wide_df <- dcast(data = celltype_frac_long_df, formula = Aliquot_WU~Cell_group, value.var = "Frac_CellGroupBarcodes_ByAliquot")
 celltype_frac_wide_df[is.na(celltype_frac_wide_df)] <- 0
 

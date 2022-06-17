@@ -37,7 +37,9 @@ plotdata_df <- enricher_out_df %>%
   mutate(size_plot = Count) %>%
   mutate(x_plot = GeneRatio_num*100) %>%
   mutate(log10FDR = -log10(p.adjust)) %>%
-  mutate(y_plot = ID)
+  mutate(y_plot = str_split_fixed(string = ID, pattern = "_", n = 2)[,2]) %>%
+  mutate(y_plot = ifelse(y_plot == "EPITHELIAL_MESENCHYMAL_TRANSITION", "EMT", y_plot))
+  # mutate(y_plot = ID)
 # pathway_label_df <- data.frame(Description = pathways_selected,
 #                                pathway_label = c("SLC transmembrane trasnport", "Eicosanoid metabolism", "Extracellular matrix proteins", "Zinc homeostasis", "Late response to estrogen"))
 # 
@@ -52,18 +54,20 @@ p <- p + geom_point(data = plotdata_df, mapping = aes(x = x_plot, y = y_plot, si
 # p <- p + scale_color_gradientn(colors = c("blue", "purple", "red"))
 p <- p + scale_color_gradientn(colors = c("blue", "purple", "red"), 
                                breaks = c(10, 20, 30, 40),
-                               guide = guide_colourbar(title = "-log10(p.adjust)", direction = "horizontal", title.position = "top"))
+                               guide = guide_colourbar(title = "-log10(p.adjust)", direction = "horizontal", title.position = "top", title.theme = element_text(size = 15),
+                                                       label.theme = element_text(size = 15)))
 p <- p + scale_size_continuous(breaks = c(60, 80, 100, 120), 
-                               guide = guide_legend(direction = "horizontal", title = "Gene count", nrow = 1, byrow = T, title.position = "top"))
+                               guide = guide_legend(direction = "horizontal", title = "Gene count", nrow = 2, byrow = T, title.position = "top", title.theme = element_text(size = 15),
+                                                    label.theme = element_text(size = 15)))
 p <- p + theme_light(base_size = 12)
 p <- p + xlab(label = "Gene ratio (%)")
 p <- p + xlim(c(0.0345, 0.082)*100)
 # p <- p + guides(size = guide_legend(title = "Gene count",
 #                                     row = 2,
 #                                     title.position = "top"))
-p <- p + theme(axis.text = element_text(color = "black"),
-               axis.title.y = element_blank(), axis.title.x = element_text(size = 10),
-               legend.position = "right", legend.box = "vertical")
+p <- p + theme(axis.text = element_text(color = "black", size = 15),
+               axis.title.y = element_blank(), axis.title.x = element_text(size = 15),
+               legend.position = "right", legend.box = "vertical", legend.background = element_rect(fill = NA, color = NA))
 p
 
 
@@ -76,6 +80,6 @@ source("./ccRCC_snRNA_analysis//functions.R")
 dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 file2write <- paste(dir_out, "dotplot.pdf")
-pdf(file2write, width = 7, height = 1.75, useDingbats = F)
+pdf(file2write, width = 6.25, height = 2, useDingbats = F)
 print(p)
 dev.off()

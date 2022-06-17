@@ -109,7 +109,7 @@ for (scoregroup_tmp in scoregroups_test) {
 }
 result_df <- data.frame(name_score = scoregroups_test, 
                         fdr.wilcox = p.adjust(p = wilcox_pvalues_vec, method = "fdr"), pvalue.wilcox = wilcox_pvalues_vec,
-                        fdr.ttest = p.adjust(p = ttest_pvalue_vec, method = "fdr"), pvalue.wilcox = ttest_pvalue_vec)
+                        fdr.ttest = p.adjust(p = ttest_pvalue_vec, method = "fdr"), pvalue.ttest = ttest_pvalue_vec)
 
 # save output -------------------------------------------------------------
 file2write <- paste0(dir_out, "wilcox_ttest_results.tsv")
