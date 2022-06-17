@@ -68,7 +68,7 @@ SpatialPlotSharedScaleMultipleGenes = function(obj, features, range_ratio = 0.9,
     wrap_plots(p_list, ncol =1 )
 }
 
-p2 = SpatialPlotSharedScaleMultipleGenes(st_htan, features = genes_check, stroke = NA, image.alpha = 0)
+p2 = SpatialPlotSharedScaleMultipleGenes(st_htan, features = genes_check, stroke = NA, image.alpha = 0, ncol = length(genes_check))
 
 ##############               
 ## set output directory
@@ -86,6 +86,6 @@ pdf(paste0(dir_out, "ccRCC_HT282_293.", "different_scales.", "pdf"), width = 4, 
 print(p1)
 dev.off()
 
-pdf(paste0(dir_out, "ccRCC_HT282_293.", "same_scales.", "pdf"), width = 4, height = 8, useDingbats = F)
+pdf(paste0(dir_out, "ccRCC_HT282_293.", "same_scales.", "pdf"), width = 10, height = 6, useDingbats = F)
 print(p2)
 dev.off()
