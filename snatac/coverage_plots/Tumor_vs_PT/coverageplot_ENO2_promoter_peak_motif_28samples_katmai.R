@@ -67,7 +67,7 @@ motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == peak_plot & peak2
 motif_coord <- sort(motif_coord); motif_coord ## KLF9, HIF1A, KLF9, NFKB1/2
 
 # preprocess samples to show ----------------------------------------------
-pieceids_tumor_selected <- unique(peak2fcs_long_tmp_df$pieceid)
+# pieceids_tumor_selected <- unique(peak2fcs_long_tmp_df$pieceid)
 pieceids_tumor_selected <- c("C3L-00448-T1", "C3L-01302-T1","C3L-00088-T1",  "C3N-00242-T1", "C3L-00790-T1", "C3L-00088-T2", 
                              "C3L-01313-T1", "C3L-00917-T1", "C3N-01200-T1", "C3L-00610-T1","C3N-01213-T1", "C3L-00079-T1", 
                              "C3L-00583-T1",  "C3N-00733-T1", "C3N-00317-T1", "C3L-00908-T1", "C3L-00026-T1", "C3L-01287-T1", 
