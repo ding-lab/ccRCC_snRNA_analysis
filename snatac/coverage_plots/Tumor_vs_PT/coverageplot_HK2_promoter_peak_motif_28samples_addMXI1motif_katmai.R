@@ -42,7 +42,7 @@ for (pkg_name_tmp in packages) {
 }
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -76,13 +76,10 @@ motif_coord <- sort(motif_coord); motif_coord
 
 
 # preprocess samples to show ----------------------------------------------
-# peak2fcs_tmp_df <- peak2fcs_df %>%
-#   filter(peak == peak_plot)
-peak2fcs_long_tmp_df <- melt(data = peak2fcs_df, measure.vars = colnames(peak2fcs_df)[grepl(pattern = "avg_lnFC", x = colnames(peak2fcs_df))])
-peak2fcs_long_tmp_df <- peak2fcs_long_tmp_df %>%
-  arrange(desc(value)) %>%
-  mutate(pieceid = str_split_fixed(string = variable, pattern = "_", n = 2)[,1])
-pieceids_tumor_selected <- unique(peak2fcs_long_tmp_df$pieceid)
+pieceids_tumor_selected <- c("C3L-00448-T1", "C3L-01302-T1","C3L-00088-T1",  "C3N-00242-T1", "C3L-00790-T1", "C3L-00088-T2", 
+                             "C3L-01313-T1", "C3L-00917-T1", "C3N-01200-T1", "C3L-00610-T1","C3N-01213-T1", "C3L-00079-T1", 
+                             "C3L-00583-T1",  "C3N-00733-T1", "C3N-00317-T1", "C3L-00908-T1", "C3L-00026-T1", "C3L-01287-T1", 
+                             "C3L-00004-T1", "C3L-00416-T2", "C3L-00096-T1", "C3N-00437-T1", "C3L-00010-T1", "C3N-00495-T1")
 pieceids_nat_selected <- c("C3N-00242-N", 'C3L-00088-N', "C3L-00079-N", 'C3N-01200-N')
 
 # preprocess ATAC object --------------------------------------------------
