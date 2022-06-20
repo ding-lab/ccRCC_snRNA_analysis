@@ -64,7 +64,7 @@ peak2motif_df %>%
 peak_plot <- c("chr12-6914200-6914700")
 topn_plot <- 24
 motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == peak_plot & peak2motif_df$motif.name %in% motifs_plot & peak2motif_df$Peak_Type == "Promoter"]; motif_coord <- unique(motif_coord)
-motif_coord <- sort(motif_coord) ## KLF9, KLF9,HIF1A
+motif_coord <- sort(motif_coord); motif_coord ## KLF9, HIF1A, KLF9, NFKB1/2
 
 # preprocess samples to show ----------------------------------------------
 # peak2fcs_tmp_df <- peak2fcs_df %>%
