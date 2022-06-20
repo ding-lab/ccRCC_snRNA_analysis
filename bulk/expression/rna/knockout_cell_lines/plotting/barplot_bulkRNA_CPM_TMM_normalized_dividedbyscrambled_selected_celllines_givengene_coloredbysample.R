@@ -42,13 +42,14 @@ exp_df <- as.data.table(exp_df)
 # samples_plot <- c("rcc4_scrambled", "rcc4_mxi1_c1", "rcc4_mxi1_c2")
 # genes_plot <- c("KLF9", "CP")
 # genes_plot <- c("KLF9", "HK2", "PFKP", "ENO2", "PKM")
-genes_plot <- c("KLF9", "HK2", "PFKP", "ENO2")
+# genes_plot <- c("KLF9", "HK2", "PFKP", "ENO2")
 # samples_plot <- c("rcc4_scrambled", "rcc4_klf9_c2", "rcc4_klf9_c3")
 samples_plot <- c("rcc4_scrambled", "rcc4_klf9_c2")
 sampletexts_plot <- c("sh-NC", "sh-KLF9")
+genes_plot <- c("MXI1", "HK2")
 # genes_plot <- c("MXI1", "HK2", "MYC")
-# samples_plot <- c("rcc4_scrambled", "rcc4_mxi1_c1", "rcc4_mxi1_c2")
-# sampletexts_plot <- c("sh-NC", "sh-MXI1-C1", "sh-MXI1-C2")
+samples_plot <- c("rcc4_scrambled", "rcc4_mxi1_c1", "rcc4_mxi1_c2")
+sampletexts_plot <- c("sh-NC", "sh-MXI1-C1", "sh-MXI1-C2")
 
 # format expression data --------------------------------------------------
 plot_data_long_df <- exp_df %>%
@@ -79,7 +80,7 @@ p <- p + theme(axis.text.x = element_text(angle = 0, vjust = 0.5, color = "black
 p <- p + theme(axis.title.x = element_blank(), axis.ticks.x = element_blank(), axis.title.y = element_text(color = "black", size = 15), title = element_text(size = 15))
 p
 file2write <- paste0(dir_out, paste0(genes_plot, collapse = "_"), ".bulkRNA.CPM.", "pdf")
-pdf(file2write, width = 4.7, height = 3, useDingbats = F)
+pdf(file2write, width = 4, height = 3, useDingbats = F)
 print(p)
 dev.off()
 file2write <- paste0(dir_out, paste0(genes_plot, collapse = "_"), ".bulkRNA.CPM.", "png")
