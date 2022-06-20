@@ -67,18 +67,18 @@ motif_plot <- "KLF9"
 topn_plot <- 24
 
 # preprocess samples to show ----------------------------------------------
-peak2fcs_tmp_df <- peak2fcs_df %>%
-  filter(peak == peak_plot)
-peak2fcs_long_tmp_df <- melt(data = peak2fcs_tmp_df, measure.vars = colnames(peak2fcs_tmp_df)[grepl(pattern = "avg_lnFC", x = colnames(peak2fcs_tmp_df))])
-peak2fcs_long_tmp_df <- peak2fcs_long_tmp_df %>%
-  arrange(desc(value)) %>%
-  mutate(pieceid = str_split_fixed(string = variable, pattern = "_", n = 2)[,1])
-pieceids_tumor_selected <- head(x = peak2fcs_long_tmp_df$pieceid, topn_plot)
+# peak2fcs_tmp_df <- peak2fcs_df %>%
+#   filter(peak == peak_plot)
+# peak2fcs_long_tmp_df <- melt(data = peak2fcs_tmp_df, measure.vars = colnames(peak2fcs_tmp_df)[grepl(pattern = "avg_lnFC", x = colnames(peak2fcs_tmp_df))])
+# peak2fcs_long_tmp_df <- peak2fcs_long_tmp_df %>%
+#   arrange(desc(value)) %>%
+#   mutate(pieceid = str_split_fixed(string = variable, pattern = "_", n = 2)[,1])
+# pieceids_tumor_selected <- head(x = peak2fcs_long_tmp_df$pieceid, topn_plot)
 pieceids_nat_selected <- c('C3L-00088-N', "C3L-00079-N", "C3N-00242-N", 'C3N-01200-N')
 
 # preprocess ATAC object --------------------------------------------------
 head(atac@meta.data)
-atac_subset=subset(atac,(cell_type %in% c('Tumor') & Piece_ID %in% pieceids_tumor_selected) | cell_type=='PT' & Piece_ID %in% pieceids_nat_selected)
+atac_subset=subset(atac,(cell_type %in% c('Tumor')) | cell_type=='PT' & Piece_ID %in% pieceids_nat_selected)
 ## make colors
 
 color_tumorcell <- RColorBrewer::brewer.pal(n = 9, name = "Dark2")[4]
