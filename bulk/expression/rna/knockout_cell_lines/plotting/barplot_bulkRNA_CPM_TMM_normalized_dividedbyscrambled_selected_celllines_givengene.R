@@ -37,14 +37,16 @@ exp_df <- fread(input = "./Resources/Analysis_Results/bulk/expression/rna/knocko
 colnames_value <- colnames(exp_df)[grepl(pattern = "sample", x = colnames(exp_df))]
 exp_df <- as.data.table(exp_df)
 # genes_plot <- c("KLF9", "CP")
-genes_plot <- c("MXI1", "CP")
-genes_plot <- c("MXI1", "PKM", "HK2", "MYC")
+# genes_plot <- c("MXI1", "CP")
+# genes_plot <- c("MXI1", "PKM", "HK2", "MYC")
+genes_plot <- c("MXI1", "HK2")
 samples_plot <- c("rcc4_scrambled", "rcc4_mxi1_c1", "rcc4_mxi1_c2")
-genes_plot <- c("KLF9", "CP")
+sampletexts_plot <- c("sh-NC", "sh-MXI1-C1", "sh-MXI1-C2")
+# genes_plot <- c("KLF9", "CP")
 # genes_plot <- c("KLF9", "HK2", "PFKP", "ENO2", "PKM")
 # samples_plot <- c("rcc4_scrambled", "rcc4_klf9_c2", "rcc4_klf9_c3")
-samples_plot <- c("rcc4_scrambled", "rcc4_klf9_c2")
-sampletexts_plot <- c("sh-NC", "sh-KLF9")
+# samples_plot <- c("rcc4_scrambled", "rcc4_klf9_c2")
+# sampletexts_plot <- c("sh-NC", "sh-KLF9")
 
 # format expression data --------------------------------------------------
 plot_data_long_df <- exp_df %>%
@@ -62,7 +64,7 @@ p <- p + ylab(label = "% CPM to control")
 p <- p + ggtitle(label = paste0("RNA-seq expression"))
 # p <- p + theme(strip.background = element_rect(fill = NA),
 #                panel.spacing = unit(0, "lines"))
-p <- p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+p <- p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, color = "black"), axis.text.y = element_text(color = "black"))
 p <- p + theme(axis.title.x = element_blank(), axis.ticks.x = element_blank())
 p
 file2write <- paste0(dir_out, paste0(genes_plot, collapse = "_"), ".bulkRNA.CPM.", "pdf")

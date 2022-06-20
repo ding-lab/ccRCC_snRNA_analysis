@@ -119,10 +119,10 @@ row_anno_obj <- rowAnnotation(#ccRCCvsNontumor_snRNA = anno_simple(x = log2fc_tu
 #                              show_heatmap_legend = F)
 p <- ComplexHeatmap::Heatmap(matrix = t(plot_data_mat), 
                              col = colors_heatmapbody, na_col = color_na, border = "black",
-                             show_column_names = T, column_names_side = "top", column_names_gp = gpar(fontface = "italic", fontsize = 10),
+                             show_column_names = T, column_names_side = "top", column_names_gp = gpar(fontface = "italic", fontsize = 13),
                              show_column_dend = F, cluster_columns = F,
                              show_row_names = T, row_names_side = "left",
-                             row_names_gp = gpar(fontsize = 10), row_labels = celltypelabels_plot,
+                             row_names_gp = gpar(fontsize = 13), row_labels = celltypelabels_plot,
                              show_row_dend = F, 
                              # column_split = col_cellgroups_factor, cluster_column_slices = F, cluster_columns = F,
                              column_title = NULL,
@@ -130,7 +130,7 @@ p <- ComplexHeatmap::Heatmap(matrix = t(plot_data_mat),
 p
 ## make legend
 list_lgd = list(
-  Legend(title = "Scaled snRNA\nexpression", title_gp = gpar(fontsize = 10),
+  Legend(title = "Scaled snRNA\nexpression", title_gp = gpar(fontsize = 13), labels_gp = gpar(fontsize = 13),
          col_fun = colors_heatmapbody, 
          legend_width = unit(2, "cm"),
          direction = "vertical"))
@@ -143,7 +143,7 @@ draw(object = p,
 dev.off()
 file2write <- paste0(dir_out, paste0(genes_plot, collapse = "_"), ".pdf")
 # pdf(file2write, width = 4, height = 6.5)
-pdf(file2write, width = 3.5, height = 3.2)
+pdf(file2write, width = 4, height = 3.2)
 draw(object = p, 
      annotation_legend_side = "right", annotation_legend_list = list_lgd)
 dev.off()
