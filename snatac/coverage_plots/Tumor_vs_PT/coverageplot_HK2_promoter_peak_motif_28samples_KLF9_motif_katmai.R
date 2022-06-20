@@ -42,7 +42,7 @@ for (pkg_name_tmp in packages) {
 }
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 3
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -53,18 +53,22 @@ dir.create(dir_out)
 atac=readRDS(paste('/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/3.Merge_snATAC/Merge.SelectPeaks.v.20210706/28_ccRCC_snATAC.selectedPeaks.chromvar.cicero.v3.20210725.rds',sep=''))
 Idents(atac)=atac$Piece_ID
 ## input motif-peak mapping result
-peak2motif_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Motifs_Mapped_to_Peaks/Motifs_matched.DEG_associated_Peaks.Motif_annotation.20210517.v1.tsv")
+# peak2motif_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Motifs_Mapped_to_Peaks/Motifs_matched.DEG_associated_Peaks.Motif_annotation.20210517.v1.tsv")
+peak2motif_df <- fread(data.table = F, input = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Signac.1.0.0/3.Merge_snATAC/Merge.SelectPeaks.v.20210706/peaks/Motifs_matched.28_snATAC_merged.object.20210827.tsv")
 ## input peak fold changes
 peak2fcs_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Differential_Peaks/ccRCC_Specific/DA_peaks_Tumor_vs_PT_affected_byCNV_removed.tsv")
 
 # specify parameters ------------------------------------------------------
-motifs_plot <- c("KLF9", "HIF1A", "NFKB1", "NFKB2")
-peak2motif_df %>%
-  filter(Gene == "ENO2" & Peak_Type == "Promoter" & motif.name %in% motifs_plot)
-peak_plot <- c("chr12-6914200-6914700")
+motifs_plot <- c("KLF9")
+motifs_plot <- c("MA1107.2")
+peak_plot <- c("chr2-74833672-74834172")
 topn_plot <- 24
-motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == peak_plot & peak2motif_df$motif.name %in% motifs_plot & peak2motif_df$Peak_Type == "Promoter"]; motif_coord <- unique(motif_coord)
-motif_coord <- sort(motif_coord); motif_coord ## KLF9, HIF1A, KLF9, NFKB1/2
+motif_coord <- peak2motif_df$motif_coord[(peak2motif_df$Peak %in% "chr2-74833672-74834172") & (peak2motif_df$group_name %in% "MA1107.2")]
+motif_coord <- unique(motif_coord)
+motif_coord <- sort(motif_coord); motif_coord 
+# [1] "chr2-74834043-74834058" "chr2-74856215-74856224" "chr2-74876328-74876337"
+## KLF9, MXI1, MXI1
+
 
 # preprocess samples to show ----------------------------------------------
 pieceids_tumor_selected <- c("C3L-00448-T1", "C3L-01302-T1","C3L-00088-T1",  "C3N-00242-T1", "C3L-00790-T1", "C3L-00088-T2", 
@@ -90,7 +94,7 @@ en=strsplit(x = peak_plot, split = "\\-")[[1]][3]; en = as.numeric(en)
 new_st=st-1000
 new_en=en+1000
 peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
-# peak_plot_expanded <- "chr10-3066223-3105784"
+# peak_plot_expanded <- "chr2-74833572-74876777"
 ## change atac ident
 # print(head(atac@meta.data))
 Idents(atac_subset)=factor(atac_subset$Piece_ID, levels=c(pieceids_tumor_selected, pieceids_nat_selected))
@@ -132,7 +136,7 @@ print("Finished CombineTracks")
 # print(p)
 # dev.off()
 file2write <- paste0(dir_out, gsub(x = peak_plot[1], pattern = "\\-", replacement = "_"), ".", paste0(motifs_plot, collapse = "_"), ".pdf")
-pdf(file2write, width = 6, height = 10, useDingbats = F)
+pdf(file2write, width = 5, height = 10, useDingbats = F)
 print(p)
 dev.off()
 
