@@ -42,7 +42,7 @@ for (pkg_name_tmp in packages) {
 }
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -62,7 +62,8 @@ peak_plot_df <- peak2motif_df %>%
   filter(motif.name == "KLF9")# %>%
 # select(Peak) %>%
   # unique()
-peak_plot <- c("chr10-3067223-3067723", "chr10-3104284-3104784")
+# peak_plot <- c("chr10-3067223-3067723", "chr10-3104284-3104784")
+peak_plot <- c("chr10-3067223-3067723")
 motif_plot <- "KLF9"
 topn_plot <- 24
 
@@ -93,7 +94,7 @@ en=strsplit(x = peak_plot, split = "\\-")[[1]][3]; en = as.numeric(en)
 new_st=st-1000
 new_en=en+1000
 peak_plot_expanded=paste(chr,new_st,new_en,sep='-')
-peak_plot_expanded <- "chr10-3066223-3105784"
+# peak_plot_expanded <- "chr10-3066223-3105784"
 ## process motif coordinates
 motif_coord <- peak2motif_df$motif_coord[peak2motif_df$Peak == peak_plot & peak2motif_df$motif.name == motif_plot & peak2motif_df$Peak_Type == "Promoter"]; motif_coord <- unique(motif_coord)
 ## change atac ident
