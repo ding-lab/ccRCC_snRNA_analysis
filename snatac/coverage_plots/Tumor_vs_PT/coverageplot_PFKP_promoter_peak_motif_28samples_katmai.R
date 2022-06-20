@@ -69,7 +69,7 @@ topn_plot <- 24
 # preprocess samples to show ----------------------------------------------
 # peak2fcs_tmp_df <- peak2fcs_df %>%
 #   filter(peak == peak_plot)
-peak2fcs_long_tmp_df <- melt(data = peak2fcs_df, measure.vars = colnames(peak2fcs_tmp_df)[grepl(pattern = "avg_lnFC", x = colnames(peak2fcs_tmp_df))])
+peak2fcs_long_tmp_df <- melt(data = peak2fcs_df, measure.vars = colnames(peak2fcs_df)[grepl(pattern = "avg_lnFC", x = colnames(peak2fcs_df))])
 peak2fcs_long_tmp_df <- peak2fcs_long_tmp_df %>%
   arrange(desc(value)) %>%
   mutate(pieceid = str_split_fixed(string = variable, pattern = "_", n = 2)[,1])
