@@ -42,7 +42,7 @@ for (pkg_name_tmp in packages) {
 }
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 3
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -136,7 +136,7 @@ print("Finished CombineTracks")
 # print(p)
 # dev.off()
 file2write <- paste0(dir_out, gsub(x = peak_plot[1], pattern = "\\-", replacement = "_"), ".", paste0(motifs_plot, collapse = "_"), ".pdf")
-pdf(file2write, width = 5, height = 10, useDingbats = F)
+pdf(file2write, width = 6, height = 10, useDingbats = F)
 print(p)
 dev.off()
 

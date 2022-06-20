@@ -61,10 +61,10 @@ plot_data_long_df$sample_text2 <- mapvalues(x = plot_data_long_df$sample_text, f
 plot_data_long_df$sample_text2 <- factor(x = plot_data_long_df$sample_text2, levels = sampletexts_plot)
 plot_data_long_df$external_gene_name <- factor(x = plot_data_long_df$external_gene_name, levels = genes_plot)
 
-colors_byline <- RColorBrewer::brewer.pal(n = 6, name = "Set2")[c(1, 2)]
-names(colors_byline) <- c("sh-NC", "sh-KLF9")
-# colors_byline <- RColorBrewer::brewer.pal(n = 6, name = "Set2")[c(1, 3, 4)]
-# names(colors_byline) <- c("sh-NC", "sh-MXI1-C1", "sh-MXI1-C2")
+# colors_byline <- RColorBrewer::brewer.pal(n = 6, name = "Set2")[c(1, 2)]
+# names(colors_byline) <- c("sh-NC", "sh-KLF9")
+colors_byline <- RColorBrewer::brewer.pal(n = 6, name = "Set2")[c(1, 3, 4)]
+names(colors_byline) <- c("sh-NC", "sh-MXI1-C1", "sh-MXI1-C2")
 
 
 p <- ggplot()
@@ -80,7 +80,7 @@ p <- p + theme(axis.text.x = element_text(angle = 0, vjust = 0.5, color = "black
 p <- p + theme(axis.title.x = element_blank(), axis.ticks.x = element_blank(), axis.title.y = element_text(color = "black", size = 15), title = element_text(size = 15))
 p
 file2write <- paste0(dir_out, paste0(genes_plot, collapse = "_"), ".bulkRNA.CPM.", "pdf")
-pdf(file2write, width = 4, height = 3, useDingbats = F)
+pdf(file2write, width = 4.7, height = 3, useDingbats = F)
 print(p)
 dev.off()
 file2write <- paste0(dir_out, paste0(genes_plot, collapse = "_"), ".bulkRNA.CPM.", "png")

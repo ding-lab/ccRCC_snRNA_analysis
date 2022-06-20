@@ -42,7 +42,7 @@ for (pkg_name_tmp in packages) {
 }
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 3
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -71,8 +71,8 @@ motif_coord <- sort(motif_coord); motif_coord
 
 
 # preprocess samples to show ----------------------------------------------
-pieceids_tumor_selected <- c("C3L-00448-T1", "C3L-01302-T1","C3L-00088-T1",  "C3N-00242-T1", "C3L-00790-T1", "C3L-00088-T2", 
-                             "C3L-01313-T1", "C3L-00917-T1", "C3N-01200-T1", "C3L-00610-T1","C3N-01213-T1", "C3L-00079-T1", 
+pieceids_tumor_selected <- c("C3L-00448-T1", "C3L-01302-T1","C3L-00088-T1", "C3N-00242-T1", "C3L-00790-T1", "C3L-00088-T2", 
+                             "C3L-01313-T1", "C3L-00917-T1", "C3N-01200-T1", "C3L-00610-T1", "C3N-01213-T1", "C3L-00079-T1", 
                              "C3L-00583-T1",  "C3N-00733-T1", "C3N-00317-T1", "C3L-00908-T1", "C3L-00026-T1", "C3L-01287-T1", 
                              "C3L-00004-T1", "C3L-00416-T2", "C3L-00096-T1", "C3N-00437-T1", "C3L-00010-T1", "C3N-00495-T1")
 pieceids_nat_selected <- c("C3N-00242-N", 'C3L-00088-N', "C3L-00079-N", 'C3N-01200-N')
@@ -136,7 +136,7 @@ print("Finished CombineTracks")
 # print(p)
 # dev.off()
 file2write <- paste0(dir_out, gsub(x = peak_plot[1], pattern = "\\-", replacement = "_"), ".", paste0(motifs_plot, collapse = "_"), ".pdf")
-pdf(file2write, width = 5, height = 10, useDingbats = F)
+pdf(file2write, width = 6, height = 10, useDingbats = F)
 print(p)
 dev.off()
 
