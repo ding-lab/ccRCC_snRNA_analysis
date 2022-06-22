@@ -22,7 +22,7 @@ setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
@@ -43,7 +43,14 @@ min.diff.pct.run <- 0
 DefaultAssay(srat)<-"RNA"
 
 # set ident ---------------------------------------------------------------
-srat@meta.data$Cell_group_test <- mapvalues(x = rownames(srat@meta.data), from = barcode2celltype_df$integrated_barcode, to = as.vector(barcode2celltype_df$Cell_group5))
+## process barcode table
+barcode2celltype_df <- barcode2celltype_df %>%
+  mutate(cell_id = paste0(orig.ident, "_", individual_barcode))
+## process seurat object
+srat@meta.data$barcode_original <- str_split_fixed(string = rownames(srat@meta.data), pattern = "_", n = 2)[,1]
+head(srat@meta.data$barcode_original)
+srat@meta.data$cell_id <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$barcode_original)
+srat@meta.data$Cell_group_test <- mapvalues(x = srat@meta.data$cell_id, from = barcode2celltype_df$cell_id, to = as.vector(barcode2celltype_df$Cell_group5))
 Idents(srat) <- "Cell_group_test"
 table(Idents(srat))
 
