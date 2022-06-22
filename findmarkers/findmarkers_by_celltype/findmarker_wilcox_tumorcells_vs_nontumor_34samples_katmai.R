@@ -39,7 +39,7 @@ for (pkg_name_tmp in packages) {
 plan("multiprocess", workers = 5)
 options(future.globals.maxSize = 10000 * 1024^2)
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -56,9 +56,9 @@ barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barc
 print("Finish reading the barcode2celltype_df file!\n")
 
 # set parameters for findmarkers ------------------------------------------
-logfc.threshold.run <- 0
-min.pct.run <- 0
-min.diff.pct.run <- 0
+logfc.threshold.run <- 0.5
+min.pct.run <- 0.1
+min.diff.pct.run <- 0.1
 DefaultAssay(srat)<-"RNA"
 
 # set ident ---------------------------------------------------------------
