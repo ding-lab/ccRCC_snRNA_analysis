@@ -76,9 +76,8 @@ srat@meta.data$Cell_group5 <- mapvalues(x = srat@meta.data$cell_id, from = barco
 srat@meta.data$Cell_group_test <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$Cell_group5)
 Idents(srat) <- "Cell_group_test"
 table(Idents(srat))
-idents_group1 <- paste0(orig.idents_process, "_", "Tumor cells")
-idents_group2 <- paste0(orig.idents_process, "_", c("Immune", "Stroma"))
-
+idents_group1 <- paste0(aliquots_group1, "_", idents_group1); idents_group1 <- idents_group1[idents_group1 %in% unique(Idents(srat))]; idents_group1
+idents_group2 <- paste0(aliquots_group2, "_", idents_group2); idents_group2 <- idents_group2[idents_group2 %in% unique(Idents(srat))]; idents_group2
 
 # run findallmarkers ------------------------------------------------------
 markers <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = idents_group1, ident.2 = idents_group2, only.pos = F,
