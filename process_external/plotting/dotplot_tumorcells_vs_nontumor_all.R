@@ -33,6 +33,7 @@ dir.create(dir_out)
 # input -------------------------------------------------------------------
 young_alltumors_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/findmarkers/findmarker_tumorcells_vs_nontumor_ccRCCpatients_tumorsonly/20220622.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
 young_eachtumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/findmarkers/findmarker_tumorcells_vs_nontumor_ccRCCpatients_byeachtumor/20220622.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
+bulk_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210824.v1/ccRCC_markers.Surface.20210824.v1.tsv")
 
 # specify parameters ---------------------------------------------------
 genes_filter <- c("CA9", "SNAP25", "TGFA", "PLIN2", "ABCC3", "PHKA2", "KCTD3", "FTO", "SEMA6A", "EPHA6", "ABLM3", "PLEKHA1", "SLC6A3", "SHISA9", "CP", "PCSK6", "NDRG1", "EGFR", "ENPP3", "COL23A1", "UBE2D2")
@@ -49,7 +50,11 @@ genes_process_df <- genes_process_df %>%
   mutate(ensembl_gene_id = paste0("ENSG", str_split_fixed(string = gene_symbol, pattern = "\\-ENSG", n = 2)[,2])) %>%
   mutate(gene_uniq_id = gene_symbol) %>%
   mutate(gene_symbol = str_split_fixed(string = gene_symbol, pattern = "\\-ENSG", n = 2)[,1])
-
+genes_process_df <- merge(x = genes_process_df,
+                          y = bulk_df %>%
+                            rename(gene_symbol = Gene) %>%
+                            rename(log2FC.wu_eachtumor = avg_log2FC.mean.TumorcellsvsNontumor) %>%
+                            select(gene_symbol, log2FC.bulkRNA, log2FC.bulkRNA, log2FC.wu_eachtumor), by = c("gene_symbol"), all = T)
 
 # make plot data ----------------------------------------------------------
 plotdata_wide_df <- genes_process_df %>%
