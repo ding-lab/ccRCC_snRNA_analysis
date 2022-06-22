@@ -67,7 +67,7 @@ clusterids_group1 <- c("T4", "T6", "T7", "T9", "T10", "T12", "T17"); clusterids_
 #### except IT4, IT15, IT16, 19 is mostly from papillary; IT17, IT22 mostly from a wilms tumor
 clusterids_group2 <- c(paste0("IT", c(0, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 18, 20, 21, 23, 24)),
                    "T0", "T1", "T2", "T3", "T8", "T11", "T14",
-                   "PT", c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)); clusterids_group2
+                   paste0("PT", c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12))); clusterids_group2
 sources_group1 <- c("VHL_Kid_T_ldc_1_1", "VHL_Kid_T_ldc_1_2", "RCC2_Kid_T_ldc_1_1", "RCC2_Kid_T_ldc_1_2", "RCC2_Kid_T_ldc_2_1", "RCC2_Kid_T_ldc_2_2", "RCC1_Kid_T_ldc_1_1", "RCC1_Kid_T_ldc_1_2", "RCC1_Kid_T_ldc_2_1", "RCC1_Kid_T_ldc_2_2")
 sources_group2 <- c("VHL_Kid_N_ldc_1_1", "VHL_Kid_N_ldc_1_2", "VHL_Kid_N_ldc_2_1", "VHL_Kid_N_ldc_2_2",
                     "RCC2_Kid_N_ldc_1_1", "RCC2_Kid_N_ldc_1_2", "RCC2_Kid_N_ldc_1_3",
