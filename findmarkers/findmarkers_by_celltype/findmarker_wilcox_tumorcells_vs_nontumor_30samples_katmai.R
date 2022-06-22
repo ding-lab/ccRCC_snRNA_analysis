@@ -36,7 +36,7 @@ for (pkg_name_tmp in packages) {
 plan("multiprocess", workers = 4)
 options(future.globals.maxSize = 10000 * 1024^2)
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -54,9 +54,9 @@ print("Finish reading the barcode2celltype_df file!\n")
 metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
 
 # set parameters for findmarkers ------------------------------------------
-logfc.threshold.run <- 0
-min.pct.run <- 0
-min.diff.pct.run <- 0
+logfc.threshold.run <- 0.5
+min.pct.run <- 0.1
+min.diff.pct.run <- 0.1
 DefaultAssay(srat)<-"RNA"
 idents_group1 <- "Tumor cells"
 idents_group2 <- c("Immune", "Normal epithelial cells", "Stroma")
