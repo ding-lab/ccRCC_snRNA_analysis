@@ -14,7 +14,7 @@ thisFile <- function() {
     # 'source'd via R console
     return(normalizePath(sys.frames()[[1]]$ofile))
   }
-}q
+}
 path_this_script <- thisFile()
 ## set working directory
 dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
