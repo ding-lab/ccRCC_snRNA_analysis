@@ -32,6 +32,7 @@ dir.create(dir_out)
 
 # input -------------------------------------------------------------------
 genes_process_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/findmarkers/findmarker_tumorcells_vs_nontumor_kidneytumorstogether/20220511.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
+genes_process_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/findmarkers/findmarker_tumorcells_vs_nontumor_ccRCCpatients_tumorsonly/20220622.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
 
 # preprocess --------------------------------------------------------------
 genes_process_df <- genes_process_df %>%
