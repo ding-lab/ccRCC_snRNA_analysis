@@ -79,6 +79,7 @@ table(Idents(srat))
 # source_tmp <- "VHL_Kid_T_ldc_1_1"
 markers <- NULL
 for (source_tmp in sources_process) {
+  cat(paste0("processing ",source_tmp, "\n"))
   markers_tmp <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = paste0(source_tmp, "_", idents_group1), ident.2 = paste0(source_tmp, "_", idents_group2), only.pos = F,
                          min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
   markers_tmp$gene_symbol <- rownames(markers_tmp)
