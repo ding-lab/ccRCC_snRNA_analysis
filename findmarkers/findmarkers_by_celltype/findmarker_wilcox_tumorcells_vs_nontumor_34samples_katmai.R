@@ -36,7 +36,7 @@ for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
 # set up future for parallization
-plan("multiprocess", workers = 5)
+plan("multiprocess", workers = 8)
 options(future.globals.maxSize = 10000 * 1024^2)
 ## set run id
 version_tmp <- 2
