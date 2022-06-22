@@ -59,14 +59,14 @@ min.pct.run <- 0
 min.diff.pct.run <- 0
 ## group 1
 ### Cell_type1 column with "renal cell carcinoma" value, mostly from RCC1, RCC2, and VHL_RCC, which are the 3 clear cell RCCs
-idents_group1 <- c("T4", "T6", "T7", "T9", "T10", "T12", "T17"); idents_group1 
+clusterids_group1 <- c("T4", "T6", "T7", "T9", "T10", "T12", "T17"); clusterids_group1 
 ## group 2
 ##@ T0, 1, 8, 14 are labeled "Normal_cell" in Cell_type1 column, all of them from kidney tumor samples, mostly from RCC1, RCC2, and VHL_RCC, which are the 3 clear cell RCCs
 ##@ T2, 3, 11 are labeled "Endothelium" in Cell_type1 column, all of them from kidney tumor samples, mostly from RCC1, RCC2, and VHL_RCC, which are the 3 clear cell RCCs
 ##@ the following IT0-24 are immune cells from kidney tumors, excluding those labeled "junk" in Cell_type1 column
 #### except IT4, IT15, IT16, 19 is mostly from papillary; IT17, IT22 mostly from a wilms tumor
-idents_group2 <- c(paste0("IT", c(0, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 18, 20, 21, 23, 24)),
-                   "T0", "T1", "T2", "T3", "T8", "T11", "T14"); idents_group2
+clusterids_group2 <- c(paste0("IT", c(0, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 18, 20, 21, 23, 24)),
+                   "T0", "T1", "T2", "T3", "T8", "T11", "T14"); clusterids_group2
 sources_process <- c("VHL_Kid_T_ldc_1_1", "VHL_Kid_T_ldc_1_2", "RCC2_Kid_T_ldc_1_1", "RCC2_Kid_T_ldc_1_2", "RCC2_Kid_T_ldc_2_1", "RCC2_Kid_T_ldc_2_2", "RCC1_Kid_T_ldc_1_1", "RCC1_Kid_T_ldc_1_2", "RCC1_Kid_T_ldc_2_1", "RCC1_Kid_T_ldc_2_2")
 
 # process -----------------------------------------------------------------
@@ -80,7 +80,9 @@ table(Idents(srat))
 markers <- NULL
 for (source_tmp in sources_process) {
   cat(paste0("processing ",source_tmp, "\n"))
-  markers_tmp <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = paste0(source_tmp, "_", idents_group1), ident.2 = paste0(source_tmp, "_", idents_group2), only.pos = F,
+  idents_group1 <- paste0(source_tmp, "_", clusterids_group1); idents_group1 <- idents_group1[idents_group1 %in% unique(Idents(srat))]; idents_group1
+  idents_group2 <- paste0(source_tmp, "_", clusterids_group2); idents_group2 <- idents_group2[idents_group2 %in% unique(Idents(srat))]; idents_group2
+  markers_tmp <- FindMarkers(object = srat, test.use = "wilcox", ident.1 = idents_group1, ident.2 = idents_group2, only.pos = F,
                          min.pct = min.pct.run, logfc.threshold = logfc.threshold.run, min.diff.pct = min.diff.pct.run, verbose = T)
   markers_tmp$gene_symbol <- rownames(markers_tmp)
   markers_tmp$Source <- source_tmp
