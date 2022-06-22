@@ -16,17 +16,33 @@ thisFile <- function() {
   }
 }
 path_this_script <- thisFile()
-## set working directory
-dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
-setwd(dir_base)
-source("./ccRCC_snRNA_analysis/load_pkgs.R")
-source("./ccRCC_snRNA_analysis/functions.R")
+## load libraries
+packages = c(
+  "rstudioapi",
+  "plyr",
+  "dplyr",
+  "stringr",
+  "reshape2",
+  "data.table",
+  "Seurat",
+  "future",
+  "future.apply"
+)
+
+for (pkg_name_tmp in packages) {
+  library(package = pkg_name_tmp, character.only = T)
+}
+# set up future for parallization
+plan("multiprocess", workers = 5)
+options(future.globals.maxSize = 10000 * 1024^2)
 ## set run id
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
+source("./ccRCC_snRNA_analysis/functions.R")
 dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
+
 
 # input dependencies ------------------------------------------------------
 ## input the integrated data

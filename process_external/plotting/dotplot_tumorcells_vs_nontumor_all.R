@@ -33,7 +33,7 @@ dir.create(dir_out)
 # input -------------------------------------------------------------------
 young_alltumors_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/findmarkers/findmarker_tumorcells_vs_nontumor_ccRCCpatients_tumorsonly/20220622.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
 young_eachtumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/findmarkers/findmarker_tumorcells_vs_nontumor_ccRCCpatients_byeachtumor/20220622.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
-young_alltumors_vs_normal_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/findmarkers/findmarker_tumortissue_tumorcells_vs_normaltissue_nontumor_ccRCCpatients/20220622.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
+young_alltumors_vs_normal_nontumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/findmarkers/findmarker_tumortissue_tumorcells_vs_normaltissue_nontumor_ccRCCpatients/20220622.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
 bulk_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210824.v1/ccRCC_markers.Surface.20210824.v1.tsv")
 
 # specify parameters ---------------------------------------------------
@@ -49,7 +49,7 @@ genes_process_df <- merge(x = young_alltumors_df %>%
                             select(p_val_adj, avg_log2FC, gene_symbol),  by = c("gene_symbol"), all = T, suffixes = c(".young.alltumors", ".young.eachtumor"))
 genes_process_df <- merge(x = genes_process_df,
                           y = young_alltumors_vs_normal_df %>%
-                            rename(avg_log2FC.young.alltumors_vs_normal = avg_log2FC) %>%
+                            rename(avg_log2FC.young.alltumors_vs_normal_nontumor = avg_log2FC) %>%
                             select(gene_symbol, avg_log2FC.young.alltumors_vs_normal), by = c("gene_symbol"), all = T)
 genes_process_df <- genes_process_df %>%
   mutate(ensembl_gene_id = paste0("ENSG", str_split_fixed(string = gene_symbol, pattern = "\\-ENSG", n = 2)[,2])) %>%
