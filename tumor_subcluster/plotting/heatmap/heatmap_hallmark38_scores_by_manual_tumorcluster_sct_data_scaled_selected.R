@@ -26,7 +26,7 @@ for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -138,6 +138,8 @@ SQSTM1_Gain_frac_vec <- mapvalues(x = colnames_plot, from = cnv_df$tumor_subclus
 SQSTM1_Gain_frac_vec[SQSTM1_Gain_frac_vec == colnames_plot] <- "0"; SQSTM1_Gain_frac_vec <- as.numeric(SQSTM1_Gain_frac_vec)
 GOLPH3_Gain_frac_vec <- mapvalues(x = colnames_plot, from = cnv_df$tumor_subcluster.dataname[cnv_df$gene_symbol == "GOLPH3" & cnv_df$cna_3state == "Gain"], to = as.vector(cnv_df$Fraction[cnv_df$gene_symbol == "GOLPH3" & cnv_df$cna_3state == "Gain"]))
 GOLPH3_Gain_frac_vec[GOLPH3_Gain_frac_vec == colnames_plot] <- "0"; GOLPH3_Gain_frac_vec <- as.numeric(GOLPH3_Gain_frac_vec)
+MECOM_Gain_frac_vec <- mapvalues(x = colnames_plot, from = cnv_df$tumor_subcluster.dataname[cnv_df$gene_symbol == "MECOM" & cnv_df$cna_3state == "Gain"], to = as.vector(cnv_df$Fraction[cnv_df$gene_symbol == "MECOM" & cnv_df$cna_3state == "Gain"]))
+MECOM_Gain_frac_vec[MECOM_Gain_frac_vec == colnames_plot] <- "0"; MECOM_Gain_frac_vec <- as.numeric(MECOM_Gain_frac_vec)
 mut_map_vec <- mapvalues(x = clusternames_column, from = driver_mutation_bytumorcluster_df$Cluster_Name, to = as.vector(driver_mutation_bytumorcluster_df$number_cells_w_driver_mutation))
 mut_map_vec <- as.character(mut_map_vec != "0")
 ## prepare bulk mutation status
@@ -159,6 +161,7 @@ colanno_obj <- HeatmapAnnotation(fraction_in_patient = anno_simple(x = fraction_
                                  chr3p_SETD2_loss_bycluster = anno_simple(x = setd2_loss_frac_vec, col = colors_loss_frac),
                                  chr5q_SQSTM1_gain_bycluster = anno_simple(x = SQSTM1_Gain_frac_vec, col = colors_gain_frac),
                                  chr5q_GOLPH3_gain_bycluster = anno_simple(x = GOLPH3_Gain_frac_vec, col = colors_gain_frac),
+                                 chr3q_MECOM_gain_bycluster = anno_simple(x = MECOM_Gain_frac_vec, col = colors_gain_frac),
                                  driver_mutation_bycluster = anno_simple(x = mut_map_vec, col = colors_truefalse[mut_map_vec]),
                                  VHL_mutated_bycase = anno_simple(x = VHL_bycase_vec, col = colors_truefalse[VHL_bycase_vec]),
                                  PBRM1_mutated_bycase = anno_simple(x = PBRM1_bycase_vec, col = colors_truefalse[PBRM1_bycase_vec]),

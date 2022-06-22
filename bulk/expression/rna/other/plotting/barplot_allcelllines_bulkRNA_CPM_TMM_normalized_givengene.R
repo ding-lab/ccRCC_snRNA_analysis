@@ -23,7 +23,7 @@ for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -31,22 +31,27 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-exp_df <- fread(input = "./Resources/Analysis_Results/bulk/expression/rna/other/normalization/get_edgeR_TMM_normalized_counts_all_cell_lines/20220603.v1/CPM.TMM_normalized.All_Cell_Lines.20220603.v1.tsv", data.table = F)
+exp_df <- fread(input = "./Resources/Analysis_Results/bulk/expression/rna/other/normalization/get_edgeR_TMM_normalized_counts_all_cell_lines/20220606.v1/CPM.TMM_normalized.All_Cell_Lines.20220606.v1.tsv", data.table = F)
 genes_plot_df <- fread(data.table = F, input = "./Resources/Knowledge/Marker_search_cell_line.tsv")
 
 # specify parameters ------------------------------------------------------
 colnames_value <- colnames(exp_df)[grepl(pattern = "sample", x = colnames(exp_df))]
 exp_df <- as.data.table(exp_df)
 # genes_plot <- c("KLF9", "CP")
+genes_plot <- genes_plot_df$Marker
+genes_plot <- c("UCHL1", "GLUL", "SQSTM1")
+samples_plot <- c("sample.dr_caki_1_rna", "sample.dr_hk_2_rna", "sample.786_o.sglacz_e1", "sample.786_o.sgbap1_e1", "sample.skrc42.bap1_e1", "sample.skrc42.emptyvector_e1")
+genes_plot <- c("SQSTM1")
+samples_plot <- c("sample.dr_caki_1_rna", "sample.dr_hk_2_rna", "sample.skrc42.bap1_e1", "sample.skrc42.emptyvector_e1")
 
-genes_plot <- c("UCHL1")
-# genes_plot <- c("VEGFA")
 
-for (gene_plot in genes_plot_df$Marker) {
+# plot --------------------------------------------------------------------
+for (gene_plot in genes_plot) {
   # format expression data --------------------------------------------------
   plot_data_long_df <- exp_df %>%
     filter(external_gene_name %in% gene_plot) %>%
     melt.data.table(measure.vars = colnames_value) %>%
+    filter(variable %in% samples_plot) %>%
     mutate(sample = gsub(x = variable, pattern = "sample\\.", replacement = "")) %>%
     mutate(sample_text = sample)
   
@@ -65,7 +70,7 @@ for (gene_plot in genes_plot_df$Marker) {
   # print(p)
   # dev.off()
   file2write <- paste0(dir_out, paste0(gene_plot, collapse = "_"), ".bulkRNA.CPM.", "png")
-  png(file2write, width = 800, height = 600, res = 150)
+  png(file2write, width = 350, height = 600, res = 150)
   print(p)
   dev.off()
   

@@ -1,5 +1,6 @@
 # Yige Wu @WashU May 2022
 ## findmarkers based on the table S2 cluster annotation
+## just use cells from the ccRCC patient and only tumor tissue samples (instead of using normal tissue)
 
 # set up working directory and libraries --------------------------------------------------------
 ## getting the path to the current script - need to keep in the front
@@ -39,7 +40,7 @@ for (pkg_name_tmp in packages) {
 plan("multiprocess", workers = 4)
 options(future.globals.maxSize = 10000 * 1024^2)
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -64,11 +65,15 @@ idents_group1 <- c("T4", "T6", "T7", "T9", "T10", "T12", "T17"); idents_group1
 ##@ T2, 3, 11 are labeled "Endothelium" in Cell_type1 column, all of them from kidney tumor samples, mostly from RCC1, RCC2, and VHL_RCC, which are the 3 clear cell RCCs
 ##@ the following IT0-24 are immune cells from kidney tumors, excluding those labeled "junk" in Cell_type1 column
 #### except IT4, IT15, IT16, 19 is mostly from papillary; IT17, IT22 mostly from a wilms tumor
-idents_group2 <- c(paste0("IT", c(0, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24)),
+idents_group2 <- c(paste0("IT", c(0, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 18, 20, 21, 23, 24)),
                    "T0", "T1", "T2", "T3", "T8", "T11", "T14"); idents_group2
-
+sources_process <- c("VHL_Kid_T_ldc_1_1", "VHL_Kid_T_ldc_1_2", "RCC2_Kid_T_ldc_1_1", "RCC2_Kid_T_ldc_1_2", "RCC2_Kid_T_ldc_2_1", "RCC2_Kid_T_ldc_2_2", "RCC1_Kid_T_ldc_1_1", "RCC1_Kid_T_ldc_1_2", "RCC1_Kid_T_ldc_2_1", "RCC1_Kid_T_ldc_2_2")
 
 # process -----------------------------------------------------------------
+dim(srat)
+Idents(srat) <- "Source"
+srat <- subset(srat, idents = sources_process)
+dim(srat)
 Idents(srat) <- "ClusterID"
 table(Idents(srat))
 DefaultAssay(srat)<-"RNA"
