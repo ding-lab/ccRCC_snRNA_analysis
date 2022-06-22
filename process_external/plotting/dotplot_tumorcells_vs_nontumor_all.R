@@ -31,9 +31,9 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input -------------------------------------------------------------------
-young_alltumors_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/findmarkers/findmarker_tumorcells_vs_nontumor_ccRCCpatients_tumorsonly/20220622.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
+young_t_tumorcells_vs_t_nontumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/findmarkers/findmarker_tumorcells_vs_nontumor_ccRCCpatients_tumorsonly/20220622.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
 young_eachtumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/findmarkers/findmarker_tumorcells_vs_nontumor_ccRCCpatients_byeachtumor/20220622.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
-young_alltumors_vs_normal_nontumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/findmarkers/findmarker_tumortissue_tumorcells_vs_normaltissue_nontumor_ccRCCpatients/20220622.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
+young_t_tumorcells_vs_n_nontumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/findmarkers/findmarker_tumortissue_tumorcells_vs_normaltissue_nontumor_ccRCCpatients/20220622.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
 bulk_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210824.v1/ccRCC_markers.Surface.20210824.v1.tsv")
 
 # specify parameters ---------------------------------------------------
