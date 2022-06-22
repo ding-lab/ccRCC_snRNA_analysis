@@ -47,7 +47,7 @@ idents_group1 <- "Tumor cells"
 idents_group2 <- c("Immune", "Normal epithelial cells", "Stroma")
 
 # preprocess --------------------------------------------------------------
-orig.idents_process <- metadata_df$Aliquot.snRNA[metadata_df$Sample_Type == "Tumor" & metadata_df$snRNA_available ]
+orig.idents_process <- metadata_df$Aliquot.snRNA[metadata_df$Sample_Type == "Tumor" & metadata_df$snRNA_available & metadata_df$Case != "C3L-00359"]
 
 # set ident ---------------------------------------------------------------
 ## process barcode table
