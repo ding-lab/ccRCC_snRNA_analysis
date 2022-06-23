@@ -93,17 +93,17 @@ rm(srat_list)
 
 srat_merged_obj <- SCTransform(srat_merged_obj, vars.to.regress = c("nCount_RNA","pct_MT"), return.only.var.genes = F)
 cat("Finished SCTransform!\n")
-srat <- RunPCA(srat, npcs = 30, verbose = FALSE)
+srat <- RunPCA(srat_merged_obj, npcs = 30, verbose = FALSE)
 cat("Finished RUNPCA!\n")
-srat <- RunUMAP(srat, reduction = "pca", dims = 1:30)
+srat <- RunUMAP(srat_merged_obj, reduction = "pca", dims = 1:30)
 cat("Finished RUNUMAP!\n")
-srat <- FindNeighbors(srat, reduction = "pca", dims = 1:30, force.recalc = T)
+srat <- FindNeighbors(srat_merged_obj, reduction = "pca", dims = 1:30, force.recalc = T)
 cat("Finished FindNeighbors!\n")
-srat <- FindClusters(srat, resolution = 0.5)
+srat <- FindClusters(srat_merged_obj, resolution = 0.5)
 cat("Finished FindClusters!\n")
 
 ## save as RDS file
 path_final_file <- paste0(dir_out, "Zhang_scRNA_PNAS_2021.Merged.", run_id, ".RDS")
-saveRDS(object = srat, file = path_final_file, compress = T)
+saveRDS(object = srat_merged_obj, file = path_final_file, compress = T)
 cat("Finished saving the output!\n")
 
