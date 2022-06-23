@@ -56,6 +56,7 @@ barcode_anno_df <- barcode_anno_df %>%
 
 # process to seurat object ------------------------------------------------
 files_input <- list.files(path = "./Resources/Knowledge/Published_Data/Zhang_scRNA_PNAS_2021/GSE159115_RAW/")
+srat_list <- list()
 for (filename_tmp in files_input) {
   count_mat_tmp <- Read10X_h5(filename = paste0("./Resources/Knowledge/Published_Data/Zhang_scRNA_PNAS_2021/GSE159115_RAW/", filename_tmp))
   si_id_tmp <- str_split_fixed(string = filename_tmp, pattern = "_", n = 8)[,3]
