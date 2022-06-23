@@ -31,37 +31,30 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input -------------------------------------------------------------------
-young_t_tumorcells_vs_n_nontumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/findmarkers/findmarker_tumortissue_tumorcells_vs_normaltissue_nontumor_ccRCCpatients/20220622.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
-wu_t_tumorcells_vs_n_nontumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/findmarker_wilcox_tumortissue_tumorcells_vs_normaltissue_normalcells_34samples_katmai/20220622.v2/logfcthreshold.0.5.minpct.0.1.mindiffpct.0.1.tsv")
-bulk.rna.df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210824.v1/ccRCC_markers.Surface.20210824.v1.tsv")
+wu.each.t_tumorcells.vs.t_nontumor.df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210824.v1/ccRCC_markers.Surface.20210824.v1.tsv")
+wu.all.t_tumorcells.vs.t_nontumor.df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/findmarker_wilcox_tumorcells_vs_nontumor_30samples_katmai/20220622.v1/logfcthreshold.0.5.minpct.0.1.mindiffpct.0.1.tsv")
+
 
 # specify parameters ---------------------------------------------------
 genes_filter <- c("CA9", "SNAP25", "TGFA", "PLIN2", "ABCC3", "PHKA2", "KCTD3", "FTO", "SEMA6A", "EPHA6", "ABLM3", "PLEKHA1", "SLC6A3", "SHISA9", "CP", "PCSK6", "NDRG1", "EGFR", "ENPP3", "COL23A1", "UBE2D2")
 
 # preprocess --------------------------------------------------------------
-genes_process_df <- young_t_tumorcells_vs_n_nontumor_df %>%
-  mutate(ensembl_gene_id = paste0("ENSG", str_split_fixed(string = gene_symbol, pattern = "\\-ENSG", n = 2)[,2])) %>%
-  mutate(gene_uniq_id = gene_symbol) %>%
-  mutate(gene_symbol = str_split_fixed(string = gene_symbol, pattern = "\\-ENSG", n = 2)[,1])
-
-genes_process_df <- merge(x = genes_process_df %>%
-                            rename(log2FC.young = avg_log2FC),
-                          y = bulk.rna.df %>%
+genes_process_df <- merge(x = wu.all.t_tumorcells.vs.t_nontumor.df %>%
+                            rename(log2FC.wu.alltumor = avg_log2FC) %>%
+                            rename(p_val_adj.wu.alltumor = p_val_adj) %>%
+                            select(gene_symbol, log2FC.wu.alltumor, p_val_adj.wu.alltumor),
+                          y = wu.each.t_tumorcells.vs.t_nontumor.df %>%
                             rename(gene_symbol = Gene) %>%
                             rename(log2FC.wu.eachtumor = avg_log2FC.mean.TumorcellsvsNontumor) %>%
-                            select(gene_symbol, log2FC.bulkRNA), by = c("gene_symbol"), all = T)
-genes_process_df <- merge(x = genes_process_df,
-                          y = wu_t_tumorcells_vs_n_nontumor_df %>%
-                            rename(log2FC.wu = avg_log2FC) %>%
-                            select(gene_symbol, log2FC.wu), by = c("gene_symbol"), all = T)
+                            select(gene_symbol, log2FC.wu.eachtumor, log2FC.bulkRNA), by = c("gene_symbol"), all = T)
 
 # make plot data ----------------------------------------------------------
 plotdata_wide_df <- genes_process_df %>%
   filter(gene_symbol %in% genes_filter)
 plotdata_df <- melt(plotdata_wide_df, id.vars = colnames(plotdata_wide_df)[!grepl(pattern = "log2FC", x = colnames(plotdata_wide_df))])
 plotdata_df <- plotdata_df %>%
-  mutate(data_type = ifelse(variable == "log2FC.young", "scRNA-seq (Young et al)",
-                            ifelse(variable == "log2FC.wu", "snRNA-seq (Wu et al)", 
+  mutate(data_type = ifelse(variable == "log2FC.wu.alltumor", "snRNA-seq (all tumor cells vs. non-tumor cells)",
+                            ifelse(variable == "log2FC.wu.eachtumor", "snRNA-seq (tumor cells vs. non-tumor cells\naveraged by each tumor)", 
                                    ifelse(variable == "log2FC.bulkRNA", "Bulk RNA-seq", "other")))) %>%
   mutate(y_plot = gene_symbol) %>%
   mutate(x_plot = ifelse(value >= 10, 10, value))
@@ -100,14 +93,22 @@ pdf(file2write, width = 4.25, height = 7, useDingbats = F)
 print(p)
 dev.off()
 
-plotdata_wide_df <- plotdata_wide_df %>%
-  mutate(diff_log2FC = ifelse(log2FC.wu - log2FC.bulkRNA > 0 , "higher", "lower"))
 
 plotdata_wide_df <- plotdata_wide_df %>%
-  mutate(diff.sn_vs_bulkrna = ifelse(abs(log2FC.wu - log2FC.bulkRNA) < 1 , "small diff",
-                              ifelse(log2FC.wu - log2FC.bulkRNA > 0 , "higher", "lower"))) %>%
-  mutate(diff.sc_vs_bulkrna = ifelse(abs(log2FC.young - log2FC.bulkRNA) < 1 , "small diff",
-                                     ifelse(log2FC.young - log2FC.bulkRNA > 0 , "higher", "lower")))
+  mutate(diff_log2FC = ifelse(log2FC.wu.eachtumor - log2FC.bulkRNA > 0 , "higher", "lower"))
 
-table(plotdata_wide_df$diff_log2FC)
+plotdata_wide_df %>%
+  mutate(diff_log2FC = ifelse(log2FC.wu.eachtumor - log2FC.bulkRNA > 0 , "higher", "lower")) %>%
+  select(diff_log2FC) %>%
+  table()
+
+plotdata_wide_df <- plotdata_wide_df %>%
+  mutate(diff_log2FC = ifelse(abs(log2FC.wu.eachtumor - log2FC.bulkRNA) < 1 , "small diff",
+                              ifelse(log2FC.wu.eachtumor - log2FC.bulkRNA > 0 , "higher", "lower")))
+  
+plotdata_wide_df %>%
+  mutate(diff_log2FC = ifelse(abs(log2FC.wu.eachtumor - log2FC.bulkRNA) < 1 , "small diff",
+                              ifelse(log2FC.wu.eachtumor - log2FC.bulkRNA > 0 , "higher", "lower"))) %>%
+  select(diff_log2FC) %>%
+  table()
 
