@@ -68,7 +68,7 @@ clusterids_group2 <- unique(srat@meta.data$anno[srat@meta.data$orig.ident %in% s
 # process -----------------------------------------------------------------
 DefaultAssay(srat)<-"RNA"
 dim(srat)
-srat@meta.data$cell_group_process <- paste0(srat@meta.data$Source, "_", srat@meta.data$ClusterID)
+srat@meta.data$cell_group_process <- paste0(srat@meta.data$orig.ident, "_", srat@meta.data$anno)
 Idents(srat) <- "cell_group_process"
 table(Idents(srat))
 idents_group1 <- paste0(sources_group1, "_", clusterids_group1); idents_group1 <- idents_group1[idents_group1 %in% unique(Idents(srat))]; idents_group1

@@ -126,7 +126,7 @@ p <- p + geom_point(data = subset(plotdata_df, diff.sc_vs_bulkrna == "higher"), 
 p <- p + geom_point(data = subset(plotdata_df, diff.sc_vs_bulkrna == "small diff"), mapping = aes(x = x_plot, y = y_plot), color = "black")
 p <- p + geom_point(data = subset(plotdata_df, diff.sc_vs_bulkrna == "lower"), mapping = aes(x = x_plot, y = y_plot), color = "blue")
 p <- p + geom_text_repel(data = subset(plotdata_df, diff.sn_vs_bulkrna == "lower" & gene_symbol %in% genes_highlight), 
-                         mapping = aes(x = x_plot, y = y_plot, label = gene_symbol), max.overlaps = Inf)
+                         mapping = aes(x = x_plot, y = y_plot, label = gene_symbol), max.overlaps = Inf, min.segment.length = 0, box.padding = 0.5)
 p <- p + xlab(label = "Log2(bulk RNA-seq fold change)\nTumors vs. NATs")
 p <- p + ylab(label = "Log2(scRNA-seq fold change)\nTumor cells vs. Non-tumor cells (NAT)")
 # p <- p + coord_fixed(ratio = 1)
@@ -137,7 +137,7 @@ pdf(file2write, width = 4, height = 4, useDingbats = F)
 print(p)
 dev.off()
 file2write <- paste0(dir_out, "log2FC.young_vs_log2FC.bulkRNA", ".png")
-png(file2write, width = 1000, height = 500, res = 150)
+png(file2write, width = 600, height = 1000, res = 150)
 print(p)
 dev.off()
 
