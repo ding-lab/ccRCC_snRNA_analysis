@@ -59,6 +59,8 @@ min.pct.run <- 0
 min.diff.pct.run <- 0
 sources_group1 <- c("18854","18855","19703","22368","22604","23459","23843")
 sources_group2 <- c("18856","19704","21255","21256","22369","22605")
+sources_group2 <- c("18856","19704", "22369","22605")
+
 ## group 1
 ### anno column with "Tumor"
 clusterids_group1 <- c("Tumor"); clusterids_group1 
