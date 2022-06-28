@@ -31,38 +31,49 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input -------------------------------------------------------------------
+zhang_t_tumorcells_vs_n_nontumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Zhang_scRNA_PNAS_2021/findmarkers/findmarker_tumortissue_tumorcells_vs_normaltissue_nontumor_ccRCCpatients/20220624.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
 young_t_tumorcells_vs_n_nontumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/findmarkers/findmarker_tumortissue_tumorcells_vs_normaltissue_nontumor_ccRCCpatients/20220622.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
 wu_t_tumorcells_vs_n_nontumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/findmarker_wilcox_tumortissue_tumorcells_vs_normaltissue_normalcells_34samples_katmai/20220622.v2/logfcthreshold.0.5.minpct.0.1.mindiffpct.0.1.tsv")
-bulk.rna.df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210824.v1/ccRCC_markers.Surface.20210824.v1.tsv")
+bulk.rna.df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/expression/edgeR/run_deg_analysis/run_tumor_vs_NAT_deg_on_cptac_ccRCC_discovery_cases/20210419.v1/Tumor_vs_NAT.glmQLFTest.OutputTables.tsv")
 
 # specify parameters ---------------------------------------------------
 genes_filter <- c("CA9", "SNAP25", "TGFA", "PLIN2", "ABCC3", "PHKA2", "KCTD3", "FTO", "SEMA6A", "EPHA6", "ABLM3", "PLEKHA1", "SLC6A3", "SHISA9", "CP", "PCSK6", "NDRG1", "EGFR", "ENPP3", "COL23A1", "UBE2D2")
 
 # preprocess --------------------------------------------------------------
-genes_process_df <- young_t_tumorcells_vs_n_nontumor_df %>%
-  mutate(ensembl_gene_id = paste0("ENSG", str_split_fixed(string = gene_symbol, pattern = "\\-ENSG", n = 2)[,2])) %>%
-  mutate(gene_uniq_id = gene_symbol) %>%
-  mutate(gene_symbol = str_split_fixed(string = gene_symbol, pattern = "\\-ENSG", n = 2)[,1])
+foldchanges_df <- merge(x = data.frame(gene_symbol = genes_filter),
+                        y = young_t_tumorcells_vs_n_nontumor_df %>%
+                          mutate(ensembl_gene_id = paste0("ENSG", str_split_fixed(string = gene_symbol, pattern = "\\-ENSG", n = 2)[,2])) %>%
+                          mutate(gene_uniq_id = gene_symbol) %>%
+                          mutate(gene_symbol = str_split_fixed(string = gene_symbol, pattern = "\\-ENSG", n = 2)[,1]) %>%
+                          rename(log2FC.young = avg_log2FC) %>%
+                          rename(fdr.young = p_val_adj) %>%
+                          select(gene_symbol, log2FC.young, fdr.young), by = c("gene_symbol"), all.x = T)
+foldchanges_df <- merge(x = foldchanges_df,
+                        y = zhang_t_tumorcells_vs_n_nontumor_df %>%
+                          rename(log2FC.zhang = avg_log2FC) %>%
+                          rename(fdr.zhang = p_val_adj) %>%
+                          select(gene_symbol, log2FC.zhang, fdr.zhang), by = c("gene_symbol"), all.x = T)
+foldchanges_df <- merge(x = foldchanges_df,
+                        y = bulk.rna.df %>%
+                          rename(gene_symbol = hgnc_symbol) %>%
+                          rename(log2FC.bulkRNA = logFC) %>%
+                          rename(fdr.bulkRNA = FDR) %>%
+                          select(gene_symbol, log2FC.bulkRNA, logCPM, fdr.bulkRNA), by = c("gene_symbol"), all.x = T)
+foldchanges_df <- merge(x = foldchanges_df,
+                        y = wu_t_tumorcells_vs_n_nontumor_df %>%
+                          rename(log2FC.wu = avg_log2FC) %>%
+                          rename(fdr.wu = p_val_adj) %>%
+                          select(gene_symbol, log2FC.wu, fdr.wu), by = c("gene_symbol"), all.x = T)
 
-genes_process_df <- merge(x = genes_process_df %>%
-                            rename(log2FC.young = avg_log2FC),
-                          y = bulk.rna.df %>%
-                            rename(gene_symbol = Gene) %>%
-                            rename(log2FC.wu.eachtumor = avg_log2FC.mean.TumorcellsvsNontumor) %>%
-                            select(gene_symbol, log2FC.bulkRNA), by = c("gene_symbol"), all = T)
-genes_process_df <- merge(x = genes_process_df,
-                          y = wu_t_tumorcells_vs_n_nontumor_df %>%
-                            rename(log2FC.wu = avg_log2FC) %>%
-                            select(gene_symbol, log2FC.wu), by = c("gene_symbol"), all = T)
 
 # make plot data ----------------------------------------------------------
-plotdata_wide_df <- genes_process_df %>%
+plotdata_wide_df <- foldchanges_df %>%
   filter(gene_symbol %in% genes_filter)
 plotdata_df <- melt(plotdata_wide_df, id.vars = colnames(plotdata_wide_df)[!grepl(pattern = "log2FC", x = colnames(plotdata_wide_df))])
 plotdata_df <- plotdata_df %>%
   mutate(data_type = ifelse(variable == "log2FC.young", "scRNA-seq (Young et al)",
                             ifelse(variable == "log2FC.wu", "snRNA-seq (Wu et al)", 
-                                   ifelse(variable == "log2FC.bulkRNA", "Bulk RNA-seq", "other")))) %>%
+                                   ifelse(variable == "log2FC.bulkRNA", "Bulk RNA-seq", "scRNA-seq (Zhang et al)")))) %>%
   mutate(y_plot = gene_symbol) %>%
   mutate(x_plot = ifelse(value >= 10, 10, value))
 plotdata_df$y_plot <- factor(x = plotdata_df$y_plot, levels = rev(genes_filter))

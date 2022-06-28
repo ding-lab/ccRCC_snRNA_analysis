@@ -35,6 +35,7 @@ dir.create(dir_out)
 # input -------------------------------------------------------------------
 young_t_tumorcells_vs_n_nontumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Young_scRNA_Science_2018/findmarkers/findmarker_tumortissue_tumorcells_vs_normaltissue_nontumor_ccRCCpatients/20220622.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
 zhang_t_tumorcells_vs_n_nontumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Zhang_scRNA_PNAS_2021/findmarkers/findmarker_tumortissue_tumorcells_vs_normaltissue_nontumor_ccRCCpatients/20220624.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
+# zhang_t_tumorcells_vs_n_nontumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/process_external/process_Zhang_scRNA_PNAS_2021/findmarkers/findmarker_tumortissue_tumorcells_vs_normaltissue_nontumor_ccRCCpatients/20220624.v2/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
 # wu_t_tumorcells_vs_n_nontumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/findmarker_wilcox_tumortissue_tumorcells_vs_normaltissue_normalcells_34samples_katmai/20220622.v2/logfcthreshold.0.5.minpct.0.1.mindiffpct.0.1.tsv")
 wu_t_tumorcells_vs_n_nontumor_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/findmarkers_by_celltype/findmarker_wilcox_tumortissue_tumorcells_vs_normaltissue_normalcells_34samples_katmai/20220624.v1/logfcthreshold.0.minpct.0.mindiffpct.0.tsv")
 genes_plot_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/tumor_specific_markers/20210701.v1/ccRCC_cells_specific_DEG_with_surface_annotations_from_3DB.txt")
@@ -53,7 +54,7 @@ foldchanges_df <- merge(x = data.frame(gene_symbol = genes_filter),
                           rename(log2FC.young = avg_log2FC) %>%
                           rename(fdr.young = p_val_adj) %>%
                           select(gene_symbol, log2FC.young, fdr.young), by = c("gene_symbol"), all.x = T)
-foldchanges_df <- merge(x = data.frame(gene_symbol = genes_filter),
+foldchanges_df <- merge(x = foldchanges_df,
                         y = zhang_t_tumorcells_vs_n_nontumor_df %>%
                           rename(log2FC.zhang = avg_log2FC) %>%
                           rename(fdr.zhang = p_val_adj) %>%
@@ -125,12 +126,16 @@ plotdata_df <- foldchanges_df %>%
   mutate(y_plot = ifelse(log2FC.young > 15, 15, ifelse(log2FC.young < -15, -15, log2FC.young))) %>%
   mutate(diff.sn_vs_bulkrna = ifelse(abs(log2FC.wu - log2FC.bulkRNA) < 1 , "small diff",
                                      ifelse(log2FC.wu - log2FC.bulkRNA > 0 , "higher", "lower"))) %>%
-  mutate(diff.sc_vs_bulkrna = ifelse(log2FC.young > 0, ifelse(abs(log2FC.young - log2FC.bulkRNA) < 1 , text_smalldiff,
-                                                              ifelse(log2FC.young - log2FC.bulkRNA > 0 , text_higher, text_lower)), text_other)) %>%
+  mutate(diff.sc_vs_bulkrna = ifelse(!is.na(log2FC.young), ifelse(log2FC.young > 0, ifelse(abs(log2FC.young - log2FC.bulkRNA) < 1 , text_smalldiff,
+                                                              ifelse(log2FC.young - log2FC.bulkRNA > 0 , text_higher, text_lower)), text_other), text_other)) %>%
   mutate(label_text = ifelse(gene_symbol %in% genes_highlight, gene_symbol, NA))
+
+table(plotdata_df$diff.sc_vs_bulkrna)
+
 table(plotdata_df$diff.sn_vs_bulkrna)
 table(plotdata_df$diff.sc_vs_bulkrna[plotdata_df$diff.sn_vs_bulkrna == "lower"])
-length(which(plotdata_df$diff.sc_vs_bulkrna[plotdata_df$diff.sn_vs_bulkrna == "lower"] %in% c("higher", "small diff")))/length(which(plotdata_df$diff.sn_vs_bulkrna == "lower"))
+length(which(plotdata_df$diff.sc_vs_bulkrna[plotdata_df$diff.sn_vs_bulkrna == "lower"] %in% c(text_higher, text_smalldiff)))/length(which(plotdata_df$diff.sn_vs_bulkrna == "lower"))
+
 colors_point <- c("red", "blue", "black", "grey50")
 names(colors_point) <- c(text_higher, text_lower, text_smalldiff, text_other)
 
@@ -172,9 +177,11 @@ plotdata_df <- foldchanges_df %>%
   mutate(y_plot = ifelse(log2FC.zhang > 15, 15, ifelse(log2FC.zhang < -15, -15, log2FC.zhang))) %>%
   mutate(diff.sn_vs_bulkrna = ifelse(abs(log2FC.wu - log2FC.bulkRNA) < 1 , "small diff",
                                      ifelse(log2FC.wu - log2FC.bulkRNA > 0 , "higher", "lower"))) %>%
-  mutate(diff.sc_vs_bulkrna = ifelse(log2FC.zhang > 0, ifelse(abs(log2FC.zhang - log2FC.bulkRNA) < 1 , text_smalldiff,
+  mutate(diff.sc_vs_bulkrna = ifelse(!is.na(log2FC.zhang) & log2FC.zhang > 0, ifelse(abs(log2FC.zhang - log2FC.bulkRNA) < 1 , text_smalldiff,
                                                               ifelse(log2FC.zhang - log2FC.bulkRNA > 0 , text_higher, text_lower)), text_other)) %>%
   mutate(label_text = ifelse(gene_symbol %in% genes_highlight, gene_symbol, NA))
+table(plotdata_df$diff.sc_vs_bulkrna)
+
 table(plotdata_df$diff.sn_vs_bulkrna)
 table(plotdata_df$diff.sc_vs_bulkrna[plotdata_df$diff.sn_vs_bulkrna == "lower"])
 length(which(plotdata_df$diff.sc_vs_bulkrna[plotdata_df$diff.sn_vs_bulkrna == "lower"] %in% c("higher", "small diff")))/length(which(plotdata_df$diff.sn_vs_bulkrna == "lower"))

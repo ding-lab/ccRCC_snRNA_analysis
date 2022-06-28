@@ -54,6 +54,7 @@ st_htan = FixSeuratImage(st_htan)
 # v1: Direct Plot with different scale
 genes_check = c("LAMA1", "LAMA3", "COL5A1", "COL8A1", "COL28A1", "CD70", "CD27", "OSM", "OSMR", "IL6ST")
 genes_check = c("CA9", "CP", "COL4A1", "OSMR", "TGM2")
+genes_check = c("CA9", "CP", "COL4A1", "OSM", "TGM2")
 p1 = SpatialPlot(st_htan, features = genes_check, stroke = NA, image.alpha = 0, ncol = 5)
 
 ##############
@@ -86,6 +87,6 @@ pdf(paste0(dir_out, "ccRCC_HT282_293.", "different_scales.", "pdf"), width = 6, 
 print(p1)
 dev.off()
 
-pdf(paste0(dir_out, "ccRCC_HT282_293.", "same_scales.", "pdf"), width = 15, height = 25, useDingbats = F)
+pdf(paste0(dir_out, "ccRCC_HT282_293.", "same_scales.", "pdf"), width = 6, height = 15, useDingbats = F)
 print(p2)
 dev.off()
