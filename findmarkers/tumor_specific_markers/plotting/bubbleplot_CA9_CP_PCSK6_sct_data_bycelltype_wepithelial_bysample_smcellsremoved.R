@@ -21,18 +21,16 @@ dir.create(dir_out)
 exp_wide_df <- fread(data.table = F, input = "./Resources/Analysis_Results/average_expression/avgexp_sct_data_bycelltypew_epithelial_bysample_katmai/20210907.v1/35_aliquot_merged.avgexp.SCT.data.Cell_group_w_epithelialcelltypes20210907.v1.tsv")
 ## input meta data
 idmetadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
-## input genes
-gene_plot_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210702.v1/ccRCC_markers.Surface.20210702.v1.tsv")
 barcode2celltype_df <- fread(input = "./Resources/Analysis_Results/annotate_barcode/annotate_barcode_with_major_cellgroups_35aliquots/20210802.v1/35Aliquot.Barcode2CellType.20210802.v1.tsv", data.table = F)
 
 # preprocess --------------------------------------------------------------
 ## make colors
-colors_tmp1 <- colors_cellgroup14[c("Tumor cells", "CD4+ T-cells", "CD8+ T-cells", "Macrophages", "NK cells", "DC", "Fibroblasts", "Myofibroblasts",  "B-cells")]
-colors_tmp2 <- c(colors_cellgroup14[c("Normal epithelial cells", "EMT tumor cells", "Immune others")], "grey80",
-                 Polychrome::palette36.colors(n = 36)[c("Vivid_Violet","Light_Olive_Brown", "Very_Light_Blue")], "grey80")
-names(colors_tmp2) <- c("Proximal tubule", "Loop of Henle", "Distal convoluted tubule", 'Principle cells', 
-                        "Intercalated cells", "Podocytes", "Endothelial cells", "Unknown")
-colors_cellgroup <- c(colors_tmp1, colors_tmp2)
+colors_cellgroup <- c("#E7298A", "#E69F00", "#56B4E9", "#F0E442", "#D55E00", "#0072B2", "#FB9A99", "#B2DF8A", "#000000",
+                      "#1B9E77", "#B15928", "#7570B3", "#90AD1C", "#AA0DFE", "#85660D", "#BDCDFF", "grey80", "grey50")
+names(colors_cellgroup) <- c("Tumor cells", "CD4+ T-cells", "CD8+ T-cells", "Macrophages", "NK cells", "DC", "Fibroblasts", "Myofibroblasts",  "B-cells",
+                             "Proximal tubule", "Loop of Henle", "Distal convoluted tubule", 
+                             'Principle cells', "Intercalated cells", "Podocytes", "Endothelial cells", 
+                             "Unknown", "Immune others")
 ## process cell type labels
 cellgroup_label_df <- data.frame(cell_type13 = c("B-cells", "CD4+ T-cells", "CD8+ T-cells", "DC", "Endothelial cells", "Fibroblasts", "Immune others", "Macrophages", "NK cells", 
                                                  "Normal epithelial cells", "Tumor cells", "Unknown",

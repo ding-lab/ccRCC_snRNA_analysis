@@ -61,16 +61,16 @@ for (easy_id_tmp in unique(barcode2umap_df$easy_id)) {
   p <- ggplot()
   p <- p + geom_point_rast(data = plot_data_df, mapping = aes(x = UMAP_1, y = UMAP_2, color = Name_TumorCluster), shape = 16, alpha = 0.8, size = 1)
   p <- p + scale_color_manual(values = uniq_cluster_colors, na.translate = T)
-  p <- p + ggtitle(label = paste0("Tumor-cell subclusters for sample ", easy_id_tmp), subtitle = "Seurat assigned")
-  p <- p + guides(colour = guide_legend(override.aes = list(size=3), title = NULL, nrow = 1))
+  # p <- p + ggtitle(label = paste0("Tumor-cell subclusters for sample ", easy_id_tmp), subtitle = "Seurat assigned")
+  p <- p + ggtitle(label = easy_id_tmp, subtitle = "Seurat assigned tumor clusters")
+  p <- p + guides(colour = guide_legend(override.aes = list(size=3), title = NULL, nrow = 2, label.theme = element_text(size = 20)))
   p <- p + theme_void()
   p <- p + theme(legend.position = "bottom")
-  p <- p + theme(legend.text = element_text(size = 15), legend.title = element_text(size = 15))
   p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                 panel.background = element_blank())
+                 panel.background = element_blank(), title = element_text(size = 25))
   ## save plot
   png2write <- paste0(dir_out_png, easy_id_tmp,  ".png")
-  png(filename = png2write, width = 900, height = 1000, res = 150)
+  png(filename = png2write, width = 900, height = 1100, res = 150)
   print(p)
   dev.off()
   # 

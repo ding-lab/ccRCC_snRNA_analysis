@@ -1,13 +1,13 @@
 # set up libraries and output directory -----------------------------------
 ## set working directory
-dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
 source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 ## set run id
-version_tmp <- 2
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -24,6 +24,8 @@ s12_scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tum
 s3_scores_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/calculate_scores/calculate_PTS3_scores_wPT/20210908.v1/PTS12Score.tsv")
 ## input clinical info
 clinical_specimen_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/clinical/extract_ccRCC_specimen_clinical_data/20210706.v1/ccRCC_Specimen_Clinicl_Data.20210706.v1.tsv")
+## input clusters to plot
+clusters_selected_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/plotting/heatmap/heatmap_hallmark38_scores_by_manual_tumorcluster_sct_data_scaled_selected/20220706.v1/intrapatient_tumorclusters.selected.20220706.v1.tsv")
 
 # preprocess-------------------------------------------------
 ## specify genes to filter 
@@ -42,13 +44,16 @@ emt_genes_df <- data.frame(gene = c("VIM", "SERPINE1", "TGFBI",
                                                rep("Tumor-cell\nmarkers", 3)))
 ## add name for the marker groups
 genes2filter <- emt_genes_df$gene
+## get cluster names to filter
+clusters_selected_df <- clusters_selected_df %>%
+  mutate(cluster_name2 = gsub(x = cluster_name, pattern = "\\-", replacement = "."))
 
 # format expression data --------------------------------------------------
 plot_data_long_df <- avgexp_df %>%
   filter(V1 %in% genes2filter) %>%
   melt() %>%
   mutate(id_bycluster_byaliquot = gsub(x = variable, pattern = "SCT.", replacement = "")) %>%
-  dplyr::filter((id_bycluster_byaliquot %in% emt_scores_df$cluster_name) | (grepl(x = id_bycluster_byaliquot, pattern = "PT"))) %>%
+  dplyr::filter((id_bycluster_byaliquot %in% clusters_selected_df$cluster_name2) | (grepl(x = id_bycluster_byaliquot, pattern = "PT"))) %>%
   mutate(easyid_column = str_split_fixed(string = id_bycluster_byaliquot, pattern = "_", n = 2)[,1]) %>%
   mutate(cluster_name = str_split_fixed(string = id_bycluster_byaliquot, pattern = "_", n = 2)[,2])
 ## filter out non-tumor and NA tumor cluster
@@ -99,7 +104,7 @@ colors_s12score <- colorRamp2(c(-67.47553, 0, 67.47553),
 colors_s3score <- colorRamp2(c(-59.14322, 0, 59.14322), 
                              c("white", brewer.pal(n = 11, name = "BrBG")[c(6,2)]))
 ## make colors for cell type
-colors_tumorgroup_sim <- c(RColorBrewer::brewer.pal(n = 9, name = "Set1")[c(1, 5, 4, 2)],  colors_cellgroup14[c("Normal epithelial cells")])
+colors_tumorgroup_sim <- c(RColorBrewer::brewer.pal(n = 9, name = "Set1")[c(1, 5, 4, 2)],  "#1B9E77")
 names(colors_tumorgroup_sim) <- c("EMT",  "Epi-L", "Epi-M", "Epi-H", "PT")
 ## make colors for S1/2/3 group
 colors_s123_group <- c(brewer.pal(n = 9, name = "BuPu")[c(8)], brewer.pal(n = 11, name = "BrBG")[c(2)], 

@@ -32,7 +32,9 @@ count_geneset_df <- enrich_df %>%
   arrange(desc(Freq))
 plotdata_df <- count_geneset_df %>%
   mutate(GeneSet_Name = gsub(x = Description, pattern = "HALLMARK_", replacement = "")) %>%
-  head(15)
+  head(38)
+plotdata_df$GeneSet_Name[plotdata_df$GeneSet_Name == "EPITHELIAL_MESENCHYMAL_TRANSITION"] <- "EMT"
+plotdata_df$GeneSet_Name[plotdata_df$GeneSet_Name == "REACTIVE_OXYGEN_SPECIES_PATHWAY"] <- "REACTIVE_OXYGEN_SPECIES"
 plotdata_df$GeneSet_Name <- factor(x = plotdata_df$GeneSet_Name, levels = plotdata_df$GeneSet_Name)
 
 # plot --------------------------------------------------------------------
@@ -49,6 +51,6 @@ png(file2write, width = 1000, height = 500, res = 150)
 print(p)
 dev.off()
 file2write <- paste0(dir_out, "Count.ORA.P.adjust.0.05.pdf")
-pdf(file2write, width = 4, height = 2.75, useDingbats = F)
+pdf(file2write, width = 8, height = 2.75, useDingbats = F)
 print(p)
 dev.off()

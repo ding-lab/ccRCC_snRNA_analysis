@@ -8,7 +8,7 @@ packages = c(
   "circlize",
   "RColorBrewer",
   "ggthemes",
-  "rcartocolor",
+  # "rcartocolor",
   "Polychrome",
   "ggrastr"
 )
@@ -16,7 +16,7 @@ packages = c(
 for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
-cartocolors_df <- rcartocolor::cartocolors
+# cartocolors_df <- rcartocolor::cartocolors
 
 
 # make colors for tumor segments ------------------------------------------
@@ -40,20 +40,20 @@ colors_cellgroup14 <- c(colors_cellgroup13, RColorBrewer::brewer.pal(n = 12, nam
 names(colors_cellgroup14) <- c(names(colors_cellgroup13), "EMT tumor cells")
 colors_cellgroup14
 
-# make color palette for variant class ------------------------------------
-# rcartocolor::display_carto_all()
-cartocolors_temps <- cartocolors_df[cartocolors_df$Name == "Temps", "n7"][[1]]
-cartocolors_tropic <- cartocolors_df[cartocolors_df$Name == "Tropic", "n7"][[1]]
-variant_class_colors <- c(cartocolors_temps[1:4], 
-                          cartocolors_tropic[4], 
-                          cartocolors_temps[c(5,6,7)],
-                          "white")
-names(variant_class_colors) <- c("Frame_Shift_Del", "Frame_Shift_Ins", "Nonsense_Mutation", 'Splice_Site', 
-                                 "Silent", 
-                                 "Missense_Mutation", "In_Frame_Ins", "In_Frame_Del",
-                                 "None")
-colors_variant_class_sim <- RColorBrewer::brewer.pal(n = 5, name = "Set1")[c(1,2,3,4,5)]
-names(colors_variant_class_sim) <- c("Missense", "Truncation", "In_Frame_Ins", "Missense,Truncation", "In_Frame_Del")
+# # make color palette for variant class ------------------------------------
+# # rcartocolor::display_carto_all()
+# cartocolors_temps <- cartocolors_df[cartocolors_df$Name == "Temps", "n7"][[1]]
+# cartocolors_tropic <- cartocolors_df[cartocolors_df$Name == "Tropic", "n7"][[1]]
+# variant_class_colors <- c(cartocolors_temps[1:4], 
+#                           cartocolors_tropic[4], 
+#                           cartocolors_temps[c(5,6,7)],
+#                           "white")
+# names(variant_class_colors) <- c("Frame_Shift_Del", "Frame_Shift_Ins", "Nonsense_Mutation", 'Splice_Site', 
+#                                  "Silent", 
+#                                  "Missense_Mutation", "In_Frame_Ins", "In_Frame_Del",
+#                                  "None")
+# colors_variant_class_sim <- RColorBrewer::brewer.pal(n = 5, name = "Set1")[c(1,2,3,4,5)]
+# names(colors_variant_class_sim) <- c("Missense", "Truncation", "In_Frame_Ins", "Missense,Truncation", "In_Frame_Del")
 
 # make color palette for copy number state --------------------------------
 cnv_state_colors <- c("gain" = "#e41a1c", "loss" = "#377eb8", "neutral" = "white")

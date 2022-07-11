@@ -39,6 +39,10 @@ exp_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/expre
 ## input survival ddata
 survival_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/clinical/extract_cptac_discovery_ccRCC_survival_time/20220317.v1/CPTAC_Discovery_ccRCC_Survival_Time20220317.v1.tsv")
 
+
+# set paramters -----------------------------------------------------------
+fontsize_plot = 14
+
 # preprocess ------------------------------------------------------
 testdata_df <- merge(x = exp_df, y = survival_df, by.x = "case", by.y = c("CASE_ID"), all.x = T)
 testdata_df <- testdata_df %>%
@@ -53,7 +57,7 @@ table(testdata_df$Expression_group)
 ## EFS_censor == 0 with event; == 1 without event
 ## test
 testdata_comp_df <- testdata_df %>%
-  mutate(surv_time = (OS_time + 9))  %>%
+  mutate(surv_time = (OS_time + 9)/365)  %>%
   mutate(surv_status = ifelse(OS_status == "censored", 1, 2)) %>%
   filter(!is.na(surv_status) & !is.na(surv_time) & !is.na(Expression_group)) %>%
   filter(Expression_group != "Medium")
@@ -64,28 +68,28 @@ res <- ggsurvplot(fit_efs,
                   conf.int = TRUE,
                   surv.median.line = "hv", pval = TRUE,
                   legend.title = paste0("tumor-cell-intrinsic\ninflammation score\n(mRNA)"),
-                  legend.labs = c("High", "Low"),
+                  legend.labs = c("High", "Low"), 
                   legend = "top",
-                  xlab = "Time (days)",
+                  xlab = "Time (year)",
                   ylab = "Overall Survival",
                   palette = c("#800026", "#FEB24C"),
-                  ggtheme = theme_survminer(base_size = 12,
+                  ggtheme = theme_survminer(base_size = fontsize_plot,
                                             base_family = "",
-                                            font.main = c(12, "plain", "black"),
-                                            font.submain = c(12, "plain", "black"),
-                                            font.x = c(12, "plain", "black"),
-                                            font.y = c(12, "plain", "black"),
-                                            font.caption = c(12, "plain", "black"),
-                                            font.tickslab = c(12, "plain", "black"),
+                                            font.main = c(fontsize_plot, "plain", "black"),
+                                            font.submain = c(fontsize_plot, "plain", "black"),
+                                            font.x = c(fontsize_plot, "plain", "black"),
+                                            font.y = c(fontsize_plot, "plain", "black"),
+                                            font.caption = c(fontsize_plot, "plain", "black"),
+                                            font.tickslab = c(fontsize_plot, "plain", "black"),
                                             legend = c("top", "bottom", "left", "right", "none"),
-                                            font.legend = c(12, "plain", "black")),
-                  conf.int.alpha = 0.1,
+                                            font.legend = c(fontsize_plot, "plain", "black")),
+                  conf.int.alpha = 0.1, tables.height = 0.3,
                   risk.table = TRUE, # Add risk table
                   risk.table.col = "strata", # Change risk table color by groups
                   linetype = "strata") # Change line type by groups
 res$table <- res$table + theme(axis.line = element_blank())
 file2write <- paste0(dir_out, "OS.pdf")
-pdf(file2write, width = 4, height = 5, useDingbats = F)
+pdf(file2write, width = 3.25, height = 5, useDingbats = F)
 print(res)
 dev.off()
 

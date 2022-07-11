@@ -48,8 +48,11 @@ samples_plot <- c("rcc4_scrambled", "rcc4_klf9_c2")
 sampletexts_plot <- c("sh-NC", "sh-KLF9")
 genes_plot <- c("MXI1", "HK2")
 # genes_plot <- c("MXI1", "HK2", "MYC")
-samples_plot <- c("rcc4_scrambled", "rcc4_mxi1_c1", "rcc4_mxi1_c2")
-sampletexts_plot <- c("sh-NC", "sh-MXI1-C1", "sh-MXI1-C2")
+# samples_plot <- c("rcc4_scrambled", "rcc4_mxi1_c1", "rcc4_mxi1_c2")
+# sampletexts_plot <- c("sh-NC", "sh-MXI1-C1", "sh-MXI1-C2")
+samples_plot <- c("rcc4_scrambled", "rcc4_mxi1_c1")
+sampletexts_plot <- c("sh-NC", "sh-MXI1-C1")
+
 
 # format expression data --------------------------------------------------
 plot_data_long_df <- exp_df %>%
@@ -69,7 +72,7 @@ names(colors_byline) <- c("sh-NC", "sh-MXI1-C1", "sh-MXI1-C2")
 
 p <- ggplot()
 p <- p + geom_col(data = plot_data_long_df, mapping = aes(x = external_gene_name, y = value, fill = sample_text2), position=position_dodge(), color = "black")
-p <- p + scale_fill_manual(values = colors_byline)
+p <- p + scale_fill_manual(values = colors_byline[sampletexts_plot])
 p <- p + guides(fill = guide_legend(title = "Cell line", title.theme = element_text(size = 15), label.theme = element_text(size = 15)))
 p <- p + theme_classic()
 p <- p + ylab(label = "% CPM to sh-NC")
@@ -80,7 +83,7 @@ p <- p + theme(axis.text.x = element_text(angle = 0, vjust = 0.5, color = "black
 p <- p + theme(axis.title.x = element_blank(), axis.ticks.x = element_blank(), axis.title.y = element_text(color = "black", size = 15), title = element_text(size = 15))
 p
 file2write <- paste0(dir_out, paste0(genes_plot, collapse = "_"), ".bulkRNA.CPM.", "pdf")
-pdf(file2write, width = 4.7, height = 3, useDingbats = F)
+pdf(file2write, width = 4.5, height = 3, useDingbats = F)
 print(p)
 dev.off()
 file2write <- paste0(dir_out, paste0(genes_plot, collapse = "_"), ".bulkRNA.CPM.", "png")

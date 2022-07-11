@@ -2,7 +2,7 @@
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -10,7 +10,7 @@ source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 library(circlize)
 ## set run id
-version_tmp <- 3
+version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 dir_out <- paste0(makeOutDir(), run_id, "/")
@@ -79,7 +79,7 @@ degs_snrna_bed_list = list(degs_snrna_bed1, degs_snrna_bed2)
 deps_bed1 <- degs_df %>%
   # filter(!is.na(Num_sig_up.snRNA) & (Num_sig_down.snRNA >=5 & Num_up == 0)) %>%
   # filter(!is.na(FDR.snRNA.cnvcorrected) & FDR.snRNA.cnvcorrected < 0.05) %>%
-  filter(FDR.bulkpro < 0.05) %>%
+  filter(!is.na(FDR.bulkpro) & FDR.bulkpro < 0.05) %>%
   filter(meddiff_exp.bulkpro < 0) %>%
   # filter(meddiff_exp.bulkpro < -0.1) %>%
   # filter(meddiff_exp.bulkpro < -log2(1.1)) %>%
@@ -92,7 +92,7 @@ deps_bed1 <- degs_df %>%
 deps_bed2 <- degs_df %>%
   # filter(!is.na(Num_sig_up.snRNA) & (Num_sig_up.snRNA >=5 & Num_down == 0)) %>%
   # filter(!is.na(FDR.snRNA.cnvcorrected) & FDR.snRNA.cnvcorrected < 0.05) %>%
-  filter(FDR.bulkpro < 0.05) %>%
+  filter(!is.na(FDR.bulkpro) & FDR.bulkpro < 0.05) %>%
   filter(meddiff_exp.bulkpro > 0) %>%
   # filter(meddiff_exp.bulkpro > 0.1) %>%
   # filter(meddiff_exp.bulkpro > log2(1.1)) %>%

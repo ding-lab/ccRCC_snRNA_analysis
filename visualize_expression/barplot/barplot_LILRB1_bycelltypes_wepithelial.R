@@ -31,7 +31,7 @@ plot_data_df <- avgexp_df %>%
   mutate(cell_type = gsub(x = variable, pattern = "SCT\\.", replacement = "")) %>%
   filter(cell_type != "Unknown") %>%
   arrange(value)
-plot_data_df$cell_type <- factor(x = plot_data_df$cell_type, levels = plot_data_df$cell_type)
+plot_data_df$cell_type <- factor(x = plot_data_df$cell_type, levels = rev(plot_data_df$cell_type))
 
 # plot --------------------------------------------------------------------
 p <- ggplot()
@@ -47,6 +47,24 @@ p
 
 file2write <- paste0(dir_out, genes_filter, ".pdf")
 pdf(file2write, width = 3, height = 3, useDingbats = F)
+print(p)
+dev.off()
+
+# plot --------------------------------------------------------------------
+fontsize_plot <- 18
+p <- ggplot()
+p <- p + geom_bar(data = plot_data_df, mapping = aes(x = cell_type, y = value), stat = "identity")
+p <- p + ylab("LILRB1\nexpression")
+# p <- p + ggtitle(paste0(genes_filter, " expression"))
+p <- p + theme_classic(base_size = fontsize_plot)
+p <- p + theme(axis.text.y = element_text(color = "black", size = fontsize_plot),
+               axis.text.x = element_text(color = "black", size = fontsize_plot, angle = 90, hjust = 1, vjust = 0.5),
+               axis.title.y = element_text(color = "black", size = fontsize_plot),
+               axis.title.x = element_blank())
+p
+
+file2write <- paste0(dir_out, genes_filter, ".horizontal.pdf")
+pdf(file2write, width = 5, height = 3, useDingbats = F)
 print(p)
 dev.off()
 

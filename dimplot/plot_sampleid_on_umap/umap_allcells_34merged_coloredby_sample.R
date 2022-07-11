@@ -41,7 +41,7 @@ p <- p + geom_point_rast(data = plot_data_df,
                          mapping = aes(x = UMAP_1, y = UMAP_2, color = sample),
                          alpha = 1, size = 0.1, shape = 16)
 p <- p + scale_color_manual(values = colors_cellgroup)
-p <- p + guides(colour = guide_legend(override.aes = list(size=4), title = NULL))
+p <- p + guides(colour = guide_legend(override.aes = list(size=3), title = NULL, ncol = 4, label.theme = element_text(size = 14)))
 p <- p + theme_void()
 p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                panel.background = element_blank(),
@@ -51,7 +51,7 @@ p <- p + theme(axis.text.x=element_blank(),
                axis.ticks.x=element_blank())
 p <- p + theme(axis.text.y=element_blank(),
                axis.ticks.y=element_blank())
-p <- p + theme(legend.position="right", aspect.ratio=1)
+p <- p + theme(legend.position="bottom", aspect.ratio=1)
 p
 # ## save as pdf
 # file2write <- paste0(dir_out, "cellgroup_on_umap.", ".pdf")
@@ -63,5 +63,9 @@ file2write <- paste0(dir_out, "cellgroup_on_umap.", ".png")
 png(filename = file2write, width = 1500, height = 1000, res = 150)
 print(p)
 dev.off()
-
+## save as pdf
+file2write <- paste0(dir_out, "cellgroup_on_umap.", ".pdf")
+pdf(file = file2write, width = 8, height = 9, useDingbats = F)
+print(p)
+dev.off()
 #

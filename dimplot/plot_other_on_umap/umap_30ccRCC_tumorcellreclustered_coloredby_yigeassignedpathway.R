@@ -61,7 +61,7 @@ for (genemodule_tmp in c("Cell_cycle", "Immune", "EMT", "mTOR")) {
                            mapping = aes(x = UMAP_1, y = UMAP_2, color = cell_group),
                            alpha = 1, size = 0.1, shape = 16)
   p <- p + scale_color_manual(values = colors_cellgroup)
-  p <- p + guides(colour = guide_legend(override.aes = list(size=4), title = NULL))
+  p <- p + guides(colour = guide_legend(override.aes = list(size=4), title = NULL, label.theme = element_text(size = 18), nrow = 3))
   p <- p + theme_void()
   p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                  panel.background = element_blank(),

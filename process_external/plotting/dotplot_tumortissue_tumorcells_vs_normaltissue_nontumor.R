@@ -38,6 +38,7 @@ bulk.rna.df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/
 
 # specify parameters ---------------------------------------------------
 genes_filter <- c("CA9", "SNAP25", "TGFA", "PLIN2", "ABCC3", "PHKA2", "KCTD3", "FTO", "SEMA6A", "EPHA6", "ABLM3", "PLEKHA1", "SLC6A3", "SHISA9", "CP", "PCSK6", "NDRG1", "EGFR", "ENPP3", "COL23A1", "UBE2D2")
+# genes_filter <- c("MXI1", "KLF9", "NFKB1", "RBPJ")
 
 # preprocess --------------------------------------------------------------
 foldchanges_df <- merge(x = data.frame(gene_symbol = genes_filter),
@@ -99,7 +100,7 @@ p <- p + ylab("Log2(Fold change)")
 p <- p + theme(panel.grid.major.y = element_line(size=.1, color="black" ))
 p <- p + theme(axis.text.y = element_text(size = 12, color = "black"), axis.title.y = element_blank())
 p <- p + theme(axis.text.x = element_text(size = 12, color = "black"), axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"), ends = "last")))
-p <- p + theme(legend.position = "top")
+p <- p + theme(legend.position = "bottom")
 p <- p + guides(fill = guide_legend(override.aes = list(size=4), nrow = 4, title = NULL, label.theme = element_text(size = 12)))
 p
 file2write <- paste0(dir_out, "Foldchanges", ".png")

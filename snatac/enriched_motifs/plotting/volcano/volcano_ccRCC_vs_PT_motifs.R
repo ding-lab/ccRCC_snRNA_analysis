@@ -29,8 +29,6 @@ for (pkg_name_tmp in packages) {
 # input dependencies ------------------------------------------------------
 # dam_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Enriched_Motifs/Score_difference.Tumor_Normal_comparison.20210509.tsv")
 dam_df <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Enriched_Motifs/Score_difference.Tumor_Normal_comparison.20210715.tsv")
-dam_df1 <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Enriched_Motifs/Motif_scores_Tumor_samples_vs_PT.20210715.tsv")
-dam_df2 <- fread(data.table = F, input = "./Resources/snATAC_Processed_Data/Enriched_Motifs/DOWN_Motif_scores_Tumor_samples_vs_PT.20210720.v2.tsv")
 
 # set plotting parameters -------------------------------------------------
 ## set y bottom threshold
@@ -63,34 +61,28 @@ plot_data_df <- dam_df %>%
                                   ifelse(Num_up == 0 & Num_sig_down >= 12, "consistently lower in ccRCC", "insignificant"))) %>%
   mutate(x_plot = ifelse(avg_diff < -2, -2, ifelse(avg_diff > 2, 2,  avg_diff))) %>%
   mutate(y_plot = avg_log10_pvalue) %>%
-  arrange(desc(foldchange_type))
+  arrange(desc(foldchange_type), desc(x_plot))
 ## decide TFs to show
-tfnames_show <- plot_data_df$TF_Name[plot_data_df$Num_sig_up == 24 | plot_data_df$Num_sig_down == 24]
+tfnames_show <- plot_data_df$TF_Name[plot_data_df$Num_sig_up == 24]
+tfnames_show <- c(tfnames_show, "HNF4G", "HNF4A", "HNF1A", "HNF1B", "RXRB", "RXRG", "PPARA::RXRA")
+# tfnames_show <- plot_data_df$TF_Name[plot_data_df$Num_sig_up == 24 | plot_data_df$Num_sig_down == 24]
+
 ## label TFS to show
 plot_data_df <- plot_data_df %>%
   # mutate(TF_modified = gsub(x = TF_Name, pattern = "\\(var.2\\)", replacement = "*")) %>%
   mutate(text_tf = ifelse(TF_Name %in% tfnames_show, TF_Name, NA))
 
-# plot all markers--------------------------------------------------------------------
-p <- ggplot()
+
+# plot --------------------------------------------------------------------
+p <- ggplot(data = plot_data_df, mapping = aes(x = x_plot, y = y_plot, color = foldchange_type, label = text_tf))
 p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey70")
-p <- p + geom_point(data = subset(plot_data_df, foldchange_type == "insignificant"), 
-                    mapping = aes(x = x_plot, y = y_plot, color = foldchange_type), alpha = 0.5, shape = 16)
-p <- p + geom_point(data = subset(plot_data_df, foldchange_type != "insignificant"), 
-                    mapping = aes(x = x_plot, y = y_plot, color = foldchange_type), alpha = 0.9, shape = 16, size = 3)
+p <- p + geom_point(alpha = 0.8, shape = 16)
 p <- p + scale_color_manual(values = c("consistently higher in ccRCC" = color_red, 
                                        "consistently lower in ccRCC" = color_blue, 
                                        "insignificant" = "grey50"))
-p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_tf) & x_plot > 0),
-                         mapping = aes(x = x_plot, y = y_plot, label = text_tf), 
-                         color = "black", alpha = 1, size = 5, #fontface = "bold",
-                         segment.size = 0.2, segment.alpha = 0.5, min.segment.length = 0,
-                         xlim = c(0, NA), max.overlaps = Inf)
-p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_tf) & x_plot < 0),
-                         mapping = aes(x = x_plot, y = y_plot, label = text_tf), 
-                         color = "black", alpha = 1, size = 5, #fontface = "bold",
-                         segment.size = 0.2, segment.alpha = 0.5, min.segment.length = 0,
-                         xlim = c(NA, 0), ylim = c(75, NA), max.overlaps = Inf)
+p <- p + geom_text_repel(alpha = 1, size = 5, force = 3,
+                         segment.size = 0.2, segment.alpha = 0.5, min.segment.length = 0, box.padding = 0.5,
+                         max.overlaps = Inf)
 p <- p + scale_size_area(max_size = 4)
 p <- p + theme_classic()
 p <- p + xlab("Motif score difference for\nccRCC cells vs. PT cells")
@@ -98,6 +90,7 @@ p <- p + ylab("-Log10FDR")
 p <- p + theme(axis.text = element_text(size = 14, color = "black"),
                axis.title = element_text(size = 14),
                legend.position = "none")
+p
 
 ## set run id
 version_tmp <- 1
@@ -110,4 +103,32 @@ file2write <- paste0(dir_out, "volcano.nolegend.", "pdf")
 pdf(file2write, width = 5.5, height = 5, useDingbats = F)
 print(p)
 dev.off()
+
+# # archive--------------------------------------------------------------------
+# p <- ggplot()
+# p <- p + geom_vline(xintercept = 0, linetype = 2, color = "grey70")
+# p <- p + geom_point(data = subset(plot_data_df, foldchange_type == "insignificant"), 
+#                     mapping = aes(x = x_plot, y = y_plot, color = foldchange_type), alpha = 0.5, shape = 16)
+# p <- p + geom_point(data = subset(plot_data_df, foldchange_type != "insignificant"), 
+#                     mapping = aes(x = x_plot, y = y_plot, color = foldchange_type), alpha = 0.9, shape = 16, size = 3)
+# p <- p + scale_color_manual(values = c("consistently higher in ccRCC" = color_red, 
+#                                        "consistently lower in ccRCC" = color_blue, 
+#                                        "insignificant" = "grey50"))
+# p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_tf) & x_plot > 0),
+#                          mapping = aes(x = x_plot, y = y_plot, label = text_tf), 
+#                          color = "black", alpha = 1, size = 5, #fontface = "bold",
+#                          segment.size = 0.2, segment.alpha = 0.5, min.segment.length = 0,
+#                          xlim = c(0, NA), max.overlaps = Inf)
+# p <- p + geom_text_repel(data = subset(plot_data_df, !is.na(text_tf) & x_plot < 0),
+#                          mapping = aes(x = x_plot, y = y_plot, label = text_tf), 
+#                          color = "black", alpha = 1, size = 5, #fontface = "bold",
+#                          segment.size = 0.2, segment.alpha = 0.5, min.segment.length = 0,
+#                          xlim = c(NA, 0), ylim = c(75, NA), max.overlaps = Inf)
+# p <- p + scale_size_area(max_size = 4)
+# p <- p + theme_classic()
+# p <- p + xlab("Motif score difference for\nccRCC cells vs. PT cells")
+# p <- p + ylab("-Log10FDR")
+# p <- p + theme(axis.text = element_text(size = 14, color = "black"),
+#                axis.title = element_text(size = 14),
+#                legend.position = "none")
 

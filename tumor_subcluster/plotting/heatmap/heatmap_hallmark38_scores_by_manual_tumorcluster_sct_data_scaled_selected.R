@@ -69,7 +69,6 @@ clustername_df$case <- mapvalues(x = clustername_df$sampleid, from = id_metadata
 clustername_df <- clustername_df %>%
   filter(case != "C3L-00359") %>%
   filter(!(cluster_name %in% c("C3N.00733.T2_C5", "C3L.01313.T1_C7" , "C3L.01287.T1_C2")))
-##
 rownames(scores_df) <- scores_df$cluster_name
 ## prepare CNV data
 cnv_df <- cnv_df %>%
@@ -82,6 +81,7 @@ colnames(plot_data_mat) <- scores_df$cluster_name
 ## make row label
 rownames_plot <- rownames(plot_data_mat)
 rowlabels_plot <- gsub(x = rownames_plot, pattern = "_Score", replacement = "")
+# rowlabels_plot <- tolower(rowlabels_plot)
 # rowlabels_plot[rowlabels_plot == "EPITHELIAL_MESENCHYMAL_TRANSITION"] <- "EMT"
 
 # make column order -------------------------------------------------------
@@ -156,18 +156,20 @@ colors_cellfrac = colorRamp2(c(quantile(fraction_bycase_vec, 0.1),
                                quantile(fraction_bycase_vec, 0.9)), 
                              brewer.pal(n = 5, "YlGn"))
 ## make column annotation object
-colanno_obj <- HeatmapAnnotation(fraction_in_patient = anno_simple(x = fraction_bycase_vec, col = colors_cellfrac),
-                                 chr3p_VHL_loss_bycluster = anno_simple(x = VHL_Loss_frac_vec, col = colors_loss_frac),
-                                 chr3p_SETD2_loss_bycluster = anno_simple(x = setd2_loss_frac_vec, col = colors_loss_frac),
-                                 chr5q_SQSTM1_gain_bycluster = anno_simple(x = SQSTM1_Gain_frac_vec, col = colors_gain_frac),
-                                 chr5q_GOLPH3_gain_bycluster = anno_simple(x = GOLPH3_Gain_frac_vec, col = colors_gain_frac),
-                                 chr3q_MECOM_gain_bycluster = anno_simple(x = MECOM_Gain_frac_vec, col = colors_gain_frac),
-                                 driver_mutation_bycluster = anno_simple(x = mut_map_vec, col = colors_truefalse[mut_map_vec]),
-                                 VHL_mutated_bycase = anno_simple(x = VHL_bycase_vec, col = colors_truefalse[VHL_bycase_vec]),
-                                 PBRM1_mutated_bycase = anno_simple(x = PBRM1_bycase_vec, col = colors_truefalse[PBRM1_bycase_vec]),
-                                 BAP1_mutated_bycase = anno_simple(x = BAP1_bycase_vec, col = colors_truefalse[BAP1_bycase_vec]),
-                                 SETD2_mutated_bycase = anno_simple(x = SETD2_bycase_vec, col = colors_truefalse[SETD2_bycase_vec]),
-                                 Inflammatory_score_group = anno_simple(x = inflam_assign_vec, col = colors_topbottom[inflam_assign_vec]), annotation_name_side = "left")
+fontsize_plot <- 21
+colanno_obj <- HeatmapAnnotation(fraction_in_patient = anno_simple(x = fraction_bycase_vec, col = colors_cellfrac, height = unit(0.7, "cm")),
+                                 chr3p_VHL_loss_bycluster = anno_simple(x = VHL_Loss_frac_vec, col = colors_loss_frac, height = unit(0.7, "cm")),
+                                 chr3p_SETD2_loss_bycluster = anno_simple(x = setd2_loss_frac_vec, col = colors_loss_frac, height = unit(0.7, "cm")),
+                                 chr5q_SQSTM1_gain_bycluster = anno_simple(x = SQSTM1_Gain_frac_vec, col = colors_gain_frac, height = unit(0.7, "cm")),
+                                 chr5q_GOLPH3_gain_bycluster = anno_simple(x = GOLPH3_Gain_frac_vec, col = colors_gain_frac, height = unit(0.7, "cm")),
+                                 #chr3q_MECOM_gain_bycluster = anno_simple(x = MECOM_Gain_frac_vec, col = colors_gain_frac),
+                                 driver_mutation_bycluster = anno_simple(x = mut_map_vec, col = colors_truefalse[mut_map_vec], height = unit(0.7, "cm")),
+                                 VHL_mutated_bycase = anno_simple(x = VHL_bycase_vec, col = colors_truefalse[VHL_bycase_vec], height = unit(0.7, "cm")),
+                                 PBRM1_mutated_bycase = anno_simple(x = PBRM1_bycase_vec, col = colors_truefalse[PBRM1_bycase_vec], height = unit(0.7, "cm")),
+                                 BAP1_mutated_bycase = anno_simple(x = BAP1_bycase_vec, col = colors_truefalse[BAP1_bycase_vec], height = unit(0.7, "cm")),
+                                 SETD2_mutated_bycase = anno_simple(x = SETD2_bycase_vec, col = colors_truefalse[SETD2_bycase_vec], height = unit(0.7, "cm")),
+                                 Inflammatory_score_group = anno_simple(x = inflam_assign_vec, col = colors_topbottom[inflam_assign_vec], height = unit(0.7, "cm")),
+                                 annotation_name_side = "left", annotation_name_gp = gpar(fontsize = fontsize_plot))
 # ## merge data
 # colanno_df <- enrich_plot_df %>%
 #   mutate(EMT_Module_Enriched = (cluster_name %in% emt_group_df$cluster_name[emt_group_df$epithelial_group == "EMT"]))
@@ -187,7 +189,7 @@ colanno_obj <- HeatmapAnnotation(fraction_in_patient = anno_simple(x = fraction_
 
 # make row annotation -----------------------------------------------------
 freq_de_vec <- mapvalues(x = rownames_plot, from = genesets_plot_df$scoregroup_name, to = as.vector(genesets_plot_df$Freq)); freq_de_vec <- as.numeric(freq_de_vec)
-rowanno_obj <- rowAnnotation(Freq_of_DE = anno_barplot(freq_de_vec), annotation_name_side = "top")
+rowanno_obj <- rowAnnotation(Freq_of_DE = anno_barplot(freq_de_vec, width = unit(1.75, "cm"), axis_param = list(gp = gpar(fontsize = fontsize_plot))), annotation_name_side = "top", annotation_name_gp = gpar(fontsize = fontsize_plot))
 
 
 # make gene set split -----------------------------------------------------
@@ -203,33 +205,34 @@ clustercount_df <- clustername_df %>%
 column_split_factor <- factor(x = column_split_vec, levels = clustercount_df$case)
 
 # plot  ------------------------------------------------------------
-p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat, 
-                             col = colors_heatmapbody,
-                             na_col = color_na, #border = "black",
-                             cell_fun = function(j, i, x, y, w, h, fill) {
-                               if (plot_data_mat[i,j] >= (quantile(plot_data_mat[i,], 0.75)+1.5*IQR(plot_data_mat[i,]))) {
-                                 grid.text("*", x, y)
-                               }
-                               # if (plot_data_mat[i,j] >= max(plot_data_mat[,j])) {
-                               #   # if (plot_data_mat[i,j] >= min(tail(sort(plot_data_mat[i,]), 2))) {
-                               #   grid.rect(x = x, y = y, width = w, height = h,
-                               #             gp = gpar(col = "red", fill = NA))
-                               # }
-                             },
-                             width = ncol(plot_data_mat)*unit(4, "mm"), 
-                             # height = nrow(plot_data_mat)*unit(5, "mm"),
-                             ## row
-                             show_row_names = T, row_names_gp = gpar(fontsize = 16), row_names_side = "right",
-                             show_row_dend = T, row_dend_side = "left", cluster_row_slices = T, 
-                             row_split = row_split_vec, row_title_side = "left", row_title_rot = 0, row_title_gp = gpar(fontsize = 16),
-                             row_labels = rowlabels_plot, 
-                             right_annotation = rowanno_obj,
-                             ## column
-                             show_column_dend = F, cluster_columns = T, 
-                             column_split = column_split_factor, cluster_column_slices = F, column_title_rot = 90,
-                             top_annotation = colanno_obj, 
-                             show_column_names = F, column_names_side = "top", column_names_gp = gpar(fontsize = 5),
-                             show_heatmap_legend = F)
+p <- Heatmap(matrix = plot_data_mat, 
+             col = colors_heatmapbody,
+             na_col = color_na, #border = "black",
+             cell_fun = function(j, i, x, y, w, h, fill) {
+               if (plot_data_mat[i,j] >= (quantile(plot_data_mat[i,], 0.75)+1.5*IQR(plot_data_mat[i,]))) {
+                 grid.text("*", x, y)
+               }
+               # if (plot_data_mat[i,j] >= max(plot_data_mat[,j])) {
+               #   # if (plot_data_mat[i,j] >= min(tail(sort(plot_data_mat[i,]), 2))) {
+               #   grid.rect(x = x, y = y, width = w, height = h,
+               #             gp = gpar(col = "red", fill = NA))
+               # }
+             },
+             width = ncol(plot_data_mat)*unit(4, "mm"), 
+             # height = nrow(plot_data_mat)*unit(5, "mm"),
+             ## row
+             show_row_names = T, row_names_gp = gpar(fontsize = fontsize_plot), row_names_side = "right",
+             show_row_dend = T, row_dend_side = "left", cluster_row_slices = T, 
+             row_split = row_split_vec, row_title_side = "left", row_title_rot = 0, row_title_gp = gpar(fontsize = 25),
+             row_labels = tolower(rowlabels_plot), 
+             right_annotation = rowanno_obj,
+             ## column
+             show_column_dend = F, cluster_columns = T, 
+             column_split = column_split_factor, cluster_column_slices = F, column_title = NULL,
+             #column_title_rot = 90,
+             top_annotation = colanno_obj, 
+             show_column_names = F, #column_names_side = "top", column_names_gp = gpar(fontsize = 5),
+             show_heatmap_legend = F)
 list_lgd = list(
   Legend(col_fun = colors_heatmapbody, 
          title = "Gene set score", 
@@ -268,7 +271,7 @@ list_lgd = list(
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "GeneSetScores", ".pdf")
-pdf(file2write, width = 25, height = 13, useDingbats = F)
+pdf(file2write, width = 25, height = 14, useDingbats = F)
 draw(object = p,
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
 dev.off()
@@ -282,7 +285,7 @@ p <- ComplexHeatmap::Heatmap(matrix = plot_data_mat,
                              show_row_names = T, row_names_gp = gpar(fontsize = 16), row_names_side = "right",
                              show_row_dend = T, row_dend_side = "left", cluster_row_slices = T, 
                              row_split = row_split_vec, row_title_side = "left", row_title_rot = 0, row_title_gp = gpar(fontsize = 16),
-                             row_labels = rowlabels_plot, 
+                             row_labels = tolower(rowlabels_plot), 
                              right_annotation = rowanno_obj,
                              ## column
                              show_column_dend = F, cluster_columns = T, 
@@ -296,6 +299,9 @@ draw(object = p,
      annotation_legend_side = "bottom", annotation_legend_list = list_lgd)
 dev.off()
 
+# output clusters to keep -------------------------------------------------
+file2write <- paste0(dir_out, "intrapatient_tumorclusters.selected.", run_id, ".tsv")
+write.table(x = clustername_df, file = file2write, quote = F, sep = "\t", row.names = F)
 # VHL_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.VHL)); VHL_bysample_vec <- as.character(VHL_bysample_vec != "None")
 # PBRM1_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.PBRM1)); PBRM1_bysample_vec <- as.character(PBRM1_bysample_vec != "None")
 # BAP1_bysample_vec <- mapvalues(x = sampleids_column, from = bulk_sn_omicsprofile_df$Aliquot_snRNA_WU, to = as.vector(bulk_sn_omicsprofile_df$Mut.BAP1)); BAP1_bysample_vec <- as.character(BAP1_bysample_vec != "None")
@@ -305,3 +311,5 @@ dev.off()
 # PBRM1_mutated_bysample = anno_simple(x = PBRM1_bysample_vec, col = colors_truefalse[PBRM1_bysample_vec]),
 # BAP1_mutated_bysample = anno_simple(x = BAP1_bysample_vec, col = colors_truefalse[BAP1_bysample_vec]),
 # SETD2_mutated_bysample = anno_simple(x = SETD2_bysample_vec, col = colors_truefalse[SETD2_bysample_vec]),
+
+

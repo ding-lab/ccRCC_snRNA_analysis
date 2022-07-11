@@ -44,6 +44,11 @@ cellnumber_percluster_df <- barcode_merged_df %>%
 nrow(cellnumber_percluster_df[cellnumber_percluster_df$Freq >= 50,])
 nrow(cellnumber_percluster_df[cellnumber_percluster_df$Freq > 50,])
 
+clusters_selected_df <- cellnumber_percluster_df %>%
+  filter(easy_id != "C3L-00359-T1") %>%
+  filter(Freq > 50)
+nrow(clusters_selected_df)
+
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "CellNumberPerTumorManualCluster.", run_id, ".tsv")
 write.table(x = cellnumber_percluster_df, file = file2write, quote = F, sep = "\t", row.names = F)

@@ -81,4 +81,27 @@ png(filename = file2write, width = 1000, height = 1100, res = 150)
 print(p)
 dev.off()
 
-#
+
+# plot for response -------------------------------------------------------
+p <- ggplot()
+p <- p + geom_point_rast(data = plot_data_df, 
+                         mapping = aes(x = UMAP_1, y = UMAP_2, color = Cell_group),
+                         alpha = 1, size = 0.1, shape = 16)
+p <- p + scale_color_manual(values = colors_cellgroup)
+p <- p + theme_void()
+p <- p + guides(colour = guide_legend(override.aes = list(size=3), title = NULL, ncol = 3, label.theme = element_text(size = 14)))
+p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+               panel.background = element_blank(),
+               axis.line = element_blank())
+# axis.line = element_line(colour = "black"))
+p <- p + theme(axis.text.x=element_blank(),
+               axis.ticks.x=element_blank())
+p <- p + theme(axis.text.y=element_blank(),
+               axis.ticks.y=element_blank())
+p <- p + theme(legend.position="bottom")
+p
+## save as pdf
+file2write <- paste0(dir_out, "cellgroup_on_umap2.", ".pdf")
+pdf(file = file2write, width = 6, height = 7, useDingbats = F)
+print(p)
+dev.off()

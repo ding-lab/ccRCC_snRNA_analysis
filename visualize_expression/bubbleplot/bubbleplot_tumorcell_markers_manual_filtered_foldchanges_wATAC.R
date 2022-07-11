@@ -2,7 +2,7 @@
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -60,11 +60,10 @@ names(colors_datatype) <- c(dataname_snrna, dataname_bulk_rna, dataname_bulk_pro
 
 # plot --------------------------------------------------------------------
 p <- ggplot()
-# p <- ggplot(data = plotdata_df, mapping = aes(x = y_plot, y = x_plot, fill = data_type, color = as.character(cell_group == "Macrophages")))
-p <- p + geom_dotplot(data = plotdata_df, mapping = aes(x = y_plot, y = x_plot, fill = data_type),
+p <- p + geom_dotplot(data = plotdata_df, mapping = aes(x = y_plot, y = x_plot, fill = data_type, color = (data_type == dataname_snrna)),
                       binaxis='y', stackdir='center', position=position_dodge(0.6), alpha = 0.7)
 p <- p + scale_fill_manual(values = colors_datatype)
-# p <- p + scale_color_manual(values = c("TRUE" = "black", "FALSE" = NA))
+p <- p + scale_color_manual(values = c("TRUE" = "black", "FALSE" = NA))
 # p <- p + geom_hline(yintercept = 1, linetype = 2, alpha = 0.5)
 p <- p + theme_classic(base_size = 12)
 p <- p + coord_flip()

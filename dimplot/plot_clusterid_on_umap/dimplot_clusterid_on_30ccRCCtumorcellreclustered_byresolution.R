@@ -43,17 +43,19 @@ plot_data_df <- merge(x = barcode2umap_df %>%
 table(plot_data_df$integrated_snn_res.2)
 
 # make plots --------------------------------------------------------------
-for (res_tmp in c(0.1, 0.2, 0.3, 0.4, 0.5, 1, 2)) {
-  plot_data_df[, "cluster_id"] <- factor(plot_data_df[, paste0("integrated_snn_res.", res_tmp)])
-  clusterids <- sort(unique(plot_data_df$cluster_id))
+for (res_tmp in c(1)) {
+# for (res_tmp in c(0.1, 0.2, 0.3, 0.4, 0.5, 1, 2)) {
+  plot_data_df[, "cluster_id"] <- plot_data_df[, paste0("integrated_snn_res.", res_tmp)]
+  plot_data_df$clustername_plot <- paste0("MC", (plot_data_df$cluster_id+1))
+  clusterids <- paste0("MC", as.numeric(sort(unique(factor(plot_data_df$cluster_id)))))
   colors_bycluster <- Polychrome::palette36.colors(n = (length(clusterids)+1))[-2]
   names(colors_bycluster) <- clusterids
   p <- ggplot()
   p <- p + geom_point_rast(data = plot_data_df, 
-                           mapping = aes(x = UMAP_1, y = UMAP_2, color = cluster_id),
+                           mapping = aes(x = UMAP_1, y = UMAP_2, color = clustername_plot),
                            alpha = 1, size = 0.1, shape = 16)
   p <- p + scale_color_manual(values = colors_bycluster)
-  p <- p + guides(colour = guide_legend(override.aes = list(size=4), title = NULL))
+  p <- p + guides(colour = guide_legend(override.aes = list(size=4), title = NULL, label.theme = element_text(size = 18), nrow = 3))
   p <- p + theme_void()
   p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                  panel.background = element_blank(),
@@ -67,6 +69,10 @@ for (res_tmp in c(0.1, 0.2, 0.3, 0.4, 0.5, 1, 2)) {
   ## save as png
   file2write <- paste0(dir_out, "resolution", res_tmp, ".png")
   png(filename = file2write, width = 1000, height = 1100, res = 150)
+  print(p)
+  dev.off()
+  file2write <- paste0(dir_out, "resolution", res_tmp, ".pdf")
+  pdf(file2write, width = 6, height = 6, useDingbats = F)
   print(p)
   dev.off()
 }

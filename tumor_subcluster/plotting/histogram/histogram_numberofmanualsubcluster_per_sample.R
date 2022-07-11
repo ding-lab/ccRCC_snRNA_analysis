@@ -10,7 +10,7 @@ packages = c(
   "dplyr",
   "data.table",
   "stringr",
-  "ggpubr",
+  "RColorBrewer",
   "ggplot2"
 )
 for (pkg_name_tmp in packages) {
@@ -28,28 +28,30 @@ for (pkg_name_tmp in packages) {
 version_tmp <- 1
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
+source("./ccRCC_snRNA_analysis/functions.R")
 dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
 ## input the tumor clusters
-clusters_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/count/count_cellnumber_per_manual_cluster_rm_doublet/20220307.v1/CellNumberPerTumorManualCluster.20220307.v1.tsv")
+# clusters_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/count/count_cellnumber_per_manual_cluster_rm_doublet/20220307.v1/CellNumberPerTumorManualCluster.20220307.v1.tsv")
+clusters_selected_df <- fread(data.table = F, input = "./Resources/Analysis_Results/tumor_subcluster/plotting/heatmap/heatmap_hallmark38_scores_by_manual_tumorcluster_sct_data_scaled_selected/20220706.v1/intrapatient_tumorclusters.selected.20220706.v1.tsv")
 
 # plot by sample --------------------------------------------------------------------
-plot_data_df <- clusters_df %>%
-  mutate(case = str_split_fixed(string = easy_id, pattern = "\\-T", n = 2)[,1]) %>%
-  filter(Freq >= 50) %>%
-  filter(case != "C3L-00359") %>%
-  group_by(easy_id) %>%
+plot_data_df <- clusters_selected_df %>%
+  group_by(sampleid) %>%
   summarise(Freq = n())
+## make color
+RColorBrewer::display.brewer.all()
 p <- ggplot(data = plot_data_df, mapping = aes(x = Freq))
-p <- p + geom_histogram(color="black", fill="white", binwidth = 1)
+p <- p + geom_histogram(color="black",  binwidth = 1, fill = RColorBrewer::brewer.pal(n = 3, name = "Accent")[1])
 p <- p + scale_x_continuous(breaks = 1:10)
 p <- p + xlab("Number of Tumor Subclusters")
 p <- p + ylab("Number of Samples")
 p <- p + theme_bw()
 p <- p + theme(axis.text.y = element_text(size = 15, color = "black"),
-               axis.text.x = element_text(vjust = 0.1, size = 15, color = "black"))
+               axis.text.x = element_text(vjust = 0.1, size = 15, color = "black"),
+               axis.title = element_text(size = 15))
 p
 pdf2write <- paste0(dir_out, "NumberOfManualTumorSubclusters.persample.", ".pdf")
 pdf(file = pdf2write, width = 4, height = 3, useDingbats = F)
@@ -57,23 +59,23 @@ print(p)
 dev.off()
 
 
-# plot by sample --------------------------------------------------------------------
-plot_data_df <- clusters_df %>%
-  mutate(case = str_split_fixed(string = easy_id, pattern = "\\-T", n = 2)[,1]) %>%
-  filter(Freq >= 50) %>%
-  filter(case != "C3L-00359") %>%
-  group_by(case) %>%
-  summarise(Freq = n())
-p <- ggplot(data = plot_data_df, mapping = aes(x = Freq))
-p <- p + geom_histogram(color="black", fill="white", binwidth = 1)
-p <- p + scale_x_continuous(breaks = 1:10)
-p <- p + xlab("Number of Tumor Subclusters")
-p <- p + ylab("Number of Patients")
-p <- p + theme_bw()
-p <- p + theme(axis.text.y = element_text(size = 15, color = "black"),
-               axis.text.x = element_text(vjust = 0.1, size = 15, color = "black"))
-p
-pdf2write <- paste0(dir_out, "NumberOfManualTumorSubclusters.perpatient.", ".pdf")
-pdf(file = pdf2write, width = 8, height = 5, useDingbats = F)
-print(p)
-dev.off()
+# # plot by case --------------------------------------------------------------------
+# plot_data_df <- clusters_df %>%
+#   mutate(case = str_split_fixed(string = easy_id, pattern = "\\-T", n = 2)[,1]) %>%
+#   filter(Freq >= 50) %>%
+#   filter(case != "C3L-00359") %>%
+#   group_by(case) %>%
+#   summarise(Freq = n())
+# p <- ggplot(data = plot_data_df, mapping = aes(x = Freq))
+# p <- p + geom_histogram(color="black", fill="white", binwidth = 1)
+# p <- p + scale_x_continuous(breaks = 1:10)
+# p <- p + xlab("Number of Tumor Subclusters")
+# p <- p + ylab("Number of Patients")
+# p <- p + theme_bw()
+# p <- p + theme(axis.text.y = element_text(size = 15, color = "black"),
+#                axis.text.x = element_text(vjust = 0.1, size = 15, color = "black"))
+# p
+# pdf2write <- paste0(dir_out, "NumberOfManualTumorSubclusters.perpatient.", ".pdf")
+# pdf(file = pdf2write, width = 8, height = 5, useDingbats = F)
+# print(p)
+# dev.off()

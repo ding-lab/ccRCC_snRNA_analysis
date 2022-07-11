@@ -20,6 +20,7 @@ library(ggrastr)
 library(ggplot2)
 ## set run id
 version_tmp <- "cutoff25cells"
+version_tmp <- "cutoff50cells"
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -29,6 +30,7 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 ## input barcode with UMAP coordinates and manual group id
 barcode2umap_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/map_tumorsubclusterid/map_barcode_with_manual_tumorsubcluster_id_downsample2000cells/20220307.vcutoff25cells/Barcode2TumorSubclusterId.20220307.vcutoff25cells.tsv")
+barcode2umap_df <- fread(data.table = F, input = "./Resources/Analysis_Results/annotate_barcode/map_tumorsubclusterid/map_barcode_with_manual_tumorsubcluster_id_downsample2000cells/20220307.vcutoff50cells/Barcode2TumorSubclusterId.20220307.vcutoff50cells.tsv")
 
 # plot by each aliquot ----------------------------------------------------
 ## make different output files
@@ -38,11 +40,11 @@ dir_out_pdf <- paste0(dir_out, "pdf", "/")
 dir.create(dir_out_pdf)
 colors_all <- Polychrome::dark.colors(n = 24)
 
-# for (easyid_tmp in "C3N-00242-T1") {
-for (easyid_tmp in unique(barcode2umap_df$easy_id)) {
+# for (easy_id_tmp in "C3N-00242-T1") {
+for (easy_id_tmp in unique(barcode2umap_df$easy_id)) {
   
   plot_data_df <- barcode2umap_df %>%
-    filter(easy_id == easyid_tmp) %>%
+    filter(easy_id == easy_id_tmp) %>%
     mutate(Name_TumorCluster = str_split_fixed(string = Cluster_Name, pattern = "_", n = 2)[,2]) %>%
     # mutate(Name_TumorCluster = ifelse(Name_TumorCluster == "CNA", "Minor cluster (<50 cells)", Name_TumorCluster))
   mutate(Name_TumorCluster = ifelse(Name_TumorCluster == "CNA", "Minor cluster (<25 cells)", Name_TumorCluster))
@@ -58,26 +60,24 @@ for (easyid_tmp in unique(barcode2umap_df$easy_id)) {
   }
   names(uniq_cluster_colors) <- names_cluster_tmp
   
-  
   ## make plot
   p <- ggplot()
   p <- p + geom_point_rast(data = plot_data_df, mapping = aes(x = UMAP_1, y = UMAP_2, color = Name_TumorCluster), shape = 16, alpha = 0.8, size = 1)
   p <- p + scale_color_manual(values = uniq_cluster_colors, na.translate = T)
-  # p <- p + theme_bw()
-  p <- p + ggtitle(label = paste0("Tumor-cell subclusters for sample ", easyid_tmp), subtitle = "down-sampled to 2000 cells")
-  p <- p + guides(colour = guide_legend(override.aes = list(size=3), title = NULL, nrow = 1))
+  # p <- p + ggtitle(label = easy_id_tmp, subtitle = "Manually grouped tumor clusters")
+  p <- p + ggtitle(label = easy_id_tmp, subtitle = "Down-sampleing 2K nuclei")
+  p <- p + guides(colour = guide_legend(override.aes = list(size=3), title = NULL, nrow = 2, label.theme = element_text(size = 20)))
   p <- p + theme_void()
   p <- p + theme(legend.position = "bottom")
-  p <- p + theme(legend.text = element_text(size = 15), legend.title = element_text(size = 15))
   p <- p + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                 panel.background = element_blank())
-  ## save plot
-  png2write <- paste0(dir_out_png, easyid_tmp, ".png")
-  png(filename = png2write, width = 900, height = 1000, res = 150)
+                 panel.background = element_blank(), title = element_text(size = 25))
+  # save plot
+  png2write <- paste0(dir_out_png, easy_id_tmp, ".png")
+  png(filename = png2write, width = 900, height = 1100, res = 150)
   print(p)
   dev.off()
   
-  # file2write <- paste0(dir_out_pdf, easyid_tmp,".pdf")
+  # file2write <- paste0(dir_out_pdf, easy_id_tmp,".pdf")
   # pdf(file2write, width = 5, height = 5.5, useDingbats = F)
   # print(p)
   # dev.off()
