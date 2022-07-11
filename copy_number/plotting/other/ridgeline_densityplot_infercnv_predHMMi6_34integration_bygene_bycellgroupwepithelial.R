@@ -63,16 +63,21 @@ for (gene_tmp in "VHL") {
   p <- ggplot()
   p <- p + geom_density_ridges(data = plotdata_df, mapping = aes(x = cna_value, y = cellgroup_plot, fill = cellgroup_plot), rel_min_height = 0.01, scale = 0.9, color = NA)
   p <- p + scale_fill_manual(values = colors_cellgroup)
-  p <- p + ggtitle(paste0(gene_tmp, " Copy Number Ratio"))
   p <- p + xlim(c(quantile(plotdata_df$cna_value, 0.01)-0.75, quantile(plotdata_df$cna_value, 0.99)+.75))
-  p <- p + xlab("copy number ratio")
+  p <- p + xlab(paste0(gene_tmp, " copy number ratio"))
   p <- p + theme_bw()
-  p <- p + theme(axis.title.y = element_blank(), axis.text = element_text(color = "black"), title = element_text(size = 10),
+  p <- p + theme(axis.title.y = element_blank(), 
+                 axis.text = element_text(color = "black", size = 14), #title = element_text(size = 10),
+                 axis.title.x = element_text(color = "black", size = 14),
                  legend.position = "none")
   # p <- p + guides(fill = guide_legend(nrow = 3, title = NULL))
   
-  file2write <- paste0(dir_out, gene_tmp, ".predHMMi6.ridgeline.png")
-  png(file2write, width = 500, height = 800, res = 150)
+  # file2write <- paste0(dir_out, gene_tmp, ".predHMMi6.ridgeline.png")
+  # png(file2write, width = 500, height = 800, res = 150)
+  # print(p)
+  # dev.off()
+  file2write <- paste0(dir_out, gene_tmp, ".predHMMi6.ridgeline.pdf")
+  pdf(file2write, width = 4, height = 6.5, useDingbats = F)
   print(p)
   dev.off()
   

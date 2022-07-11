@@ -22,7 +22,6 @@ dir_base = "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
-source("./ccRCC_snRNA_analysis/variables.R")
 library(ggplot2)
 ## set run id
 version_tmp <- 1
@@ -99,6 +98,7 @@ dim(srat)
 # dev.off()
 
 # plot scaled -------------------------------------------------------------
+fontsize_plot = 14
 p <- DotPlot(object = srat, features = genes_plot, col.min = 0, assay = "RNA")
 p$data$cell_type <- plyr::mapvalues(x = p$data$id, from = barcode2celltype_df$cell_group, to = as.vector(barcode2celltype_df$Cell_group4))
 p <- p + facet_grid(cell_type~., scales = "free", space = "free", drop = T)
@@ -109,15 +109,17 @@ p <- p + theme(panel.spacing = unit(0, "lines"), panel.grid.major = element_line
                panel.background = element_blank())
 p <- p + theme(strip.background = element_rect(color = NA, fill = NA, size = 0.5), 
                strip.text.x = element_text(angle = 0, vjust = 0.5),
-               strip.text.y = element_text(angle = 90, vjust = 0.5),
-               axis.text.x = element_text(size = 10, angle=90,hjust=0.95,vjust=0.2))
+               strip.text.y = element_text(angle = 90, vjust = 0.5, size = fontsize_plot),
+               axis.text.x = element_text(size = fontsize_plot, angle=90,hjust=0.95,vjust=0.2), axis.text.y = element_text(size = fontsize_plot))
+p <- p + guides(colour = guide_legend(label.theme = element_text(size = fontsize_plot), title.theme = element_text(size = fontsize_plot)),
+                size = guide_legend(label.theme = element_text(size = fontsize_plot), title.theme = element_text(size = fontsize_plot)))
 # file2write <- paste0(dir_out, "CellTypeMarkerExp.Scaled.png")
 # png(file = file2write, width = 1000, height = 1000, res = 150)
 # print(p)
 # dev.off()
 
 file2write <- paste0(dir_out, "CellTypeMarkerExp.Scaled.pdf")
-pdf(file = file2write, width = 5, height = 8, useDingbats = F)
+pdf(file = file2write, width = 6, height = 7, useDingbats = F)
 print(p)
 dev.off()
 

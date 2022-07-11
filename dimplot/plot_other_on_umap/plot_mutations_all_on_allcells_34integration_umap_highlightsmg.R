@@ -77,22 +77,28 @@ p <- ggplot()
 p <- p + geom_point_rast(data = plot_data_df[plot_data_df$mutation_mapped_type2 != "Var_SMG",], mapping = aes(x = UMAP_1, y = UMAP_2, color=mutation_mapped_type2), alpha = 0.5, size = 0.3)
 p <- p + geom_point_rast(data = plot_data_df[plot_data_df$mutation_mapped_type2 == "Var_SMG",], mapping = aes(x = UMAP_1, y = UMAP_2, color=mutation_mapped_type2), alpha = 1, size = 1.5)
 p <- p + scale_color_manual(values = colors_mutation_mapped_type2)
-# p <- p + geom_text_repel(data = label_data, mapping = aes(UMAP_1, UMAP_2, label = ident))
 p <- p +
   theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
-p <- p + theme(legend.position = "top")
 p <- p + ggplot2::theme(axis.line=element_blank(),axis.text.x=element_blank(),
                         axis.text.y=element_blank(),axis.ticks=element_blank(),
                         axis.title.x=element_blank(),
                         axis.title.y=element_blank())
+p <- p + guides(colour = guide_legend(override.aes = list(size=3), title = NULL, nrow = 1, label.theme = element_text(size = 18)))
+p <- p + theme(legend.position="bottom", aspect.ratio=1)
 
-## save as png
-file2write <- paste0(dir_out, "mutationmappedtype_on_umap.", ".png")
-png(filename = file2write, width = 1000, height = 1100, res = 150)
+## save as pdf
+file2write <- paste0(dir_out, "mutationmappedtype_on_umap.", "pdf")
+pdf(file = file2write, width = 6, height = 6.5, useDingbats = F)
 print(p)
 dev.off()
+
+# ## save as png
+# file2write <- paste0(dir_out, "mutationmappedtype_on_umap.", ".png")
+# png(filename = file2write, width = 1000, height = 1100, res = 150)
+# print(p)
+# dev.off()
 
 #
 
