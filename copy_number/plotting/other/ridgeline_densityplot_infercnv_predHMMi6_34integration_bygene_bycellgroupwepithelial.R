@@ -77,7 +77,7 @@ for (gene_tmp in "VHL") {
   # print(p)
   # dev.off()
   file2write <- paste0(dir_out, gene_tmp, ".predHMMi6.ridgeline.pdf")
-  pdf(file2write, width = 4, height = 6.5, useDingbats = F)
+  pdf(file2write, width = 5, height = 6.5, useDingbats = F)
   print(p)
   dev.off()
   
