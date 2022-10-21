@@ -27,7 +27,7 @@ for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -38,6 +38,8 @@ dir.create(dir_out)
 # densitometry_df <- readxl::read_xlsx(path = "./Validation/Western_Blot/wb densitometry_05162022_pl.xlsx", sheet = "mxi1_klf9_normalized_05162022")
 # densitometry_df <- readxl::read_xlsx(path = "./Validation/Western_Blot/wb densitometry_05162022_pl.xlsx", sheet = "mxi1_klf9_normalized_v2")
 densitometry_df <- readxl::read_xlsx(path = "./Validation/Western_Blot/wb densitometry_05172022_pl_v2.xlsx", sheet = "alltargets_normalized")
+densitometry_df <- fread(data.table = F, input = "./Validation/Western_Blot/wb_densitometry_alltargets_normalized.10112022.csv")
+densitometry_df <- fread(data.table = F, input = "./Validation/Western_Blot/wb_densitometry_alltargets_normalized.10112022.v2.csv")
 
 # set plot parameters -----------------------------------------------------
 genes_plot <- c("MXI1")
@@ -49,7 +51,7 @@ genes_plot <- c("MXI1")
 # lines_plot <- c("RCC4_scrambled", "RCC4_KLF9_C2", "RCC4_KLF9_C3")
 # lines_plot <- c("RCC4_scrambled", "RCC4_KLF9_C2")
 # genes_plot <- c("MXI1")
-genes_plot <- c("CP")
+# genes_plot <- c("CP")
 # genes_plot <- c("HK2")
 # lines_plot <- c("RCC4_scrambled", "RCC4_MXI1_C1", "RCC4_MXI1_C2")
 lines_plot <- c("RCC4_scrambled", "RCC4_MXI1_C1")

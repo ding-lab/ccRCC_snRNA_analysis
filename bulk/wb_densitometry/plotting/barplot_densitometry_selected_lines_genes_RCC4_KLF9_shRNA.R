@@ -38,10 +38,11 @@ dir.create(dir_out)
 # densitometry_df <- readxl::read_xlsx(path = "./Validation/Western_Blot/wb densitometry_05162022_pl.xlsx", sheet = "mxi1_klf9_normalized_05162022")
 # densitometry_df <- readxl::read_xlsx(path = "./Validation/Western_Blot/wb densitometry_05162022_pl.xlsx", sheet = "mxi1_klf9_normalized_v2")
 densitometry_df <- readxl::read_xlsx(path = "./Validation/Western_Blot/wb densitometry_05172022_pl_v2.xlsx", sheet = "alltargets_normalized")
+densitometry_df <- fread(data.table = F, input = "./Validation/Western_Blot/wb_densitometry_alltargets_normalized.csv")
 
 # set plot parameters -----------------------------------------------------
 genes_plot <- c("CP")
-# genes_plot <- c("KLF9")
+genes_plot <- c("KLF9")
 # genes_plot <- c("KLF9")
 # genes_plot <- c("HK2")
 # genes_plot <- c("PFKP")
