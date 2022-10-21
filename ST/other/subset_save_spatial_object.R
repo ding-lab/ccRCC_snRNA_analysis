@@ -34,6 +34,15 @@ for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
 
+## set run id
+version_tmp <- 1
+run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
+## set output directory
+source("./ccRCC_snRNA_analysis/functions.R")
+dir_out_parent <- makeOutDir_katmai(path_this_script)
+dir_out <- paste0(dir_out_parent, run_id, "/")
+dir.create(dir_out)
+
 ####################################### 
 ## Load and process
 source('/diskmnt/Datasets/Spatial_Transcriptomics/Analysis/RCC/script/ccRCC_loadST_08092021_wo_RCTD.R')
