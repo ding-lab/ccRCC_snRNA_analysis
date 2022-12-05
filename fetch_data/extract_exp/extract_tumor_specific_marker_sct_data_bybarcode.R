@@ -42,7 +42,7 @@ print("Finish reading RDS file")
 ## input the barcode-cell-type table
 barcode2celltype_df <- fread(input = "./Data_Freezes/V2/snRNA/Cell_Type_Assignment/33Aliquot.Barcode2CellType.20210423.v1.tsv", data.table = F)
 ## input the markers
-genes_process_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210702.v1/ccRCC_markers.Surface.20210702.v1.tsv")
+# genes_process_df <- fread(data.table = F, input = "./Resources/Analysis_Results/findmarkers/tumor_specific_markers/overlap_tumor_vs_pt_DEGs_w_tumor_vs_other_DEGs/20210702.v1/ccRCC_markers.Surface.20210702.v1.tsv")
 
 # preprocess the Seurat object meta data---------------------------------------------
 BC <- srat@meta.data %>% rownames
@@ -65,7 +65,8 @@ ids_aliquot_barcode_process <- ids_aliquot_barcode_currentall[ids_aliquot_barcod
 barcode_map_df <- data.frame(barcode_merged = barcodes_process, aliquot_barcode = ids_aliquot_barcode_process)
 
 # extract tumor-cell expression of the given genes ------------------------
-genes_process <- genes_process_df$Gene
+# genes_process <- genes_process_df$Gene
+genes_process <- c("ABCC3", "ABLIM3", "COL23A1", "CP", "EGFR", "ENPP3", "EPHA6", "FTO", "KCTD3", "NDRG1", "PCSK6", "PHKA2", "PLEKHA1", "PLIN2", "SEMA6A", "SHISA9", "SLC6A3", "SNAP25", "TGFA", "UBE2D2" )
 DefaultAssay(srat) <- "SCT"
 exp_df <- FetchData(object = srat, vars = genes_process, slot = "data")
 
