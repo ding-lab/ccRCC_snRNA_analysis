@@ -1,0 +1,48 @@
+# Yige Wu @ WashU 2021 Nov
+
+# set up libraries and output directory -----------------------------------
+## set working directory
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA"
+setwd(dir_base)
+source("./ccRCC_snRNA_analysis/load_pkgs.R")
+source("./ccRCC_snRNA_analysis/functions.R")
+source("./ccRCC_snRNA_analysis/variables.R")
+## set run id
+version_tmp <- 1
+run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
+## set output directory
+dir_out <- paste0(makeOutDir(), run_id, "/")
+dir.create(dir_out)
+
+# input dependencies ------------------------------------------------------
+## input meta data
+metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
+## input clinical data
+clinical_case_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/clinical/extract_case_clinical_data_snrna_samples/20211011.v1/snRNA_ccRCC_Clinicl_Table.20211011.v1.tsv")
+
+# process -----------------------------------------------------------------
+metadata_filtered_df <- metadata_df %>%
+  filter(Case %in% clinical_case_df$Case) %>%
+  filter(snRNA_available) %>%
+  select(Aliquot.snRNA.WU, Case, snRNA_available, snATAC_used, Sample_Type, Aliquot.snRNA)
+final_df <- rbind(metadata_filtered_df %>%
+                    mutate(sample_name = paste0("snRNA.", Aliquot.snRNA.WU)) %>%
+                    mutate(library_strategy = "RNA-seq") %>%
+                    mutate(path_katmai = paste0("/diskmnt/primary/ccRCC_snRNA/", Aliquot.snRNA, "/BAM/possorted_genome_bam.bam")) %>%
+                    mutate(expected_cells = 6000) %>%
+                    rename(Aliquot = Aliquot.snRNA) %>%
+                    select(Aliquot, Case, sample_name, Sample_Type, library_strategy, expected_cells, path_katmai),
+                  metadata_filtered_df %>%
+                    filter(snATAC_used) %>%
+                    mutate(sample_name = paste0("snATAC.", Aliquot.snRNA.WU)) %>%
+                    mutate(library_strategy = "ATAC-seq") %>%
+                    mutate(path_katmai = paste0("/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Cell_Ranger/outputs/", Aliquot.snRNA, "/outs/possorted_bam.bam")) %>%
+                    mutate(expected_cells = NA) %>%
+                    rename(Aliquot = Aliquot.snRNA) %>%
+                    select(Aliquot, Case, sample_name, Sample_Type, library_strategy, expected_cells, path_katmai))
+                  
+# write output ------------------------------------------------------------
+file2write <- paste0(dir_out, "HumanTissue.SRA_Metadata.", run_id, ".tsv")
+write.table(x = final_df, file = file2write, quote = F, sep = "\t", row.names = F)
+
+
