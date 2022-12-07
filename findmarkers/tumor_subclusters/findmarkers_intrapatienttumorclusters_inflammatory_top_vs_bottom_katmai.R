@@ -55,8 +55,6 @@ enrich_df <- enrich_df %>%
   mutate(cluster_name.formatted = gsub(x = cluster_name, pattern = "\\.", replacement = "-"))
 cluster_group1_process <- enrich_df$cluster_name.formatted[enrich_df$INFLAMMATORY_RESPONSE_Score >= quantile(x = enrich_df$INFLAMMATORY_RESPONSE_Score, probs = 0.9)]
 cluster_group2_process <- enrich_df$cluster_name.formatted[enrich_df$INFLAMMATORY_RESPONSE_Score <= quantile(x = enrich_df$INFLAMMATORY_RESPONSE_Score, probs = 0.1)]
-cluster_group1_process <- enrich_df$cluster_name.formatted[enrich_df$INFLAMMATORY_RESPONSE_Score >= quantile(x = enrich_df$INFLAMMATORY_RESPONSE_Score, probs = 0.75)]
-cluster_group2_process <- enrich_df$cluster_name.formatted[enrich_df$INFLAMMATORY_RESPONSE_Score <= quantile(x = enrich_df$INFLAMMATORY_RESPONSE_Score, probs = 0.25)]
 ## process the barcode info
 barcode2subclusterid_df <- barcode2subclusterid_df %>%
   mutate(id_aliquot_barcode = paste0(orig.ident, "_", barcode)) %>%
