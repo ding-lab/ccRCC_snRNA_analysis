@@ -57,6 +57,15 @@ enrich_df <- enrich_df %>%
 deg_all_df <- NULL
 for (geneset_tmp in c("UNFOLDED_PROTEIN_RESPONSE_Score", "TGF_BETA_SIGNALING_Score", "TNFA_SIGNALING_VIA_NFKB_Score",
                       "IL2_STAT5_SIGNALING_Score", "IL6_JAK_STAT3_SIGNALING_Score", "APICAL_JUNCTION_Score")) {
+  file2write <- paste0(dir_out, geneset_tmp, ".top_vs_bottom.", 
+                       ".logfc.threshold", logfc.threshold.run, 
+                       ".min.pct", min.pct.run,
+                       ".min.diff.pct", min.diff.pct.run,
+                       ".Assay", assay_process,
+                       ".tsv")
+  if (file.exists(file2write)) {
+    next()
+  }
   cluster_group1_process <- enrich_df$cluster_name.formatted[enrich_df[,geneset_tmp] >= quantile(x = enrich_df[,geneset_tmp], probs = 0.9)]
   cluster_group2_process <- enrich_df$cluster_name.formatted[enrich_df[,geneset_tmp] <= quantile(x = enrich_df[,geneset_tmp], probs = 0.1)]
   ## process the barcode info
@@ -97,12 +106,6 @@ for (geneset_tmp in c("UNFOLDED_PROTEIN_RESPONSE_Score", "TGF_BETA_SIGNALING_Sco
   deg_df$cellnumber_group2 <- length(which(srat@meta.data$group_findmarkers == "group2"))
   
   # write output ------------------------------------------------------------
-  file2write <- paste0(dir_out, geneset_tmp, ".top_vs_bottom.", 
-                       ".logfc.threshold", logfc.threshold.run, 
-                       ".min.pct", min.pct.run,
-                       ".min.diff.pct", min.diff.pct.run,
-                       ".Assay", assay_process,
-                       ".tsv")
   write.table(x = deg_df, file = file2write, sep = "\t", quote = F, row.names = F)
   cat("finish writing the result!\n\n")
   
