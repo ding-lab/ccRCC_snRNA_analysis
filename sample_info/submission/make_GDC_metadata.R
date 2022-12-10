@@ -19,6 +19,8 @@ dir.create(dir_out)
 metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
 ## input clinical data
 clinical_case_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/clinical/extract_case_clinical_data_snrna_samples/20211011.v1/snRNA_ccRCC_Clinicl_Table.20211011.v1.tsv")
+## input FASTQ summary
+fastq_summary_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/submission/extract_fastq_summary/20221210.v1/ccRCC.snRNA.snATAC.fastq.summary.20221210.v1.tsv")
 
 # process -----------------------------------------------------------------
 metadata_filtered_df <- metadata_df %>%
