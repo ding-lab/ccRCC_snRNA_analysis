@@ -39,6 +39,7 @@ for (dir_input in dirs_input) {
     print(file_tmp)
     df_tmp <- fread(data.table = F, input = paste0(dir_input, file_tmp))
     df_tmp$data_type <- datatype_tmp
+    df_tmp$file_dir <- str_split_fixed(string = file_tmp, pattern = "\\/", n = 2)[,1]
     print(head(df_tmp))
     
     df_tmp2 <- df_tmp[c("Flow Cell ID", "Index Sequence", "Library Name", "Completion Date", "data_type")]
