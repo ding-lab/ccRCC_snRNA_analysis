@@ -29,18 +29,20 @@ dir.create(dir_out)
 # input -------------------------------------------------------------------
 dirs_input <- c("/diskmnt/primary/ccRCC_snRNA/", "/diskmnt/primary/ccRCC_snATAC/")
 fastq_summary_df <- NULL
+fastq_summary_list <- list()
 for (dir_input in dirs_input) {
   files_input <- list.files(path = dir_input, recursive = T)
   files_input <- files_input[grepl(pattern = "Samplemap\\.csv", x = files_input) & !grepl(pattern = "md5", x = files_input)]
   # print(files_input)
-  
+  datatype_tmp <- ifelse(dir_input == "/diskmnt/primary/ccRCC_snRNA/", "snRNA", "snATAC")
   for (file_tmp in files_input) {
     print(file_tmp)
     df_tmp <- fread(data.table = F, input = paste0(dir_input, file_tmp))
+    df_tmp$data_type <- datatype_tmp
     print(head(df_tmp))
-    fastq_summary_df <- rbind(fastq_summary_df, df_tmp)
+    fastq_summary_list[[file_tmp]] <- df_tmp
+    fastq_summary_df <- rbind(fastq_summary_df, df_tmp[c("Flow Cell ID", "Index Sequence", "Library Name", "Creation Date")])
   }
-  
 }
 
 
