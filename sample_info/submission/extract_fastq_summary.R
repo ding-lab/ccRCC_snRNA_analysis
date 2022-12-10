@@ -41,7 +41,7 @@ for (dir_input in dirs_input) {
     df_tmp$data_type <- datatype_tmp
     print(head(df_tmp))
     fastq_summary_list[[file_tmp]] <- df_tmp
-    fastq_summary_df <- rbind(fastq_summary_df, df_tmp[c("Flow Cell ID", "Index Sequence", "Library Name", "Completion Date", "Protocol")])
+    fastq_summary_df <- rbind(fastq_summary_df, df_tmp[c("Flow Cell ID", "Index Sequence", "Library Name", "Completion Date")])
   }
 }
 
