@@ -31,7 +31,7 @@ dirs_input <- c("/diskmnt/primary/ccRCC_snRNA/", "/diskmnt/primary/ccRCC_snATAC/
 fastq_summary_df <- NULL
 for (dir_input in dirs_input) {
   files_input <- list.files(path = dir_input, recursive = T)
-  files_input <- files_input[grepl(pattern = "csv", x = files_input)]
+  files_input <- files_input[grepl(pattern = "csv", x = files_input) & !grepl(pattern = "md5", x = files_input)]
   # print(files_input)
   
   for (file_tmp in files_input) {
