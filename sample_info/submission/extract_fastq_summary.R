@@ -42,7 +42,7 @@ for (dir_input in dirs_input) {
     df_tmp$file_dir <- str_split_fixed(string = file_tmp, pattern = "\\/", n = 2)[,1]
     print(head(df_tmp))
     
-    df_tmp2 <- df_tmp[c("Flow Cell ID", "Index Sequence", "Library Name", "Completion Date", "data_type")]
+    df_tmp2 <- df_tmp[c("Flow Cell ID", "Index Sequence", "Library Name", "Completion Date", "data_type", "file_dir")]
     df_tmp2[, "Completion Date"] <- as.character(df_tmp2[, "Completion Date"])
     print(head(df_tmp2))
     
