@@ -41,7 +41,7 @@ for (dir_input in dirs_input) {
     df_tmp$data_type <- datatype_tmp
     print(head(df_tmp))
     fastq_summary_list[[file_tmp]] <- df_tmp
-    fastq_summary_df <- rbind(fastq_summary_df, df_tmp[c("Flow Cell ID", "Index Sequence", "Library Name", "Creation Date")])
+    fastq_summary_df <- rbind(fastq_summary_df, df_tmp[c("Flow Cell ID", "Index Sequence", "Library Name", "Completion Date", "Protocol")])
   }
 }
 
@@ -49,3 +49,5 @@ for (dir_input in dirs_input) {
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "ccRCC.snRNA.snATAC.fastq.summary.", run_id, ".tsv")
 write.table(x = fastq_summary_df, file = file2write, sep = "\t", row.names = F, quote = F)
+file2write <- paste0(dir_out, "ccRCC.snRNA.snATAC.fastq.summary.", run_id, ".RSD")
+saveRDS(object = fastq_summary_list, file = file2write, compress = T)
