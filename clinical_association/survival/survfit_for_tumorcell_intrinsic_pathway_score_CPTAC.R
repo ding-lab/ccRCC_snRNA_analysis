@@ -1,27 +1,28 @@
-# Yige Wu @WashU Jun 2021
+# Yige Wu @WashU June 2022
 
-# set up libraries and output directory -----------------------------------
+#  set up libraries and output directory -----------------------------------
 ## set working directory
-dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA"
+# dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_Drug/"
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
 setwd(dir_base)
 packages = c(
-  "rstudioapi",
   "plyr",
   "dplyr",
   "stringr",
   "reshape2",
   "data.table",
-  "ggplot2",
   "survival",
   "survminer"
 )
 for (pkg_name_tmp in packages) {
   if (!(pkg_name_tmp %in% installed.packages()[,1])) {
-    print(paste0(pkg_name_tmp, "is being installed!"))
-    BiocManager::install(pkgs = pkg_name_tmp, update = F)
     install.packages(pkg_name_tmp, dependencies = T)
   }
-  print(paste0(pkg_name_tmp, " is installed!"))
+  if (!(pkg_name_tmp %in% installed.packages()[,1])) {
+    if (!requireNamespace("BiocManager", quietly=TRUE))
+      install.packages("BiocManager")
+    BiocManager::install(pkg_name_tmp)
+  }
   library(package = pkg_name_tmp, character.only = T)
 }
 ## set run id
@@ -33,51 +34,40 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-## input protein data
-exp_df <- fread(data.table = F, input = "./Resources/Analysis_Results/average_expression/avgexp_sct_data_bycelltype13_bysample_katmai/20210701.v1/33_aliquot_merged.avgexp.SCT.data.bycelltype13_bysample.20210701.v1.tsv")
-## input bulk meta data
-metadata_df <- fread("./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv")
+## input scores
+exp_df <- fread(data.table = F, input = "./Resources/Analysis_Results/bulk/expression/rna/other/preprocess/calculate_selectedpathwaymarker_score_bulkRNA/20221207.v1/selectedpathway_tumorcell_signature_scores.20221207.v1.tsv")
 ## input survival ddata
-survival_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/clinical/extract_cptac_discovery_ccRCC_survival_time/20210621.v1/CPTAC_Discovery_ccRCC_Survival_Time20210621.v1.tsv")
 survival_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/clinical/extract_cptac_discovery_ccRCC_survival_time/20220317.v1/CPTAC_Discovery_ccRCC_Survival_Time20220317.v1.tsv")
 
-# reformat data -----------------------------------------------------------
-exp_colnames_df <- data.frame(colname = colnames(exp_df))
-exp_colnames_df <- exp_colnames_df %>%
-  mutate(id_sample_cell_group = gsub(x = colname, pattern = "SCT\\.", replacement = "")) %>%
-  mutate(aliquot = str_split_fixed(string = id_sample_cell_group, pattern = "_", n = 2)[,1]) %>%
-  mutate(cell_group.columnname = str_split_fixed(string = id_sample_cell_group, pattern = "_", n = 2)[,2])
-exp_colnames_filtered_df <- exp_colnames_df %>%
-  filter(cell_group.columnname == "Tumor.cells")
-exp_data_df <- exp_df[, c(exp_colnames_filtered_df$colname)]
-## rename columns
-exp_colnames_filtered_df$CASE_ID <- mapvalues(x = exp_colnames_filtered_df$aliquot, from = metadata_df$Aliquot.snRNA, to = as.vector(metadata_df$Case))
-colnames(exp_data_df) <- c(exp_colnames_filtered_df$CASE_ID)
-# namescolors_expgroup <- c("High", "Low", "Medium")
-colors_expgroup <- RColorBrewer::brewer.pal(n = 9, name = "YlOrRd")[c(9, 4, 6)]
+# set paramters -----------------------------------------------------------
+fontsize_plot = 14
+genesets_process <- unique(exp_df$geneset)
 
-# specify gene to test ----------------------------------------------------
-genes_process <- c("ABCC3", "ABLIM3", "COL23A1", "CP", "EGFR", "ENPP3", "EPHA6", "FTO", "KCTD3", "NDRG1", "PCSK6", "PHKA2", "PLEKHA1", "PLIN2", "SEMA6A", "SHISA9", "SLC6A3", "SNAP25", "TGFA", "UBE2D2" )
+# preprocess ------------------------------------------------------
 os_pvalue_vec <- NULL
 pfs_pvalue_vec <- NULL
-fontsize_plot <- 14
-# for (gene_test in "HIF1A") {
-for (gene_test in genes_process) {
-  # make combined data and test ------------------------------------------------------
-  ## filter specific protein data
-  exp_test_wide_df <- exp_data_df[exp_df$V1 == gene_test,]
-  testdata_df <- data.frame(CASE_ID = exp_colnames_filtered_df$CASE_ID, Expression = unlist(exp_test_wide_df))
-  testdata_df <- merge(x = testdata_df, y = survival_df, by = c("CASE_ID"), all.x = T)
-  cutoff_exp_low <- quantile(x = testdata_df$Expression, probs = 0.35, na.rm = T); cutoff_exp_low
-  cutoff_exp_high <- quantile(x = testdata_df$Expression, probs = 0.65, na.rm = T); cutoff_exp_high
+
+for (geneset_tmp in genesets_process) {
+  if (geneset_tmp == "TNFA_SIGNALING_VIA_NFKB_Score") {
+    geneset_text <- "TNFA signaling\nvia NFKB score"
+  } else if (geneset_tmp == "APICAL_JUNCTION_Score") {
+    geneset_text <- "Apical junction\nscore"
+  } else {
+    geneset_text <- geneset_tmp
+  }
   
+  testdata_df <- merge(x = exp_df %>% filter(geneset == geneset_tmp), y = survival_df, by.x = "case", by.y = c("CASE_ID"), all.x = T)
   testdata_df <- testdata_df %>%
-    filter(CASE_ID != "C3L-00359") %>%
-    mutate(Expression_group = ifelse(Expression <= cutoff_exp_low, "Low", ifelse(Expression >= cutoff_exp_high, "High", "Medium"))) %>%
-    arrange(CASE_ID, desc(Expression))
-  testdata_df <- testdata_df[!duplicated(testdata_df$CASE_ID),]
+    mutate(Expression = geneset_score)
+  cutoff_exp_low <- quantile(x = testdata_df$Expression, probs = 0.25, na.rm = T); cutoff_exp_low
+  cutoff_exp_high <- quantile(x = testdata_df$Expression, probs = 0.75, na.rm = T); cutoff_exp_high
+  testdata_df <- testdata_df %>%
+    mutate(Expression_group = ifelse(Expression <= cutoff_exp_low, "Low", ifelse(Expression >= cutoff_exp_high, "High", "Medium")))
+  table(testdata_df$Expression_group)
   
   # test overall survival ---------------------------------------------------
+  ## EFS_censor == 0 with event; == 1 without event
+  ## test
   testdata_comp_df <- testdata_df %>%
     mutate(surv_time = (OS_time + 9)/365)  %>%
     mutate(surv_status = ifelse(OS_status == "censored", 1, 2)) %>%
@@ -90,10 +80,10 @@ for (gene_test in genes_process) {
                     data = testdata_comp_df,
                     conf.int = TRUE,
                     surv.median.line = "hv", pval = TRUE,
-                    legend.title = paste0(gene_test, " expression\n(snRNA-seq)"),
-                    legend.labs = c("High", "Low"),
+                    legend.title = geneset_text,
+                    legend.labs = c("High", "Low"), 
                     legend = "top",
-                    xlab = "Time (years)",
+                    xlab = "Time (year)",
                     ylab = "Overall Survival",
                     palette = c("#800026", "#FEB24C"),
                     ggtheme = theme_survminer(base_size = fontsize_plot,
@@ -106,21 +96,21 @@ for (gene_test in genes_process) {
                                               font.tickslab = c(fontsize_plot, "plain", "black"),
                                               legend = c("top", "bottom", "left", "right", "none"),
                                               font.legend = c(fontsize_plot, "plain", "black")),
-                    conf.int.alpha = 0.1,
+                    conf.int.alpha = 0.1, tables.height = 0.3,
                     risk.table = TRUE, # Add risk table
                     risk.table.col = "strata", # Change risk table color by groups
-                    risk.table.height = 0.3,
                     linetype = "strata") # Change line type by groups
   res$table <- res$table + theme(axis.line = element_blank())
-  file2write <- paste0(dir_out, gene_test, ".OS.pdf")
-  pdf(file2write, width = 4, height = 4.75, useDingbats = F)
+  res <- res + guides(colour = guide_legend(nrow = 2))
+  file2write <- paste0(dir_out, geneset_tmp, ".OS.pdf")
+  pdf(file2write, width = 3.25, height = 4.5, useDingbats = F)
   print(res)
   dev.off()
   
   # test progression-free survival ---------------------------------------------------
   ## test
   testdata_comp_df <- testdata_df %>%
-    mutate(surv_time = (PFS_time + 9)/365)  %>%
+    mutate(surv_time = (PFS_time + 9))  %>%
     mutate(surv_status = ifelse(PFS_status == "censored", 1, 2)) %>%
     filter(!is.na(surv_status) & !is.na(surv_time) & !is.na(Expression_group)) %>%
     filter(Expression_group != "Medium")
@@ -131,10 +121,10 @@ for (gene_test in genes_process) {
                     data = testdata_comp_df,
                     conf.int = TRUE,
                     surv.median.line = "hv", pval = TRUE,
-                    legend.title = paste0(gene_test, " expression\n(snRNA-seq)"),
+                    legend.title = geneset_text,
                     legend.labs = c("High", "Low"),
                     legend = "top",
-                    xlab = "Time (years)",
+                    xlab = "Time (days)",
                     ylab = "Progression-free Survival",
                     palette = c("#800026", "#FEB24C"),
                     ggtheme = theme_survminer(base_size = 12,
@@ -152,17 +142,13 @@ for (gene_test in genes_process) {
                     risk.table.col = "strata", # Change risk table color by groups
                     linetype = "strata") # Change line type by groups
   res$table <- res$table + theme(axis.line = element_blank())
-  file2write <- paste0(dir_out, gene_test, ".PFS.pdf")
-  pdf(file2write, width = 4, height = 4.5, useDingbats = F)
+  res <- res + guides(colour = guide_legend(nrow = 2))
+  file2write <- paste0(dir_out, geneset_tmp, ".PFS.pdf")
+  pdf(file2write, width = 3.25, height = 4.5, useDingbats = F)
   print(res)
   dev.off()
 }
 
-survfit_result_df <- data.frame(gene = genes_process, 
-                                OS_pvalue = os_pvalue_vec, 
-                                OS_fdr = p.adjust(p = os_pvalue_vec, method = "fdr"),
-                                PFS_pvalue = pfs_pvalue_vec, 
-                                PFS_fdr = p.adjust(p = pfs_pvalue_vec, method = "fdr"))
+result_df <- data.frame(geneset = unique(exp_df$geneset), OS_pvalue = os_pvalue_vec, PFS_pvalue = pfs_pvalue_vec,
+                        OS_fdr = p.adjust(p = os_pvalue_vec, method = "fdr"), PFS_fdr = p.adjust(p = pfs_pvalue_vec, method = "fdr"))
 
-file2write <- paste0(dir_out, "survfit_results.", run_id, ".tsv")
-write.table(x = survfit_result_df, file = file2write, quote = F, sep = "\t", row.names = F)

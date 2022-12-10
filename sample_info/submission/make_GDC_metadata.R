@@ -30,19 +30,38 @@ final_df <- rbind(metadata_filtered_df %>%
                     mutate(library_strategy = "RNA-seq") %>%
                     mutate(path_katmai = paste0("/diskmnt/primary/ccRCC_snRNA/", Aliquot.snRNA, "/BAM/possorted_genome_bam.bam")) %>%
                     mutate(expected_cells = 6000) %>%
-                    rename(Aliquot = Aliquot.snRNA) %>%
-                    select(Aliquot, Case, sample_name, Sample_Type, library_strategy, expected_cells, path_katmai),
+                    rename(sample_type.sim = Sample_Type) %>%
+                    mutate(snRNA_aliquot_id = Aliquot.snRNA) %>%
+                    mutate(snATAC_aliquot_id = NA) %>%
+                    mutate(snATAC_experiment_type = NA) %>%
+                    mutate(snRNA_experiment_type = "snRNA") %>%
+                    mutate(has_snATAC = "FALSE") %>%
+                    mutate(has_snRNA = "TRUE") %>%
+                    select(Case, snATAC_aliquot_id, snRNA_aliquot_id, snATAC_experiment_type, snRNA_experiment_type, has_snATAC, has_snRNA,
+                           sample_name, sample_type.sim, library_strategy, expected_cells, path_katmai),
                   metadata_filtered_df %>%
                     filter(snATAC_used) %>%
                     mutate(sample_name = paste0("snATAC.", Aliquot.snRNA.WU)) %>%
                     mutate(library_strategy = "ATAC-seq") %>%
                     mutate(path_katmai = paste0("/diskmnt/Projects/ccRCC_scratch/ccRCC_snATAC/Resources/snATAC_Processed_Data/Cell_Ranger/outputs/", Aliquot.snRNA, "/outs/possorted_bam.bam")) %>%
                     mutate(expected_cells = NA) %>%
-                    rename(Aliquot = Aliquot.snRNA) %>%
-                    select(Aliquot, Case, sample_name, Sample_Type, library_strategy, expected_cells, path_katmai))
-                  
+                    rename(sample_type.sim = Sample_Type) %>%
+                    mutate(snRNA_aliquot_id = NA) %>%
+                    mutate(snATAC_aliquot_id = Aliquot.snRNA) %>%
+                    mutate(snATAC_experiment_type = "snATAC") %>%
+                    mutate(snRNA_experiment_type = NA) %>%
+                    mutate(has_snATAC = "TRUE") %>%
+                    mutate(has_snRNA = "FALSE") %>%
+                    select(Case, snATAC_aliquot_id, snRNA_aliquot_id, snATAC_experiment_type, snRNA_experiment_type, has_snATAC, has_snRNA,
+                           sample_name, sample_type.sim, library_strategy, expected_cells, path_katmai))
+final_df <- final_df %>%
+  rename(case_id = Case) %>%
+  mutate(sample_type = ifelse(sample_type.sim == "Tumor", "Primary Tumor", "Normal adjacent tissue")) %>%
+  mutate(Note = "NA") %>%
+  mutate(Published = NA) %>%
+  select(case_id, sample_type, snATAC_aliquot_id, snRNA_aliquot_id, snATAC_experiment_type, snRNA_experiment_type, has_snATAC, has_snRNA, Published)
 # write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "HumanTissue.SRA_Metadata.", run_id, ".tsv")
+file2write <- paste0(dir_out, "GDC.ccRCC.", run_id, ".tsv")
 write.table(x = final_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
 
