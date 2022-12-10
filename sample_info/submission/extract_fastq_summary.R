@@ -37,6 +37,7 @@ for (dir_input in dirs_input) {
   for (file_tmp in files_input) {
     print(file_tmp)
     df_tmp <- fread(data.table = F, input = paste0(dir_input, file_tmp))
+    print(head(df_tmp))
     fastq_summary_df <- rbind(fastq_summary_df, df_tmp)
   }
   
