@@ -40,8 +40,13 @@ for (dir_input in dirs_input) {
     df_tmp <- fread(data.table = F, input = paste0(dir_input, file_tmp))
     df_tmp$data_type <- datatype_tmp
     print(head(df_tmp))
+    
+    df_tmp2 <- df_tmp[c("Flow Cell ID", "Index Sequence", "Library Name", "Completion Date")]
+    df_tmp2[, "Completion Date"] <- as.character(df_tmp2[, "Completion Date"])
+    print(head(df_tmp2))
+    
     fastq_summary_list[[file_tmp]] <- df_tmp
-    fastq_summary_df <- rbind(fastq_summary_df, df_tmp[c("Flow Cell ID", "Index Sequence", "Library Name", "Completion Date")])
+    fastq_summary_df <- rbind(fastq_summary_df, df_tmp2)
   }
 }
 
