@@ -41,8 +41,12 @@ for (dir_input in dirs_input) {
     df_tmp$data_type <- datatype_tmp
     df_tmp$file_dir <- str_split_fixed(string = file_tmp, pattern = "\\/", n = 2)[,1]
     print(head(df_tmp))
+    colname_lane <- colnames(df_tmp)[grepl(pattern = "Lane", x = colnames(df_tmp))]
+    colname_samplename <- colnames(df_tmp)[grepl(pattern = "Sample", x = colnames(df_tmp))]
     
-    df_tmp2 <- df_tmp[c("Flow Cell ID", "Index Sequence", "Library Name", "Completion Date", "data_type", "file_dir")]
+    df_tmp2 <- df_tmp[c("Flow Cell ID", "Index Sequence", "Completion Date", colname_samplename, colname_lane, "Library Name", "data_type", "file_dir")]
+    colnames(df_tmp2) <- c("Flow Cell ID", "Index Sequence", "Completion Date", "Sample Name", "Lane Number", "Library Name", "data_type", "file_dir")
+    # df_tmp2 <- df_tmp[c("Flow Cell ID", "Index Sequence", "Library Name", "Completion Date", "data_type", "file_dir")]
     df_tmp2[, "Completion Date"] <- as.character(df_tmp2[, "Completion Date"])
     print(head(df_tmp2))
     
