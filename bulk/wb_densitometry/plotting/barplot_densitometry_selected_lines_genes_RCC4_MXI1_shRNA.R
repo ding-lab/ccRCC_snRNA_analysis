@@ -37,8 +37,8 @@ dir.create(dir_out)
 # input dependencies ------------------------------------------------------
 # densitometry_df <- readxl::read_xlsx(path = "./Validation/Western_Blot/wb densitometry_05162022_pl.xlsx", sheet = "mxi1_klf9_normalized_05162022")
 # densitometry_df <- readxl::read_xlsx(path = "./Validation/Western_Blot/wb densitometry_05162022_pl.xlsx", sheet = "mxi1_klf9_normalized_v2")
-densitometry_df <- readxl::read_xlsx(path = "./Validation/Western_Blot/wb densitometry_05172022_pl_v2.xlsx", sheet = "alltargets_normalized")
-densitometry_df <- fread(data.table = F, input = "./Validation/Western_Blot/wb_densitometry_alltargets_normalized.10112022.csv")
+# densitometry_df <- readxl::read_xlsx(path = "./Validation/Western_Blot/wb densitometry_05172022_pl_v2.xlsx", sheet = "alltargets_normalized")
+# densitometry_df <- fread(data.table = F, input = "./Validation/Western_Blot/wb_densitometry_alltargets_normalized.10112022.csv")
 densitometry_df <- fread(data.table = F, input = "./Validation/Western_Blot/wb_densitometry_alltargets_normalized.10112022.v2.csv")
 
 # set plot parameters -----------------------------------------------------
@@ -92,7 +92,7 @@ stat.test <- compare_means(
 )
 
 p <- ggbarplot(data = plotdata_df, x = "Line", y = "Value_bytub_byscrambled", 
-               add = "mean_sd", fill = "Line", color = "black", 
+               add = c("mean_sd", "dotplot"), fill = "Line", color = "black", 
                error.plot = "upper_linerange")
 p <- p + stat_pvalue_manual(stat.test, 
                             y.position = seq(ymax*1.05, ymax*(1+0.1*(length(lines_plot)-1)), length.out = (length(lines_plot)-1)), 

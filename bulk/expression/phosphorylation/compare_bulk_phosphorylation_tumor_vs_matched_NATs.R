@@ -2,7 +2,7 @@
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -16,12 +16,13 @@ dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
-exp_df <- fread(data.table = F, input = "~/Box/CPTAC_ccRCC/Data_Freeze_1.1/CPTAC_ccRCC_Discovery/Phosphoproteome/TMT/6_CPTAC3_CCRCC_Phospho_abundance_phosphosite_protNorm=2_CB_imputed.tsv")
-metadata_df <- fread(data.table = F, input = "~/Box/CPTAC_ccRCC/Data_Freeze_1.1/CPTAC_ccRCC_Discovery/Case_ID/CPTAC_ccRCC_discovery_caseID_v1.0.tsv")
+exp_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/phosphoproteome/6_CPTAC3_CCRCC_Phospho_abundance_phosphosite_protNorm=2_CB.tsv")
+## before used the imputated data sheet
+metadata_df <- fread(data.table = F, input = "./Resources/Bulk_Processed_Data/Case_ID/CPTAC_ccRCC_discovery_caseID_v1.0.tsv")
 
 # get the aliquot IDs for bulk corresponding to the snRNA aliquots --------
 metadata_filtered_df <- metadata_df %>%
-  filter(Specimen.Label.tumor != "CPT0012090003") %>%
+  filter(Specimen.Label.normal != "CPT0012090003") %>%
   filter(Histologic_Type == "Clear cell renal cell carcinoma") %>%
   filter(!is.na(Specimen.Label.normal))
 ## get aliquout ids for the two groups
@@ -42,24 +43,30 @@ ids_group2 = ids_exp_group2
 registerDoParallel(cores = 3)
 start_time <- Sys.time()
 test_list<-foreach(g=gene_index_vec) %dopar% {
-  exp_raw_vec1 <- unlist(exp_mat[gene_index_vec == g, ids_group1])
-  exp_raw_vec2 <- unlist(exp_mat[gene_index_vec == g, ids_group2])
-  exp_vec1 <- exp_raw_vec1[!is.na(exp_raw_vec1)]
-  exp_vec2 <- exp_raw_vec2[!is.na(exp_raw_vec2)]
-  meddiff_exp <- median(exp_vec1) - median(exp_vec2)
-  meddiff_exp
-  stat <- wilcox.test(x = exp_vec1, y = exp_vec2, paired = T)
-  p_val <- stat$p.value
-  result_list <- c(p_val, meddiff_exp)
+  exp_raw_t_vec <- unlist(exp_mat[gene_index_vec == g, ids_group1])
+  exp_raw_n_vec <- unlist(exp_mat[gene_index_vec == g, ids_group2])
+  
+  index_nonna <- (!is.na(exp_raw_t_vec) & !is.na(exp_raw_n_vec))
+  exp_t_vec <- exp_raw_t_vec[index_nonna]
+  exp_n_vec <- exp_raw_n_vec[index_nonna]
+  if (length(exp_t_vec) >= 5) {
+    meddiff_exp <- median(exp_t_vec) - median(exp_n_vec)
+    meddiff_exp
+    stat <- wilcox.test(x = exp_t_vec, y = exp_n_vec, paired = T)
+    p_val <- stat$p.value
+    result_list <- list(c(p_val, meddiff_exp, length(exp_t_vec)))
+  } else {
+    result_list <- list(c(NA, NA, length(exp_t_vec)))
+  }
   return(result_list)
 }
 end_time <- Sys.time()
 end_time - start_time 
 
 ## make test result into a data frame
-test_df <- do.call(rbind.data.frame, test_list)
+test_df <- data.frame(matrix(data = unlist(test_list), ncol = 3, byrow = T))
 # test_df <- data.frame(matrix(data = unlist(test_list), ncol = 4, byrow = T))
-colnames(test_df) <- c("p_val", "meddiff_exp")
+colnames(test_df) <- c("p_val", "meddiff_exp", "number_values")
 test_df <- cbind(phosphosite_idx_df, test_df)
 ## adjust p value
 test_df$fdr <- p.adjust(p = test_df$p_val, method = "fdr")
