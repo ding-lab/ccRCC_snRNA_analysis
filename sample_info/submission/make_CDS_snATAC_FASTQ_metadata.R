@@ -26,6 +26,7 @@ patient_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Resul
 filesizes_df <- fread(data.table = F, input = "~/Documents/Project/ccRCC_snRNA/Submission/CDS_upload/ccRCC.snATAC.fastq.gz.filesizes.txt", col.names = c("file_size", "path"))
 ## input md5
 md5sum_df <- fread(data.table = F, input = "~/Documents/Project/ccRCC_snRNA/Submission/CDS_upload/extract_md5sum/20230316.v1/ccRCC.snRNA.snATAC.md5sum.20230316.v1.tsv")
+md5sum_df <- fread(data.table = F, input = "~/Documents/Project/ccRCC_snRNA/Submission/CDS_upload/extract_md5sum/20230316.v2/ccRCC.snRNA.snATAC.md5sum.20230316.v2.tsv")
 
 
 # preprocess fastq summary info -------------------------------------------

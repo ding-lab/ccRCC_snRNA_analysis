@@ -30,6 +30,7 @@ dir.create(dir_out)
 dirs_input <- c("/diskmnt/primary/ccRCC_snRNA/", "/diskmnt/primary/ccRCC_snATAC/")
 md5_vec <- NULL
 filename_vec <- NULL
+path_vec <- NULL
 for (dir_input in dirs_input) {
   files_input <- list.files(path = dir_input, recursive = T)
   files_input <- files_input[grepl(pattern = "md5", x = files_input)]
@@ -39,12 +40,15 @@ for (dir_input in dirs_input) {
     print(file_tmp)
     text_tmp <- fread(data.table = F, input = paste0(dir_input, file_tmp))
     md5_vec[file_tmp] <- colnames(text_tmp)[1]
-    filename_vec[file_tmp] <- colnames(text_tmp)[2]
+    filename_tmp <- str_split(string = file_tmp, pattern = "\\/")[[1]]
+    filename_tmp = filename_tmp[length(filename_tmp)]
+    filename_vec[file_tmp] <- filename_tmp
+    path_vec[file_tmp] <- paste0(dir_input, file_tmp)
     # md5_vec[file_tmp] <- str_split_fixed(string = text_tmp, pattern = "\\\t", n = 2)[,1]
     # filename_vec[file_tmp] <- str_split_fixed(string = text_tmp, pattern = "\\\t", n = 2)[,2]
   }
 }
-md5_df <- data.frame(md5sum = md5_vec, file_name = filename_vec)
+md5_df <- data.frame(md5sum = md5_vec, file_name = filename_vec, file_path = path_vec)
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "ccRCC.snRNA.snATAC.md5sum.", run_id, ".tsv")
