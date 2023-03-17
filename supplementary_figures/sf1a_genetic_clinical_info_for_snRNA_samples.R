@@ -12,8 +12,7 @@ packages = c(
   "stringr",
   "reshape2",
   "data.table",
-  "ggplot2",
-  "ggpubr"
+  "ggplot2"
 )
 for (pkg_name_tmp in packages) {
   if (!(pkg_name_tmp %in% installed.packages()[,1])) {
@@ -31,6 +30,7 @@ run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 source("./ccRCC_snRNA_analysis/functions.R")
 dir_out <- paste0(makeOutDir(), run_id, "/")
 dir.create(dir_out)
+
 
 # input dependencies ------------------------------------------------------
 ## input id meta data
@@ -102,15 +102,7 @@ top_col_anno_df[top_col_anno_df$Aliquot.snRNA %in% normal_aliquot_ids, c("TumorP
 ## make aliquot id suffix
 aliquot_id_suffix <- str_split_fixed(string = aliquot_wu_ids, pattern = "-",n = 3)[,3]
 aliquot_id_suffix
-### make color for translocated chromosomes
-uniq_translocation_chrs <- c(as.vector(top_col_anno_df$Chr3_Translocation_Chr1), as.vector(top_col_anno_df$Chr3_Translocation_Chr2))
-uniq_translocation_chrs <- unique(uniq_translocation_chrs)
-uniq_translocation_chrs
-#### 7 different chromosomes
-cartocolors_safe <- cartocolors_df[cartocolors_df$Name == "Safe", "n7"][[1]]
-uniq_translocation_chr_colors <- c(cartocolors_safe, "white")
-names(uniq_translocation_chr_colors) <- c(uniq_translocation_chrs[uniq_translocation_chrs!="None"], "None")
-### make color for methylation
+## make color for methylation
 methyl_color_fun <- colorRamp2(c(quantile(top_col_anno_df$Methyl.VHL, 0.1, na.rm=T), 
                                  quantile(top_col_anno_df$Methyl.VHL, 0.5, na.rm=T), 
                                  quantile(top_col_anno_df$Methyl.VHL, 0.9, na.rm=T)),
@@ -119,6 +111,7 @@ methyl_color_fun <- colorRamp2(c(quantile(top_col_anno_df$Methyl.VHL, 0.1, na.rm
 Translocation.t3_other_text <- top_col_anno_df$Translocation.t3_other
 Translocation.t3_other_text[is.na(Translocation.t3_other_text)] <- ""
 Translocation.t3_other_text[Translocation.t3_other_text == "None"] <- ""
+## make top annotation
 top_col_anno = HeatmapAnnotation(snRNA_Availability = anno_simple(x = as.character(top_col_anno_df$snRNA_available),
                                                          simple_anno_size = unit(3, "mm"),
                                                          gp = gpar(col = color_gridline), col = colors_sn_data),
@@ -244,13 +237,9 @@ annotation_lgd = list(
   Legend(labels = c("Gain", "Loss", "Neutral"), labels_gp = gpar(fontsize = 9),
          title = "Bulk WGS CNV", nrow = 2, title_gp = gpar(fontsize = 9),
          legend_gp = gpar(fill = colors_cnvstate), border = color_gridline))
-# ## save heatmap as png
-# png(filename = paste0(dir_out, "data_availability",".png"), 
-#     width = 1600, height = 1600, res = 150)
-# ### combine heatmap and heatmap legend
-# draw(object = p, 
-#      annotation_legend_side = "right", annotation_legend_list = annotation_lgd)
-# dev.off()
+
+
+# write output ------------------------------------------------------------
 ## save heatmap as pdf
 pdf(paste0(dir_out, "data_availability", ".pdf"), 
     width = 6, height = 3.5)
@@ -265,4 +254,9 @@ pdf(paste0(dir_out, "legend.bottom", ".pdf"),
 draw(object = p, 
      annotation_legend_side = "bottom", annotation_legend_list = annotation_lgd)
 dev.off()
+## write source data
+source_data_df <- top_col_anno_df %>%
+  select(snRNA_available, snATAC_available, Histologic_Type, Histologic_Grade, Methyl.VHL, Mut.VHL, Mut.BAP1, Mut.PBRM1, Mut.SETD2, Mut.KDM5C, Mut.MTOR, Mut.PTEN, Mut.TSC1, CN.bulk.3p, CN.bulk.5q, CN.bulk.14q)
+write.table(x = source_data_df, file = paste0("~/Desktop/SF1a.SourceData.tsv"), quote = F, sep = "\t", row.names = F)
+
 

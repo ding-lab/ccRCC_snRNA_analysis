@@ -3,7 +3,7 @@
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -29,7 +29,7 @@ clinical_sup_df <- readxl::read_excel("./Resources/Clinical_Data/CCRCC_June2021_
 colnames_clinical_df <- data.frame(colnames_clinical = colnames(clinical_sup_df))
 colnames(clinical_sup_df)
 # input the snRNA sample matrix -------------------------------------------
-idmetadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210423.v1/meta_data.20210423.v1.tsv", data.table = F)
+idmetadata_df <- fread(input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv", data.table = F)
 
 # merge -------------------------------------------------------------------
 clinical_df <- merge(idmetadata_df, clinical_sup_df, by.x = c("Case", "Sample"), by.y = c("case_id", "specimen_id"), all = T)
@@ -43,6 +43,8 @@ clinical_selected_df <- clinical_df %>%
   rename(Histologic_Type_Of_Normal_Tissue = `cptac_path/histologic_type_of_normal_tissue`) %>%
   rename(Histologic_Type = `cptac_path/histologic_type`) %>%
   mutate(Histologic_Type = ifelse(!is.na(Histologic_Type), Histologic_Type, "Normal Adjacent Tissue")) %>%
+  filter(Histologic_Type == "Clear cell renal cell carcinoma") %>%
+  filter(!is.na(snRNA_available) & snRNA_available) %>%
   rename(Tissue_Type = `tissue_segment/tissue_type`) %>%
   select(Case, Sample, Sample_Type, Tissue_Type, Aliquot.snRNA, Aliquot.bulk, Aliquot.snRNA.WU, discovery_study, confirmatory_study,
          snRNA_available, snATAC_available,
@@ -58,6 +60,9 @@ clinical_selected_df$Histologic_Grade[clinical_selected_df$Sample == "C3N-01200-
 clinical_selected_df$Histologic_Grade[clinical_selected_df$Tissue_Type %in% c("normal", "blood")] <- "NAT"
 # clinical_selected_df$Histologic_Grade
 # clinical_selected_df$Histologic_Type
+test <- clinical_selected_df %>%
+  filter(snRNA_available)
 
 # write output ------------------------------------------------------------
 write.table(x = clinical_selected_df, file = paste0(dir_out, "ccRCC_Specimen_Clinicl_Data.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)
+write.table(x = clinical_selected_df, file = paste0("~/Downloads/ccRCC_Specimen_Clinicl_Data.", run_id, ".tsv"), quote = F, sep = "\t", row.names = F)

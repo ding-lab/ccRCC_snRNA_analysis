@@ -2,7 +2,7 @@
 
 # set up libraries and output directory -----------------------------------
 ## set working directory
-dir_base = "~/Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA/"
+dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_snRNA"
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -37,7 +37,10 @@ clinical_tab <- clinical_sup_df %>%
   rename(Case = case_id) %>%
   rename(Gender = `consent/sex`) %>%
   rename(Age = `consent/age`) %>%
-  rename(Race = `consent/ethnicity_race_ancestry_identified`) %>%
+  rename(ethnicity_race_ancestry_identified = `consent/ethnicity_race_ancestry_identified`) %>%
+  rename(Race = `consent/race`) %>%
+  mutate(Race = ifelse(is.na(Race), ifelse(ethnicity_race_ancestry_identified=="Caucasian", "White", ethnicity_race_ancestry_identified), Race)) %>%
+  rename(Ethnicity = `consent/ethnicity`) %>%
   rename(Tumor_Stage_Pathological = `baseline/tumor_stage_pathological`) %>%
   rename(Primary_Tumor_Pathologic_Stage = `baseline/pathologic_staging_primary_tumor`) %>%
   rename(Sarcomatoid_Features = `baseline/sarcomatoid_features`) %>%
@@ -53,7 +56,7 @@ clinical_tab <- clinical_sup_df %>%
   rename(Outcome_at_Followup_Completion = `follow-up/measure_of_success_of_outcome_at_completion_of_this_follow-up_form`) %>%
   rename(Followup_Cause_of_Death = `follow-up/cause_of_death`) %>%
   rename(Followup_Period = `follow-up/follow_up_period`) %>%
-  select(Case, Gender, Age, Race, 
+  select(Case, Gender, Age, Race, Ethnicity, ethnicity_race_ancestry_identified,
          Tumor_Stage_Pathological, Primary_Tumor_Pathologic_Stage,
          Sarcomatoid_Features,
          BaseLine_Metastasis_Sites, Baseline_IHC, 

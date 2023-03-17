@@ -105,5 +105,17 @@ save_pheatmap_png <- function(x, filename, width=1200, height=1000, res = 150) {
   dev.off()
 }
 
-
+# make colors -------------------------------------------------------------
+colors_tmp1 <- colors_cellgroup14[c("Tumor cells", "CD4+ T-cells", "CD8+ T-cells", "Macrophages", "NK cells", "DC", "Fibroblasts", "Myofibroblasts",  "B-cells")]
+colors_tmp2 <- c(colors_cellgroup14[c("Normal epithelial cells", "EMT tumor cells", "Immune others")],
+                 Polychrome::palette36.colors(n = 36)[c("Vivid_Yellow_Green", "Vivid_Violet","Light_Olive_Brown", "Very_Light_Blue")], 
+                 "grey80", "grey50")
+                 names(colors_tmp2) <- c("Proximal tubule", "Loop of Henle", "Distal convoluted tubule", 
+                                         'Principle cells', "Intercalated cells", "Podocytes", "Endothelial cells", 
+                                         "Unknown", "Immune others")
+                 colors_cellgroup <- c(colors_tmp1, colors_tmp2)
+                 # swatch(colors_cellgroup)
+                 # swatch(Polychrome::palette36.colors(n = 36))
+                 
+                 
 

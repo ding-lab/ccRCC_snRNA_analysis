@@ -42,7 +42,8 @@ plot_data_df <- merge(x = celltype_frac_snrna_df, y = celltype_frac_snatac_df, b
 plot_data_df <- plot_data_df %>%
   mutate(x_plot = Frac_CellGroupBarcodes_ByAliquot.snRNA) %>%
   mutate(y_plot = Frac_CellGroupBarcodes_ByAliquot.snATAC) %>%
-  filter(!is.na(x_plot) & !is.na(y_plot))
+  filter(!is.na(x_plot) & !is.na(y_plot)) %>%
+  select(x_plot, y_plot)
 
 # make scatterplot --------------------------------------------------------
 ## reference: https://rpkgs.datanovia.com/ggpubr/reference/stat_cor.html
@@ -57,14 +58,16 @@ p <- p + theme_classic(base_size = 16)
 p <- p + theme(axis.text = element_text(color = "black", size = 16),
                axis.title = element_text(color = "black", size = 16))
 
+lm_fit <- lm(y_plot ~ x_plot, data = plot_data_df)
+summary(lm_fit)
+lm_fit$coefficients
+summary(lm_fit)$coefficients[,4]  
+
 # save scatterplot --------------------------------------------------------
-file2write <- paste0(dir_out, "scatterplot",".png")
-png(file2write, width = 800, height = 800, res = 150)
-print(p)
-dev.off()
 file2write <- paste0(dir_out, "scatterplot",  ".pdf")
 pdf(file2write, width = 5, height = 5, useDingbats = F)
 print(p)
 dev.off()
+write.table(x = plot_data_df, file = "~/Desktop/SF1e.Bottom.SourceData.tsv", quote = F, sep = "\t", row.names = F)
 
 

@@ -30,7 +30,6 @@ genes2process <- knowncnvgenes_df$Gene_Symbol
 gene_tmp <- "VHL"
 for (gene_tmp in "VHL") {
 # for (gene_tmp in genes2process) {
-    
   ## extract current gene related results from the infercnv result data frame
   cnv_state_filtered_df <- cnv_state_bycell_bygene_df %>%
     filter(gene_symbol == gene_tmp)

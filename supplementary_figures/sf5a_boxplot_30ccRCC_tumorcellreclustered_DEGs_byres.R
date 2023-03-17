@@ -44,6 +44,8 @@ textdata_df <- plotdata_df %>%
   summarise(number_clusters = n()) %>%
   mutate(text = paste0("n = ", number_clusters))
 textdata_df$x_plot <- factor(textdata_df$resolution)
+plotdata_df <- plotdata_df %>%
+  select(x_plot, number_degs, resolution)
 # plot --------------------------------------------------------------------
 pos <- position_jitter(width = 0.1, seed = 1)
 p <- ggplot(data = plotdata_df, mapping = aes(x = x_plot, y = number_degs))
@@ -62,8 +64,6 @@ file2write <- paste0(dir_out, "Number_of_DEGs_byresolution.pdf")
 pdf(file2write, width = 6, height = 6, useDingbats = F)
 print(p)
 dev.off()
+## write source data
+write.table(x = plotdata_df, file = paste0("~/Desktop/SF5a.SourceData.tsv"), quote = F, sep = "\t", row.names = F)
 
-file2write <- paste0(dir_out, "Number_of_DEGs_byresolution.png")
-png(file2write, width = 1000, height = 800, res = 150)
-print(p)
-dev.off()

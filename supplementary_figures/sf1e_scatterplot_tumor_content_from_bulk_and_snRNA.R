@@ -6,7 +6,6 @@ dir_base = "~/Library/CloudStorage/Box-Box/Ding_Lab/Projects_Current/RCC/ccRCC_s
 setwd(dir_base)
 source("./ccRCC_snRNA_analysis/load_pkgs.R")
 source("./ccRCC_snRNA_analysis/functions.R")
-source("./ccRCC_snRNA_analysis/variables.R")
 source("./ccRCC_snRNA_analysis/plotting.R")
 library(ggpubr)
 ## set run id
@@ -26,7 +25,8 @@ plot_data_df <- merged_tumorcontent_df
 plot_data_df <- plot_data_df %>%
   mutate(x_plot = Frac_CellGroupBarcodes_ByAliquot) %>%
   mutate(y_plot = ESTIMATE_TumorPurity_RNA) %>%
-  filter(!is.na(x_plot) & !is.na(y_plot))
+  filter(!is.na(x_plot) & !is.na(y_plot)) %>%
+  select(x_plot, y_plot)
 
 # make scatterplot --------------------------------------------------------
 ## reference: https://rpkgs.datanovia.com/ggpubr/reference/stat_cor.html
@@ -47,13 +47,10 @@ p <- p + theme(axis.text = element_text(color = "black", size = 16),
 p
 
 # save scatterplot --------------------------------------------------------
-file2write <- paste0(dir_out, "scatterplot_tumor_content_from_bulk_and_snRNA.",".png")
-png(file2write, width = 800, height = 800, res = 150)
-print(p)
-dev.off()
 file2write <- paste0(dir_out, "scatterplot_tumor_content_from_bulk_and_snRNA",  ".pdf")
 pdf(file2write, width = 5, height = 5, useDingbats = F)
 print(p)
 dev.off()
+write.table(x = plot_data_df, file = "~/Desktop/SF1e.Top.SourceData.tsv", quote = F, sep = "\t", row.names = F)
 
 

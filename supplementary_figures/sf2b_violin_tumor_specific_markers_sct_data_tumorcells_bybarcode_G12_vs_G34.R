@@ -57,8 +57,8 @@ exp_df <- exp_df[barcode_mapping_df$barcode_merged,]
 ttest_t_vec <- NULL
 ttest_pvalue_vec <- NULL
 fontsize <- 10
-for (gene_tmp in genes_plot) {
-# for (gene_tmp in colnames(exp_df)) {
+# for (gene_tmp in genes_plot) {
+for (gene_tmp in c("CP", "PCSK6")) {
   ## make plot data
   plot_data_df <- data.frame(barcode_merged = rownames(exp_df), expression = exp_df[,gene_tmp])
   plot_data_df$Histologic_Grade <- barcode_mapping_df$Histologic_Grade
@@ -68,7 +68,8 @@ for (gene_tmp in genes_plot) {
   plot_data_df <- plot_data_df %>%
     filter(easy_id != "C3L-00359-T1") %>%
     mutate(x_plot = ifelse(Histologic_Grade %in% c("G1", "G2"), "G1/2", "G3/4")) %>%
-    mutate(y_plot = expression)
+    mutate(y_plot = expression) %>%
+    select(x_plot, y_plot)
   ## plot
   p = ggplot(plot_data_df, aes(x=x_plot, y=y_plot))
   p = p + geom_violin(aes(fill = x_plot),  color = NA, alpha = 1)
@@ -91,15 +92,18 @@ for (gene_tmp in genes_plot) {
   print(p)
   dev.off()
   
-  ## do T test
-  t.test_result_34vs12 <- t.test(y = plot_data_df$expression[plot_data_df$Histologic_Grade %in% c("G1", "G2")],
-                             x = plot_data_df$expression[plot_data_df$Histologic_Grade %in% c("G3", "G4")])
-
-  ttest_pvalue_vec <- c(ttest_pvalue_vec, t.test_result_34vs12$p.value)
-  ttest_t_vec <- c(ttest_t_vec, t.test_result_34vs12$statistic)
+  # ## do T test
+  # t.test_result_34vs12 <- t.test(y = plot_data_df$expression[plot_data_df$Histologic_Grade %in% c("G1", "G2")],
+  #                            x = plot_data_df$expression[plot_data_df$Histologic_Grade %in% c("G3", "G4")])
+  # 
+  # ttest_pvalue_vec <- c(ttest_pvalue_vec, t.test_result_34vs12$p.value)
+  # ttest_t_vec <- c(ttest_t_vec, t.test_result_34vs12$statistic)
+  
+  ## write source data
+  write.table(x = plot_data_df, file = paste0("~/Desktop/SF2b.", gene_tmp, ".SourceData.tsv"), quote = F, sep = "\t", row.names = F)
 }
 
-ttest_result_df <- data.frame(gene = genes_plot, p_value = ttest_pvalue_vec, t = ttest_t_vec,
-                              fdr = p.adjust(p = ttest_pvalue_vec, method = "fdr"))
-file2write <- paste0(dir_out, "t_test.tsv")
-write.table(x = ttest_result_df, file = file2write, quote = F, sep = "\t", row.names = F)
+# ttest_result_df <- data.frame(gene = genes_plot, p_value = ttest_pvalue_vec, t = ttest_t_vec,
+#                               fdr = p.adjust(p = ttest_pvalue_vec, method = "fdr"))
+# file2write <- paste0(dir_out, "t_test.tsv")
+# write.table(x = ttest_result_df, file = file2write, quote = F, sep = "\t", row.names = F)

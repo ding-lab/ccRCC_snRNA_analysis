@@ -101,7 +101,9 @@ p <- p + theme(panel.grid.major.y = element_line(size=.1, color="black" ))
 p <- p + theme(axis.text.y = element_text(size = 12, color = "black"), axis.title.y = element_blank())
 p <- p + theme(axis.text.x = element_text(size = 12, color = "black"), axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"), ends = "last")))
 p <- p + theme(legend.position = "bottom")
-p <- p + guides(fill = guide_legend(override.aes = list(size=4), nrow = 4, title = NULL, label.theme = element_text(size = 12)))
+p <- p + guides(fill = guide_legend(override.aes = list(size=4), 
+                                    nrow = 4, title = NULL, 
+                                    label.theme = element_text(size = 12)))
 p
 file2write <- paste0(dir_out, "Foldchanges", ".png")
 png(file2write, width = 600, height = 900, res = 150)
@@ -123,3 +125,4 @@ plotdata_wide_df <- plotdata_wide_df %>%
 
 table(plotdata_wide_df$diff_log2FC)
 
+n

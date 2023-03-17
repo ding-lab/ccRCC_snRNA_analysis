@@ -63,8 +63,8 @@ ttest_t_vec <- NULL
 ttest_pvalue_vec <- NULL
 fontsize <- 10
 
-for (gene_tmp in genes_plot) {
-  # for (gene_tmp in genes_process) {
+# for (gene_tmp in genes_plot) {
+for (gene_tmp in c("CP", "PCSK6")) {
   ## filter specific protein data
   exp_test_wide_df <- exp_data_df[exp_df$gene_name == gene_tmp,]
   plot_data_df <- data.frame(CASE_ID = metadata_filtered_df$CASE_ID, Expression = unlist(exp_test_wide_df))
@@ -82,6 +82,8 @@ for (gene_tmp in genes_plot) {
     rename(x_plot = '.')
   number_G12 <- number_tumors_df$Freq[number_tumors_df$x_plot == "G1/2"]; x_G12 <- paste0("G1/2 (", number_G12, ")")
   number_G34 <- number_tumors_df$Freq[number_tumors_df$x_plot == "G3/4"]; x_G34 <- paste0("G3/4 (", number_G34, ")")
+  plot_data_df <- plot_data_df %>%
+    select(x_plot, y_plot)
   
   ## plot
   p = ggplot(plot_data_df, aes(x=x_plot, y=y_plot))
@@ -103,18 +105,21 @@ for (gene_tmp in genes_plot) {
   print(p)
   dev.off()
   
-  ## do T test
-  t.test_result_34vs12 <- t.test(y = plot_data_df$y_plot[plot_data_df$Histologic_Grade %in% c("G1", "G2")],
-                                 x = plot_data_df$y_plot[plot_data_df$Histologic_Grade %in% c("G3", "G4")])
+  ## write source data
+  write.table(x = plot_data_df, file = paste0("~/Desktop/SF2c.", gene_tmp, ".SourceData.tsv"), quote = F, sep = "\t", row.names = F)
   
-  ttest_pvalue_vec <- c(ttest_pvalue_vec, t.test_result_34vs12$p.value)
-  ttest_t_vec <- c(ttest_t_vec, t.test_result_34vs12$statistic)
+  # ## do T test
+  # t.test_result_34vs12 <- t.test(y = plot_data_df$y_plot[plot_data_df$Histologic_Grade %in% c("G1", "G2")],
+  #                                x = plot_data_df$y_plot[plot_data_df$Histologic_Grade %in% c("G3", "G4")])
+  # 
+  # ttest_pvalue_vec <- c(ttest_pvalue_vec, t.test_result_34vs12$p.value)
+  # ttest_t_vec <- c(ttest_t_vec, t.test_result_34vs12$statistic)
 }
 
-ttest_result_df <- data.frame(gene = genes_plot, p_value = ttest_pvalue_vec, t = ttest_t_vec,
-                              fdr = p.adjust(p = ttest_pvalue_vec, method = "fdr"))
-file2write <- paste0(dir_out, "t_test.tsv")
-write.table(x = ttest_result_df, file = file2write, quote = F, sep = "\t", row.names = F)
+# ttest_result_df <- data.frame(gene = genes_plot, p_value = ttest_pvalue_vec, t = ttest_t_vec,
+#                               fdr = p.adjust(p = ttest_pvalue_vec, method = "fdr"))
+# file2write <- paste0(dir_out, "t_test.tsv")
+# write.table(x = ttest_result_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
 
 

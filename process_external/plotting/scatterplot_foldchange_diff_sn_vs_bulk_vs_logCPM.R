@@ -102,15 +102,18 @@ p <- p + xlab(label = "Log2(bulk RNA-seq fold change)\nTumors vs. NATs")
 p <- p + ylab(label = "Log2(snRNA-seq fold change)\nTumor cells vs. Non-tumor cells (NAT)")
 # p <- p + coord_fixed(ratio = 1)
 p <- p + theme_classic(base_size = 12)
+p <- p + theme(legend.position = "bottom")
+p <- p + guides(color = guide_legend(nrow = 4, title = NULL, label.theme = element_text(size = 12)))
+
 p
 file2write <- paste0(dir_out, "log2FC.wu_vs_log2FC.bulkRNA", ".pdf")
-pdf(file2write, width = 4, height = 4, useDingbats = F)
+pdf(file2write, width = 4.5, height = 5, useDingbats = F)
 print(p)
 dev.off()
-file2write <- paste0(dir_out, "log2FC.wu_vs_log2FC.bulkRNA", ".png")
-png(file2write, width = 1000, height = 800, res = 150)
-print(p)
-dev.off()
+# file2write <- paste0(dir_out, "log2FC.wu_vs_log2FC.bulkRNA", ".png")
+# png(file2write, width = 1000, height = 800, res = 150)
+# print(p)
+# dev.off()
 
 # log2FC.young_vs_log2FC.bulkRNA --------------------------------------------------------------------
 text_lower <- "log2FC.sc - log2.bulk < -1 (log2FC.sc > 0)"
@@ -144,7 +147,7 @@ p <- p + geom_hline(yintercept = 0, linetype = 2, color = "grey50")
 p <- p + geom_abline(slope = 1, intercept = 1, linetype = 2, color = "grey50")
 p <- p + geom_abline(slope = 1, intercept = -1, linetype = 2, color = "grey50")
 p <- p + geom_point()
-p <- p + geom_label_repel(max.overlaps = Inf, min.segment.length = 0, box.padding = 0.5)
+p <- p + geom_label_repel(max.overlaps = Inf, min.segment.length = 0, box.padding = 0.5, force = 2)
 p <- p + scale_color_manual(values = colors_point)
 # p <- p + ylim(c(-2, 15))
 p <- p + xlab(label = "Log2(bulk RNA-seq fold change)\nTumors vs. NATs")
@@ -152,16 +155,16 @@ p <- p + ylab(label = "Log2(Young et al. scRNA-seq fold change)\nTumor cells vs.
 # p <- p + coord_fixed(ratio = 1)
 p <- p + theme_classic(base_size = 12)
 p <- p + theme(legend.position = "bottom")
-p <- p + guides(color = guide_legend(nrow = 3, title = NULL))
+p <- p + guides(color = guide_legend(nrow = 4, title = NULL, label.theme = element_text(size = 12)))
 p
 file2write <- paste0(dir_out, "log2FC.young_vs_log2FC.bulkRNA", ".pdf")
-pdf(file2write, width = 4, height = 4, useDingbats = F)
+pdf(file2write, width = 4.5, height = 5, useDingbats = F)
 print(p)
 dev.off()
-file2write <- paste0(dir_out, "log2FC.young_vs_log2FC.bulkRNA", ".png")
-png(file2write, width = 800, height = 900, res = 150)
-print(p)
-dev.off()
+# file2write <- paste0(dir_out, "log2FC.young_vs_log2FC.bulkRNA", ".png")
+# png(file2write, width = 800, height = 900, res = 150)
+# print(p)
+# dev.off()
 
 # log2FC.zhang_vs_log2FC.bulkRNA --------------------------------------------------------------------
 text_lower <- "log2FC.sc - log2.bulk < -1 (log2FC.sc > 0)"
@@ -201,16 +204,16 @@ p <- p + ylab(label = "Log2(zhang et al. scRNA-seq fold change)\nTumor cells vs.
 # p <- p + coord_fixed(ratio = 1)
 p <- p + theme_classic(base_size = 12)
 p <- p + theme(legend.position = "bottom")
-p <- p + guides(color = guide_legend(nrow = 3, title = NULL))
+p <- p + guides(color = guide_legend(nrow = 4, title = NULL, label.theme = element_text(size = 12)))
 p
 file2write <- paste0(dir_out, "log2FC.zhang_vs_log2FC.bulkRNA", ".pdf")
-pdf(file2write, width = 4, height = 4, useDingbats = F)
+pdf(file2write, width = 4.5, height = 5, useDingbats = F)
 print(p)
 dev.off()
-file2write <- paste0(dir_out, "log2FC.zhang_vs_log2FC.bulkRNA", ".png")
-png(file2write, width = 800, height = 900, res = 150)
-print(p)
-dev.off()
+# file2write <- paste0(dir_out, "log2FC.zhang_vs_log2FC.bulkRNA", ".png")
+# png(file2write, width = 800, height = 900, res = 150)
+# print(p)
+# dev.off()
 
 # log2FC.wu_-_log2FC.bulkRNA --------------------------------------------------------------------
 plotdata_df <- foldchanges_df %>%
