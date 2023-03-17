@@ -6,8 +6,7 @@ packages = c(
   "dplyr",
   "stringr",
   "reshape2",
-  "data.table",
-  "Seurat"
+  "data.table"
 )
 
 for (pkg_name_tmp in packages) {
