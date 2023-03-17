@@ -24,20 +24,10 @@ fastq_summary_list <- readRDS("./Resources/Analysis_Results/sample_info/submissi
 patient_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/clinical/extract_case_clinical_data/20230310.v1/snRNA_ccRCC_Clinicl_Table.20230310.v1.tsv")
 ## input file sizes
 filesizes_df <- fread(data.table = F, input = "~/Documents/Project/ccRCC_snRNA/Submission/CDS_upload/ccRCC.snATAC.fastq.gz.filesizes.txt", col.names = c("file_size", "path"))
+## input md5
+md5sum_df <- fread(data.table = F, input = "~/Documents/Project/ccRCC_snRNA/Submission/CDS_upload/extract_md5sum/20230316.v1/ccRCC.snRNA.snATAC.md5sum.20230316.v1.tsv")
 
 
-# input .md5 files --------------------------------------------------------
-dir_md5 = "~/Documents/Project/ccRCC_snRNA/Submission/CDS_upload/MD5/"
-md5_vec <- NULL
-filename_vec <- NULL
-for (file_tmp in list.files(path = dir_md5)) {
-  md5_tmp <- fread(data.table = F,input = paste0(dir_md5, file_tmp))
-  text_tmp <- readLines(paste0(dir_md5, file_tmp))
-  md5_vec[file_tmp] <- str_split_fixed(string = text_tmp, pattern = "\\\t", n = 2)[,1]
-  filename_vec[file_tmp] <- str_split_fixed(string = text_tmp, pattern = "\\\t", n = 2)[,2]
-}
-
-file_tmp <- list.files(path = dir_md5)[1]
 # preprocess fastq summary info -------------------------------------------
 # View(fastq_summary_list[[1]])
 ## this info is extracted from the sampleinfo.csv we grabbed recursively in the primary data folder
@@ -91,7 +81,9 @@ metadata_merged_df <- merge(x = metadata_merged_df,
                             y = filesizes_df,
                             by.x = c("File Name"), by.y = c("file_name"), all.x = T)
 ## add md5sum
-metadata_merged_df$md5sum = mapvalues(x = metadata_merged_df$`File Name`, from = filename_vec, to = md5_vec)
+metadata_merged_df <- merge(x = metadata_merged_df, 
+                            y = md5sum_df,
+                            by.x = c("File Name"), by.y = c("file_name"), all.x = T)
 unique(metadata_df$Case[metadata_df$snRNA_available & metadata_df$Case != "C3L-00359"])
 unique(metadata_df$Sample[metadata_df$snRNA_available & metadata_df$Case != "C3L-00359"])
 
