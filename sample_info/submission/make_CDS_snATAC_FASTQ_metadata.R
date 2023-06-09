@@ -18,7 +18,7 @@ dir.create(dir_out)
 # metadata_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/make_meta_data/20210809.v1/meta_data.20210809.v1.tsv")
 metadata_df <- fread(data.table = F, input = "~/Documents/Project/ccRCC_snRNA/Resouces/meta_data.20210809.v1.tsv")
 ## input FASTQ summary
-# fastq_summary_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/submission/extract_fastq_summary/20221212.v1/ccRCC.snRNA.snATAC.fastq.summary.20221212.v1.tsv")
+fastq_summary_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/submission/extract_fastq_summary/20221212.v1/ccRCC.snRNA.snATAC.fastq.summary.20221212.v1.tsv")
 fastq_summary_list <- readRDS("./Resources/Analysis_Results/sample_info/submission/extract_fastq_summary/20221212.v1/ccRCC.snRNA.snATAC.fastq.summary.20221212.v1.RSD")
 ## input patient-level clinical data
 patient_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/clinical/extract_case_clinical_data/20230310.v1/snRNA_ccRCC_Clinicl_Table.20230310.v1.tsv")

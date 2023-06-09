@@ -59,8 +59,41 @@ for (dir_input in dirs_input) {
 }
 fastq_paths_df = data.frame(file_path = path_vec)
 
+# gather samplemap.csv ----------------------------------------------------
+fastq_info_samplemap_df <- NULL
+for (dir_input in dirs_input) {
+  files_input <- list.files(path = dir_input, recursive = T)
+  files_input <- files_input[grepl(pattern = "Samplemap\\.csv", x = files_input) & !grepl(pattern = "md5", x = files_input)]
+  # print(files_input)
+  datatype_tmp <- ifelse(dir_input == "/diskmnt/primary/ccRCC_snRNA/", "snRNA", "snATAC")
+  for (file_tmp in files_input) {
+    print(file_tmp)
+    fastqinfo_tmp_df <- fread(data.table = F, input = paste0(dir_input, file_tmp))
+    fastqinfo_tmp_df$data_type <- datatype_tmp
+    fastqinfo_tmp_df$file_dir <- str_split_fixed(string = file_tmp, pattern = "\\/", n = 2)[,1]
+    
+    colname_samplename <- colnames(fastqinfo_tmp_df)[grepl(pattern = "Sample", x = colnames(fastqinfo_tmp_df))]
+    colname_lane <- colnames(fastqinfo_tmp_df)[grepl(pattern = "Lane", x = colnames(fastqinfo_tmp_df))]
+    if ("File Name" %in% colnames(fastqinfo_tmp_df)) {
+      fastqinfo_keep_tmp_df <- fastqinfo_tmp_df[, c("data_type", "file_dir", "File Name", "Flow Cell ID", "Index Sequence", "Completion Date", colname_samplename, colname_lane)]
+    } else {
+      ## in this case, there are two FASTQ files listed in each row
+      colnames2process <- colnames(fastqinfo_tmp_df)[which(grepl(x = fastqinfo_tmp_df[1,], pattern = "fastq"))]
+      fastqinfo_tmp_df1 <- fastqinfo_tmp_df[, c("data_type", "file_dir", "Flow Cell ID", "Index Sequence", "Completion Date", colname_samplename, colname_lane, colnames2process)]
+      fastqinfo_tmp_df2 <- melt.data.table(data = data.table(fastqinfo_tmp_df1), measure.vars = colnames2process)
+      fastqinfo_tmp_df2 <- as.data.frame(fastqinfo_tmp_df2)
+      fastqinfo_keep_tmp_df <- fastqinfo_tmp_df2[, c("data_type", "file_dir", "value", "Flow Cell ID", "Index Sequence", "Completion Date", colname_samplename, colname_lane)]
+    }
+    colnames(fastqinfo_keep_tmp_df) <- c("data_type", "file_dir", "File Name", "Flow Cell ID", "Index Sequence", "Completion Date", "Sample Name", "Lane Number")
+    fastqinfo_keep_tmp_df$`Completion Date` = as.character(fastqinfo_keep_tmp_df$`Completion Date`)
+    fastq_info_samplemap_df <- rbind(fastq_info_samplemap_df, fastqinfo_keep_tmp_df)
+  }
+}
+
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "ccRCC.snRNA.snATAC.md5sum.", run_id, ".tsv")
 write.table(x = md5_df, file = file2write, sep = "\t", row.names = F, quote = F)
 file2write <- paste0(dir_out, "ccRCC.snRNA.snATAC.FASTQ.paths.", run_id, ".tsv")
 write.table(x = fastq_paths_df, file = file2write, sep = "\t", row.names = F, quote = F)
+file2write <- paste0(dir_out, "ccRCC.snRNA.snATAC.FASTQ.detailedinfo.", run_id, ".tsv")
+write.table(x = fastq_info_samplemap_df, file = file2write, sep = "\t", row.names = F, quote = F)
