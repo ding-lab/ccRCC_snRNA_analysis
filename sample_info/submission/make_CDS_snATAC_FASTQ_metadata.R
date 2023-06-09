@@ -25,9 +25,8 @@ patient_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Resul
 ## input file sizes
 filesizes_df <- fread(data.table = F, input = "~/Documents/Project/ccRCC_snRNA/Submission/CDS_upload/ccRCC.snATAC.fastq.gz.filesizes.txt", col.names = c("file_size", "path"))
 ## input md5
-md5sum_df <- fread(data.table = F, input = "~/Documents/Project/ccRCC_snRNA/Submission/CDS_upload/extract_md5sum/20230316.v1/ccRCC.snRNA.snATAC.md5sum.20230316.v1.tsv")
 md5sum_df <- fread(data.table = F, input = "~/Documents/Project/ccRCC_snRNA/Submission/CDS_upload/extract_md5sum/20230316.v2/ccRCC.snRNA.snATAC.md5sum.20230316.v2.tsv")
-
+md5sum_df <- fread(data.table = F, input = "~/Documents/Project/ccRCC_snRNA/Submission/CDS_upload/fastq.gz.md5sum.txt", col.names = c("md5sum", "file_path"), header = F)
 
 # preprocess fastq summary info -------------------------------------------
 # View(fastq_summary_list[[1]])
@@ -69,6 +68,9 @@ metadata_filtered_df <- metadata_df %>%
 metadata_merged_df <- merge(x = metadata_filtered_df, 
                             y = fastq_summary_ccRCC_df, 
                             by.x = c("Aliquot.snRNA"), by.y = c("aliquot"), all.x = T)
+metadata_add_df = metadata_merged_df[metadata_merged_df$Aliquot.snRNA == "CPT0000890002",]
+metadata_add_df$`File Name` = c("TWFU-CPT0000890002-XBa1_S2_L002_I1_001.fastq.gz", "TWFU-CPT0000890002-XBa1_S2_L002_R1_001.fastq.gz")
+metadata_merged_df = rbind(metadata_merged_df, metadata_add_df)
 unique(metadata_merged_df$Aliquot.snRNA) ## 28 samples
 table(metadata_merged_df$Aliquot.snRNA)
 metadata_merged_df <- merge(x = metadata_merged_df, y = patient_clinical_df, by = c("Case"), all.x = T) ## this has to be added because gender info is required
@@ -77,21 +79,32 @@ filesizes_df$file_name <- sapply(filesizes_df$path, FUN = function(p) {
   filename = p_split[length(p_split)]
   return(filename)
 })
+filesizes_df = filesizes_df[!grepl(pattern = "2863682_new", x = filesizes_df$path),]
 ## add file sizes
 metadata_merged_df <- merge(x = metadata_merged_df, 
                             y = filesizes_df,
                             by.x = c("File Name"), by.y = c("file_name"), all.x = T)
 ## add md5sum
+md5sum_df$file_name.orig = sapply(X = md5sum_df$file_path, FUN = function(p) {
+  p_split = str_split(string = p, pattern = "\\/")[[1]]
+  filename_tmp = p_split[length(p_split)]
+  return(filename_tmp)
+})
+md5sum_df = md5sum_df[!grepl(pattern = "2863682_new", x = md5sum_df$file_path),]
+
 metadata_merged_df <- merge(x = metadata_merged_df, 
-                            y = md5sum_df,
-                            by.x = c("File Name"), by.y = c("file_name"), all.x = T)
+                            y = md5sum_df %>%
+                              # mutate(file_name.orig = gsub(x = file_name, pattern = "\\.md5", replacement = "")) %>%
+                              select(file_name.orig, md5sum, file_path),
+                            by.x = c("File Name"), by.y = c("file_name.orig"), all.x = T)
+## examine final numbers
 unique(metadata_df$Case[metadata_df$snRNA_available & metadata_df$Case != "C3L-00359"])
 unique(metadata_df$Sample[metadata_df$snRNA_available & metadata_df$Case != "C3L-00359"])
 
 # create metadata fields --------------------------------------------------
 cds_metadata_df <- metadata_merged_df %>%
   ## Study Top Level
-  mutate(phs_accession="phs001287.v15.p6", 
+  mutate(phs_accession="phs001287.v16.p6", 
          study_name="Washington University in St. Louis ccRCC snRNA-seq and snATAC-seq study",
          study_acronym="WashUccRCCsn",
          number_of_participants=25,
@@ -131,7 +144,7 @@ cds_metadata_df <- metadata_merged_df %>%
          alternate_participant_id_1="",
          alternate_system_1="") %>%
   ## Sample
-  mutate(sample_id=Aliquot.snRNA,
+  mutate(sample_id=Case,
          sample_description="",
          biosample_accession="",
          sample_type=ifelse(Sample_Type == "Tumor", "Clear Cell Renal Cell Carcinoma - Kidney", "Normal Adjacent Tissue - Kidney")) %>%
@@ -143,8 +156,8 @@ cds_metadata_df <- metadata_merged_df %>%
   ## File
   mutate(file_name=`File Name`,
          file_type="FASTQ",
-         file_size="", ## Required
-         md5sum="",## Required
+         file_size=file_size, ## Required
+         md5sum=md5sum,## Required
          file_url_in_cds="", ## Required after sending to CDS
          checksum_value="",
          checksum_algorithm="",
@@ -158,7 +171,7 @@ cds_metadata_df <- metadata_merged_df %>%
          platform="ILLUMINA",
          instrument_model="",
          design_description="",
-         reference_genome_assembly="",
+         reference_genome_assembly="GRCh38",
          custom_assembly_fasta_file_for_alignment="",
          bases="",
          number_of_reads="",
@@ -269,9 +282,29 @@ cds_metadata_df <- metadata_merged_df %>%
 table(cds_metadata_df$race)
 table(as.character(cds_metadata_df$ethnicity))
 table(as.character(cds_metadata_df$sample_id))
+cds_metadata_df = unique(cds_metadata_df)
+
+sampleid_mapping_df = cds_metadata_df %>%
+  rename(subject_id = participant_id) %>%
+  select(subject_id, sample_id) %>%
+  unique() %>%
+  rename(SUBJECT_ID = subject_id) %>%
+  rename(SAMPLE_ID = sample_id)
+
+consent_df = sampleid_mapping_df %>%
+  select(SUBJECT_ID) %>%
+  unique() %>%
+  mutate(CONSENT = 1)
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "CDS.snATAC.ccRCC.", run_id, ".tsv")
 write.table(x = cds_metadata_df, file = file2write, quote = F, sep = "\t", row.names = F)
+file2write <- paste0(dir_out, "sample_mapping_for_dbGAP.", run_id, ".tsv")
+write.table(x = sampleid_mapping_df, file = file2write, quote = F, sep = "\t", row.names = F)
+file2write <- paste0(dir_out, "subject_consent_for_dbGAP.", run_id, ".tsv")
+write.table(x = consent_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
-
+filecount_df = cds_metadata_df %>%
+  select(sample_id) %>%
+  table() %>%
+  as.data.frame()
