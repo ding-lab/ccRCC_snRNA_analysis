@@ -21,6 +21,8 @@ clinical_case_df <- fread(data.table = F, input = "./Resources/Analysis_Results/
 ## input FASTQ summary
 # fastq_summary_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/submission/extract_fastq_summary/20221212.v1/ccRCC.snRNA.snATAC.fastq.summary.20221212.v1.tsv")
 fastq_summary_list <- readRDS("./Resources/Analysis_Results/sample_info/submission/extract_fastq_summary/20221212.v1/ccRCC.snRNA.snATAC.fastq.summary.20221212.v1.RSD")
+md5_df = fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/submission/extract_filepath_md5sum/20230609.v2/ccRCC.snRNA.snATAC.md5sum.20230609.v2.tsv")
+fastq_paths_df = fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/submission/extract_filepath_md5sum/20230609.v2/ccRCC.snRNA.snATAC.FASTQ.paths.20230609.v2.tsv")
 
 # preprocess fastq summary info -------------------------------------------
 fastqinfo_summary_df <- NULL

@@ -55,7 +55,7 @@ for (dir_input in dirs_input) {
   files_input <- list.files(path = dir_input, recursive = T)
   files_input <- files_input[grepl(pattern = "fastq.gz", x = files_input)]
   files_input <- files_input[!grepl(pattern = "md5", x = files_input)]
-  path_vec = c(path_vec, files_input)
+  path_vec = c(path_vec, paste0(dir_input, files_input))
 }
 fastq_paths_df = data.frame(file_path = path_vec)
 
