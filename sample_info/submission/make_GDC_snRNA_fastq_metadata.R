@@ -21,6 +21,7 @@ clinical_case_df <- fread(data.table = F, input = "./Resources/Analysis_Results/
 ## input FASTQ info
 md5_df = fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/submission/extract_filepath_md5sum/20230609.v2/ccRCC.snRNA.snATAC.md5sum.20230609.v2.tsv")
 fastq_paths_df = fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/submission/extract_filepath_md5sum/20230609.v2/ccRCC.snRNA.snATAC.FASTQ.paths.20230609.v2.tsv")
+fastq_info_samplemap_df = fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/submission/extract_filepath_md5sum/20230609.v2/ccRCC.snRNA.snATAC.FASTQ.detailedinfo.20230609.v2.tsv")
 
 # preprocess meta data --------------------------------------------------------------
 metadata_filtered_df <- metadata_df %>%
@@ -30,28 +31,6 @@ metadata_filtered_df <- metadata_df %>%
 aliquots_all = unique(metadata_filtered_df$Aliquot.snRNA)
 
 # preprocess fastq summary info -------------------------------------------
-fastq_info_samplemap_df <- NULL
-for (idx in names(fastq_summary_list)) {
-  fastqinfo_tmp_df <- fastq_summary_list[[idx]]
-  if ("snRNA" %in% fastqinfo_tmp_df$data_type) { ## we are only extracting the snATAC FASTQ files
-    colname_samplename <- colnames(fastqinfo_tmp_df)[grepl(pattern = "Sample", x = colnames(fastqinfo_tmp_df))]
-    colname_lane <- colnames(fastqinfo_tmp_df)[grepl(pattern = "Lane", x = colnames(fastqinfo_tmp_df))]
-    if ("File Name" %in% colnames(fastqinfo_tmp_df)) {
-      fastqinfo_keep_tmp_df <- fastqinfo_tmp_df[, c("File Name", "Flow Cell ID", "Index Sequence", "Completion Date", colname_samplename, colname_lane)]
-    } else {
-      ## in this case, there are two FASTQ files listed in each row
-      colnames2process <- colnames(fastqinfo_tmp_df)[which(grepl(x = fastqinfo_tmp_df[1,], pattern = "fastq"))]
-      fastqinfo_tmp_df1 <- fastqinfo_tmp_df[, c("Flow Cell ID", "Index Sequence", "Completion Date", colname_samplename, colname_lane, colnames2process)]
-      fastqinfo_tmp_df2 <- melt.data.table(data = data.table(fastqinfo_tmp_df1), measure.vars = colnames2process)
-      fastqinfo_tmp_df2 <- as.data.frame(fastqinfo_tmp_df2)
-      fastqinfo_keep_tmp_df <- fastqinfo_tmp_df2[, c( "value", "Flow Cell ID", "Index Sequence", "Completion Date", colname_samplename, colname_lane)]
-    }
-    colnames(fastqinfo_keep_tmp_df) <- c("File Name", "Flow Cell ID", "Index Sequence", "Completion Date", "Sample Name", "Lane Number")
-    fastqinfo_keep_tmp_df$`Completion Date` = as.character(fastqinfo_keep_tmp_df$`Completion Date`)
-    fastq_info_samplemap_df <- rbind(fastq_info_samplemap_df, fastqinfo_keep_tmp_df)
-  }
-}
-
 ## process MD5
 md5_df = md5_df %>%
   rename(file_name.md5 = file_name) %>%
@@ -59,21 +38,43 @@ md5_df = md5_df %>%
   rename(file_path.md5 = file_path) %>%
   mutate(file_path = gsub(x = file_path.md5, pattern = "\\.md5", replacement = "")) %>%
   mutate(file_path = gsub(x = file_path, pattern = "\\/MD5\\/", replacement = "/FASTQ/"))
-## merge data
-fastq_info_df = merge(x = fastq_paths_df, y = md5_df, by = "file_path")
+## merge data 1
+fastq_paths_df$file_name = sapply(fastq_paths_df$file_path, function(x) {
+  str_vec = str_split(x, pattern = "\\/")[[1]]
+  file_name = str_vec[length(str_vec)]
+  return(file_name)
+})
+fastq_paths_df = data.frame(fastq_paths_df)
+fastq_info_df = merge(x = fastq_paths_df, y = md5_df, by = c("file_name", "file_path"), all.x = T)
+
 fastq_info_df = fastq_info_df %>%
   filter(grepl(x = file_path, pattern = "ccRCC_snRNA")) %>%
   mutate(aliquot = str_split_fixed(file_path, "\\/", 6)[,5]) %>%
   filter(aliquot %in% metadata_filtered_df$Aliquot.snRNA)
 length(unique(fastq_info_df$aliquot))
 aliquots_all[!(aliquots_all %in% unique(fastq_info_df$aliquot))]
-fastq_info_df = merge(x = fastq_info_df, y = fastq_info_samplemap_df, by.x = "file_name", by.y = "File Name", all.x = T)
-
-# process snRNA data-----------------------------------------------------------------
+length(unique(fastq_info_df$file_name))
+nrow(fastq_info_df)
+## merge data 2
+fastq_info_samplemap_df <- fastq_info_samplemap_df %>%
+  select(-file_dir) %>%
+  unique() %>%
+  rename(file_name = `File Name`) %>%
+  filter((data_type == "snRNA") & (file_name %in% fastq_info_df$file_name))
+nrow(fastq_info_samplemap_df)
+fastq_info_df = merge(x = fastq_info_df, y = fastq_info_samplemap_df, by = "file_name", all.x = T)
+fastq_info_df$data_type = "snRNA"
+fastq_info_df$`Flow Cell ID`[fastq_info_df$aliquot == "CPT0001220012"] = "HVLMGDSXX"
+fastq_info_df$`Index Sequence`[fastq_info_df$aliquot == "CPT0001220012"] = "ATTACTTC-TGCGAACT-GCATTCGG-CAGCGGAA"
+fastq_info_df$`Lane Number`[fastq_info_df$aliquot == "CPT0001220012"] = "4"
+fastq_info_df$`Completion Date`[fastq_info_df$aliquot == "CPT0001220012"] = "10/12/19"
+fastq_info_df$`Sample Name`[fastq_info_df$aliquot == "CPT0001220012"] = "TWCE-CPT000122-0012-lib1"
+## merge data 3
 snRNA_metadata_df <- merge(x = metadata_filtered_df, 
-                            y = fastq_info_df, 
-                            by.x = c("Aliquot.snRNA"), by.y = c("aliquot"), all.x = T)
+                           y = fastq_info_df, 
+                           by.x = c("Aliquot.snRNA"), by.y = c("aliquot"), all.x = T)
 
+# construct meta data -----------------------------------------------------------------
 snRNA_metadata_df <- snRNA_metadata_df %>%
   rename(case_id = Case) %>%
   rename(specimen_id = Sample) %>%
@@ -90,7 +91,7 @@ snRNA_metadata_df <- snRNA_metadata_df %>%
   mutate(Status = "Ready for upload to GDC") %>%
   mutate(Location =  paste0(str_split_fixed(file_path, "FASTQ\\/", 2)[,1], "FASTQ/")) %>%
   rename(`Sequencing lane` = `Lane Number`) %>%
-  rename(`Sample name` = `Sample Name`) %>%
+  mutate(`Sample name` = ifelse(is.na(`Sample Name`), str_split_fixed(file_name, "\\-lib1", 2)[,1], `Sample Name`)) %>%
   mutate(expected_cells = 6000) %>%
   mutate(`Sequence read length` = 150) %>%
   rename(`Number of expected cells` = expected_cells) %>%
@@ -110,14 +111,15 @@ snRNA_metadata_df <- snRNA_metadata_df %>%
          snATAC_aliquot_id, snRNA_aliquot_id, snATAC_experiment_type, snRNA_experiment_type, has_snATAC, has_snRNA,
          Published, Status, Location, file_path, `Flow Cell ID`, `Index Sequence`, 
          `Sequencing lane`, `Sequence read length`, `Sample name`,
-         `Number of expected cells`, `Sequencing date`, Protocol)
+         `Number of expected cells`, `Sequencing date`, Protocol, md5sum)
+snRNA_metadata_df$`Sequencing date`[snRNA_metadata_df$`Sequencing date` == "NA//"] <- "NA"
+snRNA_metadata_df[is.na(snRNA_metadata_df)] <- "NA"
 
-# combine -----------------------------------------------------------------
-final_df <- rbind(snRNA_metadata_df, snATAC_metadata_df)
-final_df$`Sequencing date`[final_df$`Sequencing date` == "NA//"] <- NA
+table(snRNA_metadata_df$snRNA_aliquot_id)
+nrow(snRNA_metadata_df)
 
 # write output ------------------------------------------------------------
 file2write <- paste0(dir_out, "GDC.ccRCC.snRNA.FASTQ.", run_id, ".tsv")
-write.table(x = final_df, file = file2write, quote = F, sep = "\t", row.names = F)
+write.table(x = snRNA_metadata_df, file = file2write, quote = F, sep = "\t", row.names = F)
 
 

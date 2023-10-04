@@ -23,7 +23,9 @@ fastq_summary_list <- readRDS("./Resources/Analysis_Results/sample_info/submissi
 ## input patient-level clinical data
 patient_clinical_df <- fread(data.table = F, input = "./Resources/Analysis_Results/sample_info/clinical/extract_case_clinical_data/20230310.v1/snRNA_ccRCC_Clinicl_Table.20230310.v1.tsv")
 ## input file sizes
-filesizes_df <- fread(data.table = F, input = "~/Documents/Project/ccRCC_snRNA/Submission/CDS_upload/ccRCC.snATAC.fastq.gz.filesizes.txt", col.names = c("file_size", "path"))
+# filesizes_df <- fread(data.table = F, input = "~/Documents/Project/ccRCC_snRNA/Submission/CDS_upload/ccRCC.snATAC.fastq.gz.filesizes.txt", col.names = c("file_size", "path"))
+filesizes_df <- fread(data.table = F, input = "./Submissions/CDS_upload/snATAC.FASTQ.filesizes.txt")
+
 ## input md5
 md5sum_df <- fread(data.table = F, input = "~/Documents/Project/ccRCC_snRNA/Submission/CDS_upload/extract_md5sum/20230316.v2/ccRCC.snRNA.snATAC.md5sum.20230316.v2.tsv")
 md5sum_df <- fread(data.table = F, input = "~/Documents/Project/ccRCC_snRNA/Submission/CDS_upload/fastq.gz.md5sum.txt", col.names = c("md5sum", "file_path"), header = F)
@@ -74,15 +76,11 @@ metadata_merged_df = rbind(metadata_merged_df, metadata_add_df)
 unique(metadata_merged_df$Aliquot.snRNA) ## 28 samples
 table(metadata_merged_df$Aliquot.snRNA)
 metadata_merged_df <- merge(x = metadata_merged_df, y = patient_clinical_df, by = c("Case"), all.x = T) ## this has to be added because gender info is required
-filesizes_df$file_name <- sapply(filesizes_df$path, FUN = function(p) {
-  p_split = str_split(p, pattern = "\\/")[[1]]
-  filename = p_split[length(p_split)]
-  return(filename)
-})
-filesizes_df = filesizes_df[!grepl(pattern = "2863682_new", x = filesizes_df$path),]
 ## add file sizes
 metadata_merged_df <- merge(x = metadata_merged_df, 
-                            y = filesizes_df,
+                            y = filesizes_df %>%
+                              rename(file_name = V9) %>%
+                              rename(file_size = V5),
                             by.x = c("File Name"), by.y = c("file_name"), all.x = T)
 ## add md5sum
 md5sum_df$file_name.orig = sapply(X = md5sum_df$file_path, FUN = function(p) {
@@ -147,7 +145,9 @@ cds_metadata_df <- metadata_merged_df %>%
   mutate(sample_id=Case,
          sample_description="",
          biosample_accession="",
-         sample_type=ifelse(Sample_Type == "Tumor", "Clear Cell Renal Cell Carcinoma - Kidney", "Normal Adjacent Tissue - Kidney")) %>%
+         sample_type=ifelse(Sample_Type == "Tumor", 
+                            "Primary Tumor", 
+                            "Tumor Adjacent Normal")) %>%
   ## Additional Sample Information
   mutate(sample_tumor_status=ifelse(Sample_Type == "Tumor", "tumor", "normal"),
          sample_anatomic_site="Kidney",
@@ -158,7 +158,7 @@ cds_metadata_df <- metadata_merged_df %>%
          file_type="FASTQ",
          file_size=file_size, ## Required
          md5sum=md5sum,## Required
-         file_url_in_cds="", ## Required after sending to CDS
+         file_url_in_cds= paste0("s3://cds-296-phs001287/snATAC-seq-phs001287.v16.p6/FASTQ/", Aliquot.snRNA, "/FASTQ/", `File Name`), ## Required after sending to CDS
          checksum_value="",
          checksum_algorithm="",
          file_mapping_level="Sample") %>%
