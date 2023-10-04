@@ -34,7 +34,7 @@ for (pkg_name_tmp in packages) {
   library(package = pkg_name_tmp, character.only = T)
 }
 ## set run id
-version_tmp <- 1
+version_tmp <- 2
 run_id <- paste0(format(Sys.Date(), "%Y%m%d") , ".v", version_tmp)
 ## set output directory
 source("./ccRCC_snRNA_analysis/functions.R")
@@ -52,6 +52,7 @@ print("Finish reading the RDS file!\n")
 assay_process <- "RNA"
 slot_process <- "data"
 cat(paste0("Assay: ", assay_process, "\n"))
+genes_exp = c("MYC", "QKI", "ARID1B", "CD70")
 
 # pre-process---------------------------------------------------------------
 srat@meta.data$barcode.individual = str_split_fixed(string = rownames(srat@meta.data), pattern = "_", n = 2)[,1]
@@ -73,7 +74,7 @@ for (gene_cna in c("MYC", "QKI", "ARID1B")) {
   
   # write output ------------------------------------------------------------
   file2write <- paste0(dir_out, "30ccRCCtumorcellreclustered.", "avgexp.", assay_process, ".", slot_process, ".", gene_cna,  ".CNA.", run_id, ".tsv")
-  write.table(aliquot.averages, file = file2write, quote = F, sep = "\t", row.names = T)
+  write.table(aliquot.averages[genes_exp,], file = file2write, quote = F, sep = "\t", row.names = T)
   cat("Finished saving the output\n")
   cat("###########################################\n")
 }
