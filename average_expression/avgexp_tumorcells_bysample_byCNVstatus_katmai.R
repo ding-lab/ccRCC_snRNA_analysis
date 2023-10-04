@@ -42,13 +42,14 @@ dir_out <- paste0(makeOutDir_katmai(path_this_script), run_id, "/")
 dir.create(dir_out)
 
 # input dependencies ------------------------------------------------------
+## input CNV data
+cnv_state_bycell_bygene_df <- fread(data.table = F, input = "./Resources/Analysis_Results/copy_number/annotate_barcode_cnv/annotate_barcode_with_gene_level_cnv_using_cnv_genes/20220131.v1/CNV_State_By_Gene_By_Barcode.20220131.v1.tsv")
 ## input the integrated data
 path_rds <- "/diskmnt/Projects/ccRCC_scratch/ccRCC_snRNA/Resources/Analysis_Results/integration/seuratintegrate_34_ccRCC_samples/reciprocalPCA_integrate_30_ccRCC_tumorcells/20220404.v1/ccRCC.34samples.Tumorcells.SeuratIntegrated.20220404.v1.RDS"
 srat <- readRDS(file = path_rds)
 print("Finish reading the RDS file!\n")
-cnv_state_bycell_bygene_df <- fread(data.table = F, input = "./Resources/Analysis_Results/copy_number/annotate_barcode_cnv/annotate_barcode_with_gene_level_cnv_using_cnv_genes/20220131.v1/CNV_State_By_Gene_By_Barcode.20220131.v1.tsv")
 ## spcify assay
-assay_process <- "SCT"
+assay_process <- "RNA"
 slot_process <- "data"
 cat(paste0("Assay: ", assay_process, "\n"))
 

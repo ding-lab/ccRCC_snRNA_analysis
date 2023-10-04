@@ -36,22 +36,14 @@ srat_paths_df <- fread(data.table = F, input = "./Data_Freezes/V2/snRNA/Tumor_Ce
 # process by each aliquot ----------------------------------------------------
 barcode_metadata_df <- NULL
 for (aliquot_tmp in srat_paths_df$Aliquot.snRNA.WU) {
-  ## input srat object
-  srat_path <- srat_paths_df$Path_katmai[srat_paths_df$Aliquot.snRNA.WU == aliquot_tmp]
-  srat <- readRDS(file = srat_path)
-  
-  ## extract current meta data
-  barcode_metadata_tmp <- FetchData(object = srat, vars = c("UMAP_1", "UMAP_2", "orig.ident", "seurat_clusters"))
-  barcode_metadata_tmp$barcode_tumorcellreclustered <- rownames(barcode_metadata_tmp)
-  barcode_metadata_tmp$easy_id <- aliquot_tmp
-  
-  ## bind with the super table
-  barcode_metadata_df <- rbind(barcode_metadata_tmp, barcode_metadata_df)
+  for (gene_cna in c("MYC", "QKI", "ARID1B", "CD70")) {
+    ## input srat object
+    srat_path <- srat_paths_df$Path_katmai[srat_paths_df$Aliquot.snRNA.WU == aliquot_tmp]
+    srat <- readRDS(file = srat_path)
+    
+    p = Featurep
+  }
 }
-
-# write output ------------------------------------------------------------
-file2write <- paste0(dir_out, "MetaData_TumorCellOnlyReclustered.", run_id, ".tsv")
-write.table(x = barcode_metadata_df, file = file2write, sep = '\t', quote = F, row.names = F)
 print("Finished!")
-  
-  
+
+#
