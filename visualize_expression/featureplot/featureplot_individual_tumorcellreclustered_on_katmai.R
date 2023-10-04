@@ -36,12 +36,15 @@ srat_paths_df <- fread(data.table = F, input = "./Data_Freezes/V2/snRNA/Tumor_Ce
 # process by each aliquot ----------------------------------------------------
 barcode_metadata_df <- NULL
 for (aliquot_tmp in srat_paths_df$Aliquot.snRNA.WU) {
-  for (gene_cna in c("MYC", "QKI", "ARID1B", "CD70")) {
+  for (gene_exp in c("MYC", "QKI", "ARID1B", "CD70")) {
     ## input srat object
     srat_path <- srat_paths_df$Path_katmai[srat_paths_df$Aliquot.snRNA.WU == aliquot_tmp]
     srat <- readRDS(file = srat_path)
     
-    p = Featurep
+    p = FeaturePlot(object = srat, features = gene_exp, max.cutoff = "q90")
+    png(paste0(dir_out, aliquot_tmp, ".", gene_exp, ".png"), width = 500, height = 500, res = 150)
+    print(p)
+    dev.off()
   }
 }
 print("Finished!")
