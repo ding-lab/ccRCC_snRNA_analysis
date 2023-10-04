@@ -68,7 +68,7 @@ for (gene_cna in c("MYC", "QKI", "ARID1B")) {
   srat@meta.data$cell_group = paste0(srat@meta.data$orig.ident, "_", srat@meta.data$cna_state)
   Idents(srat) <- "cell_group" 
   # run average expression --------------------------------------------------
-  aliquot.averages <- AverageExpression(srat, assays = assay_process, slot = slot_process)
+  aliquot.averages <- AverageExpression(srat, assays = assay_process, slot = slot_process, features = genes_exp)
   print("Finish running AverageExpression!\n")
   cat("###########################################\n")
   
